@@ -1,29 +1,20 @@
-"use client";
 import Box from "@mui/material/Box";
-import SideMenu from "./SideMenu";
-import AppBar from "@mui/material/AppBar";
 import Stack from "@mui/material/Stack";
-
-import { alpha } from "@mui/material/styles";
 import { PropsWithChildren } from "react";
+import SideBar from "./Sidebar";
+import Header from "./Header";
+import MainClientWraper from "./MainWraperClient";
+import Copyright from "./Copyright";
+import NavbarMobile from "./NavbarMobile";
 
 interface MainLayoutProps extends PropsWithChildren {}
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <Box sx={{ display: "flex" }}>
-      <SideMenu />
-      <AppBar />
+      <SideBar />
+      <NavbarMobile />
       {/* Main content */}
-      <Box
-        component="main"
-        sx={(theme) => ({
-          flexGrow: 1,
-          backgroundColor: theme.vars
-            ? `rgba(${theme.vars.palette.background.defaultChannel} / 1)`
-            : alpha(theme.palette.background.default, 1),
-          overflow: "auto",
-        })}
-      >
+      <MainClientWraper>
         <Stack
           spacing={2}
           sx={{
@@ -33,9 +24,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             mt: { xs: 8, md: 0 },
           }}
         >
+          <Header />
           {children}
         </Stack>
-      </Box>
+        <Copyright />
+      </MainClientWraper>
     </Box>
   );
 };

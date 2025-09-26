@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import ReactQueryClientProvider from "@/shared/providers/ReactQueryClientProvider";
 import MUIThemeProvider from "@/shared/providers/MUIThemeProvider";
-import MainLayout from "@/shared/ui/layouts/MainLayout";
 import "../theme/globals.css";
 
 export const metadata: Metadata = {
-  title: "LMS APP",
+  title: "LMS APP - ONAIR",
   description: "LMS APP",
 };
 
@@ -18,9 +17,7 @@ export default function RootLayout({
     <ReactQueryClientProvider>
       <html lang="vi" suppressHydrationWarning>
         <body>
-          <MUIThemeProvider>
-            <MainLayout>{children}</MainLayout>
-          </MUIThemeProvider>
+          <MUIThemeProvider>{children}</MUIThemeProvider>
         </body>
       </html>
     </ReactQueryClientProvider>

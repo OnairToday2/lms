@@ -11,13 +11,12 @@ import Stack from "@mui/material/Stack";
 import LinearProgress, {
   linearProgressClasses,
 } from "@mui/material/LinearProgress";
-
 import {
   IndiaFlag,
   UsaFlag,
   BrazilFlag,
   GlobeFlag,
-} from "../../shared/assets/icons/customIcons";
+} from "@/shared/assets/flags";
 
 const data = [
   { label: "India", value: 50000 },

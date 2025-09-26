@@ -14,6 +14,7 @@ import {
   treeViewCustomizations,
 } from "./customizations";
 import { colorSchemes, typography, shadows, shape } from "./themePrimitives";
+import { viVN } from "@mui/material/locale";
 
 interface AppThemeProps {
   children: React.ReactNode;
@@ -29,28 +30,31 @@ export default function AppTheme(props: AppThemeProps) {
   const theme = React.useMemo(() => {
     return disableCustomTheme
       ? {}
-      : createTheme({
-          cssVariables: {
-            colorSchemeSelector: "data-mui-color-scheme",
-            cssVarPrefix: "template",
+      : createTheme(
+          {
+            cssVariables: {
+              colorSchemeSelector: "data-mui-color-scheme",
+              cssVarPrefix: "template",
+            },
+            colorSchemes,
+            typography,
+            shadows,
+            shape,
+            components: {
+              ...inputsCustomizations,
+              ...dataDisplayCustomizations,
+              ...feedbackCustomizations,
+              ...navigationCustomizations,
+              ...surfacesCustomizations,
+              ...chartsCustomizations,
+              ...dataGridCustomizations,
+              ...datePickersCustomizations,
+              ...treeViewCustomizations,
+              ...themeComponents,
+            },
           },
-          colorSchemes,
-          typography,
-          shadows,
-          shape,
-          components: {
-            ...inputsCustomizations,
-            ...dataDisplayCustomizations,
-            ...feedbackCustomizations,
-            ...navigationCustomizations,
-            ...surfacesCustomizations,
-            ...chartsCustomizations,
-            ...dataGridCustomizations,
-            ...datePickersCustomizations,
-            ...treeViewCustomizations,
-            ...themeComponents,
-          },
-        });
+          viVN,
+        );
   }, [disableCustomTheme, themeComponents]);
   if (disableCustomTheme) {
     return <React.Fragment>{children}</React.Fragment>;

@@ -6,7 +6,7 @@ import AppTheme from "@/theme/mui/AppTheme";
 const MUIThemeProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <AppRouterCacheProvider options={{ enableCssLayer: true, key: "onair" }}>
-      <AppTheme themeComponents={undefined}>
+      <AppTheme>
         <GlobalStyles styles="@layer theme, base, mui, components, utilities;" />
         <CssBaseline />
         {children}
