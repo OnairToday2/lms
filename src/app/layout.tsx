@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import ReactQueryClientProvider from "@/shared/providers/ReactQueryClientProvider";
+import MUIThemeProvider from "@/shared/providers/MUIThemeProvider";
+import MainLayout from "@/shared/ui/layouts/MainLayout";
 import "../theme/globals.css";
 
 export const metadata: Metadata = {
@@ -15,7 +17,11 @@ export default function RootLayout({
   return (
     <ReactQueryClientProvider>
       <html lang="vi" suppressHydrationWarning>
-        <body>{children}</body>
+        <body>
+          <MUIThemeProvider>
+            <MainLayout>{children}</MainLayout>
+          </MUIThemeProvider>
+        </body>
       </html>
     </ReactQueryClientProvider>
   );
