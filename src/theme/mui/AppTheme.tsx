@@ -14,7 +14,9 @@ import {
   treeViewCustomizations,
 } from "./customizations";
 import { colorSchemes, typography, shadows, shape } from "./themePrimitives";
-import { viVN } from "@mui/material/locale";
+import { viVN as coreViVN } from "@mui/material/locale";
+import { viVN as dateViVN } from "@mui/x-date-pickers/locales";
+import { viVN as dataGridViVN } from "@mui/x-data-grid";
 
 interface AppThemeProps {
   children: React.ReactNode;
@@ -53,7 +55,9 @@ export default function AppTheme(props: AppThemeProps) {
               ...themeComponents,
             },
           },
-          viVN,
+          dateViVN,
+          dataGridViVN,
+          coreViVN,
         );
   }, [disableCustomTheme, themeComponents]);
   if (disableCustomTheme) {

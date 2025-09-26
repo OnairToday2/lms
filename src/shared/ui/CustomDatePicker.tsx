@@ -6,6 +6,7 @@ import Button from "@mui/material/Button";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { viVN } from "@mui/x-date-pickers/locales";
 import {
   DatePicker,
   DatePickerFieldProps,
@@ -47,7 +48,12 @@ export default function CustomDatePicker() {
   const [value, setValue] = React.useState<Dayjs | null>(dayjs("2023-04-17"));
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
+    <LocalizationProvider
+      dateAdapter={AdapterDayjs}
+      localeText={
+        viVN.components.MuiLocalizationProvider.defaultProps.localeText
+      }
+    >
       <DatePicker
         value={value}
         label={value == null ? null : value.format("MMM DD, YYYY")}
