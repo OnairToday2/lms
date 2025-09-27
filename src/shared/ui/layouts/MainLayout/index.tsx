@@ -1,35 +1,55 @@
-import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
 import { PropsWithChildren } from "react";
-import SideBar from "./Sidebar";
-import Header from "./Header";
-import MainClientWraper from "./MainWraperClient";
-import Copyright from "./Copyright";
+import Copyright from "./partials/Copyright";
+import LayoutWraper from "./LayoutWraper";
+import SelectContent from "./Sidebar/SelectContent";
+import Divider from "@mui/material/Divider";
+import CardAlert from "../../CardAlert";
+import AccountSetting from "./partials/AccountSetting";
+import NavbarBreadcrumbs from "./partials/NavbarBreadcrumbs";
+import Stack from "@mui/material/Stack";
+import Search from "../../Search";
+import CustomDatePicker from "../../CustomDatePicker";
+import MenuButton from "./MenuButton";
+import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
+import ColorModeIconDropdown from "../../ColorModeIconDropdown";
 import NavbarMobile from "./NavbarMobile";
+import MenuContent from "./MenuContent";
 
 interface MainLayoutProps extends PropsWithChildren {}
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
-    <Box sx={{ display: "flex" }}>
-      <SideBar />
-      <NavbarMobile />
-      {/* Main content */}
-      <MainClientWraper>
-        <Stack
-          spacing={2}
-          sx={{
-            alignItems: "center",
-            mx: 3,
-            pb: 5,
-            mt: { xs: 8, md: 0 },
-          }}
-        >
-          <Header />
-          {children}
-        </Stack>
-        <Copyright />
-      </MainClientWraper>
-    </Box>
+    <LayoutWraper
+      siderBar={
+        <>
+          <div className="flex mt-2 p-3">
+            <SelectContent />
+          </div>
+          <Divider />
+          <div className="flex flex-col flex-1">
+            <MenuContent />
+            <CardAlert />
+          </div>
+          <AccountSetting />
+        </>
+      }
+      appBar={<NavbarMobile />}
+      header={
+        <>
+          <NavbarBreadcrumbs />
+          <Stack direction="row" sx={{ gap: 1 }}>
+            <Search />
+            <CustomDatePicker />
+            <MenuButton showBadge aria-label="Open notifications">
+              <NotificationsRoundedIcon />
+            </MenuButton>
+            <ColorModeIconDropdown />
+          </Stack>
+        </>
+      }
+      footer={<Copyright />}
+    >
+      {children}
+    </LayoutWraper>
   );
 };
 export default MainLayout;

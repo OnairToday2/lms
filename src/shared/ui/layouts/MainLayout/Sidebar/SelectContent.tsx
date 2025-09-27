@@ -45,7 +45,6 @@ export default function SelectContent() {
       fullWidth
       sx={{
         maxHeight: 56,
-        width: 215,
         "&.MuiList-root": {
           p: "8px",
         },
