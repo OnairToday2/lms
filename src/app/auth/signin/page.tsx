@@ -1,0 +1,26 @@
+import SignIn from "@/modules/auth/components/SignIn";
+import type { Metadata, ResolvingMetadata } from "next";
+
+interface SignInPageProps {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export async function generateMetadata(
+  { params, searchParams }: SignInPageProps,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const previousImages = (await parent).openGraph?.images || [];
+
+  return {
+    title: "Đăng nhập tài khoản | ONAIR",
+    openGraph: {
+      images: [...previousImages],
+    },
+  };
+}
+
+const SignInPage: React.FC<SignInPageProps> = () => {
+  return <SignIn />;
+};
+export default SignInPage;

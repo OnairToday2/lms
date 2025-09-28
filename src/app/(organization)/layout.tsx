@@ -1,15 +1,14 @@
-import type { Metadata } from "next";
 import MainLayout from "@/shared/ui/layouts/MainLayout";
+import Authorized from "@/modules/authWrapper/Authorized";
 
-export const metadata: Metadata = {
-  title: "LMS APP - ONAIR",
-  description: "LMS APP",
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <MainLayout>{children}</MainLayout>;
+  return (
+    <Authorized>
+      <MainLayout>{children}</MainLayout>
+    </Authorized>
+  );
 }

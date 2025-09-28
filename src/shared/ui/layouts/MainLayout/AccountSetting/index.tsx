@@ -1,13 +1,22 @@
+"use client";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import AccountMenuOptions from "./AccountMenuOptions";
-
+import { useAuthStore } from "@/modules/auth/store/AuthProvider";
+import IconButton from "@mui/material/IconButton";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import SignOutButton from "@/modules/auth/components/SignOutButton";
 interface AccountSettingProps {
   className?: string;
 }
 const AccountSetting: React.FC<AccountSettingProps> = () => {
+  const {
+    data: { name, email, avatarUrl } = {},
+    signOut,
+    isLoading,
+  } = useAuthStore((state) => state) || {};
+
   return (
     <Stack
       direction="row"
@@ -22,21 +31,26 @@ const AccountSetting: React.FC<AccountSettingProps> = () => {
       <Avatar
         sizes="small"
         alt="Riley Carter"
-        src="/assets/images/avatar/7.jpg"
+        src={avatarUrl ?? "/assets/images/avatar/7.jpg"}
         sx={{ width: 36, height: 36 }}
       />
-      <Box sx={{ mr: "auto" }}>
+      <Box component="div" sx={{ mr: "auto" }} className="flex-1">
         <Typography
           variant="body2"
           sx={{ fontWeight: 500, lineHeight: "16px" }}
         >
-          Riley Carter
+          {name}
         </Typography>
-        <Typography variant="caption" sx={{ color: "text.secondary" }}>
-          riley@email.com
+        <Typography
+          variant="caption"
+          sx={{ color: "text.secondary" }}
+          className="line-clamp-1 break-all"
+        >
+          {email}
         </Typography>
       </Box>
-      <AccountMenuOptions />
+      <SignOutButton />
+      {/* <AccountMenuOptions /> */}
     </Stack>
   );
 };

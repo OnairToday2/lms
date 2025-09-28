@@ -1,5 +1,8 @@
 import * as React from "react";
-import { Grid, Box, Stack, Typography } from "@mui/material";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import ChartUserByCountry from "../_components/ChartUserByCountry";
 import CustomizedTreeView from "../_components/CustomizedTreeView";
 import CustomizedDataGrid from "../_components/CustomizedDataGrid";
@@ -8,7 +11,6 @@ import PageViewsBarChart from "../_components/PageViewsBarChart";
 import SessionsChart from "../_components/SessionsChart";
 import StatCard, { StatCardProps } from "../_components/StatCard";
 import PureClient from "@/shared/ui/PureClient";
-import { Metadata } from "next";
 
 const data: StatCardProps[] = [
   {
@@ -44,34 +46,12 @@ const data: StatCardProps[] = [
   },
 ];
 
-export const metadata: Metadata = {
-  title: "Dashboard",
-  description: "Quản lý doanh nghiệp",
-};
-
-export default function DashboardPage() {
+export default function AnalyticPage() {
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-        Overview
+        Analytic
       </Typography>
-      <Grid container spacing={2} columns={12} marginBottom={2}>
-        {data.map((card, index) => (
-          <Grid key={index} size={{ xs: 12, sm: 6, lg: 3 }}>
-            <StatCard {...card} />
-          </Grid>
-        ))}
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <HighlightedCard />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <SessionsChart />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <PageViewsBarChart />
-        </Grid>
-      </Grid>
-
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
         Details
       </Typography>

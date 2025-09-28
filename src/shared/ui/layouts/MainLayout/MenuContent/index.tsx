@@ -8,7 +8,7 @@ import ListItemText from "@mui/material/ListItemText";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import Stack from "@mui/material/Stack";
 import { usePathname } from "next/navigation";
-import { cn } from "@/shared/utils/cn";
+import { cn } from "@/utils/cn";
 
 import { SECONDARY_MENU_LIST, MAIN_MENU_LIST } from "./menuConfig";
 import type { MenuItemType } from "./menuConfig";

@@ -10,11 +10,14 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemIcon, { listItemIconClasses } from "@mui/material/ListItemIcon";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
-import MenuButton from "../../MenuButton";
+import MenuButton from "../MenuButton";
 const MenuItem = styled(MuiMenuItem)({
   margin: "2px 0",
 });
 
+interface AccountMenuOptionsProps {
+  items: {}[];
+}
 export default function AccountMenuOptions() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -53,14 +56,13 @@ export default function AccountMenuOptions() {
           },
         }}
       >
-        <MenuItem onClick={handleClose}>Profile</MenuItem>
-        <MenuItem onClick={handleClose}>My account</MenuItem>
+        <MenuItem>Profile</MenuItem>
+        <MenuItem>My account</MenuItem>
         <Divider />
-        <MenuItem onClick={handleClose}>Add another account</MenuItem>
-        <MenuItem onClick={handleClose}>Settings</MenuItem>
+        <MenuItem>Add another account</MenuItem>
+        <MenuItem>Settings</MenuItem>
         <Divider />
         <MenuItem
-          onClick={handleClose}
           sx={{
             [`& .${listItemIconClasses.root}`]: {
               ml: "auto",

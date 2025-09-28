@@ -1,4 +1,4 @@
-import SignUp from "@/modules/auth/components/SignUp";
+import SignUp, { SignUpProps } from "@/modules/auth/components/SignUp";
 
 const SignUpPage = () => {
   return <SignUp />;

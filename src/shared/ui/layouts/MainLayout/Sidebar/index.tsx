@@ -8,7 +8,7 @@ import SelectContent from "./SelectContent";
 import MenuContent from "../MenuContent";
 import CardAlert from "../../../CardAlert";
 
-import AccountSetting from "../partials/AccountSetting";
+import AccountSetting from "../AccountSetting";
 
 const drawerWidth = 240;
 
