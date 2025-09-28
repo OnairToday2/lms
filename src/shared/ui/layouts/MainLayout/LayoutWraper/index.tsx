@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import MainClientWraper from "./MainWraperClient";
 import SideBarContainer from "./SidebarWraper";
-import HeaderWraper from "./HeaderWraper";
 
 interface LayoutWraperProps extends PropsWithChildren {
   className?: string;
@@ -29,12 +28,26 @@ const LayoutWraper: React.FC<LayoutWraperProps> = ({
           spacing={2}
           sx={{
             alignItems: "center",
-            mx: 3,
+            mx: 6,
             pb: 5,
             mt: { xs: 8, md: 0 },
           }}
         >
-          {header && <HeaderWraper>{header}</HeaderWraper>}
+          {header && (
+            <Stack
+              direction="row"
+              sx={{
+                display: { xs: "none", md: "flex" },
+                width: "100%",
+                alignItems: { xs: "flex-start", md: "center" },
+                justifyContent: "space-between",
+                pt: 1.5,
+              }}
+              spacing={2}
+            >
+              {header}
+            </Stack>
+          )}
           {children}
         </Stack>
         {footer}

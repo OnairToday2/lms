@@ -2,9 +2,8 @@ import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
 import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
 import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
-import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
-import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
+import React from "react";
 
 export type MenuItemType = {
   title: string;
@@ -16,39 +15,45 @@ export type MenuItemType = {
 const MAIN_MENU_LIST: MenuItemType[] = [
   {
     title: "Dashboard",
-    icon: <HomeRoundedIcon />,
+    icon: React.createElement(HomeRoundedIcon),
     key: "dashboard",
     children: [],
     path: "/dashboard",
   },
   {
     title: "Analytics",
-    icon: <AnalyticsRoundedIcon />,
+    icon: React.createElement(AnalyticsRoundedIcon),
     key: "analytics",
     children: [],
     path: "analytic",
   },
   {
-    title: "Clients",
-    icon: <PeopleRoundedIcon />,
+    title: "Employees",
+    icon: React.createElement(PeopleRoundedIcon),
+    key: "employee",
+    path: "employees",
+  },
+  {
+    title: "Help",
+    icon: React.createElement(HelpRoundedIcon),
     key: "clients",
-    path: "clients",
+    path: "customer",
     children: [
       {
         title: "clients sub 1",
-        icon: <PeopleRoundedIcon />,
+        icon: React.createElement(PeopleRoundedIcon),
         key: "clients",
         path: "/",
         children: [
           {
-            title: "clients sub 2",
-            icon: <PeopleRoundedIcon />,
+            title: "clients sub 2 clients clients clients",
+            icon: React.createElement(PeopleRoundedIcon),
             key: "clients",
             path: "clients",
           },
           {
             title: "clients sub 2",
-            icon: <PeopleRoundedIcon />,
+            icon: React.createElement(PeopleRoundedIcon),
             key: "clients",
             path: "clients",
           },
@@ -56,7 +61,7 @@ const MAIN_MENU_LIST: MenuItemType[] = [
       },
       {
         title: "clients sub 1",
-        icon: <PeopleRoundedIcon />,
+        icon: React.createElement(PeopleRoundedIcon),
         key: "clients",
         path: "clients",
       },
@@ -64,17 +69,17 @@ const MAIN_MENU_LIST: MenuItemType[] = [
   },
   {
     title: "Tasks",
-    icon: <AssignmentRoundedIcon />,
+    icon: React.createElement(AssignmentRoundedIcon),
     key: "task",
     children: [],
     path: "/",
   },
 ];
 
-const SECONDARY_MENU_LIST = [
-  { title: "Settings", icon: <SettingsRoundedIcon /> },
-  { title: "About", icon: <InfoRoundedIcon /> },
-  { title: "Feedback", icon: <HelpRoundedIcon /> },
-];
+// const SECONDARY_MENU_LIST = [
+//   { title: "Settings", icon: <SettingsRoundedIcon /> },
+//   { title: "About", icon: <InfoRoundedIcon /> },
+//   { title: "Feedback", icon: <HelpRoundedIcon /> },
+// ];
 
-export { MAIN_MENU_LIST, SECONDARY_MENU_LIST };
+export { MAIN_MENU_LIST };

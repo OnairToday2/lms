@@ -9,6 +9,7 @@ import SessionsChart from "../_components/SessionsChart";
 import StatCard, { StatCardProps } from "../_components/StatCard";
 import PureClient from "@/shared/ui/PureClient";
 import { Metadata } from "next";
+import PageContainer from "@/shared/ui/PageContainer";
 
 const data: StatCardProps[] = [
   {
@@ -51,7 +52,7 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
   return (
-    <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+    <PageContainer title="Dashboard">
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
         Overview
       </Typography>
@@ -88,6 +89,6 @@ export default function DashboardPage() {
           </Stack>
         </Grid>
       </Grid>
-    </Box>
+    </PageContainer>
   );
 }

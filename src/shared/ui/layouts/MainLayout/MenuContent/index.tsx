@@ -1,128 +1,78 @@
 "use client";
 import * as React from "react";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import List, { ListProps } from "@mui/material/List";
 import Stack from "@mui/material/Stack";
 import { usePathname } from "next/navigation";
 import { cn } from "@/utils/cn";
+import type { MenuItemType } from "../menuConfig";
+import MenuItem, { MenuItemProps } from "./MenuItem";
 
-import { SECONDARY_MENU_LIST, MAIN_MENU_LIST } from "./menuConfig";
-import type { MenuItemType } from "./menuConfig";
-import Link from "next/link";
-import IconButton from "@mui/material/IconButton";
-
-export default function MenuContent() {
+interface MenuContentProps {
+  items: MenuItemType[];
+}
+const MenuContent: React.FC<MenuContentProps> = ({ items }) => {
   return (
     <Stack sx={{ flexGrow: 1, p: 2, justifyContent: "space-between" }}>
-      <MenuList items={MAIN_MENU_LIST} />
-      <List dense>
-        {SECONDARY_MENU_LIST.map((item, index) => (
-          <ListItem key={index} disablePadding sx={{ display: "block" }}>
-            <ListItemButton>
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.title} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+      <MenuList items={items} />
     </Stack>
   );
-}
-
-interface MenuItemProps {
-  data: MenuItemType;
-  dropdown?: React.ReactNode;
-  isActive?: boolean;
-}
-const MenuItem: React.FC<MenuItemProps> = ({
-  data: { title, icon, path, key, children: subItems },
-  isActive,
-  dropdown,
-}) => {
-  const [isOpenDropdown, setOpenDropdown] = React.useState(false);
-  const toggleDropdown = React.useCallback(
-    () => setOpenDropdown((prev) => !prev),
-    [],
-  );
-
-  return (
-    <ListItem disablePadding sx={{ display: "block" }}>
-      {dropdown ? (
-        <>
-          <ListItemButton
-            selected={isActive}
-            sx={{ height: 40 }}
-            className="flex items-center"
-          >
-            <div className="flex items-center gap-3 flex-1">
-              {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
-              <ListItemText primary={title} />
-            </div>
-            <IconButton
-              className="border-0 bg-transparent"
-              size="small"
-              onClick={toggleDropdown}
-            >
-              <KeyboardArrowDownIcon
-                className={cn({
-                  "rotate-x-180": isOpenDropdown,
-                })}
-              />
-            </IconButton>
-          </ListItemButton>
-          <div
-            className={cn("menu-dropdown", {
-              block: isOpenDropdown,
-              hidden: !isOpenDropdown,
-            })}
-          >
-            {dropdown}
-          </div>
-        </>
-      ) : (
-        <ListItemButton
-          LinkComponent={Link}
-          href={path}
-          selected={isActive}
-          sx={{ height: 40 }}
-          className="flex items-center"
-        >
-          <div className="flex items-center gap-3 flex-1">
-            {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
-            <ListItemText primary={title} />
-          </div>
-        </ListItemButton>
-      )}
-    </ListItem>
-  );
 };
+
+export default MenuContent;
 
 interface MenuListProps {
   items: MenuItemType[];
   asSub?: boolean;
   depth?: number;
   className?: string;
+  sx?: ListProps["sx"];
 }
 const MenuList: React.FC<MenuListProps> = ({
   items,
   asSub,
   depth = 1,
   className,
+  sx,
 }) => {
+  const [menuItemDrropdownKey, setMenuItemDropdownKey] = React.useState<
+    string[]
+  >([]);
   const pathName = usePathname();
   const pathNameArr = pathName.split("/");
 
   const hasActive = (path: string) => {
-    return pathNameArr.includes(path.replace("/", ""));
+    return [...pathNameArr.slice(1)].includes(path.replace("/", ""));
   };
+
+  const hasOpenDropdown = React.useCallback(
+    (key: string) => {
+      return menuItemDrropdownKey?.includes(key);
+    },
+    [menuItemDrropdownKey],
+  );
+
+  const handleOpen: Exclude<MenuItemProps["onToggleOpen"], undefined> =
+    React.useCallback(
+      (key: string) => {
+        console.log(key);
+        setMenuItemDropdownKey((prevKeys) => {
+          let updateKey = [...prevKeys];
+          const keyIndex = updateKey.findIndex((item) => item === key);
+          if (!keyIndex || keyIndex < 0) {
+            updateKey = [...updateKey, key];
+          } else {
+            updateKey.splice(keyIndex, 1);
+          }
+          return updateKey;
+        });
+      },
+      [menuItemDrropdownKey],
+    );
 
   return (
     <List
       dense
+      sx={sx}
       data-depth={depth}
       className={cn(
         "menu-list p-0 flex flex-col gap-2",
@@ -135,9 +85,15 @@ const MenuList: React.FC<MenuListProps> = ({
           key={index}
           data={menuItem}
           isActive={hasActive(menuItem.path)}
+          onToggleOpen={handleOpen}
+          isOpenDropdown={hasOpenDropdown(menuItem.key)}
           dropdown={
             menuItem?.children?.length ? (
-              <MenuList items={menuItem.children} depth={depth + 1} />
+              <MenuList
+                items={menuItem.children}
+                depth={depth + 1}
+                sx={{ paddingLeft: `${depth * 0.5}rem !important` }}
+              />
             ) : undefined
           }
         />
