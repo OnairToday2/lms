@@ -314,3 +314,7 @@
   background-image: --value(--overlay- *);
   box-shadow: --value(--shadow- *);
 }
+
+body {
+  background: var(--color-background-default);
+}
