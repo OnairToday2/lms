@@ -1,5 +1,7 @@
 import { Button } from "@mui/material";
-const Buttons = () => {
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import Fingerprint from "@mui/icons-material/Fingerprint";
+const Buttons: React.FC = ({}) => {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex gap-3 ">
@@ -105,6 +107,61 @@ const Buttons = () => {
           Secondary text
         </Button>
         <Button variant="text" color="success" size="large">
+          Success text
+        </Button>
+        <Button variant="text" color="warning" size="large">
+          Warning text
+        </Button>
+        <Button variant="text" color="error">
+          Error text
+        </Button>
+        <Button variant="text" color="info">
+          Inffo text
+        </Button>
+        <Button variant="text" color="inherit">
+          inherit text
+        </Button>
+      </div>
+      <div className="flex gap-3">
+        <Button
+          variant="contained"
+          color="primary"
+          size="small"
+          startIcon={<Fingerprint />}
+        >
+          Primary text
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          // size="small"
+          startIcon={<Fingerprint />}
+        >
+          Primary text
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          size="large"
+          startIcon={<Fingerprint />}
+        >
+          Primary text
+        </Button>
+
+        <Button
+          variant="text"
+          color="secondary"
+          size="large"
+          endIcon={<Fingerprint />}
+        >
+          Secondary text
+        </Button>
+        <Button
+          variant="outlined"
+          color="success"
+          size="large"
+          endIcon={<Fingerprint />}
+        >
           Success text
         </Button>
         <Button variant="text" color="warning" size="large">

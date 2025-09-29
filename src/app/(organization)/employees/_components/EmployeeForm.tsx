@@ -20,8 +20,6 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import dayjs, { Dayjs } from "dayjs";
 import type { Employee } from "../data/employees";
 import { FormLabel } from "@mui/material";
-import Buttons from "./Buttons";
-import Inputs from "./inputs";
 
 export interface EmployeeFormState {
   values: Partial<Omit<Employee, "id">>;
@@ -143,11 +141,11 @@ export default function EmployeeForm(props: EmployeeFormProps) {
         <Grid container spacing={2} sx={{ mb: 2, width: "100%" }}>
           <Grid size={{ xs: 12, sm: 6 }} sx={{ display: "flex" }}>
             <FormControl>
+              <FormLabel>123131</FormLabel>
               <TextField
                 value={formValues.name ?? ""}
                 onChange={handleTextFieldChange}
                 name="name"
-                label="Nam1e"
                 error={!!formErrors.name}
                 helperText={formErrors.name ?? " "}
                 fullWidth
@@ -155,7 +153,6 @@ export default function EmployeeForm(props: EmployeeFormProps) {
               />
             </FormControl>
           </Grid>
-
           <Grid size={{ xs: 12, sm: 6 }} sx={{ display: "flex" }}>
             <FormControl>
               <FormLabel htmlFor="name">Họ và tên</FormLabel>
@@ -290,8 +287,6 @@ export default function EmployeeForm(props: EmployeeFormProps) {
           Back
         </Button>
       </Stack>
-      <Buttons />
-      <Inputs />
     </Box>
   );
 }

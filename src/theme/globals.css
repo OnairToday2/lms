@@ -1,6 +1,8 @@
 @layer theme, base, mui, components, utilities;
-@import "tailwindcss";
-
+@import "tailwindcss" important;
+@theme {
+  --color-mint-500: oklch(0.72 0.11 178);
+}
 @theme inline {
   /* Material UI typography */
   --font-h1: var(--mui-font-h1);

@@ -12,6 +12,15 @@ import EmployeeForm, {
   type EmployeeFormState,
 } from "../_components/EmployeeForm";
 import PageContainer from "@/shared/ui/PageContainer";
+import SelectTextFields from "../_components/Selects";
+import ButtonsIcons from "../_components/ButtonsIcon";
+import InputFields from "../_components/InputFields";
+import Buttons from "../_components/Buttons";
+import InputAdornments from "../_components/InputAdorment";
+import { Divider } from "@mui/material";
+import InputWithIcon from "../_components/InputIcons";
+import ComposedTextField from "../_components/ComposeTextFields";
+import ColorCheckboxes from "../_components/Checkboxes";
 
 const INITIAL_FORM_VALUES: Partial<EmployeeFormState["values"]> = {
   role: "Market",
@@ -110,6 +119,22 @@ const PageEmployeeCreate = () => {
 
   return (
     <PageContainer title={pageTitle} breadcrumbs={[{ title: pageTitle }]}>
+      <SelectTextFields />
+      <Divider className="my-12">Button Icon</Divider>
+      <ButtonsIcons />
+      <Divider className="my-12">Buttons</Divider>
+      <Buttons />
+      <Divider className="my-12">Input</Divider>
+      <InputFields />
+      <Divider className="my-12">Input Adorment</Divider>
+      <InputAdornments />
+      <Divider className="my-12">Input with icon</Divider>
+      <InputWithIcon />
+      <Divider className="my-12">Composed text fields</Divider>
+      <ComposedTextField />
+      <Divider className="my-12">Checkboxes</Divider>
+
+      <ColorCheckboxes />
       <EmployeeForm
         formState={formState}
         onFieldChange={handleFormFieldChange}

@@ -1,7 +1,6 @@
 import * as React from "react";
 import { alpha, Theme, Components } from "@mui/material/styles";
 import { outlinedInputClasses } from "@mui/material/OutlinedInput";
-import { formLabelClasses } from "@mui/material";
 import { svgIconClasses } from "@mui/material/SvgIcon";
 import { toggleButtonGroupClasses } from "@mui/material/ToggleButtonGroup";
 import { toggleButtonClasses } from "@mui/material/ToggleButton";
@@ -597,8 +596,8 @@ export const inputsCustomizations: Components<Theme> = {
         fontWeight: theme.typography.fontWeightMedium,
         letterSpacing: 0,
         color: (theme.vars || theme).palette.text.primary,
-        // border: "1px solid ",
-        // borderColor: gray[200],
+        border: "1px solid ",
+        borderColor: gray[200],
         backgroundColor: alpha(gray[50], 0.3),
         "&:hover": {
           backgroundColor: gray[100],
@@ -627,7 +626,7 @@ export const inputsCustomizations: Components<Theme> = {
               width: "2.25rem",
               height: "2.25rem",
               padding: "0.25rem",
-              [`& .${svgIconClasses.root}`]: { fontSize: "1.25rem" },
+              [`& .${svgIconClasses.root}`]: { fontSize: "1rem" },
             },
           },
           {
@@ -637,172 +636,6 @@ export const inputsCustomizations: Components<Theme> = {
             style: {
               width: "2.5rem",
               height: "2.5rem",
-            },
-          },
-          {
-            props: {
-              size: "large",
-            },
-            style: {
-              width: "2.75rem",
-              height: "2.75rem",
-              [`& .${svgIconClasses.root}`]: { fontSize: "1.75rem" },
-            },
-          },
-          {
-            props: {
-              color: "primary",
-            },
-            style: {
-              color: brand[600],
-              "&:hover": {
-                backgroundColor: brand[50],
-              },
-              "&:active": {
-                backgroundColor: brand[100],
-              },
-              ...theme.applyStyles("dark", {
-                color: brand[700],
-                backgroundColor: alpha(brand[900], 0.0),
-                "&:hover": {
-                  color: brand[600],
-                  backgroundColor: alpha(brand[900], 0.3),
-                },
-                "&:active": {
-                  color: brand[600],
-                  backgroundColor: alpha(brand[900], 0.3),
-                },
-              }),
-            },
-          },
-          {
-            props: {
-              color: "secondary",
-            },
-            style: {
-              color: purple[600],
-              "&:hover": {
-                backgroundColor: purple[50],
-              },
-              "&:active": {
-                backgroundColor: purple[100],
-              },
-              ...theme.applyStyles("dark", {
-                color: purple[700],
-                backgroundColor: alpha(purple[900], 0.0),
-                "&:hover": {
-                  color: purple[600],
-                  backgroundColor: alpha(purple[900], 0.3),
-                },
-                "&:active": {
-                  color: purple[600],
-                  backgroundColor: alpha(purple[900], 0.3),
-                },
-              }),
-            },
-          },
-          {
-            props: {
-              color: "success",
-            },
-            style: {
-              color: green[600],
-              "&:hover": {
-                backgroundColor: green[50],
-              },
-              "&:active": {
-                backgroundColor: green[100],
-              },
-              ...theme.applyStyles("dark", {
-                color: green[700],
-                backgroundColor: alpha(green[900], 0.0),
-                "&:hover": {
-                  color: green[600],
-                  backgroundColor: alpha(green[900], 0.3),
-                },
-                "&:active": {
-                  color: green[600],
-                  backgroundColor: alpha(green[900], 0.3),
-                },
-              }),
-            },
-          },
-          {
-            props: {
-              color: "warning",
-            },
-            style: {
-              color: yellow[400],
-              "&:hover": {
-                backgroundColor: yellow[50],
-              },
-              "&:active": {
-                backgroundColor: yellow[100],
-              },
-              ...theme.applyStyles("dark", {
-                color: yellow[700],
-                backgroundColor: alpha(yellow[900], 0.0),
-                "&:hover": {
-                  color: yellow[600],
-                  backgroundColor: alpha(yellow[900], 0.3),
-                },
-                "&:active": {
-                  color: yellow[600],
-                  backgroundColor: alpha(yellow[900], 0.3),
-                },
-              }),
-            },
-          },
-          {
-            props: {
-              color: "info",
-            },
-            style: {
-              color: blue[600],
-              "&:hover": {
-                backgroundColor: blue[50],
-              },
-              "&:active": {
-                backgroundColor: blue[100],
-              },
-              ...theme.applyStyles("dark", {
-                color: blue[700],
-                backgroundColor: alpha(blue[900], 0.0),
-                "&:hover": {
-                  color: blue[600],
-                  backgroundColor: alpha(blue[900], 0.3),
-                },
-                "&:active": {
-                  color: blue[600],
-                  backgroundColor: alpha(blue[900], 0.3),
-                },
-              }),
-            },
-          },
-          {
-            props: {
-              color: "error",
-            },
-            style: {
-              color: red[600],
-              "&:hover": {
-                backgroundColor: red[50],
-              },
-              "&:active": {
-                backgroundColor: red[100],
-              },
-              ...theme.applyStyles("dark", {
-                color: red[700],
-                backgroundColor: alpha(red[900], 0.0),
-                "&:hover": {
-                  color: red[600],
-                  backgroundColor: alpha(red[900], 0.3),
-                },
-                "&:active": {
-                  color: red[600],
-                  backgroundColor: alpha(red[900], 0.3),
-                },
-              }),
             },
           },
         ],
@@ -869,14 +702,14 @@ export const inputsCustomizations: Components<Theme> = {
           borderColor: brand[300],
         },
         "&.Mui-focusVisible": {
-          outline: `3px solid ${alpha(brand[600], 0.5)}`,
+          outline: `3px solid ${alpha(brand[500], 0.5)}`,
           outlineOffset: "2px",
           borderColor: brand[400],
         },
         "&.Mui-checked": {
           color: "white",
-          backgroundColor: brand[600],
-          borderColor: brand[700],
+          backgroundColor: brand[500],
+          borderColor: brand[500],
           boxShadow: `none`,
           "&:hover": {
             backgroundColor: brand[600],
@@ -895,292 +728,6 @@ export const inputsCustomizations: Components<Theme> = {
             outlineOffset: "2px",
           },
         }),
-        variants: [
-          {
-            props: {
-              color: "primary",
-            },
-            style: {
-              color: brand[600],
-              "&:hover": {
-                borderColor: brand[300],
-              },
-              "&.Mui-focusVisible": {
-                outline: `3px solid ${alpha(brand[600], 0.5)}`,
-                outlineOffset: "2px",
-                borderColor: brand[400],
-              },
-              "&.Mui-checked": {
-                color: "white",
-                backgroundColor: brand[600],
-                borderColor: brand[600],
-                boxShadow: `none`,
-                "&:hover": {
-                  backgroundColor: brand[700],
-                  borderColor: brand[700],
-                },
-              },
-            },
-          },
-          {
-            props: {
-              color: "secondary",
-            },
-            style: {
-              color: purple[600],
-              "&:hover": {
-                borderColor: purple[300],
-              },
-              "&.Mui-focusVisible": {
-                outline: `3px solid ${alpha(purple[600], 0.5)}`,
-                outlineOffset: "2px",
-                borderColor: purple[400],
-              },
-              "&.Mui-checked": {
-                color: "white",
-                backgroundColor: purple[600],
-                borderColor: purple[600],
-                boxShadow: `none`,
-                "&:hover": {
-                  backgroundColor: purple[700],
-                  borderColor: purple[700],
-                },
-              },
-            },
-          },
-          {
-            props: {
-              color: "success",
-            },
-            style: {
-              color: green[600],
-              "&:hover": {
-                borderColor: green[500],
-              },
-              "&.Mui-focusVisible": {
-                outline: `3px solid ${alpha(green[600], 0.5)}`,
-                outlineOffset: "2px",
-                borderColor: green[400],
-              },
-              "&.Mui-checked": {
-                color: "white",
-                backgroundColor: green[600],
-                borderColor: green[600],
-                boxShadow: `none`,
-                "&:hover": {
-                  backgroundColor: green[700],
-                  borderColor: green[700],
-                },
-              },
-            },
-          },
-          {
-            props: {
-              color: "warning",
-            },
-            style: {
-              color: yellow[400],
-              "&:hover": {
-                borderColor: yellow[400],
-              },
-              "&.Mui-focusVisible": {
-                outline: `3px solid ${alpha(yellow[600], 0.5)}`,
-                outlineOffset: "2px",
-                borderColor: yellow[400],
-              },
-              "&.Mui-checked": {
-                color: "white",
-                backgroundColor: yellow[400],
-                borderColor: yellow[400],
-                boxShadow: `none`,
-                "&:hover": {
-                  backgroundColor: yellow[500],
-                  borderColor: yellow[500],
-                },
-              },
-            },
-          },
-          {
-            props: {
-              color: "info",
-            },
-            style: {
-              color: blue[400],
-              "&:hover": {
-                borderColor: blue[400],
-              },
-              "&.Mui-focusVisible": {
-                outline: `3px solid ${alpha(blue[600], 0.5)}`,
-                outlineOffset: "2px",
-                borderColor: blue[400],
-              },
-              "&.Mui-checked": {
-                color: "white",
-                backgroundColor: blue[600],
-                borderColor: blue[600],
-                boxShadow: `none`,
-                "&:hover": {
-                  backgroundColor: blue[700],
-                  borderColor: blue[700],
-                },
-              },
-            },
-          },
-          {
-            props: {
-              color: "error",
-            },
-            style: {
-              color: red[400],
-              "&:hover": {
-                borderColor: red[400],
-              },
-              "&.Mui-focusVisible": {
-                outline: `3px solid ${alpha(red[600], 0.5)}`,
-                outlineOffset: "2px",
-                borderColor: red[400],
-              },
-              "&.Mui-checked": {
-                color: "white",
-                backgroundColor: red[600],
-                borderColor: red[600],
-                boxShadow: `none`,
-                "&:hover": {
-                  backgroundColor: red[700],
-                  borderColor: red[700],
-                },
-              },
-            },
-          },
-        ],
-      }),
-    },
-  },
-  MuiRadio: {
-    defaultProps: {
-      // disableRipple: true,
-      // icon: (
-      //   <CheckBoxOutlineBlankRoundedIcon
-      //     sx={{ color: "hsla(210, 0%, 0%, 0.0)" }}
-      //   />
-      // ),
-      // checkedIcon: <CheckRoundedIcon sx={{ height: 14, width: 14 }} />,
-    },
-    styleOverrides: {
-      root: ({ theme }) => ({
-        margin: 10,
-        height: 16,
-        width: 16,
-        borderRadius: 16,
-        border: "1px solid ",
-        // borderColor: alpha(gray[300], 0.8),
-        // boxShadow: "0 0 0 1.5px hsla(210, 0%, 0%, 0.04) inset",
-        backgroundColor: alpha(gray[100], 0.4),
-        transition: "border-color, background-color, 120ms ease-in",
-        variants: [
-          {
-            props: {
-              color: "primary",
-            },
-            style: {
-              color: brand[600],
-              "&:hover": {
-                borderColor: brand[700],
-              },
-              "&.Mui-checked": {
-                color: brand[600],
-                "&:hover": {
-                  color: brand[700],
-                },
-              },
-            },
-          },
-          {
-            props: {
-              color: "secondary",
-            },
-            style: {
-              color: purple[600],
-              "&:hover": {
-                borderColor: purple[700],
-              },
-              "&.Mui-checked": {
-                color: purple[600],
-                "&:hover": {
-                  color: purple[700],
-                },
-              },
-            },
-          },
-          {
-            props: {
-              color: "success",
-            },
-            style: {
-              color: green[600],
-              "&:hover": {
-                borderColor: green[700],
-              },
-              "&.Mui-checked": {
-                color: green[600],
-                "&:hover": {
-                  color: green[700],
-                },
-              },
-            },
-          },
-          {
-            props: {
-              color: "warning",
-            },
-            style: {
-              color: yellow[400],
-              "&:hover": {
-                borderColor: yellow[500],
-              },
-              "&.Mui-checked": {
-                color: yellow[400],
-                "&:hover": {
-                  color: yellow[500],
-                },
-              },
-            },
-          },
-          {
-            props: {
-              color: "error",
-            },
-            style: {
-              color: red[600],
-              "&:hover": {
-                borderColor: red[700],
-              },
-              "&.Mui-checked": {
-                color: red[600],
-                "&:hover": {
-                  color: red[700],
-                },
-              },
-            },
-          },
-          {
-            props: {
-              color: "info",
-            },
-            style: {
-              color: blue[600],
-              "&:hover": {
-                borderColor: blue[700],
-              },
-              "&.Mui-checked": {
-                color: blue[600],
-                "&:hover": {
-                  color: blue[700],
-                },
-              },
-            },
-          },
-        ],
       }),
     },
   },
@@ -1197,16 +744,6 @@ export const inputsCustomizations: Components<Theme> = {
       },
     },
   },
-  MuiInputLabel: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        [`&.MuiInputLabel-outlined.MuiFormLabel-filled`]: {
-          backgroundColor: "white",
-        },
-      }),
-    },
-  },
-
   MuiOutlinedInput: {
     styleOverrides: {
       input: {
@@ -1277,13 +814,6 @@ export const inputsCustomizations: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         borderRadius: theme.shape.borderRadius,
-        ["&::after"]: {
-          border: "none",
-        },
-        ["&::before"]: {
-          border: "none",
-          content: "none",
-        },
       }),
     },
   },
