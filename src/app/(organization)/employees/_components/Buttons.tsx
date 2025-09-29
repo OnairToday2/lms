@@ -3,6 +3,9 @@ const Buttons = () => {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex gap-3 ">
+        <Button variant="contained" size="large" className="bg-blue-600">
+          Primary large11
+        </Button>
         <Button variant="contained" color="primary" size="large">
           Primary large
         </Button>
