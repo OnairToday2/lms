@@ -1,5 +1,5 @@
 import { paperClasses } from "@mui/material/Paper";
-import { alpha } from "@mui/material/styles";
+import { Theme, alpha, Components } from "@mui/material/styles";
 
 import { menuItemClasses } from "@mui/material/MenuItem";
 import { listItemIconClasses } from "@mui/material/ListItemIcon";
@@ -8,10 +8,10 @@ import { checkboxClasses } from "@mui/material/Checkbox";
 import { listClasses } from "@mui/material/List";
 import { gridClasses } from "@mui/x-data-grid";
 import { tablePaginationClasses } from "@mui/material/TablePagination";
-import { gray } from "../themePrimitives";
+import { gray } from "../../themePrimitives";
 
 /* eslint-disable import/prefer-default-export */
-export const dataGridCustomizations = {
+export const dataGridCustomizations: Components<Theme> = {
   MuiDataGrid: {
     styleOverrides: {
       root: ({ theme }) => ({

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import ReactQueryClientProvider from "@/shared/providers/ReactQueryClientProvider";
 import MUIThemeProvider from "@/shared/providers/MUIThemeProvider";
-import "../theme/globals.css";
 import NotificationsProvider from "@/hooks/useNotifications/NotificationsProvider";
 import DialogsProvider from "@/hooks/useDialogs/DialogsProvider";
+import "../theme/palette.css";
+import "../theme/globals.css";
+
 export const metadata: Metadata = {
   title: {
     template: "%s | ONAIR",

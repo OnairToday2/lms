@@ -19,7 +19,7 @@ const LayoutWraper: React.FC<LayoutWraperProps> = ({
   appBar,
 }) => {
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box component="div" className="main-layout" sx={{ display: "flex" }}>
       <SideBarContainer>{siderBar}</SideBarContainer>
       {appBar}
       {/* Main content */}

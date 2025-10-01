@@ -2,21 +2,25 @@
 import * as React from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import type { ThemeOptions } from "@mui/material/styles";
-import { inputsCustomizations } from "./customizations/inputs";
-import { dataDisplayCustomizations } from "./customizations/dataDisplay";
-import { feedbackCustomizations } from "./customizations/feedback";
-import { navigationCustomizations } from "./customizations/navigation";
-import { surfacesCustomizations } from "./customizations/surfaces";
+import { colorSchemes, typography, shadows, shape } from "./themePrimitives";
+import { viVN as coreViVN } from "@mui/material/locale";
+import { viVN as dateViVN } from "@mui/x-date-pickers/locales";
+import { viVN as dataGridViVN } from "@mui/x-data-grid/locales";
 import {
   chartsCustomizations,
   dataGridCustomizations,
   datePickersCustomizations,
   treeViewCustomizations,
+  selectsCustomizations,
+  typographyCustomizations,
+  inputsCustomizations,
+  dataDisplayCustomizations,
+  feedbackCustomizations,
+  navigationCustomizations,
+  surfacesCustomizations,
+  buttonsCustomizations,
+  toggleButtonsCustomizations,
 } from "./customizations";
-import { colorSchemes, typography, shadows, shape } from "./themePrimitives";
-import { viVN as coreViVN } from "@mui/material/locale";
-import { viVN as dateViVN } from "@mui/x-date-pickers/locales";
-import { viVN as dataGridViVN } from "@mui/x-data-grid/locales";
 
 interface AppThemeProps {
   children: React.ReactNode;
@@ -36,6 +40,7 @@ export default function AppTheme(props: AppThemeProps) {
         typography,
         shadows,
         shape,
+
         components: {
           ...inputsCustomizations,
           ...dataDisplayCustomizations,
@@ -46,6 +51,10 @@ export default function AppTheme(props: AppThemeProps) {
           ...dataGridCustomizations,
           ...datePickersCustomizations,
           ...treeViewCustomizations,
+          ...typographyCustomizations,
+          ...selectsCustomizations,
+          ...buttonsCustomizations,
+          ...toggleButtonsCustomizations,
           ...themeComponents,
         },
       },

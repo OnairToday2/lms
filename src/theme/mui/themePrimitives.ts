@@ -1,4 +1,6 @@
 import { createTheme, alpha, PaletteMode, Shadows } from "@mui/material/styles";
+import { grey, primary, info, warning } from "./theme-color.ts";
+export * from "./primitive/typography";
 
 declare module "@mui/material/Paper" {
   interface PaperPropsVariantOverrides {
@@ -243,6 +245,12 @@ export const getDesignTokens = (mode: PaletteMode) => {
         fontWeight: 600,
         lineHeight: 1.2,
         letterSpacing: -0.5,
+        "@media (min-width:600px)": {
+          fontSize: "1.5rem",
+        },
+        [defaultTheme.breakpoints.up("md")]: {
+          fontSize: defaultTheme.typography.pxToRem(111),
+        },
       },
       h2: {
         fontSize: defaultTheme.typography.pxToRem(36),
@@ -299,21 +307,21 @@ export const colorSchemes = {
   light: {
     palette: {
       primary: {
-        light: brand[200],
-        main: brand[400],
-        dark: brand[700],
-        contrastText: brand[50],
+        light: primary["light"],
+        main: primary["main"],
+        dark: primary["dark"],
+        contrastText: grey["800"],
       },
       info: {
-        light: brand[100],
-        main: brand[300],
-        dark: brand[600],
-        contrastText: gray[50],
+        light: info["light"],
+        main: info["main"],
+        dark: info["dark"],
+        contrastText: grey["800"],
       },
       warning: {
-        light: orange[300],
-        main: orange[400],
-        dark: orange[800],
+        light: warning["light"],
+        main: warning["main"],
+        dark: warning["dark"],
       },
       error: {
         light: red[300],
@@ -326,7 +334,7 @@ export const colorSchemes = {
         dark: green[800],
       },
       grey: {
-        ...gray,
+        ...grey,
       },
       divider: alpha(gray[300], 0.4),
       background: {
@@ -394,56 +402,6 @@ export const colorSchemes = {
       baseShadow:
         "hsla(220, 30%, 5%, 0.7) 0px 4px 16px 0px, hsla(220, 25%, 10%, 0.8) 0px 8px 16px -5px",
     },
-  },
-};
-
-export const typography = {
-  fontFamily: "Inter, sans-serif",
-  h1: {
-    fontSize: defaultTheme.typography.pxToRem(48),
-    fontWeight: 600,
-    lineHeight: 1.2,
-    letterSpacing: -0.5,
-  },
-  h2: {
-    fontSize: defaultTheme.typography.pxToRem(36),
-    fontWeight: 600,
-    lineHeight: 1.2,
-  },
-  h3: {
-    fontSize: defaultTheme.typography.pxToRem(30),
-    lineHeight: 1.2,
-  },
-  h4: {
-    fontSize: defaultTheme.typography.pxToRem(24),
-    fontWeight: 600,
-    lineHeight: 1.5,
-  },
-  h5: {
-    fontSize: defaultTheme.typography.pxToRem(20),
-    fontWeight: 600,
-  },
-  h6: {
-    fontSize: defaultTheme.typography.pxToRem(18),
-    fontWeight: 600,
-  },
-  subtitle1: {
-    fontSize: defaultTheme.typography.pxToRem(18),
-  },
-  subtitle2: {
-    fontSize: defaultTheme.typography.pxToRem(14),
-    fontWeight: 500,
-  },
-  body1: {
-    fontSize: defaultTheme.typography.pxToRem(14),
-  },
-  body2: {
-    fontSize: defaultTheme.typography.pxToRem(14),
-    fontWeight: 400,
-  },
-  caption: {
-    fontSize: defaultTheme.typography.pxToRem(12),
-    fontWeight: 400,
   },
 };
 

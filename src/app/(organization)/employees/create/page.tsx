@@ -21,6 +21,9 @@ import { Divider } from "@mui/material";
 import InputWithIcon from "../_components/InputIcons";
 import ComposedTextField from "../_components/ComposeTextFields";
 import ColorCheckboxes from "../_components/Checkboxes";
+import ToggleButtonsMultiple from "../_components/ToggleButtons";
+import TextAreas from "../_components/TextArea";
+import Heading from "../_components/heading";
 
 const INITIAL_FORM_VALUES: Partial<EmployeeFormState["values"]> = {
   role: "Market",
@@ -135,6 +138,12 @@ const PageEmployeeCreate = () => {
       <Divider className="my-12">Checkboxes</Divider>
 
       <ColorCheckboxes />
+      <Divider className="my-12">ToggleButtonsMultiple</Divider>
+      <ToggleButtonsMultiple />
+      <Divider className="my-12">TextAreas</Divider>
+      <TextAreas />
+      <Divider className="my-12">Heading</Divider>
+      <Heading />
       <EmployeeForm
         formState={formState}
         onFieldChange={handleFormFieldChange}

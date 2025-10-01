@@ -5,9 +5,29 @@ const Buttons: React.FC = ({}) => {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex gap-3 ">
-        <Button variant="contained" size="large" className="bg-blue-600">
-          Primary large11
+        <Button variant="fill" size="large" color="primary">
+          Fill primary
         </Button>
+        <Button variant="fill" size="large" color="secondary">
+          Fill secondary
+        </Button>
+        <Button variant="fill" size="large" color="success">
+          Fill success
+        </Button>
+        <Button variant="fill" size="large" color="warning">
+          Fill warning
+        </Button>
+        <Button variant="fill" size="large" color="error">
+          Fill error
+        </Button>
+        <Button variant="fill" size="large" color="info">
+          Fill info
+        </Button>
+        <Button variant="fill" size="large" color="inherit">
+          Fill inherit
+        </Button>
+      </div>
+      <div className="flex gap-3 ">
         <Button variant="contained" color="primary" size="large">
           Primary large
         </Button>
@@ -75,6 +95,7 @@ const Buttons: React.FC = ({}) => {
         <Button variant="contained" color="inherit" size="small">
           Inherit small
         </Button>
+        <Button size="small">default color</Button>
       </div>
       <div className="flex gap-3">
         <Button variant="outlined" color="primary" size="large">

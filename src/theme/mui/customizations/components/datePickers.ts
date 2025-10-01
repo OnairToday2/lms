@@ -3,7 +3,7 @@ import { alpha, Theme } from "@mui/material/styles";
 import type { PickerComponents } from "@mui/x-date-pickers/themeAugmentation";
 import { menuItemClasses } from "@mui/material/MenuItem";
 import { pickersDayClasses, yearCalendarClasses } from "@mui/x-date-pickers";
-import { gray, brand } from "../themePrimitives";
+import { gray, brand } from "../../themePrimitives";
 
 /* eslint-disable import/prefer-default-export */
 export const datePickersCustomizations: PickerComponents<Theme> = {

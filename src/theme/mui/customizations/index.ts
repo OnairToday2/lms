@@ -1,4 +1,13 @@
-export { chartsCustomizations } from "./charts";
-export { dataGridCustomizations } from "./dataGrid";
-export { datePickersCustomizations } from "./datePickers";
-export { treeViewCustomizations } from "./treeView";
+export { chartsCustomizations } from "./components/charts";
+export { dataGridCustomizations } from "./components/dataGrid";
+export { datePickersCustomizations } from "./components/datePickers";
+export { treeViewCustomizations } from "./components/treeView";
+export { selectsCustomizations } from "./components/selects";
+export { typographyCustomizations } from "./components/typography";
+export { inputsCustomizations } from "./components/inputs";
+export { dataDisplayCustomizations } from "./components/dataDisplay";
+export { feedbackCustomizations } from "./components/feedback";
+export { navigationCustomizations } from "./components/navigation";
+export { surfacesCustomizations } from "./components/surfaces";
+export { buttonsCustomizations } from "./components/buttons";
+export { toggleButtonsCustomizations } from "./components/toggleButtons";

@@ -1,7 +1,6 @@
 import * as React from "react";
 import { alpha, Theme, Components } from "@mui/material/styles";
 import { outlinedInputClasses } from "@mui/material/OutlinedInput";
-import { formLabelClasses } from "@mui/material";
 import { svgIconClasses } from "@mui/material/SvgIcon";
 import { toggleButtonGroupClasses } from "@mui/material/ToggleButtonGroup";
 import { toggleButtonClasses } from "@mui/material/ToggleButton";
@@ -11,13 +10,12 @@ import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
 import {
   gray,
   brand,
-  orange,
   red,
   purple,
   green,
   yellow,
   blue,
-} from "../themePrimitives";
+} from "../../themePrimitives";
 
 /* eslint-disable import/prefer-default-export */
 export const inputsCustomizations: Components<Theme> = {
@@ -812,17 +810,88 @@ export const inputsCustomizations: Components<Theme> = {
   MuiToggleButtonGroup: {
     styleOverrides: {
       root: ({ theme }) => ({
-        borderRadius: "10px",
-        boxShadow: `0 4px 16px ${alpha(gray[400], 0.2)}`,
+        // borderRadius: "10px",
         [`& .${toggleButtonGroupClasses.selected}`]: {
-          color: brand[500],
+          color: brand[600],
         },
         ...theme.applyStyles("dark", {
           [`& .${toggleButtonGroupClasses.selected}`]: {
             color: "#fff",
           },
-          boxShadow: `0 4px 16px ${alpha(brand[700], 0.5)}`,
         }),
+        variants: [
+          {
+            props: {
+              size: "small",
+              style: {
+                [`& .MuiToggleButton-sizeSmall`]: {
+                  paddingTop: "6px",
+                  paddingBottom: "6px",
+                  background: "red",
+                  paddingBlockStart: "6px",
+                },
+              },
+            },
+          },
+          {
+            props: {
+              size: "medium",
+              style: {
+                [` .MuiToggleButton-sizeMedium`]: {},
+              },
+            },
+          },
+          {
+            props: {
+              size: "large",
+              style: {
+                [`& .MuiToggleButton-sizeLarge`]: {
+                  paddingTop: "6px",
+                  paddingBottom: "6px",
+                  paddintBlockStart: "6px",
+                },
+              },
+            },
+          },
+          {
+            props: {
+              color: "primary",
+              style: {
+                [`& .${toggleButtonGroupClasses.selected}`]: {
+                  color: brand[600],
+                },
+              },
+            },
+          },
+          {
+            props: {
+              color: "secondary",
+              style: {
+                color: brand["600"],
+              },
+            },
+          },
+          {
+            props: {
+              color: "success",
+            },
+          },
+          {
+            props: {
+              color: "warning",
+            },
+          },
+          {
+            props: {
+              color: "error",
+            },
+          },
+          {
+            props: {
+              color: "info",
+            },
+          },
+        ],
       }),
     },
   },
@@ -1285,6 +1354,11 @@ export const inputsCustomizations: Components<Theme> = {
           content: "none",
         },
       }),
+    },
+  },
+  MuiButtonGroup: {
+    styleOverrides: {
+      root: {},
     },
   },
 };
