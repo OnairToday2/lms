@@ -1,27 +1,23 @@
 import * as React from "react";
 import { alpha, Theme, Components } from "@mui/material/styles";
-import { outlinedInputClasses } from "@mui/material/OutlinedInput";
-import { svgIconClasses } from "@mui/material/SvgIcon";
-import { toggleButtonGroupClasses } from "@mui/material/ToggleButtonGroup";
-import { toggleButtonClasses } from "@mui/material/ToggleButton";
 import CheckBoxOutlineBlankRoundedIcon from "@mui/icons-material/CheckBoxOutlineBlankRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
 import {
-  gray,
-  brand,
-  red,
-  purple,
-  green,
-  yellow,
-  blue,
-} from "../../themePrimitives";
+  primary,
+  secondary,
+  grey,
+  success,
+  warning,
+  info,
+  error,
+} from "../../theme-color";
 
 /* eslint-disable import/prefer-default-export */
 export const checkboxCustomizations: Components<Theme> = {
   MuiCheckbox: {
     defaultProps: {
-      disableRipple: true,
+      // disableRipple: true,
       icon: (
         <CheckBoxOutlineBlankRoundedIcon
           sx={{ color: "hsla(210, 0%, 0%, 0.0)" }}
@@ -32,68 +28,44 @@ export const checkboxCustomizations: Components<Theme> = {
     },
     styleOverrides: {
       root: ({ theme }) => ({
-        margin: 10,
-        height: 16,
-        width: 16,
-        borderRadius: 5,
-        border: "1px solid ",
-        borderColor: alpha(gray[300], 0.8),
-        boxShadow: "0 0 0 1.5px hsla(210, 0%, 0%, 0.04) inset",
-        backgroundColor: alpha(gray[100], 0.4),
+        margin: "0.5rem",
+        height: "1.125rem",
+        width: "1.125rem",
+        borderRadius: "0.375rem",
+        border: "2px solid ",
+        borderColor: grey[600],
         transition: "border-color, background-color, 120ms ease-in",
-        "&:hover": {
-          borderColor: brand[300],
-        },
-        "&.Mui-focusVisible": {
-          outline: `3px solid ${alpha(brand[600], 0.5)}`,
-          outlineOffset: "2px",
-          borderColor: brand[400],
-        },
-        "&.Mui-checked": {
-          color: "white",
-          backgroundColor: brand[600],
-          borderColor: brand[700],
-          boxShadow: `none`,
-          "&:hover": {
-            backgroundColor: brand[600],
-          },
-        },
-        ...theme.applyStyles("dark", {
-          borderColor: alpha(gray[700], 0.8),
-          boxShadow: "0 0 0 1.5px hsl(210, 0%, 0%) inset",
-          backgroundColor: alpha(gray[900], 0.8),
-          "&:hover": {
-            borderColor: brand[300],
-          },
-          "&.Mui-focusVisible": {
-            borderColor: brand[400],
-            outline: `3px solid ${alpha(brand[500], 0.5)}`,
-            outlineOffset: "2px",
-          },
-        }),
+        // ...theme.applyStyles("dark", {
+        //   borderColor: alpha(gray[700], 0.8),
+        //   boxShadow: "0 0 0 1.5px hsl(210, 0%, 0%) inset",
+        //   backgroundColor: alpha(gray[900], 0.8),
+        //   "&:hover": {
+        //     borderColor: brand[300],
+        //   },
+        //   "&.Mui-focusVisible": {
+        //     borderColor: brand[400],
+        //     outline: `3px solid ${alpha(brand[500], 0.5)}`,
+        //     outlineOffset: "2px",
+        //   },
+        // }),
         variants: [
           {
             props: {
               color: "primary",
             },
             style: {
-              color: brand[600],
+              color: primary["main"],
               "&:hover": {
-                borderColor: brand[300],
-              },
-              "&.Mui-focusVisible": {
-                outline: `3px solid ${alpha(brand[600], 0.5)}`,
-                outlineOffset: "2px",
-                borderColor: brand[400],
+                borderColor: primary["main"],
               },
               "&.Mui-checked": {
                 color: "white",
-                backgroundColor: brand[600],
-                borderColor: brand[600],
+                backgroundColor: primary["main"],
+                borderColor: primary["main"],
                 boxShadow: `none`,
                 "&:hover": {
-                  backgroundColor: brand[700],
-                  borderColor: brand[700],
+                  backgroundColor: primary["main"],
+                  borderColor: primary["main"],
                 },
               },
             },
@@ -103,23 +75,18 @@ export const checkboxCustomizations: Components<Theme> = {
               color: "secondary",
             },
             style: {
-              color: purple[600],
+              color: secondary["main"],
               "&:hover": {
-                borderColor: purple[300],
-              },
-              "&.Mui-focusVisible": {
-                outline: `3px solid ${alpha(purple[600], 0.5)}`,
-                outlineOffset: "2px",
-                borderColor: purple[400],
+                borderColor: secondary["main"],
               },
               "&.Mui-checked": {
                 color: "white",
-                backgroundColor: purple[600],
-                borderColor: purple[600],
+                backgroundColor: secondary["main"],
+                borderColor: secondary["main"],
                 boxShadow: `none`,
                 "&:hover": {
-                  backgroundColor: purple[700],
-                  borderColor: purple[700],
+                  backgroundColor: secondary["main"],
+                  borderColor: secondary["main"],
                 },
               },
             },
@@ -129,23 +96,18 @@ export const checkboxCustomizations: Components<Theme> = {
               color: "success",
             },
             style: {
-              color: green[600],
+              color: success["main"],
               "&:hover": {
-                borderColor: green[500],
-              },
-              "&.Mui-focusVisible": {
-                outline: `3px solid ${alpha(green[600], 0.5)}`,
-                outlineOffset: "2px",
-                borderColor: green[400],
+                borderColor: success["main"],
               },
               "&.Mui-checked": {
                 color: "white",
-                backgroundColor: green[600],
-                borderColor: green[600],
+                backgroundColor: success["main"],
+                borderColor: success["main"],
                 boxShadow: `none`,
                 "&:hover": {
-                  backgroundColor: green[700],
-                  borderColor: green[700],
+                  backgroundColor: success["main"],
+                  borderColor: success["main"],
                 },
               },
             },
@@ -155,23 +117,18 @@ export const checkboxCustomizations: Components<Theme> = {
               color: "warning",
             },
             style: {
-              color: yellow[400],
+              color: warning["main"],
               "&:hover": {
-                borderColor: yellow[400],
-              },
-              "&.Mui-focusVisible": {
-                outline: `3px solid ${alpha(yellow[600], 0.5)}`,
-                outlineOffset: "2px",
-                borderColor: yellow[400],
+                borderColor: warning["main"],
               },
               "&.Mui-checked": {
                 color: "white",
-                backgroundColor: yellow[400],
-                borderColor: yellow[400],
+                backgroundColor: warning["main"],
+                borderColor: warning["main"],
                 boxShadow: `none`,
                 "&:hover": {
-                  backgroundColor: yellow[500],
-                  borderColor: yellow[500],
+                  backgroundColor: warning["main"],
+                  borderColor: warning["main"],
                 },
               },
             },
@@ -181,23 +138,18 @@ export const checkboxCustomizations: Components<Theme> = {
               color: "info",
             },
             style: {
-              color: blue[400],
+              color: info["main"],
               "&:hover": {
-                borderColor: blue[400],
-              },
-              "&.Mui-focusVisible": {
-                outline: `3px solid ${alpha(blue[600], 0.5)}`,
-                outlineOffset: "2px",
-                borderColor: blue[400],
+                borderColor: info["main"],
               },
               "&.Mui-checked": {
                 color: "white",
-                backgroundColor: blue[600],
-                borderColor: blue[600],
+                backgroundColor: info["main"],
+                borderColor: info["main"],
                 boxShadow: `none`,
                 "&:hover": {
-                  backgroundColor: blue[700],
-                  borderColor: blue[700],
+                  backgroundColor: info["main"],
+                  borderColor: info["main"],
                 },
               },
             },
@@ -207,23 +159,185 @@ export const checkboxCustomizations: Components<Theme> = {
               color: "error",
             },
             style: {
-              color: red[400],
+              color: error["main"],
               "&:hover": {
-                borderColor: red[400],
-              },
-              "&.Mui-focusVisible": {
-                outline: `3px solid ${alpha(red[600], 0.5)}`,
-                outlineOffset: "2px",
-                borderColor: red[400],
+                borderColor: error["main"],
               },
               "&.Mui-checked": {
                 color: "white",
-                backgroundColor: red[600],
-                borderColor: red[600],
+                backgroundColor: error["main"],
+                borderColor: error["main"],
                 boxShadow: `none`,
                 "&:hover": {
-                  backgroundColor: red[700],
-                  borderColor: red[700],
+                  backgroundColor: error["main"],
+                  borderColor: error["main"],
+                },
+              },
+            },
+          },
+          {
+            props: {
+              color: "default",
+            },
+            style: {
+              color: "white",
+              "&:hover": {
+                borderColor: grey[800],
+              },
+              "&.Mui-checked": {
+                color: "white",
+                backgroundColor: grey[800],
+                borderColor: grey[800],
+                boxShadow: `none`,
+                "&:hover": {
+                  backgroundColor: grey[800],
+                  borderColor: grey[800],
+                },
+              },
+            },
+          },
+        ],
+      }),
+    },
+  },
+  MuiRadio: {
+    defaultProps: {
+      color: "primary",
+      disableRipple: false,
+      // icon: (
+      //   <CheckBoxOutlineBlankRoundedIcon
+      //     sx={{ color: "hsla(210, 0%, 0%, 0.0)" }}
+      //   />
+      // ),
+      // checkedIcon: <CheckRoundedIcon sx={{ height: 14, width: 14 }} />,
+    },
+    styleOverrides: {
+      root: ({ theme }) => ({
+        margin: 10,
+        height: 16,
+        width: 16,
+        borderRadius: 16,
+        border: "1px solid ",
+        // borderColor: alpha(gray[300], 0.8),
+        // boxShadow: "0 0 0 1.5px hsla(210, 0%, 0%, 0.04) inset",
+        backgroundColor: alpha(grey[100], 0.4),
+        transition: "border-color, background-color, 120ms ease-in",
+        variants: [
+          {
+            props: {
+              color: "primary",
+            },
+            style: {
+              color: primary["main"],
+              "&:hover": {
+                borderColor: primary["main"],
+              },
+              "&.Mui-checked": {
+                color: primary["main"],
+                "&:hover": {
+                  color: primary["main"],
+                },
+              },
+            },
+          },
+          {
+            props: {
+              color: "secondary",
+            },
+            style: {
+              color: secondary["main"],
+              "&:hover": {
+                borderColor: secondary["main"],
+              },
+              "&.Mui-checked": {
+                color: secondary["main"],
+                "&:hover": {
+                  color: secondary["main"],
+                },
+              },
+            },
+          },
+          {
+            props: {
+              color: "success",
+            },
+            style: {
+              color: success["main"],
+              "&:hover": {
+                borderColor: success["main"],
+              },
+              "&.Mui-checked": {
+                color: success["main"],
+                "&:hover": {
+                  color: success["main"],
+                },
+              },
+            },
+          },
+          {
+            props: {
+              color: "warning",
+            },
+            style: {
+              color: warning["main"],
+              "&:hover": {
+                borderColor: warning["main"],
+              },
+              "&.Mui-checked": {
+                color: warning["main"],
+                "&:hover": {
+                  color: warning["main"],
+                },
+              },
+            },
+          },
+          {
+            props: {
+              color: "error",
+            },
+            style: {
+              color: error["main"],
+              "&:hover": {
+                borderColor: error["main"],
+              },
+              "&.Mui-checked": {
+                color: error["main"],
+                "&:hover": {
+                  color: error["main"],
+                },
+              },
+            },
+          },
+          {
+            props: {
+              color: "info",
+            },
+            style: {
+              color: info["main"],
+              "&:hover": {
+                borderColor: info["main"],
+              },
+              "&.Mui-checked": {
+                color: info["main"],
+                "&:hover": {
+                  color: info["main"],
+                },
+              },
+            },
+          },
+          {
+            props: {
+              color: "default",
+            },
+            style: {
+              color: grey[800],
+              "&:hover": {
+                borderColor: grey[800],
+              },
+              "&.Mui-checked": {
+                color: grey[800],
+                "&:hover": {
+                  color: grey[800],
                 },
               },
             },

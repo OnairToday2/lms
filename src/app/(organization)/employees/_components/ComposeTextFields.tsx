@@ -15,8 +15,8 @@ export default function ComposedTextField() {
       noValidate
       autoComplete="off"
     >
-      <FormControl variant="standard">
-        <InputLabel htmlFor="component-simple">Name</InputLabel>
+      <FormControl variant="outlined" size="small">
+        <InputLabel htmlFor="component-simple">small outline</InputLabel>
         <Input id="component-simple" defaultValue="Composed TextField" />
       </FormControl>
       <FormControl variant="standard">

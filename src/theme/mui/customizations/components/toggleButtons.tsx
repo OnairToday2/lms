@@ -16,99 +16,21 @@ import {
 
 export const toggleButtonsCustomizations: Components<Theme> = {
   MuiToggleButtonGroup: {
-    defaultProps: {
-      // color: "primary",
-    },
     styleOverrides: {
-      root: ({ theme }) => ({
-        width: "fit-content",
-        [`& .${toggleButtonGroupClasses.selected}`]: {
-          color: "white",
-        },
-        ...theme.applyStyles("dark", {
+      root: ({ theme }) => {
+        return {
+          width: "fit-content",
           [`& .${toggleButtonGroupClasses.selected}`]: {
-            color: primary["light"],
+            color: "white",
           },
-        }),
-        variant: [
-          {
-            props: {
-              orientation: "vertical",
-            },
-            style: {
-              width: "fit-content",
-              [`& .${toggleButtonClasses.root}`]: {
-                display: "inline-block",
-              },
-            },
-          },
-          {
-            props: {
-              orientation: "vertical",
-            },
-            style: {
-              width: "fit-content",
-            },
-          },
-        ],
-      }),
-    },
-  },
-
-  MuiToggleButton: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        textTransform: "none",
-        fontWeight: theme.typography.fontWeightBold,
-        ...theme.applyStyles("dark", {
-          color: grey[400],
-          [`&.${toggleButtonClasses.selected}`]: {
-            color: primary["main"],
-          },
-        }),
-        variants: [
-          {
-            props: {
-              size: "small",
-            },
-            style: {
-              height: "1.875rem", //30px
-              borderRadius: "0.5rem", // 8px
-              fontSize: "0.75rem",
-              padding: "0.125rem 0.375rem",
-              [`& .${svgIconClasses.root}`]: { fontSize: "1rem" },
-            },
-          },
-          {
-            props: {
-              size: "medium",
-            },
-            style: {
-              height: "2.25rem", // 36px
-              borderRadius: "0.5rem", //8px
-              padding: "0.25rem 0.5rem",
-            },
-          },
-          {
-            props: {
-              size: "large",
-            },
-            style: {
-              height: "2.5rem", // 40px
-              borderRadius: "0.5rem", //8px
-              padding: "0.25rem 0.75rem",
-            },
-          },
-          {
-            props: {
-              color: "primary",
-            },
-            style: {
+          [`&.${toggleButtonGroupClasses.root}`]: {
+            [`& .MuiToggleButton-primary`]: {
               color: "white",
-              background: primary["main"],
+              backgroundColor: primary["main"],
               borderColor: primary["main"],
-              [`& .${toggleButtonGroupClasses.middleButton}`]: {
-                borderLeftColor: "red",
+              "&:hover": {
+                backgroundColor: primary["dark"],
+                borderColor: primary["dark"],
               },
               [`&.${toggleButtonClasses.selected}`]: {
                 color: "white",
@@ -119,27 +41,14 @@ export const toggleButtonsCustomizations: Components<Theme> = {
                   borderColor: primary["dark"],
                 },
               },
-              "&:hover": {
-                backgroundColor: primary["dark"],
-                borderColor: primary["dark"],
-              },
               [`&.${toggleButtonClasses.disabled}`]: {
                 color: "white",
                 opacity: 0.6,
-                backgroundColor: alpha(primary["dark"], 1),
-                borderColor: alpha(primary["dark"], 1),
-                "&:hover": {
-                  backgroundColor: alpha(primary["dark"], 1),
-                  borderColor: alpha(primary["dark"], 1),
-                },
+                backgroundColor: primary["dark"],
+                borderColor: primary["dark"],
               },
             },
-          },
-          {
-            props: {
-              color: "secondary",
-            },
-            style: {
+            [`& .MuiToggleButton-secondary`]: {
               color: "white",
               background: secondary["main"],
               borderColor: secondary["main"],
@@ -163,12 +72,7 @@ export const toggleButtonsCustomizations: Components<Theme> = {
                 borderColor: secondary["dark"],
               },
             },
-          },
-          {
-            props: {
-              color: "success",
-            },
-            style: {
+            [`& .MuiToggleButton-success`]: {
               color: "white",
               background: success["main"],
               borderColor: success["main"],
@@ -192,44 +96,7 @@ export const toggleButtonsCustomizations: Components<Theme> = {
                 borderColor: success["dark"],
               },
             },
-          },
-          {
-            props: {
-              color: "info",
-            },
-            style: {
-              color: "white",
-              background: info["main"],
-              borderColor: info["main"],
-              [`&.${toggleButtonClasses.selected}`]: {
-                color: "white",
-                backgroundColor: info["dark"],
-                borderColor: info["dark"],
-                "&:hover": {
-                  backgroundColor: info["dark"],
-                  borderColor: info["dark"],
-                },
-              },
-              "&:hover": {
-                backgroundColor: info["dark"],
-                borderColor: info["dark"],
-              },
-              [`&.${toggleButtonClasses.disabled}`]: {
-                color: alpha(grey[300], 0.8),
-                backgroundColor: alpha(info["dark"], 0.9),
-                borderColor: info["dark"],
-                "&:hover": {
-                  backgroundColor: info["dark"],
-                  borderColor: info["dark"],
-                },
-              },
-            },
-          },
-          {
-            props: {
-              color: "warning",
-            },
-            style: {
+            [`& .MuiToggleButton-warning`]: {
               color: "white",
               background: warning["main"],
               borderColor: warning["main"],
@@ -247,53 +114,37 @@ export const toggleButtonsCustomizations: Components<Theme> = {
                 borderColor: warning["dark"],
               },
               [`&.${toggleButtonClasses.disabled}`]: {
-                color: alpha(grey[300], 0.8),
-                backgroundColor: alpha(warning["dark"], 0.9),
+                color: "white",
+                backgroundColor: warning["dark"],
                 borderColor: warning["dark"],
-                "&:hover": {
-                  backgroundColor: warning["dark"],
-                  borderColor: warning["dark"],
-                },
+                opacity: 0.6,
               },
             },
-          },
-          {
-            props: {
-              color: "success",
-            },
-            style: {
+            [`& .MuiToggleButton-info`]: {
               color: "white",
-              background: success["main"],
-              borderColor: success["main"],
+              background: info["main"],
+              borderColor: info["main"],
               [`&.${toggleButtonClasses.selected}`]: {
                 color: "white",
-                backgroundColor: success["dark"],
-                borderColor: success["dark"],
+                backgroundColor: info["dark"],
+                borderColor: info["dark"],
                 "&:hover": {
-                  backgroundColor: success["dark"],
-                  borderColor: success["dark"],
+                  backgroundColor: info["dark"],
+                  borderColor: info["dark"],
                 },
               },
               "&:hover": {
-                backgroundColor: success["dark"],
-                borderColor: success["dark"],
+                backgroundColor: info["dark"],
+                borderColor: info["dark"],
               },
               [`&.${toggleButtonClasses.disabled}`]: {
-                color: alpha(grey[300], 0.8),
-                backgroundColor: alpha(success["dark"], 0.9),
-                borderColor: success["dark"],
-                "&:hover": {
-                  backgroundColor: success["dark"],
-                  borderColor: success["dark"],
-                },
+                color: "white",
+                backgroundColor: info["dark"],
+                borderColor: info["dark"],
+                opacity: 0.6,
               },
             },
-          },
-          {
-            props: {
-              color: "error",
-            },
-            style: {
+            [`& .Mui-error`]: {
               color: "white",
               background: error["main"],
               borderColor: error["main"],
@@ -311,24 +162,19 @@ export const toggleButtonsCustomizations: Components<Theme> = {
                 borderColor: error["dark"],
               },
               [`&.${toggleButtonClasses.disabled}`]: {
-                color: alpha(grey[300], 0.8),
-                backgroundColor: alpha(error["dark"], 0.9),
+                color: "white",
+                backgroundColor: error["dark"],
                 borderColor: error["dark"],
-                "&:hover": {
-                  backgroundColor: error["dark"],
-                  borderColor: error["dark"],
-                },
+                opacity: 0.6,
               },
             },
-          },
-          {
-            props: {
-              color: "standard",
-            },
-            style: {
+            [`& .MuiToggleButton-standard`]: {
               color: "white",
               background: grey[800],
               borderColor: grey[800],
+              [`&.${toggleButtonGroupClasses.middleButton}`]: {
+                borderLeftColor: `${grey[900]} !important`,
+              },
               [`&.${toggleButtonClasses.selected}`]: {
                 color: "white",
                 backgroundColor: grey[900],
@@ -339,18 +185,159 @@ export const toggleButtonsCustomizations: Components<Theme> = {
                 },
               },
               "&:hover": {
-                backgroundColor: grey[800],
-                borderColor: grey[800],
+                backgroundColor: grey[900],
+                borderColor: grey[900],
               },
               [`&.${toggleButtonClasses.disabled}`]: {
-                color: alpha(grey[300], 0.8),
-                backgroundColor: alpha(grey[800], 0.9),
+                color: "white",
+                backgroundColor: grey[800],
+                opacity: 0.6,
                 borderColor: grey[800],
-                "&:hover": {
-                  backgroundColor: grey[800],
-                  borderColor: grey[800],
-                },
               },
+            },
+          },
+          [`&.${toggleButtonGroupClasses.horizontal}`]: {
+            width: "fit-content",
+            [`& .${toggleButtonClasses.root}`]: {
+              borderTopWidth: 0,
+              borderBottomWidth: 0,
+            },
+            "& .MuiToggleButton-primary": {
+              [`&.${toggleButtonGroupClasses.middleButton}`]: {
+                borderLeftColor: primary["dark"],
+              },
+            },
+            "& .MuiToggleButton-secondary": {
+              [`&.${toggleButtonGroupClasses.middleButton}`]: {
+                borderLeftColor: secondary["dark"],
+              },
+            },
+            "& .MuiToggleButton-success": {
+              [`&.${toggleButtonGroupClasses.middleButton}`]: {
+                borderLeftColor: `${success["dark"]} !important`,
+              },
+            },
+            "& .MuiToggleButton-warning": {
+              [`&.${toggleButtonGroupClasses.middleButton}`]: {
+                borderLeftColor: warning["dark"],
+              },
+            },
+            "& .MuiToggleButton-info": {
+              [`&.${toggleButtonGroupClasses.middleButton}`]: {
+                borderLeftColor: info["dark"],
+              },
+            },
+            "& .Mui-error": {
+              [`&.${toggleButtonGroupClasses.middleButton}`]: {
+                borderLeftColor: error["dark"],
+              },
+            },
+            "& .MuiToggleButton-standard": {
+              [`&.${toggleButtonGroupClasses.middleButton}`]: {
+                borderLeftColor: grey[900],
+              },
+            },
+          },
+          [`&.${toggleButtonGroupClasses.vertical}`]: {
+            width: "fit-content",
+            [`& .${toggleButtonClasses.root}`]: {
+              borderRightWidth: 0,
+              borderLeftWidth: 0,
+            },
+            "& .MuiToggleButton-primary": {
+              [`&.${toggleButtonGroupClasses.middleButton}, &.${toggleButtonGroupClasses.lastButton}`]:
+                {
+                  borderTopColor: primary["dark"],
+                },
+            },
+            "& .MuiToggleButton-secondary": {
+              [`&.${toggleButtonGroupClasses.middleButton}, &.${toggleButtonGroupClasses.lastButton}`]:
+                {
+                  borderTopColor: secondary["dark"],
+                },
+            },
+            "& .MuiToggleButton-success": {
+              [`&.${toggleButtonGroupClasses.middleButton}, &.${toggleButtonGroupClasses.lastButton}`]:
+                {
+                  borderTopColor: `${success["dark"]} !important`,
+                },
+            },
+            "& .MuiToggleButton-warning": {
+              [`&.${toggleButtonGroupClasses.middleButton}, &.${toggleButtonGroupClasses.lastButton}`]:
+                {
+                  borderTopColor: warning["dark"],
+                },
+            },
+            "& .MuiToggleButton-info": {
+              [`&.${toggleButtonGroupClasses.middleButton}, &.${toggleButtonGroupClasses.lastButton}`]:
+                {
+                  borderTopColor: info["dark"],
+                },
+            },
+            "& .Mui-error": {
+              [`&.${toggleButtonGroupClasses.middleButton}, &.${toggleButtonGroupClasses.lastButton}`]:
+                {
+                  borderTopColor: error["dark"],
+                },
+            },
+            "& .MuiToggleButton-standard": {
+              [`&.${toggleButtonGroupClasses.middleButton}, &.${toggleButtonGroupClasses.lastButton}`]:
+                {
+                  borderTopColor: grey[900],
+                },
+            },
+          },
+          ...theme.applyStyles("dark", {
+            [`& .${toggleButtonGroupClasses.selected}`]: {
+              color: primary["light"],
+            },
+          }),
+        };
+      },
+    },
+  },
+  MuiToggleButton: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        textTransform: "none",
+        fontWeight: theme.typography.fontWeightBold,
+        ...theme.applyStyles("dark", {
+          color: grey[400],
+          [`&.${toggleButtonClasses.selected}`]: {
+            color: primary["main"],
+          },
+        }),
+        variants: [
+          {
+            props: {
+              size: "small",
+            },
+            style: {
+              height: "1.875rem", //30px
+              borderRadius: "0.5rem", // 8px
+              fontSize: "0.75rem",
+              padding: "0.125rem 0.5rem",
+              [`& .${svgIconClasses.root}`]: { fontSize: "1rem" },
+            },
+          },
+          {
+            props: {
+              size: "medium",
+            },
+            style: {
+              height: "2.25rem", // 36px
+              borderRadius: "0.5rem", //8px
+              padding: "0.25rem 0.75rem",
+            },
+          },
+          {
+            props: {
+              size: "large",
+            },
+            style: {
+              height: "2.5rem", // 36px
+              borderRadius: "0.5rem", //8px
+              padding: "0.5rem 0.875rem",
             },
           },
         ],

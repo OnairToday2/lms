@@ -1,14 +1,10 @@
 import * as React from "react";
 import { Theme, alpha, Components } from "@mui/material/styles";
-import { SvgIconProps } from "@mui/material/SvgIcon";
 import { buttonBaseClasses } from "@mui/material/ButtonBase";
 import { dividerClasses } from "@mui/material/Divider";
 import { menuItemClasses } from "@mui/material/MenuItem";
-import { selectClasses } from "@mui/material/Select";
 import { tabClasses } from "@mui/material/Tab";
-import UnfoldMoreRoundedIcon from "@mui/icons-material/UnfoldMoreRounded";
-import { gray, brand } from "../../themePrimitives";
-
+import { grey, primary } from "../../theme-color";
 /* eslint-disable import/prefer-default-export */
 export const navigationCustomizations: Components<Theme> = {
   MuiMenuItem: {
@@ -49,7 +45,7 @@ export const navigationCustomizations: Components<Theme> = {
           },
         },
         ...theme.applyStyles("dark", {
-          background: gray[900],
+          background: grey[900],
           boxShadow:
             "hsla(220, 30%, 5%, 0.7) 0px 4px 16px 0px, hsla(220, 25%, 10%, 0.8) 0px 8px 16px -5px",
         }),
@@ -83,7 +79,7 @@ export const navigationCustomizations: Components<Theme> = {
           width: 0,
         },
         "&:focus-visible": {
-          outline: `3px solid ${alpha(brand[500], 0.5)}`,
+          outline: `3px solid ${alpha(primary["main"], 0.5)}`,
           outlineOffset: "4px",
           borderRadius: "2px",
         },
@@ -138,17 +134,17 @@ export const navigationCustomizations: Components<Theme> = {
         borderColor: "transparent",
         ":hover": {
           color: (theme.vars || theme).palette.text.primary,
-          backgroundColor: gray[100],
-          borderColor: gray[200],
+          backgroundColor: grey[100],
+          borderColor: grey[200],
         },
         [`&.${tabClasses.selected}`]: {
-          color: gray[900],
+          color: grey[900],
         },
         ...theme.applyStyles("dark", {
           ":hover": {
             color: (theme.vars || theme).palette.text.primary,
-            backgroundColor: gray[800],
-            borderColor: gray[700],
+            backgroundColor: grey[800],
+            borderColor: grey[700],
           },
           [`&.${tabClasses.selected}`]: {
             color: "#fff",
@@ -171,7 +167,7 @@ export const navigationCustomizations: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         color: "transparent",
-        border: `1px solid ${gray[400]}`,
+        border: `1px solid ${grey[400]}`,
         width: 12,
         height: 12,
         borderRadius: "50%",
@@ -187,7 +183,7 @@ export const navigationCustomizations: Components<Theme> = {
           color: (theme.vars || theme).palette.success.main,
         },
         ...theme.applyStyles("dark", {
-          border: `1px solid ${gray[700]}`,
+          border: `1px solid ${grey[700]}`,
           "&.Mui-active": {
             border: "none",
             color: (theme.vars || theme).palette.primary.light,

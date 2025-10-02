@@ -20,6 +20,7 @@ import {
   surfacesCustomizations,
   buttonsCustomizations,
   toggleButtonsCustomizations,
+  checkboxCustomizations,
 } from "./customizations";
 
 interface AppThemeProps {
@@ -40,7 +41,6 @@ export default function AppTheme(props: AppThemeProps) {
         typography,
         shadows,
         shape,
-
         components: {
           ...inputsCustomizations,
           ...dataDisplayCustomizations,
@@ -55,6 +55,7 @@ export default function AppTheme(props: AppThemeProps) {
           ...selectsCustomizations,
           ...buttonsCustomizations,
           ...toggleButtonsCustomizations,
+          ...checkboxCustomizations,
           ...themeComponents,
         },
       },

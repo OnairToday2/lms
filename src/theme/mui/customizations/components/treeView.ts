@@ -1,6 +1,6 @@
 import { alpha, Theme } from "@mui/material/styles";
 import type { TreeViewComponents } from "@mui/x-tree-view/themeAugmentation";
-import { gray, brand } from "../../themePrimitives";
+import { grey, primary } from "../../theme-color";
 
 /* eslint-disable import/prefer-default-export */
 export const treeViewCustomizations: TreeViewComponents<Theme> = {
@@ -17,11 +17,11 @@ export const treeViewCustomizations: TreeViewComponents<Theme> = {
           borderColor: (theme.vars || theme).palette.divider,
         },
         "&:focus-visible .focused": {
-          outline: `3px solid ${alpha(brand[500], 0.5)}`,
+          outline: `3px solid ${alpha(primary["main"], 0.5)}`,
           outlineOffset: "2px",
           "&:hover": {
-            backgroundColor: alpha(gray[300], 0.2),
-            outline: `3px solid ${alpha(brand[500], 0.5)}`,
+            backgroundColor: alpha(grey[300], 0.2),
+            outline: `3px solid ${alpha(primary["main"], 0.5)}`,
             outlineOffset: "2px",
           },
         },
@@ -31,28 +31,28 @@ export const treeViewCustomizations: TreeViewComponents<Theme> = {
         padding: theme.spacing(0.5, 1),
         overflow: "clip",
         "&:hover": {
-          backgroundColor: alpha(gray[300], 0.2),
+          backgroundColor: alpha(grey[300], 0.2),
         },
 
         "&.selected": {
-          backgroundColor: alpha(gray[300], 0.4),
+          backgroundColor: alpha(grey[300], 0.4),
           "&:hover": {
-            backgroundColor: alpha(gray[300], 0.6),
+            backgroundColor: alpha(grey[300], 0.6),
           },
         },
         ...theme.applyStyles("dark", {
           "&:hover": {
-            backgroundColor: alpha(gray[500], 0.2),
+            backgroundColor: alpha(grey[500], 0.2),
           },
           "&:focus-visible": {
             "&:hover": {
-              backgroundColor: alpha(gray[500], 0.2),
+              backgroundColor: alpha(grey[500], 0.2),
             },
           },
           "&.selected": {
-            backgroundColor: alpha(gray[500], 0.4),
+            backgroundColor: alpha(grey[500], 0.4),
             "&:hover": {
-              backgroundColor: alpha(gray[500], 0.6),
+              backgroundColor: alpha(grey[500], 0.6),
             },
           },
         }),

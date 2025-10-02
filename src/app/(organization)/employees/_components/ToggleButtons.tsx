@@ -37,7 +37,7 @@ export default function ToggleButtonsMultiple() {
     <>
       <div>primary</div>
       <div>
-        <ToggleButtonGroup size="large" color="primary">
+        <ToggleButtonGroup size="large" color="primary" value={["bold"]}>
           <ToggleButton value="bold" aria-label="bold">
             Middle 123
           </ToggleButton>
@@ -87,6 +87,7 @@ export default function ToggleButtonsMultiple() {
           onChange={handleFormat}
           aria-label="text formatting"
           size="large"
+          value={["bold"]}
         >
           <ToggleButton value="bold" aria-label="bold">
             <FormatBoldIcon />
@@ -174,7 +175,12 @@ export default function ToggleButtonsMultiple() {
             <ArrowDropDownIcon />
           </ToggleButton>
         </ToggleButtonGroup>
-        <ToggleButtonGroup color="success" onChange={handleFormat} size="small">
+        <ToggleButtonGroup
+          color="success"
+          onChange={handleFormat}
+          size="small"
+          value={["bold"]}
+        >
           <ToggleButton value="bold" aria-label="bold">
             <FormatBoldIcon />
           </ToggleButton>
@@ -194,7 +200,7 @@ export default function ToggleButtonsMultiple() {
       <div className="py-6">warning</div>
       <div>
         <ToggleButtonGroup
-          value={formats}
+          value={["bold"]}
           color="warning"
           onChange={handleFormat}
           aria-label="text formatting"
@@ -214,7 +220,7 @@ export default function ToggleButtonsMultiple() {
           </ToggleButton>
         </ToggleButtonGroup>
         <ToggleButtonGroup
-          value={formats}
+          value={["bold"]}
           color="warning"
           onChange={handleFormat}
         >
@@ -233,7 +239,7 @@ export default function ToggleButtonsMultiple() {
           </ToggleButton>
         </ToggleButtonGroup>
         <ToggleButtonGroup
-          value={formats}
+          value={["bold"]}
           color="warning"
           onChange={handleFormat}
           size="small"
@@ -257,7 +263,7 @@ export default function ToggleButtonsMultiple() {
       <div className="py-6">info</div>
       <div>
         <ToggleButtonGroup
-          value={formats}
+          value={["bold"]}
           color="info"
           onChange={handleFormat}
           aria-label="text formatting"
@@ -292,7 +298,7 @@ export default function ToggleButtonsMultiple() {
           </ToggleButton>
         </ToggleButtonGroup>
         <ToggleButtonGroup
-          value={formats}
+          value={["bold"]}
           color="info"
           onChange={handleFormat}
           size="small"
@@ -316,7 +322,7 @@ export default function ToggleButtonsMultiple() {
       <div className="py-6">error</div>
       <div>
         <ToggleButtonGroup
-          value={formats}
+          value={["bold"]}
           color="error"
           onChange={handleFormat}
           aria-label="text formatting"
@@ -336,7 +342,7 @@ export default function ToggleButtonsMultiple() {
           </ToggleButton>
         </ToggleButtonGroup>
         <ToggleButtonGroup
-          value={formats}
+          value={["bold"]}
           color="error"
           onChange={handleFormat}
         >
@@ -355,7 +361,7 @@ export default function ToggleButtonsMultiple() {
           </ToggleButton>
         </ToggleButtonGroup>
         <ToggleButtonGroup
-          value={formats}
+          value={["bold"]}
           color="error"
           onChange={handleFormat}
           size="small"
@@ -379,7 +385,7 @@ export default function ToggleButtonsMultiple() {
       <div className="py-6">standard</div>
       <div>
         <ToggleButtonGroup
-          value={formats}
+          value={["bold"]}
           color="standard"
           onChange={handleFormat}
           aria-label="text formatting"
@@ -399,7 +405,7 @@ export default function ToggleButtonsMultiple() {
           </ToggleButton>
         </ToggleButtonGroup>
         <ToggleButtonGroup
-          value={formats}
+          value={["bold"]}
           color="standard"
           onChange={handleFormat}
         >
@@ -418,7 +424,7 @@ export default function ToggleButtonsMultiple() {
           </ToggleButton>
         </ToggleButtonGroup>
         <ToggleButtonGroup
-          value={formats}
+          value={["bold"]}
           color="standard"
           onChange={handleFormat}
           size="small"

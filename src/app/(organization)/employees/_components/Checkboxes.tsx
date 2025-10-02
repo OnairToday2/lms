@@ -25,6 +25,19 @@ export default function ColorCheckboxes() {
     setChecked([checked[0], event.target.checked]);
   };
 
+  const [selectedValue, setSelectedValue] = React.useState("a");
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedValue(event.target.value);
+  };
+
+  const controlProps = (item: string) => ({
+    checked: selectedValue === item,
+    onChange: handleChange,
+    value: item,
+    name: "size-radio-button-demo",
+    inputProps: { "aria-label": item },
+  });
+
   return (
     <div>
       <Checkbox {...label} defaultChecked />
@@ -46,22 +59,24 @@ export default function ColorCheckboxes() {
         />
         <Box sx={{ display: "flex", flexDirection: "column", ml: 3 }}>
           <FormControlLabel
-            label="Primary"
+            label="Primary large"
             control={
               <Checkbox
                 checked={checked[0]}
                 onChange={handleChange2}
                 color="primary"
+                size="large"
               />
             }
           />
           <FormControlLabel
-            label="Secondary"
+            label="Secondary small"
             control={
               <Checkbox
                 checked={checked[0]}
                 onChange={handleChange2}
                 color="secondary"
+                size="small"
               />
             }
           />
@@ -152,9 +167,7 @@ export default function ColorCheckboxes() {
           </RadioGroup>
         </FormControl>
         <FormControl>
-          <FormLabel id="demo-radio-buttons-group-label">
-            123132132132132131231231
-          </FormLabel>
+          <FormLabel id="demo-radio-buttons-group-label"></FormLabel>
           <RadioGroup
             aria-labelledby="demo-radio-buttons-group-label"
             // defaultValue="female"
@@ -192,6 +205,19 @@ export default function ColorCheckboxes() {
             />
           </RadioGroup>
         </FormControl>
+        <div>
+          <FormControlLabel control={<Radio color="info" />} label="Info" />
+          <Radio {...controlProps("a")} size="small" />
+          <Radio {...controlProps("b")} />
+          <Radio
+            {...controlProps("c")}
+            sx={{
+              "& .MuiSvgIcon-root": {
+                fontSize: 28,
+              },
+            }}
+          />
+        </div>
       </div>
     </div>
   );

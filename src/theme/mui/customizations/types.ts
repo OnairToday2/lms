@@ -19,12 +19,8 @@ declare module "@mui/material/Button" {
   }
 }
 
-// declare module "@mui/material/styles" {
-//   interface PaletteColor {
-//     darker?: string;
-//   }
-
-//   interface SimplePaletteColorOptions {
-//     darker?: string;
-//   }
-// }
+declare module "@mui/material/Paper" {
+  interface PaperPropsVariantOverrides {
+    highlighted: true;
+  }
+}

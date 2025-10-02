@@ -7,70 +7,98 @@ const InputFields = () => {
       sx={{ "& .MuiTextField-root": { m: 1, width: "25ch" } }}
       noValidate
       autoComplete="off"
+      className="flex flex-col gap-3"
     >
       <div>
+        <div>disabled ountline</div>
         <TextField
-          required
-          id="outlined-required"
-          label="Required"
-          defaultValue="Hello World"
+          disabled
+          type="text"
+          label="Disabled medium outlined"
+          defaultValue="Hello World medium"
+          variant="outlined"
         />
         <TextField
           disabled
-          id="outlined-disabled"
-          label="Disabled"
-          defaultValue="Hello World"
+          label="Disablaed small outlined"
+          type="text"
+          size="small"
+          variant="outlined"
+        />
+      </div>
+      <div>
+        <div>primary ountline</div>
+        <TextField
+          type="text"
+          label="primary medium outlined"
+          defaultValue="Hello World medium"
+          variant="outlined"
+          color="primary"
         />
         <TextField
-          id="outlined-password-input"
-          label="Password"
-          type="password"
+          label="primary small outlined"
+          type="text"
+          size="small"
+          variant="outlined"
+          color="primary"
+        />
+      </div>
+      <div>
+        <div>secondary ountline</div>
+        <TextField
+          type="text"
+          label="secondary medium outlined"
+          defaultValue="Hello World medium"
+          variant="outlined"
+          color="secondary"
+        />
+        <TextField
+          label="secondary small outlined"
+          type="text"
+          size="small"
+          variant="outlined"
+          color="secondary"
+        />
+      </div>
+      <div>
+        <div>Secondary Filled</div>
+        <TextField
+          label="Filled small"
+          type="text"
           autoComplete="current-password"
+          placeholder="placeholder"
+          size="small"
+          color="secondary"
+          variant="filled"
         />
         <TextField
-          id="outlined-read-only-input"
-          label="Read Only"
-          defaultValue="Hello World"
+          label="Filled medium"
+          type="text"
+          defaultValue="filled medium"
+          placeholder="placeholder"
+          variant="filled"
+        />
+      </div>
+      <div>
+        <div>secondary filled read only</div>
+        <TextField
+          label="Filled small readonly"
+          type="text"
+          autoComplete="current-password"
+          placeholder="placeholder"
+          size="small"
+          color="secondary"
+          variant="filled"
           slotProps={{
             input: {
               readOnly: true,
             },
           }}
         />
-        <TextField id="outlined-search" label="Search field" type="search" />
         <TextField
-          id="outlined-helperText"
-          label="Helper text"
-          defaultValue="Default Value"
-          helperText="Some important text"
-        />
-      </div>
-      <div>
-        <TextField
-          required
-          id="filled-required"
-          label="Required"
-          defaultValue="Hello World"
-          variant="filled"
-        />
-        <TextField
-          disabled
-          id="filled-disabled"
-          label="Disabled"
-          defaultValue="Hello World"
-          variant="filled"
-        />
-        <TextField
-          id="filled-password-input"
-          label="Password"
-          type="password"
-          autoComplete="current-password"
-          variant="filled"
-        />
-        <TextField
-          id="filled-read-only-input"
-          label="Read Only"
-          defaultValue="Hello World"
+          label="Filled medium readonly"
+          type="text"
+          defaultValue="filled password"
           variant="filled"
           slotProps={{
             input: {
@@ -78,21 +106,10 @@ const InputFields = () => {
             },
           }}
         />
-        <TextField
-          id="filled-search"
-          label="Search field"
-          type="search"
-          variant="filled"
-        />
-        <TextField
-          id="filled-helperText"
-          label="Helper text"
-          defaultValue="Default Value"
-          helperText="Some important text"
-          variant="filled"
-        />
       </div>
+      --------------
       <div>
+        <div>standard medium</div>
         <TextField
           required
           id="standard-required"
@@ -107,36 +124,24 @@ const InputFields = () => {
           defaultValue="Hello World"
           variant="standard"
         />
+      </div>
+      <div>
+        <div>standard small</div>
         <TextField
-          id="standard-password-input"
-          label="Password"
-          type="password"
-          autoComplete="current-password"
-          variant="standard"
-        />
-        <TextField
-          id="standard-read-only-input"
-          label="Read Only"
+          required
+          id="standard-required"
+          label="Required"
           defaultValue="Hello World"
           variant="standard"
-          slotProps={{
-            input: {
-              readOnly: true,
-            },
-          }}
+          size="small"
         />
         <TextField
-          id="standard-search"
-          label="Search field"
-          type="search"
+          disabled
+          id="standard-disabled"
+          label="Disabled"
+          defaultValue="Hello World"
           variant="standard"
-        />
-        <TextField
-          id="standard-helperText"
-          label="Helper text"
-          defaultValue="Default Value"
-          helperText="Some important text"
-          variant="standard"
+          size="small"
         />
       </div>
     </Box>

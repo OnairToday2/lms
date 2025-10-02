@@ -2,7 +2,7 @@ import React from "react";
 import { alpha, Theme, Components } from "@mui/material/styles";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { selectClasses, SvgIconProps } from "@mui/material";
-import { gray } from "../../themePrimitives";
+import { grey } from "../../theme-color";
 export const selectsCustomizations: Components<Theme> = {
   MuiButtonBase: {
     defaultProps: {
@@ -32,17 +32,17 @@ export const selectsCustomizations: Components<Theme> = {
       root: ({ theme }) => ({
         borderRadius: (theme.vars || theme).shape.borderRadius,
         border: "1px solid",
-        borderColor: gray[200],
+        borderColor: grey[200],
         backgroundColor: (theme.vars || theme).palette.background.paper,
         boxShadow: `inset 0 1px 0 1px hsla(220, 0%, 100%, 0.6), inset 0 -1px 0 1px hsla(220, 35%, 90%, 0.5)`,
         "&:hover": {
-          borderColor: gray[300],
+          borderColor: grey[300],
           backgroundColor: (theme.vars || theme).palette.background.paper,
           boxShadow: "none",
         },
         [`&.${selectClasses.focused}`]: {
           outlineOffset: 0,
-          borderColor: gray[400],
+          borderColor: grey[400],
         },
         "&:before, &:after": {
           display: "none",
@@ -50,20 +50,20 @@ export const selectsCustomizations: Components<Theme> = {
 
         ...theme.applyStyles("dark", {
           borderRadius: (theme.vars || theme).shape.borderRadius,
-          borderColor: gray[700],
+          borderColor: grey[700],
           backgroundColor: (theme.vars || theme).palette.background.paper,
           boxShadow: `inset 0 1px 0 1px ${alpha(
-            gray[700],
+            grey[700],
             0.15,
           )}, inset 0 -1px 0 1px hsla(220, 0%, 0%, 0.7)`,
           "&:hover": {
-            borderColor: alpha(gray[700], 0.7),
+            borderColor: alpha(grey[700], 0.7),
             backgroundColor: (theme.vars || theme).palette.background.paper,
             boxShadow: "none",
           },
           [`&.${selectClasses.focused}`]: {
             outlineOffset: 0,
-            borderColor: gray[900],
+            borderColor: grey[900],
           },
           "&:before, &:after": {
             display: "none",
@@ -95,7 +95,7 @@ export const selectsCustomizations: Components<Theme> = {
           display: "flex",
           alignItems: "center",
           "&:focus-visible": {
-            backgroundColor: gray[900],
+            backgroundColor: grey[900],
           },
         }),
       }),
