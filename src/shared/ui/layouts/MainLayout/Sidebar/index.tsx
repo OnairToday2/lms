@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -23,7 +24,7 @@ import {
 
 export interface DashboardSidebarProps {
   expanded?: boolean;
-  setExpanded: (expanded: boolean) => void;
+  setExpanded?: (expanded: boolean) => void;
   disableCollapsibleSidebar?: boolean;
   container?: Element;
 }
@@ -78,7 +79,7 @@ export default function DashboardSidebar({
 
   const handleSetSidebarExpanded = React.useCallback(
     (newExpanded: boolean) => () => {
-      setExpanded(newExpanded);
+      setExpanded?.(newExpanded);
     },
     [setExpanded],
   );
@@ -94,7 +95,7 @@ export default function DashboardSidebar({
             : [...previousValue, itemId],
         );
       } else if (!isOverSmViewport && !hasNestedNavigation) {
-        setExpanded(false);
+        setExpanded?.(false);
       }
     },
     [mini, setExpanded, isOverSmViewport],
@@ -104,11 +105,12 @@ export default function DashboardSidebar({
     isOverSmViewport && (!disableCollapsibleSidebar || isOverMdViewport);
 
   const matchPath = React.useCallback(
-    (path: string, targetPath: string) => {
-      return false;
+    (path: string, pathname: string) => {
+      return pathname.includes(path);
     },
     [pathname],
   );
+
   const getDrawerContent = React.useCallback(
     (viewport: "phone" | "tablet" | "desktop") => (
       <React.Fragment>
@@ -252,26 +254,13 @@ export default function DashboardSidebar({
         sx={{
           display: {
             xs: "block",
-            sm: disableCollapsibleSidebar ? "block" : "none",
+            // sm: disableCollapsibleSidebar ? "block" : "none",
             md: "none",
           },
           ...getDrawerSharedSx(true),
         }}
       >
         {getDrawerContent("phone")}
-      </Drawer>
-      <Drawer
-        variant="permanent"
-        sx={{
-          display: {
-            xs: "none",
-            sm: disableCollapsibleSidebar ? "none" : "block",
-            md: "none",
-          },
-          ...getDrawerSharedSx(false),
-        }}
-      >
-        {getDrawerContent("tablet")}
       </Drawer>
       <Drawer
         variant="permanent"

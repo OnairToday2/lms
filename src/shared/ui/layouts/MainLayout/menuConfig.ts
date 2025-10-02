@@ -5,6 +5,17 @@ import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
 import React from "react";
 
+// id: string;
+// title: string;
+// icon?: React.ReactNode;
+// href: string;
+// action?: React.ReactNode;
+// defaultExpanded?: boolean;
+// expanded?: boolean;
+// selected?: boolean;
+// disabled?: boolean;
+// nestedNavigation?: React.ReactNode;
+
 export type MenuItemType = {
   title: string;
   icon: React.ReactNode;
