@@ -52,7 +52,13 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
   return (
-    <PageContainer title="Dashboard">
+    <PageContainer
+      title="Dashboard"
+      breadcrumbs={[
+        { title: "Dashboard", path: "/dashboard" },
+        { title: "view" },
+      ]}
+    >
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
         Overview
       </Typography>
@@ -78,9 +84,7 @@ export default function DashboardPage() {
       </Typography>
       <Grid container spacing={2} columns={12}>
         <Grid size={{ xs: 12, lg: 9 }}>
-          <PureClient>
-            <CustomizedDataGrid />
-          </PureClient>
+          <CustomizedDataGrid />
         </Grid>
         <Grid size={{ xs: 12, lg: 3 }}>
           <Stack gap={2} direction={{ xs: "column", sm: "row", lg: "column" }}>

@@ -3,7 +3,7 @@ import { alpha, Theme } from "@mui/material/styles";
 import type { PickerComponents } from "@mui/x-date-pickers/themeAugmentation";
 import { menuItemClasses } from "@mui/material/MenuItem";
 import { pickersDayClasses, yearCalendarClasses } from "@mui/x-date-pickers";
-import { gray, brand } from "../../theme-color";
+import { grey, primary } from "../../theme-color";
 
 /* eslint-disable import/prefer-default-export */
 export const datePickersCustomizations: PickerComponents<Theme> = {
@@ -22,7 +22,7 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
           margin: "0 6px",
         },
         ...theme.applyStyles("dark", {
-          background: gray[900],
+          background: grey[900],
           boxShadow:
             "hsla(220, 30%, 5%, 0.7) 0px 4px 16px 0px, hsla(220, 25%, 10%, 0.8) 0px 8px 16px -5px",
         }),
@@ -60,14 +60,14 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
           backgroundColor: (theme.vars || theme).palette.action.hover,
         },
         [`&.${yearCalendarClasses.selected}`]: {
-          backgroundColor: gray[700],
+          backgroundColor: grey[700],
           fontWeight: theme.typography.fontWeightMedium,
         },
         "&:focus": {
-          outline: `3px solid ${alpha(brand[500], 0.5)}`,
+          outline: `3px solid ${alpha(primary["main"], 0.5)}`,
           outlineOffset: "2px",
           backgroundColor: "transparent",
-          [`&.${yearCalendarClasses.selected}`]: { backgroundColor: gray[700] },
+          [`&.${yearCalendarClasses.selected}`]: { backgroundColor: grey[700] },
         },
         ...theme.applyStyles("dark", {
           color: (theme.vars || theme).palette.grey[300],
@@ -77,14 +77,14 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
           [`&.${yearCalendarClasses.selected}`]: {
             color: (theme.vars || theme).palette.common.black,
             fontWeight: theme.typography.fontWeightMedium,
-            backgroundColor: gray[300],
+            backgroundColor: grey[300],
           },
           "&:focus": {
-            outline: `3px solid ${alpha(brand[500], 0.5)}`,
+            outline: `3px solid ${alpha(primary["main"], 0.5)}`,
             outlineOffset: "2px",
             backgroundColor: "transparent",
             [`&.${yearCalendarClasses.selected}`]: {
-              backgroundColor: gray[300],
+              backgroundColor: grey[300],
             },
           },
         }),
@@ -103,14 +103,14 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
           backgroundColor: (theme.vars || theme).palette.action.hover,
         },
         [`&.${yearCalendarClasses.selected}`]: {
-          backgroundColor: gray[700],
+          backgroundColor: grey[700],
           fontWeight: theme.typography.fontWeightMedium,
         },
         "&:focus": {
-          outline: `3px solid ${alpha(brand[500], 0.5)}`,
+          outline: `3px solid ${alpha(primary["main"], 0.5)}`,
           outlineOffset: "2px",
           backgroundColor: "transparent",
-          [`&.${yearCalendarClasses.selected}`]: { backgroundColor: gray[700] },
+          [`&.${yearCalendarClasses.selected}`]: { backgroundColor: grey[700] },
         },
         ...theme.applyStyles("dark", {
           color: (theme.vars || theme).palette.grey[300],
@@ -120,14 +120,14 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
           [`&.${yearCalendarClasses.selected}`]: {
             color: (theme.vars || theme).palette.common.black,
             fontWeight: theme.typography.fontWeightMedium,
-            backgroundColor: gray[300],
+            backgroundColor: grey[300],
           },
           "&:focus": {
-            outline: `3px solid ${alpha(brand[500], 0.5)}`,
+            outline: `3px solid ${alpha(primary["main"], 0.5)}`,
             outlineOffset: "2px",
             backgroundColor: "transparent",
             [`&.${yearCalendarClasses.selected}`]: {
-              backgroundColor: gray[300],
+              backgroundColor: grey[300],
             },
           },
         }),
@@ -145,14 +145,14 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
           backgroundColor: (theme.vars || theme).palette.action.hover,
         },
         [`&.${pickersDayClasses.selected}`]: {
-          backgroundColor: gray[700],
+          backgroundColor: grey[700],
           fontWeight: theme.typography.fontWeightMedium,
         },
         "&:focus": {
-          outline: `3px solid ${alpha(brand[500], 0.5)}`,
+          outline: `3px solid ${alpha(primary["main"], 0.5)}`,
           outlineOffset: "2px",
           backgroundColor: "transparent",
-          [`&.${pickersDayClasses.selected}`]: { backgroundColor: gray[700] },
+          [`&.${pickersDayClasses.selected}`]: { backgroundColor: grey[700] },
         },
         ...theme.applyStyles("dark", {
           color: (theme.vars || theme).palette.grey[300],
@@ -162,13 +162,13 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
           [`&.${pickersDayClasses.selected}`]: {
             color: (theme.vars || theme).palette.common.black,
             fontWeight: theme.typography.fontWeightMedium,
-            backgroundColor: gray[300],
+            backgroundColor: grey[300],
           },
           "&:focus": {
-            outline: `3px solid ${alpha(brand[500], 0.5)}`,
+            outline: `3px solid ${alpha(primary["main"], 0.5)}`,
             outlineOffset: "2px",
             backgroundColor: "transparent",
-            [`&.${pickersDayClasses.selected}`]: { backgroundColor: gray[300] },
+            [`&.${pickersDayClasses.selected}`]: { backgroundColor: grey[300] },
           },
         }),
       }),

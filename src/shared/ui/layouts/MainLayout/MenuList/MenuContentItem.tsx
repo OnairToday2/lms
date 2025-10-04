@@ -1,10 +1,10 @@
 import * as React from "react";
-import { type Theme, SxProps } from "@mui/material/styles";
+import { type Theme, alpha, styled, SxProps } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Collapse from "@mui/material/Collapse";
 import Grow from "@mui/material/Grow";
-import ListItem from "@mui/material/ListItem";
+import ListItem, { ListItemProps } from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
@@ -13,10 +13,14 @@ import Typography from "@mui/material/Typography";
 import type {} from "@mui/material/themeCssVarsAugmentation";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Link from "next/link";
-import DashboardSidebarContext from "./DashboardSidebarContext";
-import { MINI_DRAWER_WIDTH } from "./constants";
+import { MINI_DRAWER_WIDTH } from "../Sidebar/constants";
+import MenuContextProvider, {
+  MenuContextApi,
+  useMenuContext,
+} from "./MenuContext";
+import { svgIconClasses } from "@mui/material";
 
-export interface DashboardSidebarPageItemProps {
+export interface MenuContentItemProps {
   id: string;
   title: string;
   icon?: React.ReactNode;
@@ -27,9 +31,10 @@ export interface DashboardSidebarPageItemProps {
   selected?: boolean;
   disabled?: boolean;
   nestedNavigation?: React.ReactNode;
+  type?: "item" | "group";
 }
 
-export default function DashboardSidebarPageItem({
+export default function MenuContentItem({
   id,
   title,
   icon,
@@ -40,28 +45,19 @@ export default function DashboardSidebarPageItem({
   selected = false,
   disabled = false,
   nestedNavigation,
-}: DashboardSidebarPageItemProps) {
-  const sidebarContext = React.useContext(DashboardSidebarContext);
-  if (!sidebarContext) {
-    throw new Error("Sidebar context was used without a provider.");
-  }
-  const {
-    onPageItemClick,
-    mini = false,
-    fullyExpanded = true,
-    fullyCollapsed = false,
-  } = sidebarContext;
+}: MenuContentItemProps) {
+  const { onMenuItemClick, mini = false, matchPath } = useMenuContext();
 
   const [isHovered, setIsHovered] = React.useState(false);
 
   const handleClick = React.useCallback(() => {
-    if (onPageItemClick) {
-      onPageItemClick(id, !!nestedNavigation);
+    if (onMenuItemClick) {
+      onMenuItemClick(id, !!nestedNavigation);
     }
-  }, [onPageItemClick, id, nestedNavigation]);
+  }, [onMenuItemClick, id, nestedNavigation]);
 
   let nestedNavigationCollapseSx: SxProps<Theme> = { display: "none" };
-  if (mini && fullyCollapsed) {
+  if (mini) {
     nestedNavigationCollapseSx = {
       fontSize: 18,
       position: "absolute",
@@ -69,7 +65,7 @@ export default function DashboardSidebarPageItem({
       right: "2px",
       transform: "translateY(-50%) rotate(-90deg)",
     };
-  } else if (!mini && fullyExpanded) {
+  } else if (!mini) {
     nestedNavigationCollapseSx = {
       ml: 0.5,
       fontSize: 20,
@@ -86,17 +82,21 @@ export default function DashboardSidebarPageItem({
     ? href.startsWith("http://") || href.startsWith("https://")
     : false;
 
+  const correctPath = React.useCallback(
+    (path: string) => (path.startsWith("/") ? path : ["/", path].join("")),
+    [],
+  );
+
   const LinkComponent = hasExternalHref ? "a" : Link;
 
-  const miniNestedNavigationSidebarContextValue = React.useMemo(() => {
+  const nestedMenuItemContext: MenuContextApi = React.useMemo(() => {
     return {
-      onPageItemClick: onPageItemClick ?? (() => {}),
-      mini: false,
-      fullyExpanded: true,
-      fullyCollapsed: false,
-      hasDrawerTransitions: false,
+      onMenuItemClick: onMenuItemClick ?? (() => {}),
+      matchPath: matchPath,
+      expandedItemIds: [],
+      mini: mini,
     };
-  }, [onPageItemClick]);
+  }, [onMenuItemClick]);
 
   return (
     <React.Fragment>
@@ -115,8 +115,18 @@ export default function DashboardSidebarPageItem({
         sx={{
           display: "block",
           py: 0,
-          px: 1,
+          px: mini ? 1 : 2,
           overflowX: "hidden",
+          "& .MuiButtonBase-root": {
+            minHeight: mini ? 58 : 42,
+            padding: mini ? 0 : "8px 6px 8px 12px",
+          },
+          ["& .MuiListItemIcon-root"]: {
+            [`& svg`]: {
+              width: mini ? 24 : 22,
+              height: mini ? 24 : 22,
+            },
+          },
         }}
       >
         <ListItemButton
@@ -139,7 +149,7 @@ export default function DashboardSidebarPageItem({
                       rel: "noopener noreferrer",
                     }
                   : {}),
-                to: href,
+                to: correctPath(href),
                 onClick: handleClick,
               }
             : {})}
@@ -169,8 +179,8 @@ export default function DashboardSidebarPageItem({
                   <Avatar
                     sx={{
                       fontSize: 10,
-                      height: 16,
-                      width: 16,
+                      height: 22,
+                      width: 22,
                     }}
                   >
                     {title
@@ -206,13 +216,18 @@ export default function DashboardSidebarPageItem({
             <ListItemText
               primary={title}
               sx={{
-                whiteSpace: "nowrap",
+                WebkitLineClamp: 2,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "-webkit-box",
+                WebkitBoxOrient: "vertical",
                 zIndex: 1,
+                margin: 0,
               }}
             />
           ) : null}
-          {action && !mini && fullyExpanded ? action : null}
-          {nestedNavigation ? (
+          {action && !mini ? action : null}
+          {nestedNavigation && !mini ? (
             <ExpandMoreIcon sx={nestedNavigationCollapseSx} />
           ) : null}
         </ListItemButton>
@@ -228,16 +243,15 @@ export default function DashboardSidebarPageItem({
               <Paper
                 elevation={8}
                 sx={{
-                  pt: 0.2,
-                  pb: 0.2,
+                  p: 0.5,
                   transform: "translateY(-50px)",
+                  boxShadow: "0px 6px 16px -4px hsla(0 0 0 / 0.3)",
+                  background: "white",
                 }}
               >
-                <DashboardSidebarContext.Provider
-                  value={miniNestedNavigationSidebarContextValue}
-                >
+                <MenuContextProvider value={nestedMenuItemContext}>
                   {nestedNavigation}
-                </DashboardSidebarContext.Provider>
+                </MenuContextProvider>
               </Paper>
             </Box>
           </Grow>
