@@ -562,6 +562,16 @@ export const buttonsCustomizations: Components<Theme> = {
               "&:active": {
                 backgroundColor: alpha(grey[600], 0.24),
               },
+              ...theme.applyStyles("dark", {
+                color: grey["300"],
+                backgroundColor: alpha(grey[800], 0.9),
+                "&:hover": {
+                  backgroundColor: alpha(grey[700], 0.6),
+                },
+                "&:active": {
+                  backgroundColor: alpha(grey[700], 0.6),
+                },
+              }),
             },
           },
           {
@@ -984,6 +994,7 @@ export const buttonsCustomizations: Components<Theme> = {
             },
             style: {
               color: grey[800],
+              backgroundColor: grey[100],
               "&:hover": {
                 backgroundColor: alpha(grey[200], 1),
               },
@@ -991,15 +1002,13 @@ export const buttonsCustomizations: Components<Theme> = {
                 backgroundColor: alpha(grey[200], 1),
               },
               ...theme.applyStyles("dark", {
-                color: grey[800],
-                backgroundColor: alpha(grey[200], 1),
+                color: grey[300],
+                backgroundColor: alpha(grey[800], 0.8),
                 "&:hover": {
-                  color: grey[800],
-                  backgroundColor: alpha(grey[200], 1),
+                  backgroundColor: alpha(grey[700], 0.6),
                 },
                 "&:active": {
-                  color: grey[800],
-                  backgroundColor: alpha(grey[200], 1),
+                  backgroundColor: alpha(grey[700], 0.6),
                 },
               }),
             },

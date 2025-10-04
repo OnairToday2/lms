@@ -68,8 +68,8 @@ export default function AppTheme(props: AppThemeProps) {
   return (
     <ThemeProvider
       theme={theme}
-      disableTransitionOnChange
       defaultMode="light"
+      disableTransitionOnChange
       modeStorageKey="theme-mode"
     >
       {children}

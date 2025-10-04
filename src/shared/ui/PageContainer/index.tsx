@@ -7,6 +7,7 @@ import NotifycationButton from "../NotificationButton";
 import ThemeSwitcher from "../layouts/MainLayout/ThemeSwitcher";
 import SettingButton from "../SettingButton";
 import AccountSetting from "../layouts/MainLayout/AccountSetting";
+import { Toolbar } from "@mui/material";
 
 export interface PageContainerProps extends ContainerProps {
   children?: React.ReactNode;
@@ -18,6 +19,7 @@ export default function PageContainer(props: PageContainerProps) {
   const { children, breadcrumbs, title, actions = null } = props;
   return (
     <div className="page-container">
+      <Toolbar />
       <PageHeader
         breadcrumbs={breadcrumbs}
         actions={actions}
@@ -30,7 +32,6 @@ export default function PageContainer(props: PageContainerProps) {
             <SettingButton />
           </Stack>
         }
-        className="py-6"
       />
       <Container
         sx={{

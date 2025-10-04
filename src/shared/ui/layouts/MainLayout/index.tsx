@@ -62,13 +62,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       />
       {/* Main content */}
       <Box
-        sx={{
+        sx={(theme) => ({
           display: "flex",
           flexDirection: "column",
           flex: 1,
           background: "#F5F8FF",
           overflow: "auto",
-        }}
+          ...theme.applyStyles("dark", {
+            background: "rgb(5 7 10)",
+          }),
+        })}
       >
         <Box
           component="main"
@@ -76,7 +79,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             display: "flex",
             flexDirection: "column",
             flex: 1,
-            px: { xs: 6, md: 8, lg: 12 },
+            px: { xs: 4, md: 6, xl: 8 },
           }}
         >
           {children}

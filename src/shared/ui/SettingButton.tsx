@@ -14,9 +14,9 @@ const SettingButton = () => {
 
   return (
     <IconButton
-      sx={{
-        backgroundColor: paletteMode === "light" ? "white" : "white",
-      }}
+      sx={(theme) => ({
+        backgroundColor: paletteMode === "dark" ? "white" : "white",
+      })}
     >
       <SettingIcon />
     </IconButton>
