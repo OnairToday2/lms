@@ -6,12 +6,13 @@ import AuthCard from "../AuthCard";
 import GoogleSignInButton from "../GoogleSignInButton";
 
 import { useAuthSignInWithPassword } from "../../hooks/useAuthSignIn";
+import { Alert } from "@mui/material";
 
 interface SignInProps {
   className?: string;
 }
 export default function SignIn({ className }: SignInProps) {
-  const { signInWithPassword, isPending } = useAuthSignInWithPassword();
+  const { signInWithPassword, isPending, error } = useAuthSignInWithPassword();
   const handleLogin: SignInFormClientProps["onSubmit"] = async ({
     email,
     password,
@@ -24,6 +25,11 @@ export default function SignIn({ className }: SignInProps) {
       description="Truy cập vào OnAir LMS để bắt đầu hành trình học tập và phát triển của bạn"
       className={className}
     >
+      {error && (
+        <Alert variant="outlined" severity="error">
+          {error.message}
+        </Alert>
+      )}
       <SignInFormClient onSubmit={handleLogin} isSubmitting={isPending} />
       <Typography
         sx={{ fontWeight: "bold", fontSize: "0.875rem", margin: "auto" }}

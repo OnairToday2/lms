@@ -3,7 +3,9 @@ import {
   useSignInWithGoogleMutation,
 } from "../operations/mutation";
 import { AuthSignInWithPasswordPayload } from "@/repository/auth";
+import { AuthError } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 /**
  *
  * SIGN IN WITH PASSWORD
@@ -12,15 +14,25 @@ import { useRouter } from "next/navigation";
 export const useAuthSignInWithPassword = () => {
   const { mutate: signInWithPassword, isPending } =
     useSignInWithPasswordMutation();
+  const [error, setError] = useState<AuthError | null>(null);
   const router = useRouter();
   const onSignInWithPassword = (payload: AuthSignInWithPasswordPayload) => {
     signInWithPassword(payload, {
-      onSuccess: () => {
+      onSuccess: ({ data, error }) => {
+        if (error) {
+          console.error("Error signing in:", error);
+          setError(error);
+          return;
+        }
+        setError(null);
         router.push("/dashboard");
+      },
+      onError: (error) => {
+        console.error("Error signing in:", error);
       },
     });
   };
-  return { signInWithPassword: onSignInWithPassword, isPending };
+  return { signInWithPassword: onSignInWithPassword, isPending, error };
 };
 
 /**
