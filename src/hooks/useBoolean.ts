@@ -1,9 +1,4 @@
-// @ts-nocheck
-// 'use client';
-
 import { useMemo, useState, useCallback } from "react";
-
-// ----------------------------------------------------------------------
 
 export type UseBooleanReturn = {
   value: boolean;

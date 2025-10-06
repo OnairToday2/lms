@@ -4,9 +4,11 @@ import { useMediaQuery, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
-interface MainLayoutProps extends PropsWithChildren {}
+interface MainLayoutProps extends PropsWithChildren {
+  className?: string;
+}
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const theme = useTheme();
   const [isDesktopNavigationExpanded, setIsDesktopNavigationExpanded] =
     useState(true);

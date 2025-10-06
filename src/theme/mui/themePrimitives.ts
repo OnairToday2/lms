@@ -1,4 +1,4 @@
-import { createTheme, alpha, PaletteMode, Shadows } from "@mui/material/styles";
+import { createTheme, alpha, Shadows } from "@mui/material/styles";
 import { grey, primary, info, warning, error, success } from "./theme-color";
 export * from "./primitive/typography";
 
@@ -124,7 +124,7 @@ export const shape = {
   borderRadius: 8,
 };
 
-// @ts-ignore
+// @ts-ignore-error
 const defaultShadows: Shadows = [
   "none",
   "var(--template-palette-baseShadow)",

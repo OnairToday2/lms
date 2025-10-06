@@ -1,5 +1,3 @@
-import { alpha } from "@mui/material";
-
 export const primary = {
   lighter: "hsl(221, 100%, 90%)",
   light: "hsl(221, 100%, 80%)",
@@ -194,7 +192,6 @@ declare module "@mui/material/styles" {
     900: string;
     950: string;
   }
-  interface PaletteColor extends ColorRange {}
   interface Palette {
     baseShadow: string;
   }

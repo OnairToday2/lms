@@ -2,7 +2,6 @@ import * as React from "react";
 import ListSubheader from "@mui/material/ListSubheader";
 import type {} from "@mui/material/themeCssVarsAugmentation";
 import { useMenuContext } from "./MenuContext";
-import { getDrawerSxTransitionMixin } from "./utils";
 
 export interface MenuHeaderItemProps {
   children?: React.ReactNode;

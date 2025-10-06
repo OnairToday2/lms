@@ -1,17 +1,16 @@
 "use client";
 import * as React from "react";
-import Link from "next/link";
-import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import SignInFormClient, { SignInFormClientProps } from "./SignInFormClient";
 import AuthCard from "../AuthCard";
 import GoogleSignInButton from "../GoogleSignInButton";
-import FacebookSignInButton from "../FacebookSignInButton";
 
 import { useAuthSignInWithPassword } from "../../hooks/useAuthSignIn";
 
-export default function SignIn() {
+interface SignInProps {
+  className?: string;
+}
+export default function SignIn({ className }: SignInProps) {
   const { signInWithPassword, isPending } = useAuthSignInWithPassword();
   const handleLogin: SignInFormClientProps["onSubmit"] = async ({
     email,
@@ -20,22 +19,22 @@ export default function SignIn() {
     signInWithPassword({ email, password });
   };
   return (
-    <AuthCard title="Đăng nhập">
+    <AuthCard
+      title="Đăng nhập"
+      description="Truy cập vào OnAir LMS để bắt đầu hành trình học tập và phát triển của bạn"
+      className={className}
+    >
       <SignInFormClient onSubmit={handleLogin} isSubmitting={isPending} />
-      <Link type="button" href={"/"}>
-        Quên mật khẩu?
-      </Link>
-      <Divider>Hoặc</Divider>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <GoogleSignInButton
-          buttonText="Đăng nhập với Google"
-          disabled={isPending}
-        />
-        <FacebookSignInButton />
-        <Typography sx={{ textAlign: "center" }}>
-          Bạn chưa có tài khoản? <Link href="/auth/signup">Đăng ký</Link>
-        </Typography>
-      </Box>
+      <Typography
+        sx={{ fontWeight: "bold", fontSize: "0.875rem", margin: "auto" }}
+      >
+        Hoặc
+      </Typography>
+      <GoogleSignInButton
+        size="large"
+        buttonText="Đăng nhập với Google"
+        disabled={isPending}
+      />
     </AuthCard>
   );
 }

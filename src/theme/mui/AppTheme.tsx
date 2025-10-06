@@ -66,12 +66,7 @@ export default function AppTheme(props: AppThemeProps) {
   }, [themeComponents]);
 
   return (
-    <ThemeProvider
-      theme={theme}
-      defaultMode="light"
-      disableTransitionOnChange
-      modeStorageKey="theme-mode"
-    >
+    <ThemeProvider theme={theme} defaultMode="light">
       {children}
     </ThemeProvider>
   );

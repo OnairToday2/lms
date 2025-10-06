@@ -9,6 +9,7 @@ import { listClasses } from "@mui/material/List";
 import { gridClasses } from "@mui/x-data-grid";
 import { tablePaginationClasses } from "@mui/material/TablePagination";
 import { grey } from "../../theme-color";
+import type {} from "@mui/x-data-grid/themeAugmentation";
 
 /* eslint-disable import/prefer-default-export */
 export const dataGridCustomizations: Components<Theme> = {

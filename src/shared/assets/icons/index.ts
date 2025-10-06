@@ -8,6 +8,9 @@ import LogoOnairIcon from "./LogoOnairIcon";
 import LogoOnairShortIcon from "./LogoOnairShortIcon";
 import SettingIcon from "./SettingIcon";
 import BellIcon from "./BellIcon";
+import EyeIcon from "./EyeIcon";
+import EyeOffIcon from "./EyeOffIcon";
+import Loading from "./LoadingIcon";
 
 export {
   FacebookIcon,
@@ -20,4 +23,7 @@ export {
   LogoOnairShortIcon,
   SettingIcon,
   BellIcon,
+  EyeIcon,
+  EyeOffIcon,
+  Loading,
 };

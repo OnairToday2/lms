@@ -1,4 +1,3 @@
-import * as React from "react";
 import { alpha, Theme, Components } from "@mui/material/styles";
 import { svgIconClasses } from "@mui/material/SvgIcon";
 
@@ -94,6 +93,10 @@ export const buttonsCustomizations: Components<Theme> = {
               },
               "&:active": {
                 backgroundColor: primary["dark"],
+              },
+              "&:disabled": {
+                color: "white",
+                backgroundColor: alpha(primary["main"], 0.6),
               },
               ...theme.applyStyles("dark", {
                 color: "white",

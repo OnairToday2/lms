@@ -3,7 +3,7 @@ import {
   useSignInWithGoogleMutation,
 } from "../operations/mutation";
 import { AuthSignInWithPasswordPayload } from "@/repository/auth";
-
+import { useRouter } from "next/navigation";
 /**
  *
  * SIGN IN WITH PASSWORD
@@ -12,10 +12,12 @@ import { AuthSignInWithPasswordPayload } from "@/repository/auth";
 export const useAuthSignInWithPassword = () => {
   const { mutate: signInWithPassword, isPending } =
     useSignInWithPasswordMutation();
-
+  const router = useRouter();
   const onSignInWithPassword = (payload: AuthSignInWithPasswordPayload) => {
     signInWithPassword(payload, {
-      onSuccess: () => {},
+      onSuccess: () => {
+        router.push("/dashboard");
+      },
     });
   };
   return { signInWithPassword: onSignInWithPassword, isPending };

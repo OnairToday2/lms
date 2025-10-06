@@ -13,6 +13,7 @@ import {
   dividerClasses,
 } from "@mui/material";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import useAuthSignOut from "@/modules/auth/hooks/useAuthSignOut";
 
 type AccountMenuDividerItem = {
   type: "divider";
@@ -31,7 +32,9 @@ const AccountMenuOptions: React.FC<AccountMenuOptionsProps> = ({
   children,
   menuItems = [],
 }) => {
+  const { signOut, isPending } = useAuthSignOut();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -93,6 +96,8 @@ const AccountMenuOptions: React.FC<AccountMenuOptionsProps> = ({
               minWidth: 0,
             },
           }}
+          onClick={signOut}
+          disabled={isPending}
         >
           <ListItemText>Đăng xuất</ListItemText>
           <ListItemIcon>

@@ -1,22 +1,161 @@
 @layer theme, base, mui, components, utilities;
 @import "tailwindcss" important;
 
+:root {
+  --primary-Lighter: hsla(221, 100%, 90%, 1);
+  --primary-Light: hsla(221, 100%, 80%, 1);
+  --primary-Main: hsla(221, 100%, 50%, 1);
+  --primary-Dark: hsla(221, 100%, 35%, 1);
+  --primary-Darker: hsla(221, 100%, 25%, 1);
+  --primary-Contrast-text: var(--white-main);
+  --primary-8: hsla(221, 100%, 50%, 0.08);
+  --primary-12: hsla(221, 100%, 50%, 0.12);
+  --primary-16: hsla(221, 100%, 50%, 0.16);
+  --primary-20: hsla(221, 100%, 50%, 0.2);
+  --primary-24: hsla(221, 100%, 50%, 0.24);
+  --primary-32: hsla(221, 100%, 50%, 0.32);
+  --primary-48: hsla(221, 100%, 50%, 0.48);
+  --secondary-Lighter: hsla(273, 92%, 95%, 1);
+  --secondary-Light: hsla(273, 95%, 85%, 1);
+  --secondary-Main: hsla(273, 95%, 56%, 1);
+  --secondary-Dark: hsla(273, 95%, 40%, 1);
+  --secondary-Darker: hsla(272, 94%, 20%, 1);
+  --secondary-Contrast-text: var(--white-main);
+  --info-lighter: hsla(211, 100%, 95%, 1);
+  --info-light: hsla(211, 100%, 80%, 1);
+  --info-main: hsla(211, 100%, 50%, 1);
+  --info-dark: hsla(211, 100%, 30%, 1);
+  --info-darker: hsla(211, 100%, 30%, 1);
+  --info-contrast-text: var(--white-main);
+  --success-lighter: hsla(119, 88%, 91%, 1);
+  --success-light: hsla(130, 77%, 70%, 1);
+  --success-main: hsla(142, 71%, 45%, 1);
+  --success-dark: hsla(154, 78%, 31%, 1);
+  --success-darker: hsla(166, 88%, 20%, 1);
+  --success-contrast-text: var(--white-main);
+  --success-8: hsla(142, 71%, 45%, 0.08);
+  --success-12: hsla(142, 71%, 45%, 0.12);
+  --success-16: hsla(142, 71%, 45%, 0.16);
+  --success-20: hsla(142, 71%, 45%, 0.2);
+  --success-24: hsla(142, 71%, 45%, 0.24);
+  --success-32: hsla(142, 71%, 45%, 0.32);
+  --success-48: hsla(142, 71%, 45%, 0.48);
+  --warning-lighter: hsla(48, 100%, 90%, 1);
+  --warning-light: hsla(44, 100%, 70%, 1);
+  --warning-main: hsla(40, 100%, 50%, 1);
+  --warning-dark: hsla(36, 100%, 36%, 1);
+  --warning-darker: hsla(32, 100%, 24%, 1);
+  --warning-contrast-text: var(--grey-800);
+  --error-lighter: hsla(29, 100%, 92%, 1);
+  --error-light: hsla(20, 100%, 75%, 1);
+  --error-main: hsla(4, 100%, 57%, 1);
+  --error-dark: hsla(2, 77%, 41%, 1);
+  --error-darker: hsla(353, 86%, 26%, 1);
+  --error-contrast-text: var(--white-main);
+  --grey-100: hsla(210, 20%, 98%, 1);
+  --grey-200: hsla(210, 22%, 96%, 1);
+  --grey-300: hsla(213, 16%, 89%, 1);
+  --grey-400: hsla(208, 17%, 80%, 1);
+  --grey-500: hsla(210, 13%, 62%, 1);
+  --grey-600: hsla(208, 13%, 45%, 1);
+  --grey-700: hsla(213, 14%, 31%, 1);
+  --grey-800: hsla(211, 24%, 17%, 1);
+  --grey-900: hsla(214, 24%, 11%, 1);
+  --grey-8: hsla(210, 13%, 62%, 0.08);
+  --grey-12: hsla(210, 13%, 62%, 0.12);
+  --grey-16: hsla(210, 13%, 62%, 0.16);
+  --grey-20: hsla(210, 13%, 62%, 0.2);
+  --grey-24: hsla(210, 13%, 62%, 0.24);
+  --grey-32: hsla(210, 13%, 62%, 0.32);
+  --grey-48: hsla(210, 13%, 62%, 0.48);
+  --grey-56: hsla(210, 13%, 62%, 0.56);
+  --grey-64: hsla(210, 13%, 62%, 0.64);
+  --grey-72: hsla(210, 13%, 62%, 0.72);
+  --grey-80: hsla(210, 13%, 62%, 0.8);
+  --black-main: hsla(0, 0%, 0%, 1);
+  --black-8: hsla(0, 0%, 0%, 0.08);
+  --black-12: hsla(0, 0%, 0%, 0.12);
+  --black-16: hsla(0, 0%, 0%, 0.16);
+  --black-20: hsla(0, 0%, 0%, 0.2);
+  --black-24: hsla(0, 0%, 0%, 0.24);
+  --black-32: hsla(0, 0%, 0%, 0.32);
+  --black-48: hsla(0, 0%, 0%, 0.48);
+  --black-56: hsla(0, 0%, 0%, 0.56);
+  --black-64: hsla(0, 0%, 0%, 0.64);
+  --black-72: hsla(0, 0%, 0%, 0.72);
+  --black-80: hsla(0, 0%, 0%, 0.8);
+  --white-main: hsla(0, 0%, 100%, 1);
+  --white-8: hsla(0, 0%, 100%, 0.08);
+  --white-12: hsla(0, 0%, 100%, 0.12);
+  --white-16: hsla(0, 0%, 100%, 0.16);
+  --white-20: hsla(0, 0%, 100%, 0.2);
+  --white-24: hsla(0, 0%, 100%, 0.24);
+  --white-32: hsla(0, 0%, 100%, 0.32);
+  --white-48: hsla(0, 0%, 100%, 0.48);
+  --white-56: hsla(0, 0%, 100%, 0.56);
+  --white-64: hsla(0, 0%, 100%, 0.64);
+  --white-72: hsla(0, 0%, 100%, 0.72);
+  --white-80: hsla(0, 0%, 100%, 0.8);
+  --secondary-8: hsla(273, 95%, 56%, 0.08);
+  --secondary-12: hsla(273, 95%, 56%, 0.12);
+  --secondary-24: hsla(273, 95%, 56%, 0.24);
+  --info-8: hsla(211, 100%, 50%, 0.08);
+  --info-12: hsla(211, 100%, 50%, 0.12);
+  --info-16: hsla(211, 100%, 50%, 0.16);
+  --info-20: hsla(211, 100%, 50%, 0.2);
+  --info-24: hsla(211, 100%, 50%, 0.24);
+  --info-32: hsla(211, 100%, 50%, 0.32);
+  --info-48: hsla(211, 100%, 50%, 0.48);
+  --warning-8: hsla(40, 100%, 50%, 0.08);
+  --warning-12: hsla(40, 100%, 50%, 0.12);
+  --warning-16: hsla(40, 100%, 50%, 0.16);
+  --warning-20: hsla(40, 100%, 50%, 0.2);
+  --warning-24: hsla(40, 100%, 50%, 0.24);
+  --warning-32: hsla(40, 100%, 50%, 0.32);
+  --warning-48: hsla(40, 100%, 50%, 0.48);
+  --error-8: hsla(11, 100%, 59%, 0.08);
+  --error-12: hsla(11, 100%, 59%, 0.12);
+  --error-16: hsla(11, 100%, 59%, 0.16);
+  --error-20: hsla(11, 100%, 59%, 0.2);
+  --error-24: hsla(11, 100%, 59%, 0.24);
+  --error-32: hsla(11, 100%, 59%, 0.32);
+  --error-48: hsla(11, 100%, 59%, 0.48);
+  --other-facebook: hsla(214, 89%, 52%, 1);
+  --other-twitter: hsla(197, 100%, 46%, 1);
+  --other-linkedin: hsla(200, 100%, 37%, 1);
+  --other-instagram: hsla(340, 74%, 53%, 1);
+  --other-skin: hsla(1, 94%, 86%, 1);
+  --other-mask: hsla(0, 0%, 100%, 0);
+  --secondary-32: hsla(273, 95%, 56%, 0.32);
+  --secondary-48: hsla(273, 95%, 56%, 0.48);
+  --Rose-lighter: hsla(347, 90%, 96%, 1);
+  --Rose-light: hsla(345, 90%, 84%, 1);
+  --Rose-main: hsla(346, 91%, 60%, 1);
+  --Rose-dark: hsla(346, 61%, 37%, 1);
+  --Rose-darker: hsla(346, 64%, 20%, 1);
+  --Rose-contrast-text: var(--white-main);
+  --Rose-8: hsla(346, 91%, 60%, 0.08);
+  --Rose-12: hsla(346, 91%, 60%, 0.12);
+  --Rose-16: hsla(346, 91%, 60%, 0.16);
+  --Rose-20: hsla(346, 91%, 60%, 0.2);
+  --Rose-24: hsla(346, 91%, 60%, 0.24);
+  --Rose-32: hsla(346, 91%, 60%, 0.32);
+  --Rose-48: hsla(346, 91%, 60%, 0.48);
+  --Orange-lighter: hsla(17, 100%, 96%, 1);
+  --Orange-light: hsla(17, 100%, 83%, 1);
+  --Orange-main: hsla(16, 100%, 52%, 1);
+  --Orange-dark: hsla(17, 71%, 35%, 1);
+  --Orange-darker: hsla(17, 71%, 18%, 1);
+  --Orange-contrast-text: var(--white-main);
+  --Orange-8: hsla(17, 100%, 58%, 0.08);
+  --Orange-12: hsla(17, 100%, 58%, 0.12);
+  --Orange-16: hsla(17, 100%, 58%, 0.16);
+  --Orange-20: hsla(17, 100%, 58%, 0.2);
+  --Orange-24: hsla(17, 100%, 58%, 0.24);
+  --Orange-32: hsla(17, 100%, 58%, 0.32);
+  --Orange-48: hsla(17, 100%, 58%, 0.48);
+}
 @theme inline {
-  /* Material UI typography */
-  --font-h1: var(--mui-font-h1);
-  --font-h2: var(--mui-font-h2);
-  --font-h3: var(--mui-font-h3);
-  --font-h4: var(--mui-font-h4);
-  --font-h5: var(--mui-font-h5);
-  --font-h6: var(--mui-font-h6);
-  --font-subtitle1: var(--mui-font-subtitle1);
-  --font-subtitle2: var(--mui-font-subtitle2);
-  --font-body1: var(--mui-font-body1);
-  --font-body2: var(--mui-font-body2);
-  --font-button: var(--mui-font-button);
-  --font-caption: var(--mui-font-caption);
-  --font-overline: var(--mui-font-overline);
-
   --letter-spacing-h1: -0.01562em;
   --letter-spacing-h2: -0.00833em;
   --letter-spacing-h4: 0.00735em;
@@ -31,240 +170,22 @@
   --breakpoint-xl: 96rem; /* 1536px */
   --breakpoint-2xl: 120rem; /* 1920px */
 
-  /* Material UI theme colors */
-  --color-primary: rgb(var(--mui-palette-primary-mainChannel));
-  --color-primary-light: rgb(var(--mui-palette-primary-lightChannel));
-  --color-primary-dark: rgb(var(--mui-palette-primary-darkChannel));
-  --color-primary-contrast: rgb(var(--mui-palette-primary-contrastTextChannel));
+  --color-action-active: hsla(208, 13%, 45%, 1);
+  --color-action-hover: hsla(210, 13%, 62%, 0.08);
+  --color-action-selected: hsla(208, 13%, 45%, 0.16);
+  --color-action-focus: hsla(208, 13%, 45%, 0.24);
+  --color-action-disabled: hsla(208, 13%, 45%, 0.8);
+  --color-action-bg-disabled: hsla(208, 13%, 45%, 0.24);
 
-  --color-secondary: rgb(var(--mui-palette-secondary-mainChannel));
-  --color-secondary-light: rgb(var(--mui-palette-secondary-lightChannel));
-  --color-secondary-dark: rgb(var(--mui-palette-secondary-darkChannel));
-  --color-secondary-contrast: rgb(
-    var(--mui-palette-secondary-contrastTextChannel)
-  );
-
-  /* Material UI status colors */
-  --color-info: rgb(var(--mui-palette-info-mainChannel));
-  --color-info-light: rgb(var(--mui-palette-info-lightChannel));
-  --color-info-dark: rgb(var(--mui-palette-info-darkChannel));
-  --color-info-contrast: rgb(var(--mui-palette-info-contrastTextChannel));
-
-  --color-error: rgb(var(--mui-palette-error-mainChannel));
-  --color-error-light: rgb(var(--mui-palette-error-lightChannel));
-  --color-error-dark: rgb(var(--mui-palette-error-darkChannel));
-  --color-error-contrast: rgb(var(--mui-palette-error-contrastTextChannel));
-
-  --color-success: rgb(var(--mui-palette-success-mainChannel));
-  --color-success-light: rgb(var(--mui-palette-success-lightChannel));
-  --color-success-dark: rgb(var(--mui-palette-success-darkChannel));
-  --color-success-contrast: rgb(var(--mui-palette-success-contrastTextChannel));
-
-  --color-warning: rgb(var(--mui-palette-warning-mainChannel));
-  --color-warning-light: rgb(var(--mui-palette-warning-lightChannel));
-  --color-warning-dark: rgb(var(--mui-palette-warning-darkChannel));
-  --color-warning-contrast: rgb(var(--mui-palette-warning-contrastTextChannel));
-
-  /* Material UI text & common colors */
-  --color-text-primary: rgb(var(--mui-palette-text-primaryChannel));
-  --color-text-secondary: rgb(var(--mui-palette-text-secondaryChannel));
-  --color-text-disabled: var(--mui-palette-text-disabled);
-  --color-common-background: var(--mui-palette-common-background);
-  --color-common-onBackground: var(--mui-palette-common-onBackground);
-  --color-divider: var(--mui-palette-divider);
-
-  /* Material UI background colors */
-  --color-background-default: rgb(var(--mui-palette-background-defaultChannel));
-  --color-background-paper: rgb(var(--mui-palette-background-paperChannel));
-
-  /* Material UI action colors */
-  --color-action-active: var(--mui-palette-action-active);
-  --color-action-hover: var(--mui-palette-action-hover);
-  --color-action-selected: var(--mui-palette-action-selected);
-  --color-action-disabled: var(--mui-palette-action-disabled);
-  --color-action-focus: var(--mui-palette-action-focus);
-
-  /* Material UI gray scale */
-  --color-gray-50: var(--mui-palette-grey-50);
-  --color-gray-100: var(--mui-palette-grey-100);
-  --color-gray-200: var(--mui-palette-grey-200);
-  --color-gray-300: var(--mui-palette-grey-300);
-  --color-gray-400: var(--mui-palette-grey-400);
-  --color-gray-500: var(--mui-palette-grey-500);
-  --color-gray-600: var(--mui-palette-grey-600);
-  --color-gray-700: var(--mui-palette-grey-700);
-  --color-gray-800: var(--mui-palette-grey-800);
-  --color-gray-900: var(--mui-palette-grey-900);
-  --color-gray-A100: var(--mui-palette-grey-A100);
-  --color-gray-A200: var(--mui-palette-grey-A200);
-  --color-gray-A400: var(--mui-palette-grey-A400);
-  --color-gray-A700: var(--mui-palette-grey-A700);
-
-  /* Material UI Component Colors */
-  /* Alert */
-  --color-Alert-error: var(--mui-palette-Alert-errorColor);
-  --color-Alert-info: var(--mui-palette-Alert-infoColor);
-  --color-Alert-success: var(--mui-palette-Alert-successColor);
-  --color-Alert-warning: var(--mui-palette-Alert-warningColor);
-  --color-Alert-errorFilled: var(--mui-palette-Alert-errorFilledBg);
-  --color-Alert-infoFilled: var(--mui-palette-Alert-infoFilledBg);
-  --color-Alert-successFilled: var(--mui-palette-Alert-successFilledBg);
-  --color-Alert-warningFilled: var(--mui-palette-Alert-warningFilledBg);
-  --color-Alert-errorFilledColor: var(--mui-palette-Alert-errorFilledColor);
-  --color-Alert-infoFilledColor: var(--mui-palette-Alert-infoFilledColor);
-  --color-Alert-successFilledColor: var(--mui-palette-Alert-successFilledColor);
-  --color-Alert-warningFilledColor: var(--mui-palette-Alert-warningFilledColor);
-  --color-Alert-errorStandard: var(--mui-palette-Alert-errorStandardBg);
-  --color-Alert-infoStandard: var(--mui-palette-Alert-infoStandardBg);
-  --color-Alert-successStandard: var(--mui-palette-Alert-successStandardBg);
-  --color-Alert-warningStandard: var(--mui-palette-Alert-warningStandardBg);
-  --color-Alert-errorIcon: var(--mui-palette-Alert-errorIconColor);
-  --color-Alert-infoIcon: var(--mui-palette-Alert-infoIconColor);
-  --color-Alert-successIcon: var(--mui-palette-Alert-successIconColor);
-  --color-Alert-warningIcon: var(--mui-palette-Alert-warningIconColor);
-
-  /* AppBar */
-  --color-AppBar-default: var(--mui-palette-AppBar-defaultBg);
-
-  /* Avatar */
-  --color-Avatar-default: var(--mui-palette-Avatar-defaultBg);
-
-  /* Button */
-  --color-Button-inheritContained: var(--mui-palette-Button-inheritContainedBg);
-  --color-Button-inheritContainedHover: var(
-    --mui-palette-Button-inheritContainedHoverBg
-  );
-
-  /* Chip */
-  --color-Chip-defaultBorder: var(--mui-palette-Chip-defaultBorder);
-  --color-Chip-defaultAvatar: var(--mui-palette-Chip-defaultAvatarColor);
-  --color-Chip-defaultIcon: var(--mui-palette-Chip-defaultIconColor);
-
-  /* FilledInput */
-  --color-FilledInput-bg: var(--mui-palette-FilledInput-bg);
-  --color-FilledInput-hover: var(--mui-palette-FilledInput-hoverBg);
-  --color-FilledInput-disabled: var(--mui-palette-FilledInput-disabledBg);
-
-  /* LinearProgress */
-  --color-LinearProgress-primary: var(--mui-palette-LinearProgress-primaryBg);
-  --color-LinearProgress-secondary: var(
-    --mui-palette-LinearProgress-secondaryBg
-  );
-  --color-LinearProgress-error: var(--mui-palette-LinearProgress-errorBg);
-  --color-LinearProgress-info: var(--mui-palette-LinearProgress-infoBg);
-  --color-LinearProgress-success: var(--mui-palette-LinearProgress-successBg);
-  --color-LinearProgress-warning: var(--mui-palette-LinearProgress-warningBg);
-
-  /* Skeleton */
-  --color-Skeleton-bg: var(--mui-palette-Skeleton-bg);
-
-  /* Slider */
-  --color-Slider-primary: var(--mui-palette-Slider-primaryTrack);
-  --color-Slider-secondary: var(--mui-palette-Slider-secondaryTrack);
-  --color-Slider-error: var(--mui-palette-Slider-errorTrack);
-  --color-Slider-info: var(--mui-palette-Slider-infoTrack);
-  --color-Slider-success: var(--mui-palette-Slider-successTrack);
-  --color-Slider-warning: var(--mui-palette-Slider-warningTrack);
-
-  /* SnackbarContent */
-  --color-SnackbarContent-bg: var(--mui-palette-SnackbarContent-bg);
-  --color-SnackbarContent-text: var(--mui-palette-SnackbarContent-color);
-
-  /* SpeedDialAction */
-  --color-SpeedDialAction-fabHover: var(
-    --mui-palette-SpeedDialAction-fabHoverBg
-  );
-
-  /* StepConnector & StepContent */
-  --color-StepConnector-border: var(--mui-palette-StepConnector-border);
-  --color-StepContent-border: var(--mui-palette-StepContent-border);
-
-  /* Switch */
-  --color-Switch-default: var(--mui-palette-Switch-defaultColor);
-  --color-Switch-defaultDisabled: var(
-    --mui-palette-Switch-defaultDisabledColor
-  );
-  --color-Switch-primaryDisabled: var(
-    --mui-palette-Switch-primaryDisabledColor
-  );
-  --color-Switch-secondaryDisabled: var(
-    --mui-palette-Switch-secondaryDisabledColor
-  );
-  --color-Switch-errorDisabled: var(--mui-palette-Switch-errorDisabledColor);
-  --color-Switch-infoDisabled: var(--mui-palette-Switch-infoDisabledColor);
-  --color-Switch-successDisabled: var(
-    --mui-palette-Switch-successDisabledColor
-  );
-  --color-Switch-warningDisabled: var(
-    --mui-palette-Switch-warningDisabledColor
-  );
-
-  /* TableCell */
-  --color-TableCell-border: var(--mui-palette-TableCell-border);
-
-  /* Tooltip */
-  --color-Tooltip-bg: var(--mui-palette-Tooltip-bg);
-
-  /* Material UI shadows */
-  --shadow-1: var(--mui-shadows-1);
-  --shadow-2: var(--mui-shadows-2);
-  --shadow-3: var(--mui-shadows-3);
-  --shadow-4: var(--mui-shadows-4);
-  --shadow-5: var(--mui-shadows-5);
-  --shadow-6: var(--mui-shadows-6);
-  --shadow-7: var(--mui-shadows-7);
-  --shadow-8: var(--mui-shadows-8);
-  --shadow-9: var(--mui-shadows-9);
-  --shadow-10: var(--mui-shadows-10);
-  --shadow-11: var(--mui-shadows-11);
-  --shadow-12: var(--mui-shadows-12);
-  --shadow-13: var(--mui-shadows-13);
-  --shadow-14: var(--mui-shadows-14);
-  --shadow-15: var(--mui-shadows-15);
-  --shadow-16: var(--mui-shadows-16);
-  --shadow-17: var(--mui-shadows-17);
-  --shadow-18: var(--mui-shadows-18);
-  --shadow-19: var(--mui-shadows-19);
-  --shadow-20: var(--mui-shadows-20);
-  --shadow-21: var(--mui-shadows-21);
-  --shadow-22: var(--mui-shadows-22);
-  --shadow-23: var(--mui-shadows-23);
-  --shadow-24: var(--mui-shadows-24);
-
-  /* Material UI opacity */
-  --opacity-activated: calc(100% * var(--mui-palette-action-activatedOpacity));
-  --opacity-disabled: calc(100% * var(--mui-palette-action-disabledOpacity));
-  --opacity-focus: calc(100% * var(--mui-palette-action-focusOpacity));
-  --opacity-hover: calc(100% * var(--mui-palette-action-hoverOpacity));
-  --opacity-selected: calc(100% * var(--mui-palette-action-selectedOpacity));
-
-  /* Material UI overlays */
-  --overlay-1: var(--mui-overlays-1);
-  --overlay-2: var(--mui-overlays-2);
-  --overlay-3: var(--mui-overlays-3);
-  --overlay-4: var(--mui-overlays-4);
-  --overlay-5: var(--mui-overlays-5);
-  --overlay-6: var(--mui-overlays-6);
-  --overlay-7: var(--mui-overlays-7);
-  --overlay-8: var(--mui-overlays-8);
-  --overlay-9: var(--mui-overlays-9);
-  --overlay-10: var(--mui-overlays-10);
-  --overlay-11: var(--mui-overlays-11);
-  --overlay-12: var(--mui-overlays-12);
-  --overlay-13: var(--mui-overlays-13);
-  --overlay-14: var(--mui-overlays-14);
-  --overlay-15: var(--mui-overlays-15);
-  --overlay-16: var(--mui-overlays-16);
-  --overlay-17: var(--mui-overlays-17);
-  --overlay-18: var(--mui-overlays-18);
-  --overlay-19: var(--mui-overlays-19);
-  --overlay-20: var(--mui-overlays-20);
-  --overlay-21: var(--mui-overlays-21);
-  --overlay-22: var(--mui-overlays-22);
-  --overlay-23: var(--mui-overlays-23);
-  --overlay-24: var(--mui-overlays-24);
+  --color-background-default: var(--white-main);
+  --color-background-paper: var(--white-main);
+  --color-background-neutral: var(--grey-100);
 }
-
+@layer components {
+  .text-action-active {
+    color: var(--color-action-active) !important;
+  }
+}
 /* Material UI base styles */
 @layer base {
   h1 {

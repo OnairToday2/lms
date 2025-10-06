@@ -17,11 +17,11 @@ export default function InputAdornments() {
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
-  const handleMouseDownPassword = (event) => {
+  const handleMouseDownPassword = (event: any) => {
     event.preventDefault();
   };
 
-  const handleMouseUpPassword = (event) => {
+  const handleMouseUpPassword = (event: any) => {
     event.preventDefault();
   };
 
