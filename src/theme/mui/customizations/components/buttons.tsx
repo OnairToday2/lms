@@ -1,4 +1,3 @@
-import * as React from "react";
 import { alpha, Theme, Components } from "@mui/material/styles";
 import { svgIconClasses } from "@mui/material/SvgIcon";
 
@@ -94,6 +93,10 @@ export const buttonsCustomizations: Components<Theme> = {
               },
               "&:active": {
                 backgroundColor: primary["dark"],
+              },
+              "&:disabled": {
+                color: "white",
+                backgroundColor: alpha(primary["main"], 0.6),
               },
               ...theme.applyStyles("dark", {
                 color: "white",
@@ -562,6 +565,16 @@ export const buttonsCustomizations: Components<Theme> = {
               "&:active": {
                 backgroundColor: alpha(grey[600], 0.24),
               },
+              ...theme.applyStyles("dark", {
+                color: grey["300"],
+                backgroundColor: alpha(grey[800], 0.9),
+                "&:hover": {
+                  backgroundColor: alpha(grey[700], 0.6),
+                },
+                "&:active": {
+                  backgroundColor: alpha(grey[700], 0.6),
+                },
+              }),
             },
           },
           {
@@ -769,6 +782,9 @@ export const buttonsCustomizations: Components<Theme> = {
         fontWeight: theme.typography.fontWeightMedium,
         letterSpacing: 0,
         color: (theme.vars || theme).palette.text.primary,
+        // display: "inline-flex",
+        // alignItems: "center",
+        // justifyContent: "center",
         // border: "1px solid ",
         // borderColor: gray[200],
         backgroundColor: alpha(grey[100], 0.3),
@@ -981,6 +997,7 @@ export const buttonsCustomizations: Components<Theme> = {
             },
             style: {
               color: grey[800],
+              backgroundColor: grey[100],
               "&:hover": {
                 backgroundColor: alpha(grey[200], 1),
               },
@@ -988,15 +1005,13 @@ export const buttonsCustomizations: Components<Theme> = {
                 backgroundColor: alpha(grey[200], 1),
               },
               ...theme.applyStyles("dark", {
-                color: grey[800],
-                backgroundColor: alpha(grey[200], 1),
+                color: grey[300],
+                backgroundColor: alpha(grey[800], 0.8),
                 "&:hover": {
-                  color: grey[800],
-                  backgroundColor: alpha(grey[200], 1),
+                  backgroundColor: alpha(grey[700], 0.6),
                 },
                 "&:active": {
-                  color: grey[800],
-                  backgroundColor: alpha(grey[200], 1),
+                  backgroundColor: alpha(grey[700], 0.6),
                 },
               }),
             },

@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 import type { Breakpoint } from "@mui/material/styles";
 
 import { useMemo } from "react";

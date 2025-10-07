@@ -1,8 +1,9 @@
 import { createTheme } from "@mui/material";
+
 const defaultTheme = createTheme();
 
 export const typography = {
-  fontFamily: "Inter, sans-serif",
+  fontFamily: "var(--font-inter)",
   h1: {
     fontSize: defaultTheme.typography.pxToRem(40),
     fontWeight: 800,

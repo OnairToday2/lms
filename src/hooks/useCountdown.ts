@@ -1,9 +1,4 @@
-// @ts-nocheck
-import dayjs from "dayjs";
-import { initialize } from "next/dist/server/lib/render-server";
 import { useRef, useState, useEffect, useCallback } from "react";
-
-// ----------------------------------------------------------------------
 
 export type UseCountdownDateReturn = {
   days: string;
@@ -49,18 +44,17 @@ export function useCountdownDate(date: Date): UseCountdownDateReturn {
 
     const getDays = Math.floor(distanceToNow / (1000 * 60 * 60 * 24));
 
-    const getHours =
-      `0${Math.floor((distanceToNow % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))}`.slice(
-        -2,
-      );
+    const getHours = `0${Math.floor(
+      (distanceToNow % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+    )}`.slice(-2);
 
-    const getMinutes =
-      `0${Math.floor((distanceToNow % (1000 * 60 * 60)) / (1000 * 60))}`.slice(
-        -2,
-      );
+    const getMinutes = `0${Math.floor(
+      (distanceToNow % (1000 * 60 * 60)) / (1000 * 60),
+    )}`.slice(-2);
 
-    const getSeconds =
-      `0${Math.floor((distanceToNow % (1000 * 60)) / 1000)}`.slice(-2);
+    const getSeconds = `0${Math.floor(
+      (distanceToNow % (1000 * 60)) / 1000,
+    )}`.slice(-2);
 
     setCountdown({
       days: getDays < 10 ? `0${getDays}` : `${getDays}`,
@@ -136,12 +130,14 @@ export function useCountdownV2(endDate: Date): UseCountdownDateReturnReturn {
   });
 
   useEffect(() => {
+    if (!intervalRef.current) return;
+
     intervalRef.current = setInterval(() => {
       const now = new Date();
       const remainDateTime = endDate.getTime() - now.getTime();
 
       if (remainDateTime < 0) {
-        clearInterval(intervalRef.current);
+        intervalRef.current && clearInterval(intervalRef.current);
         return;
       }
 
@@ -165,7 +161,9 @@ export function useCountdownV2(endDate: Date): UseCountdownDateReturnReturn {
       });
     }, 1000);
 
-    return () => clearInterval(intervalRef.current);
+    return () => {
+      intervalRef.current && clearInterval(intervalRef.current);
+    };
   }, [endDate]);
 
   const numberToStringDateTime = (value: number) => {

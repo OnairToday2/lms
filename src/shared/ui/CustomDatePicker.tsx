@@ -17,7 +17,9 @@ import {
   useSplitFieldProps,
 } from "@mui/x-date-pickers";
 
-interface ButtonFieldProps extends DatePickerFieldProps {}
+interface ButtonFieldProps extends DatePickerFieldProps {
+  className?: string;
+}
 
 function ButtonField(props: ButtonFieldProps) {
   // const { forwardedProps } = useSplitFieldProps(props, "date");

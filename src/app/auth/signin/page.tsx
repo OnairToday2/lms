@@ -1,5 +1,6 @@
 import SignIn from "@/modules/auth/components/SignIn";
 import type { Metadata, ResolvingMetadata } from "next";
+import PageAuthContainer from "../_components/PageAuthContainer";
 
 interface SignInPageProps {
   params: Promise<{ id: string }>;
@@ -21,6 +22,10 @@ export async function generateMetadata(
 }
 
 const SignInPage: React.FC<SignInPageProps> = () => {
-  return <SignIn />;
+  return (
+    <PageAuthContainer className="h-screen">
+      <SignIn className="max-w-[450px] mx-auto" />
+    </PageAuthContainer>
+  );
 };
 export default SignInPage;

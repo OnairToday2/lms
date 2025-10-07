@@ -1,48 +1,94 @@
-import { PropsWithChildren } from "react";
-import Copyright from "./Copyright";
-import LayoutWraper from "./LayoutWraper";
-import SelectContent from "./Sidebar/SelectContent";
-import Divider from "@mui/material/Divider";
-import AccountSetting from "./AccountSetting";
-import Stack from "@mui/material/Stack";
-import MenuButton from "./MenuButton";
-import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
-import ColorModeIconDropdown from "../../ColorModeIconDropdown";
-import NavbarMobile from "./NavbarMobile";
-import MenuContent from "./MenuContent";
-import { MAIN_MENU_LIST } from "./menuConfig";
-interface MainLayoutProps extends PropsWithChildren {}
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+"use client";
+import { PropsWithChildren, useCallback, useRef, useState } from "react";
+import { useMediaQuery, useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import Sidebar from "./Sidebar";
+import Footer from "./Footer";
+interface MainLayoutProps extends PropsWithChildren {
+  className?: string;
+}
+
+const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
+  const theme = useTheme();
+  const [isDesktopNavigationExpanded, setIsDesktopNavigationExpanded] =
+    useState(true);
+  const [isMobileNavigationExpanded, setIsMobileNavigationExpanded] =
+    useState(false);
+
+  const isOverLGViewport = useMediaQuery(theme.breakpoints.up("lg"));
+
+  const isNavigationExpanded = isOverLGViewport
+    ? isDesktopNavigationExpanded
+    : isMobileNavigationExpanded;
+
+  const setIsNavigationExpanded = useCallback(
+    (newExpanded: boolean) => {
+      if (isOverLGViewport) {
+        setIsDesktopNavigationExpanded(newExpanded);
+      } else {
+        setIsMobileNavigationExpanded(newExpanded);
+      }
+    },
+    [
+      isOverLGViewport,
+      setIsDesktopNavigationExpanded,
+      setIsMobileNavigationExpanded,
+    ],
+  );
+
+  const handleToggleHeaderMenu = useCallback(
+    (isExpanded: boolean) => {
+      setIsNavigationExpanded(isExpanded);
+    },
+    [setIsNavigationExpanded],
+  );
+
+  const layoutRef = useRef<HTMLDivElement>(null);
+
   return (
-    <LayoutWraper
-      siderBar={
-        <>
-          <div className="flex mt-2 p-3">
-            <SelectContent />
-          </div>
-          <Divider />
-          <div className="flex flex-col flex-1">
-            <MenuContent items={MAIN_MENU_LIST} />
-            {/* <CardAlert /> */}
-          </div>
-          <AccountSetting />
-        </>
-      }
-      appBar={<NavbarMobile />}
-      header={
-        <>
-          <Stack direction="row" sx={{ gap: 1 }} className="ml-auto">
-            <MenuButton showBadge aria-label="Open notifications">
-              <NotificationsRoundedIcon />
-            </MenuButton>
-            <ColorModeIconDropdown />
-          </Stack>
-        </>
-      }
-      footer={<Copyright />}
+    <Box
+      ref={layoutRef}
+      component="div"
+      className="main-layout"
+      sx={{
+        position: "relative",
+        display: "flex",
+        overflow: "hidden",
+        height: "100dvh",
+      }}
     >
-      {children}
-    </LayoutWraper>
+      <Sidebar
+        expanded={isNavigationExpanded}
+        setExpanded={setIsNavigationExpanded}
+        container={layoutRef.current ?? undefined}
+      />
+      {/* Main content */}
+      <Box
+        sx={(theme) => ({
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          background: "#F5F8FF",
+          overflow: "auto",
+          ...theme.applyStyles("dark", {
+            background: "rgb(5 7 10)",
+          }),
+        })}
+      >
+        <Box
+          component="main"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
+            px: { xs: 4, md: 6, xl: 8 },
+          }}
+        >
+          {children}
+        </Box>
+        <Footer />
+      </Box>
+    </Box>
   );
 };
 export default MainLayout;

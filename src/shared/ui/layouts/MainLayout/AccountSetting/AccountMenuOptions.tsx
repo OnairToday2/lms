@@ -1,25 +1,40 @@
 "use client";
-import * as React from "react";
-import { styled } from "@mui/material/styles";
-import Divider, { dividerClasses } from "@mui/material/Divider";
-import Menu from "@mui/material/Menu";
-import MuiMenuItem from "@mui/material/MenuItem";
-import { paperClasses } from "@mui/material/Paper";
-import { listClasses } from "@mui/material/List";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemIcon, { listItemIconClasses } from "@mui/material/ListItemIcon";
+import React, { Children, memo } from "react";
+import {
+  Button,
+  Menu,
+  MenuItem,
+  Divider,
+  ListItemText,
+  ListItemIcon,
+  listItemIconClasses,
+  paperClasses,
+  listClasses,
+  dividerClasses,
+} from "@mui/material";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
-import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
-import MenuButton from "../MenuButton";
-const MenuItem = styled(MuiMenuItem)({
-  margin: "2px 0",
-});
+import useAuthSignOut from "@/modules/auth/hooks/useAuthSignOut";
 
-interface AccountMenuOptionsProps {
-  items: {}[];
+type AccountMenuDividerItem = {
+  type: "divider";
+};
+type AccountMenuItem = {
+  title: string;
+  type: "item";
+  onClick?: () => void;
+};
+
+type AccountMenuItems = (AccountMenuItem | AccountMenuDividerItem)[];
+export interface AccountMenuOptionsProps extends React.PropsWithChildren {
+  menuItems?: AccountMenuItems;
 }
-export default function AccountMenuOptions() {
+const AccountMenuOptions: React.FC<AccountMenuOptionsProps> = ({
+  children,
+  menuItems = [],
+}) => {
+  const { signOut, isPending } = useAuthSignOut();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -27,41 +42,53 @@ export default function AccountMenuOptions() {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const Element = Children.only(children);
+
   return (
     <React.Fragment>
-      <MenuButton
+      <Button
         aria-label="Open menu"
         onClick={handleClick}
         sx={{ borderColor: "transparent" }}
+        type="button"
+        color="inherit"
+        variant="fill"
+        className="bg-transparent flex items-center gap-2 text-left px-0 py-0"
       >
-        <MoreVertRoundedIcon />
-      </MenuButton>
+        {Element}
+      </Button>
       <Menu
         anchorEl={anchorEl}
-        id="menu"
+        id="account-menu"
         open={open}
         onClose={handleClose}
-        onClick={handleClose}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         sx={{
           [`& .${listClasses.root}`]: {
-            padding: "4px",
+            padding: "8px",
           },
           [`& .${paperClasses.root}`]: {
             padding: 0,
+            width: "180px",
           },
           [`& .${dividerClasses.root}`]: {
-            margin: "4px -4px",
+            margin: "4px -8px",
           },
         }}
       >
-        <MenuItem>Profile</MenuItem>
-        <MenuItem>My account</MenuItem>
-        <Divider />
-        <MenuItem>Add another account</MenuItem>
-        <MenuItem>Settings</MenuItem>
-        <Divider />
+        {menuItems.map((item, _index) => {
+          if (item.type === "divider") {
+            return <Divider key={_index} />;
+          }
+          return (
+            <MenuItem key={_index} className="line-clamp-1 my-[0.5]">
+              {item.title}
+            </MenuItem>
+          );
+        })}
+        {menuItems.length ? <Divider /> : null}
         <MenuItem
           sx={{
             [`& .${listItemIconClasses.root}`]: {
@@ -69,8 +96,10 @@ export default function AccountMenuOptions() {
               minWidth: 0,
             },
           }}
+          onClick={signOut}
+          disabled={isPending}
         >
-          <ListItemText>Logout</ListItemText>
+          <ListItemText>Đăng xuất</ListItemText>
           <ListItemIcon>
             <LogoutRoundedIcon fontSize="small" />
           </ListItemIcon>
@@ -78,4 +107,6 @@ export default function AccountMenuOptions() {
       </Menu>
     </React.Fragment>
   );
-}
+};
+
+export default memo(AccountMenuOptions);

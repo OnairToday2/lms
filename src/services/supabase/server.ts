@@ -7,10 +7,10 @@ import { Database } from "@/types/supabase.types";
  * global variable. Always create a new client within each function when using
  * it.
  */
-export async function createSVClient<Database>() {
+export async function createSVClient() {
   const cookieStore = await cookies();
 
-  return createServerClient(
+  return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
     {

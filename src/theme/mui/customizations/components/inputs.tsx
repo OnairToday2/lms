@@ -105,6 +105,7 @@ export const inputsCustomizations: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         typography: theme.typography.caption,
+        color: "hsla(0, 0%, 0%, 1)",
         marginBottom: 8,
       }),
     },

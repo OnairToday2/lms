@@ -1,6 +1,9 @@
-import { type Theme } from '@mui/material/styles';
+import { type Theme } from "@mui/material/styles";
 
-export function getDrawerSxTransitionMixin(isExpanded: boolean, property: string) {
+export function getDrawerSxTransitionMixin(
+  isExpanded: boolean,
+  property: string,
+) {
   return {
     transition: (theme: Theme) =>
       theme.transitions.create(property, {
@@ -14,7 +17,7 @@ export function getDrawerSxTransitionMixin(isExpanded: boolean, property: string
 
 export function getDrawerWidthTransitionMixin(isExpanded: boolean) {
   return {
-    ...getDrawerSxTransitionMixin(isExpanded, 'width'),
-    overflowX: 'hidden',
+    ...getDrawerSxTransitionMixin(isExpanded, "width"),
+    overflowX: "hidden",
   };
 }

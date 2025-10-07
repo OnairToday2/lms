@@ -8,7 +8,8 @@ import { checkboxClasses } from "@mui/material/Checkbox";
 import { listClasses } from "@mui/material/List";
 import { gridClasses } from "@mui/x-data-grid";
 import { tablePaginationClasses } from "@mui/material/TablePagination";
-import { gray } from "../../theme-color";
+import { grey } from "../../theme-color";
+import type {} from "@mui/x-data-grid/themeAugmentation";
 
 /* eslint-disable import/prefer-default-export */
 export const dataGridCustomizations: Components<Theme> = {
@@ -84,15 +85,15 @@ export const dataGridCustomizations: Components<Theme> = {
             backgroundColor: alpha(theme.palette.action.selected, 0.3),
           },
           "&:active": {
-            backgroundColor: gray[200],
+            backgroundColor: grey[200],
           },
           ...theme.applyStyles("dark", {
-            color: gray[50],
+            color: grey[100],
             "&:hover": {
-              backgroundColor: gray[800],
+              backgroundColor: grey[800],
             },
             "&:active": {
-              backgroundColor: gray[900],
+              backgroundColor: grey[900],
             },
           }),
         },
@@ -101,18 +102,18 @@ export const dataGridCustomizations: Components<Theme> = {
         border: "none",
         backgroundColor: "transparent",
         "&:hover": {
-          backgroundColor: gray[100],
+          backgroundColor: grey[100],
         },
         "&:active": {
-          backgroundColor: gray[200],
+          backgroundColor: grey[200],
         },
         ...theme.applyStyles("dark", {
-          color: gray[50],
+          color: grey[100],
           "&:hover": {
-            backgroundColor: gray[800],
+            backgroundColor: grey[800],
           },
           "&:active": {
-            backgroundColor: gray[900],
+            backgroundColor: grey[900],
           },
         }),
       }),

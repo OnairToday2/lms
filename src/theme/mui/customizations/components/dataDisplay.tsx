@@ -4,7 +4,7 @@ import { typographyClasses } from "@mui/material/Typography";
 import { buttonBaseClasses } from "@mui/material/ButtonBase";
 import { chipClasses } from "@mui/material/Chip";
 import { iconButtonClasses } from "@mui/material/IconButton";
-import { gray, red, green } from "../../theme-color";
+import { grey, error, success, black, white } from "../../theme-color";
 
 /* eslint-disable import/prefer-default-export */
 export const dataDisplayCustomizations: Components<Theme> = {
@@ -24,34 +24,42 @@ export const dataDisplayCustomizations: Components<Theme> = {
         [`& .${svgIconClasses.root}`]: {
           width: "1rem",
           height: "1rem",
-          color: (theme.vars || theme).palette.text.secondary,
+          color: black[900],
         },
         [`& .${typographyClasses.root}`]: {
-          fontWeight: 500,
+          fontWeight: 600,
+          color: black[900],
         },
         [`& .${buttonBaseClasses.root}`]: {
           display: "flex",
           gap: 8,
           padding: "2px 8px",
           borderRadius: (theme.vars || theme).shape.borderRadius,
-          opacity: 0.7,
           "&.Mui-selected": {
             opacity: 1,
-            backgroundColor: alpha(theme.palette.action.selected, 0.3),
-            [`& .${svgIconClasses.root}`]: {
-              color: (theme.vars || theme).palette.text.primary,
-            },
+            backgroundColor: alpha(theme.palette.action.selected, 0.2),
             "&:focus-visible": {
-              backgroundColor: alpha(theme.palette.action.selected, 0.3),
+              backgroundColor: alpha(theme.palette.action.selected, 0.2),
             },
             "&:hover": {
-              backgroundColor: alpha(theme.palette.action.selected, 0.5),
+              backgroundColor: alpha(theme.palette.action.selected, 0.2),
             },
+          },
+          "&:hover": {
+            backgroundColor: alpha(theme.palette.action.selected, 0.2),
           },
           "&:focus-visible": {
             backgroundColor: "transparent",
           },
         },
+        ...theme.applyStyles("dark", {
+          [`& .${svgIconClasses.root}`]: {
+            color: white[80],
+          },
+          [`& .${typographyClasses.root}`]: {
+            color: white[80],
+          },
+        }),
       }),
     },
   },
@@ -81,11 +89,18 @@ export const dataDisplayCustomizations: Components<Theme> = {
   },
   MuiListItemIcon: {
     styleOverrides: {
-      root: {
+      root: ({ theme }) => ({
         minWidth: 0,
-      },
+        // [`& .${svgIconClasses.root}`]: {
+        //   color: "red",
+        //   ...theme.applyStyles("dark", {
+        //     color: "white",
+        //   }),
+        // },
+      }),
     },
   },
+
   MuiChip: {
     defaultProps: {
       size: "small",
@@ -103,22 +118,22 @@ export const dataDisplayCustomizations: Components<Theme> = {
               color: "default",
             },
             style: {
-              borderColor: gray[200],
-              backgroundColor: gray[100],
+              borderColor: grey[200],
+              backgroundColor: grey[100],
               [`& .${chipClasses.label}`]: {
-                color: gray[500],
+                color: grey[500],
               },
               [`& .${chipClasses.icon}`]: {
-                color: gray[500],
+                color: grey[500],
               },
               ...theme.applyStyles("dark", {
-                borderColor: gray[700],
-                backgroundColor: gray[800],
+                borderColor: grey[700],
+                backgroundColor: grey[800],
                 [`& .${chipClasses.label}`]: {
-                  color: gray[300],
+                  color: grey[300],
                 },
                 [`& .${chipClasses.icon}`]: {
-                  color: gray[300],
+                  color: grey[300],
                 },
               }),
             },
@@ -128,22 +143,22 @@ export const dataDisplayCustomizations: Components<Theme> = {
               color: "success",
             },
             style: {
-              borderColor: green[200],
-              backgroundColor: green[50],
+              borderColor: success["main"],
+              backgroundColor: success[8],
               [`& .${chipClasses.label}`]: {
-                color: green[500],
+                color: success["main"],
               },
               [`& .${chipClasses.icon}`]: {
-                color: green[500],
+                color: success["main"],
               },
               ...theme.applyStyles("dark", {
-                borderColor: green[800],
-                backgroundColor: green[900],
+                borderColor: success["darker"],
+                backgroundColor: success["darker"],
                 [`& .${chipClasses.label}`]: {
-                  color: green[300],
+                  color: success["light"],
                 },
                 [`& .${chipClasses.icon}`]: {
-                  color: green[300],
+                  color: success["light"],
                 },
               }),
             },
@@ -153,22 +168,22 @@ export const dataDisplayCustomizations: Components<Theme> = {
               color: "error",
             },
             style: {
-              borderColor: red[100],
-              backgroundColor: red[50],
+              borderColor: error["light"],
+              backgroundColor: error["lighter"],
               [`& .${chipClasses.label}`]: {
-                color: red[500],
+                color: error["main"],
               },
               [`& .${chipClasses.icon}`]: {
-                color: red[500],
+                color: error["main"],
               },
               ...theme.applyStyles("dark", {
-                borderColor: red[800],
-                backgroundColor: red[900],
+                borderColor: error["darker"],
+                backgroundColor: error["darker"],
                 [`& .${chipClasses.label}`]: {
-                  color: red[200],
+                  color: error["light"],
                 },
                 [`& .${chipClasses.icon}`]: {
-                  color: red[300],
+                  color: error["light"],
                 },
               }),
             },

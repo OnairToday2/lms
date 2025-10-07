@@ -4,12 +4,14 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useAuthStore } from "@/modules/auth/store/AuthProvider";
-import IconButton from "@mui/material/IconButton";
-import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
-import SignOutButton from "@/modules/auth/components/SignOutButton";
+import AccountMenuOptions, {
+  AccountMenuOptionsProps,
+} from "./AccountMenuOptions";
+import { useMemo } from "react";
 interface AccountSettingProps {
   className?: string;
 }
+
 const AccountSetting: React.FC<AccountSettingProps> = () => {
   const {
     data: { name, email, avatarUrl } = {},
@@ -17,40 +19,52 @@ const AccountSetting: React.FC<AccountSettingProps> = () => {
     isLoading,
   } = useAuthStore((state) => state) || {};
 
+  const ACCOUNT_ITEMS: AccountMenuOptionsProps["menuItems"] = useMemo(
+    () => [
+      {
+        title: "Thông tin cá nhân",
+        type: "item",
+      },
+      {
+        title: "Tài khoản",
+        type: "item",
+      },
+      {
+        title: "Cài đặt",
+        type: "item",
+      },
+    ],
+    [],
+  );
+
   return (
-    <Stack
-      direction="row"
-      sx={{
-        p: 2,
-        gap: 1,
-        alignItems: "center",
-        borderTop: "1px solid",
-        borderColor: "divider",
-      }}
-    >
-      <Avatar
-        sizes="small"
-        alt="Riley Carter"
-        src={avatarUrl ?? "/assets/images/avatar/7.jpg"}
-        sx={{ width: 36, height: 36 }}
-      />
-      <Box component="div" sx={{ mr: "auto" }} className="flex-1">
-        <Typography
-          variant="body2"
-          sx={{ fontWeight: 500, lineHeight: "16px" }}
-        >
-          {name}
-        </Typography>
-        <Typography
-          variant="caption"
-          sx={{ color: "text.secondary" }}
-          className="line-clamp-1 break-all"
-        >
-          {email}
-        </Typography>
-      </Box>
-      <SignOutButton />
-      {/* <AccountMenuOptions /> */}
+    <Stack direction="row" className="account-item">
+      <AccountMenuOptions menuItems={ACCOUNT_ITEMS}>
+        <>
+          <Avatar
+            sizes="small"
+            alt="Riley Carter"
+            src={avatarUrl ?? "/assets/images/avatar/7.jpg"}
+            sx={{ width: 36, height: 36 }}
+            variant="rounded"
+          />
+          <Box component="div" sx={{ mr: "auto" }} className="flex-1">
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 500, lineHeight: "16px" }}
+            >
+              {name}
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{ color: "text.secondary" }}
+              className="line-clamp-1 break-all"
+            >
+              admin
+            </Typography>
+          </Box>
+        </>
+      </AccountMenuOptions>
     </Stack>
   );
 };

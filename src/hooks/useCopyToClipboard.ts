@@ -1,7 +1,4 @@
-// @ts-nocheck
 import { useMemo, useState, useCallback } from "react";
-
-// ----------------------------------------------------------------------
 
 export type UseCopyToClipboardReturn = {
   copy: CopyFn;

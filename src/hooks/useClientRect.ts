@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   useRef,
   useMemo,
@@ -30,7 +29,7 @@ type DOMRectValue = {
 
 export type UseClientRectReturn = DOMRectValue &
   ScrollElValue & {
-    elementRef: React.RefObject<HTMLDivElement>;
+    elementRef: React.RefObject<HTMLDivElement | null>;
   };
 
 export function useClientRect(

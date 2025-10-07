@@ -220,10 +220,9 @@ const PageEmployee = () => {
   const pageTitle = "Employees";
 
   return (
-    <PageContainer
-      title={pageTitle}
-      breadcrumbs={[{ title: pageTitle }]}
-      actions={
+    <PageContainer title={pageTitle} breadcrumbs={[{ title: pageTitle }]}>
+      <div className="flex items-center justify-between py-6">
+        <div></div>
         <Stack direction="row" alignItems="center" spacing={1}>
           <Tooltip title="Reload data" placement="right" enterDelay={1000}>
             <div>
@@ -244,8 +243,7 @@ const PageEmployee = () => {
             Create
           </Button>
         </Stack>
-      }
-    >
+      </div>
       <Box sx={{ flex: 1, width: "100%" }}>
         {error ? (
           <Box sx={{ flexGrow: 1 }}>
