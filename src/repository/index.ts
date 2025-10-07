@@ -1,2 +1,2 @@
 export * as authRepository from "./auth";
-export * as profileRepository from "./profiles";
+export * as employeesRepository from "./employees";

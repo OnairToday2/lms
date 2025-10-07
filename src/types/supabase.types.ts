@@ -9,29 +9,41 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      employees: {
+      employments: {
         Row: {
           created_at: string
-          employee_code: string
-          id: string
-          updated_at: string
-          user_id: string | null
+          id: number
+          organization_unit_id: string
+          profile_id: string
         }
         Insert: {
           created_at?: string
-          employee_code: string
-          id?: string
-          updated_at?: string
-          user_id?: string | null
+          id?: number
+          organization_unit_id: string
+          profile_id: string
         }
         Update: {
           created_at?: string
-          employee_code?: string
-          id?: string
-          updated_at?: string
-          user_id?: string | null
+          id?: number
+          organization_unit_id?: string
+          profile_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "employments_organization_unit_id_fkey"
+            columns: ["organization_unit_id"]
+            isOneToOne: false
+            referencedRelation: "organization_units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       organization_units: {
         Row: {
@@ -40,6 +52,7 @@ export type Database = {
           name: string
           organization_id: string
           parent_id: string | null
+          type: Database["public"]["Enums"]["organization_unit_type"]
         }
         Insert: {
           created_at?: string
@@ -47,6 +60,7 @@ export type Database = {
           name: string
           organization_id: string
           parent_id?: string | null
+          type: Database["public"]["Enums"]["organization_unit_type"]
         }
         Update: {
           created_at?: string
@@ -54,6 +68,7 @@ export type Database = {
           name?: string
           organization_id?: string
           parent_id?: string | null
+          type?: Database["public"]["Enums"]["organization_unit_type"]
         }
         Relationships: [
           {
@@ -87,6 +102,45 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar: string | null
+          birthday: string | null
+          created_at: string
+          employee_code: string
+          full_name: string
+          gender: string
+          id: string
+          phone_number: string
+          start_date: string
+          user_id: string | null
+        }
+        Insert: {
+          avatar?: string | null
+          birthday?: string | null
+          created_at: string
+          employee_code: string
+          full_name: string
+          gender: string
+          id?: string
+          phone_number: string
+          start_date: string
+          user_id?: string | null
+        }
+        Update: {
+          avatar?: string | null
+          birthday?: string | null
+          created_at?: string
+          employee_code?: string
+          full_name?: string
+          gender?: string
+          id?: string
+          phone_number?: string
+          start_date?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -95,7 +149,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      organization_unit_type: "branch" | "department"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -222,7 +276,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      organization_unit_type: ["branch", "department"],
+    },
   },
 } as const
 
