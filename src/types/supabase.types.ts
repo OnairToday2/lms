@@ -12,19 +12,19 @@ export type Database = {
       employments: {
         Row: {
           created_at: string
-          id: number
+          id: string
           organization_unit_id: string
           profile_id: string
         }
         Insert: {
           created_at?: string
-          id?: number
+          id: string
           organization_unit_id: string
           profile_id: string
         }
         Update: {
           created_at?: string
-          id?: number
+          id?: string
           organization_unit_id?: string
           profile_id?: string
         }
@@ -109,7 +109,7 @@ export type Database = {
           created_at: string
           employee_code: string
           full_name: string
-          gender: string
+          gender: Database["public"]["Enums"]["gender"]
           id: string
           phone_number: string
           start_date: string
@@ -121,7 +121,7 @@ export type Database = {
           created_at: string
           employee_code: string
           full_name: string
-          gender: string
+          gender: Database["public"]["Enums"]["gender"]
           id?: string
           phone_number: string
           start_date: string
@@ -133,7 +133,7 @@ export type Database = {
           created_at?: string
           employee_code?: string
           full_name?: string
-          gender?: string
+          gender?: Database["public"]["Enums"]["gender"]
           id?: string
           phone_number?: string
           start_date?: string
@@ -149,6 +149,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      gender: "male" | "female" | "other"
       organization_unit_type: "branch" | "department"
     }
     CompositeTypes: {
@@ -277,6 +278,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      gender: ["male", "female", "other"],
       organization_unit_type: ["branch", "department"],
     },
   },

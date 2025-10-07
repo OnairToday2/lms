@@ -28,20 +28,20 @@ const MAIN_MENU_LIST: MenuItemType[] = [
   {
     title: "Danh sách nhân viên",
     icon: React.createElement(UsersIcon),
-    key: "employee",
-    path: "employee",
+    key: "employees",
+    path: "employees",
     children: [
       {
-        title: "Tạo nhân vien",
+        title: "Tạo nhân viên",
         icon: React.createElement(UsersIcon),
-        key: "employee",
-        path: "employee",
+        key: "employees/create",
+        path: "employees/create",
       },
       {
         title: "Import danh sách",
         icon: React.createElement(UsersIcon),
-        key: "employee",
-        path: "employee",
+        key: "employees/import",
+        path: "employees/import",
       },
     ],
   },
