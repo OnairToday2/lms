@@ -9,38 +9,59 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      employments: {
+      employees: {
         Row: {
           created_at: string
           id: string
-          organization_unit_id: string
-          profile_id: string
+          start_date: string
+          user_id: string
         }
         Insert: {
           created_at?: string
-          id: string
-          organization_unit_id: string
-          profile_id: string
+          id?: string
+          start_date: string
+          user_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          start_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      employments: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          organization_unit_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id: string
+          organization_unit_id: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
           organization_unit_id?: string
-          profile_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "employments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "employments_organization_unit_id_fkey"
             columns: ["organization_unit_id"]
             isOneToOne: false
             referencedRelation: "organization_units"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employments_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -107,21 +128,18 @@ export type Database = {
           created_at: string
           id: string
           organization_id: string
-          organization_unit_id: string
           title: string
         }
         Insert: {
           created_at?: string
           id?: string
           organization_id: string
-          organization_unit_id: string
           title: string
         }
         Update: {
           created_at?: string
           id?: string
           organization_id?: string
-          organization_unit_id?: string
           title?: string
         }
         Relationships: [
@@ -132,13 +150,6 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "positions_organization_unit_id_fkey"
-            columns: ["organization_unit_id"]
-            isOneToOne: false
-            referencedRelation: "organization_units"
-            referencedColumns: ["id"]
-          },
         ]
       }
       profiles: {
@@ -146,39 +157,41 @@ export type Database = {
           avatar: string | null
           birthday: string | null
           created_at: string
-          employee_code: string
+          employee_id: string
           full_name: string
           gender: Database["public"]["Enums"]["gender"]
           id: string
           phone_number: string
-          start_date: string
-          user_id: string | null
         }
         Insert: {
           avatar?: string | null
           birthday?: string | null
           created_at: string
-          employee_code: string
+          employee_id: string
           full_name: string
           gender: Database["public"]["Enums"]["gender"]
           id?: string
           phone_number: string
-          start_date: string
-          user_id?: string | null
         }
         Update: {
           avatar?: string | null
           birthday?: string | null
           created_at?: string
-          employee_code?: string
+          employee_id?: string
           full_name?: string
           gender?: Database["public"]["Enums"]["gender"]
           id?: string
           phone_number?: string
-          start_date?: string
-          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

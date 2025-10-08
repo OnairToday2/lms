@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { Constants } from "@/types/supabase.types";
 
-// Extract gender enum values from database schema
 const genderValues = [...Constants.public.Enums.gender] as [string, ...string[]];
 
 export const EmployeeFormSchema = z.object({
@@ -29,6 +28,15 @@ export const EmployeeFormSchema = z.object({
     message: "Vui lòng chọn giới tính",
   }),
   birthday: z.string().nullable().optional(),
+
+  // Work Information
+  branch: z.string().optional(),
+  department: z.string().min(1, { message: "Vui lòng chọn phòng ban" }),
+  employee_code: z.string().min(1, { message: "Vui lòng nhập mã nhân viên" }),
+  manager_id: z.string().min(1, { message: "Vui lòng chọn người quản lý" }),
+  role: z.string().optional(),
+  position_id: z.string().optional(),
+  start_date: z.string().nullable().optional(),
 });
 
 export type EmployeeFormData = z.infer<typeof EmployeeFormSchema>;
