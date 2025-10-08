@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Constants } from "@/types/supabase.types";
 
-const genderValues = [...Constants.public.Enums.gender] as [string, ...string[]];
+const genderValues = Constants.public.Enums.gender;
 
 export const EmployeeFormSchema = z.object({
   email: z

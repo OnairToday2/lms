@@ -13,19 +13,19 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          start_date: string
+          start_date: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
-          start_date: string
+          start_date?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          start_date?: string
+          start_date?: string | null
           user_id?: string
         }
         Relationships: []
@@ -40,7 +40,7 @@ export type Database = {
         Insert: {
           created_at?: string
           employee_id: string
-          id: string
+          id?: string
           organization_unit_id: string
         }
         Update: {
@@ -166,7 +166,7 @@ export type Database = {
         Insert: {
           avatar?: string | null
           birthday?: string | null
-          created_at: string
+          created_at?: string
           employee_id: string
           full_name: string
           gender: Database["public"]["Enums"]["gender"]
