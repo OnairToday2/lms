@@ -157,6 +157,7 @@ export type Database = {
           avatar: string | null
           birthday: string | null
           created_at: string
+          email: string
           employee_id: string
           full_name: string
           gender: Database["public"]["Enums"]["gender"]
@@ -167,6 +168,7 @@ export type Database = {
           avatar?: string | null
           birthday?: string | null
           created_at?: string
+          email: string
           employee_id: string
           full_name: string
           gender: Database["public"]["Enums"]["gender"]
@@ -177,6 +179,7 @@ export type Database = {
           avatar?: string | null
           birthday?: string | null
           created_at?: string
+          email?: string
           employee_id?: string
           full_name?: string
           gender?: Database["public"]["Enums"]["gender"]
