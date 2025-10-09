@@ -19,11 +19,58 @@ const MAIN_MENU_LIST: MenuItemType[] = [
     type: "item",
   },
   {
-    title: "Quản lý phòng ban",
+    title: "Quản lý chi nhánh",
     icon: React.createElement(GitIcon),
-    key: "department",
-    path: "department",
+    key: "branches",
+    path: "branches",
     type: "item",
+    children: [
+      {
+        title: "Danh sách chi nhánh",
+        icon: React.createElement(GitIcon),
+        key: "branches-list",
+        path: "/department/branches",
+      },
+      {
+        title: "Tạo chi nhánh",
+        icon: React.createElement(GitIcon),
+        key: "create-branch",
+        path: "/department/branches/create",
+      },
+      {
+        title: "Import chi nhánh",
+        icon: React.createElement(GitIcon),
+        key: "import-branch",
+        path: "/department/branches/import",
+      },
+    ],
+  },
+  {
+    title: "Quản lý phòng ban",
+    icon: React.createElement(UsersIcon),
+    key: "departments",
+    path: "departments",
+    type: "item",
+    children: [
+      {
+        title: "Danh sách phòng ban",
+        icon: React.createElement(UsersIcon),
+        key: "departments-list",
+        path: "/department/departments",
+      },
+      {
+        title: "Tạo phòng ban",
+        icon: React.createElement(UsersIcon),
+        key: "create-department",
+        path: "/department/departments/create",
+      },
+      {
+        title: "Import phòng ban",
+        icon: React.createElement(UsersIcon),
+        key: "import-department",
+        path: "/department/departments/import",
+      },
+    ],
   },
   {
     title: "Danh sách nhân viên",
