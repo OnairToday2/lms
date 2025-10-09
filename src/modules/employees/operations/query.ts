@@ -7,3 +7,11 @@ export const useGetEmployeesQuery = () => {
     queryFn: employeesRepository.getEmployees,
   });
 };
+
+export const useGetEmployeeQuery = (id: string) => {
+  return useTQuery({
+    queryKey: ["employees", id],
+    queryFn: () => employeesRepository.getEmployeeById(id),
+    enabled: !!id,
+  });
+};

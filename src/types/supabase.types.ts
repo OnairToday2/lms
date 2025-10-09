@@ -12,18 +12,21 @@ export type Database = {
       employees: {
         Row: {
           created_at: string
+          employee_code: string
           id: string
           start_date: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
+          employee_code: string
           id?: string
           start_date?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
+          employee_code?: string
           id?: string
           start_date?: string | null
           user_id?: string
@@ -190,7 +193,7 @@ export type Database = {
           {
             foreignKeyName: "profiles_employee_id_fkey"
             columns: ["employee_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },

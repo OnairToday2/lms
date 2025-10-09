@@ -1,10 +1,105 @@
 import { supabase } from "@/services";
 import type { Database } from "@/types/supabase.types";
 
-const getEmployees = async () => {
-  const response = await supabase.from("profiles").select("*");
+export interface EmployeeListItem {
+  id: string;
+  employee_code: string;
+  start_date: string | null;
+  user_id: string;
+  created_at: string;
+  profiles: {
+    id: string;
+    full_name: string;
+    email: string;
+    phone_number: string;
+    gender: Database["public"]["Enums"]["gender"];
+    birthday: string | null;
+    avatar: string | null;
+  } | null;
+  employments: Array<{
+    id: string;
+    organization_unit_id: string;
+    organization_units: {
+      id: string;
+      name: string;
+      type: Database["public"]["Enums"]["organization_unit_type"];
+    } | null;
+  }>;
+}
 
-  return response.data;
+const getEmployees = async () => {
+  const { data, error } = await supabase
+    .from("employees")
+    .select(`
+      id,
+      employee_code,
+      start_date,
+      user_id,
+      created_at,
+      profiles!profiles_employee_id_fkey (
+        id,
+        full_name,
+        email,
+        phone_number,
+        gender,
+        birthday,
+        avatar
+      ),
+      employments (
+        id,
+        organization_unit_id,
+        organization_units!employments_organization_unit_id_fkey (
+          id,
+          name,
+          type
+        )
+      )
+    `)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch employees: ${error.message}`);
+  }
+
+  return data as unknown as EmployeeListItem[];
+};
+
+const getEmployeeById = async (id: string) => {
+  const { data, error } = await supabase
+    .from("employees")
+    .select(`
+      id,
+      employee_code,
+      start_date,
+      user_id,
+      created_at,
+      profiles!profiles_employee_id_fkey (
+        id,
+        full_name,
+        email,
+        phone_number,
+        gender,
+        birthday,
+        avatar
+      ),
+      employments (
+        id,
+        organization_unit_id,
+        organization_units!employments_organization_unit_id_fkey (
+          id,
+          name,
+          type
+        )
+      )
+    `)
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to fetch employee: ${error.message}`);
+  }
+
+  return data as unknown as EmployeeListItem;
 };
 
 export interface CreateEmployeePayload {
@@ -67,7 +162,101 @@ const createEmployee = async (payload: CreateEmployeePayload) => {
   };
 };
 
+export interface UpdateEmployeePayload {
+  id: string;
+  email: string;
+  fullName: string;
+  phoneNumber?: string;
+  gender: Database["public"]["Enums"]["gender"];
+  birthday?: string | null;
+  employee_code: string;
+  department: string;
+  branch?: string;
+  manager_id: string;
+  role?: string;
+  position_id?: string;
+  start_date?: string | null;
+}
+
+const updateEmployee = async (payload: UpdateEmployeePayload) => {
+  // Start a transaction-like operation by updating all related tables
+
+  // 1. Update employee record
+  const { error: employeeError } = await supabase
+    .from("employees")
+    .update({
+      employee_code: payload.employee_code,
+      start_date: payload.start_date || null,
+    })
+    .eq("id", payload.id);
+
+  if (employeeError) {
+    throw new Error(`Failed to update employee: ${employeeError.message}`);
+  }
+
+  // 2. Update profile record
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .update({
+      full_name: payload.fullName,
+      email: payload.email,
+      phone_number: payload.phoneNumber || "",
+      gender: payload.gender,
+      birthday: payload.birthday || null,
+    })
+    .eq("employee_id", payload.id);
+
+  if (profileError) {
+    throw new Error(`Failed to update profile: ${profileError.message}`);
+  }
+
+  // 3. Handle employments - delete existing and create new ones
+  // First, delete all existing employment records for this employee
+  const { error: deleteError } = await supabase
+    .from("employments")
+    .delete()
+    .eq("employee_id", payload.id);
+
+  if (deleteError) {
+    throw new Error(`Failed to delete old employments: ${deleteError.message}`);
+  }
+
+  // Create new employment records
+  const employmentsToCreate = [];
+
+  // Add department employment if provided
+  if (payload.department) {
+    employmentsToCreate.push({
+      employee_id: payload.id,
+      organization_unit_id: payload.department,
+    });
+  }
+
+  // Add branch employment if provided and different from department
+  if (payload.branch && payload.branch !== payload.department) {
+    employmentsToCreate.push({
+      employee_id: payload.id,
+      organization_unit_id: payload.branch,
+    });
+  }
+
+  if (employmentsToCreate.length > 0) {
+    const { error: employmentsError } = await supabase
+      .from("employments")
+      .insert(employmentsToCreate);
+
+    if (employmentsError) {
+      throw new Error(`Failed to create employments: ${employmentsError.message}`);
+    }
+  }
+
+  // Return the updated employee
+  return await getEmployeeById(payload.id);
+};
+
 export {
   getEmployees,
+  getEmployeeById,
   createEmployee,
+  updateEmployee,
 };
