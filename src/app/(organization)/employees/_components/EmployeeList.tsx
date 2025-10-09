@@ -36,11 +36,23 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PageContainer from "@/shared/ui/PageContainer";
 import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
+import { useDeleteEmployeeMutation } from "@/modules/employees/operations/mutation";
 import type { EmployeeListItem } from "@/repository/employees";
+import { useDialogs } from "@/hooks/useDialogs/useDialogs";
+import useNotifications from "@/hooks/useNotifications/useNotifications";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function EmployeeList() {
   const router = useRouter();
+  const dialogs = useDialogs();
+  const notifications = useNotifications();
+  const queryClient = useQueryClient();
+
+  // Fetch employees data
   const { data: employees, isLoading, error } = useGetEmployeesQuery();
+
+  // Delete mutation
+  const { mutateAsync: deleteEmployee, isPending: isDeleting } = useDeleteEmployeeMutation();
 
   // State for filters and pagination
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -150,10 +162,50 @@ export default function EmployeeList() {
     handleMenuClose();
   };
 
-  const handleDelete = () => {
-    // TODO: Implement delete functionality
-    console.log("Delete employee:", selectedEmployeeId);
-    handleMenuClose();
+  const handleDelete = async () => {
+    if (!selectedEmployeeId) return;
+
+    // Show confirmation dialog
+    const confirmed = await dialogs.confirm(
+      "Bạn có chắc chắn muốn xóa nhân viên này không? Hành động này không thể hoàn tác.",
+      {
+        title: "Xác nhận xóa",
+        okText: "Xóa",
+        cancelText: "Hủy",
+        severity: "error",
+      }
+    );
+
+    if (!confirmed) {
+      handleMenuClose();
+      return;
+    }
+
+    try {
+      await deleteEmployee(selectedEmployeeId);
+
+      // Invalidate and refetch the employees query
+      await queryClient.invalidateQueries({ queryKey: ["employees"] });
+
+      notifications.show("Xóa nhân viên thành công!", {
+        severity: "success",
+        autoHideDuration: 3000,
+      });
+
+      handleMenuClose();
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      notifications.show(
+        error instanceof Error
+          ? error.message
+          : "Có lỗi xảy ra khi xóa nhân viên",
+        {
+          severity: "error",
+          autoHideDuration: 5000,
+        }
+      );
+      handleMenuClose();
+    }
   };
 
   // Helper function to get department/branch names
@@ -378,7 +430,7 @@ export default function EmployeeList() {
               </ListItemIcon>
               <ListItemText>Xem chi tiết</ListItemText>
             </MenuItem>
-            <MenuItem onClick={handleDelete}>
+            <MenuItem onClick={handleDelete} disabled={isDeleting}>
               <ListItemIcon>
                 <DeleteIcon fontSize="small" color="error" />
               </ListItemIcon>
