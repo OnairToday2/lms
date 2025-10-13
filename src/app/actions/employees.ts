@@ -3,10 +3,38 @@
 import { createServiceRoleClient } from "@/services/supabase/service-role-client";
 import { revalidatePath } from "next/cache";
 
+// Import utilities
+import { parseCSVOnServer, parseXLSXOnServer } from "@/utils/employees/file-parser";
+import {
+  validateParsedData,
+  validateAgainstDatabase,
+  mergeValidationResults,
+  type EmployeeImportData,
+  type ValidationResult,
+} from "@/utils/employees/employee-validation";
+
+// Re-export types for external use
+export type { EmployeeImportData, ValidationResult };
+
+export interface FieldError {
+  field: string;
+  message: string;
+}
+
+export interface ImportResult {
+  successCount: number;
+  failedCount: number;
+  errors: Array<{
+    row: number;
+    employeeCode: string;
+    error: string;
+  }>;
+}
+
 /**
  * Server action to delete an employee and all related records
  * This uses the service role client to bypass RLS policies
- * 
+ *
  * @param employeeId - The ID of the employee to delete
  * @returns Success message or throws an error
  */
@@ -36,7 +64,7 @@ export async function deleteEmployeeAction(employeeId: string) {
     const userId = employee.user_id;
 
     // 2. Delete related records in the correct order to avoid foreign key constraints
-    
+
     // Delete employments (references employees)
     const { error: employmentsError } = await supabase
       .from("employments")
@@ -94,3 +122,175 @@ export async function deleteEmployeeAction(employeeId: string) {
   }
 }
 
+/**
+ * Validate employee import file (server-side parsing and validation)
+ * This server action accepts a raw file via FormData and handles all parsing on the server
+ *
+ * @param formData - FormData containing the file to validate
+ * @returns Validation result with valid and invalid records
+ */
+export async function validateEmployeeFile(
+  formData: FormData,
+): Promise<ValidationResult> {
+  try {
+    // Extract the file from FormData
+    const file = formData.get("file") as File;
+
+    console.log("=== VALIDATE EMPLOYEE FILE START ===");
+    console.log("File received:", file ? file.name : "NO FILE");
+
+    if (!file) {
+      throw new Error("Không tìm thấy file trong request");
+    }
+
+    // Validate file type
+    const fileName = file.name.toLowerCase();
+    const isCSV = fileName.endsWith(".csv");
+    const isXLSX = fileName.endsWith(".xlsx") || fileName.endsWith(".xls");
+
+    console.log("File type:", { fileName, isCSV, isXLSX });
+
+    if (!isCSV && !isXLSX) {
+      throw new Error("Định dạng file không được hỗ trợ. Vui lòng tải lên file CSV hoặc XLSX");
+    }
+
+    // Validate file size (4MB max)
+    const maxSize = 4 * 1024 * 1024; // 4MB
+    if (file.size > maxSize) {
+      throw new Error("File quá lớn. Kích thước tối đa là 4MB");
+    }
+
+    console.log("File size:", file.size, "bytes");
+
+    let parsedData: any[];
+
+    if (isCSV) {
+      // Parse CSV file
+      const text = await file.text();
+      console.log("CSV text length:", text.length);
+      console.log("CSV first 200 chars:", text.substring(0, 200));
+
+      parsedData = parseCSVOnServer(text);
+      console.log("Parsed data count:", parsedData.length);
+      console.log("First parsed row:", parsedData[0]);
+      console.log("Sample row keys:", parsedData[0] ? Object.keys(parsedData[0]) : "NO DATA");
+    } else {
+      // Parse XLSX file
+      const buffer = await file.arrayBuffer();
+      parsedData = await parseXLSXOnServer(buffer);
+    }
+
+    if (!parsedData || parsedData.length === 0) {
+      throw new Error("File không chứa dữ liệu hoặc định dạng không đúng");
+    }
+
+    console.log("Total records to validate:", parsedData.length);
+
+    // Step 1: Format validation
+    const formatValidation = validateParsedData(parsedData);
+
+    console.log("Format validation result:", {
+      totalCount: formatValidation.totalCount,
+      validCount: formatValidation.validCount,
+      invalidCount: formatValidation.invalidCount,
+    });
+
+    // Step 2: Database validation (only for records that passed format validation)
+    console.log("=== DATABASE VALIDATION START ===");
+    const databaseValidation = await validateAgainstDatabase(formatValidation.validRecords);
+    console.log("Database validation result:", {
+      invalidCount: databaseValidation.invalidRecords.length,
+    });
+    console.log("=== DATABASE VALIDATION END ===");
+
+    // Step 3: Merge validation results
+    const finalResult = mergeValidationResults(formatValidation, databaseValidation);
+
+    console.log("Final validation result:", {
+      totalCount: finalResult.totalCount,
+      validCount: finalResult.validCount,
+      invalidCount: finalResult.invalidCount,
+    });
+
+    if (finalResult.invalidCount > 0) {
+      console.log("Sample invalid records:", finalResult.invalidRecords.slice(0, 3));
+    }
+
+    console.log("=== VALIDATE EMPLOYEE FILE END ===");
+
+    return finalResult;
+  } catch (error) {
+    console.error("Error validating employee file:", error);
+    throw error instanceof Error
+      ? error
+      : new Error("Có lỗi xảy ra khi xác thực file");
+  }
+}
+
+/**
+ * Import validated employee records into the database
+ * Uses the service role client and relies on the handle_new_employee trigger
+ *
+ * @param records - Array of validated employee records
+ * @returns Import result with success/failure counts and errors
+ */
+export async function importEmployeesAction(
+  records: EmployeeImportData[],
+): Promise<ImportResult> {
+  const supabase = createServiceRoleClient();
+
+  let successCount = 0;
+  let failedCount = 0;
+  const errors: Array<{ row: number; employeeCode: string; error: string }> = [];
+
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    const rowNumber = i + 2; // +2 because index is 0-based and row 1 is header
+
+    try {
+      // Create auth user - the database trigger will handle the rest
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: record.email,
+        email_confirm: true,
+        user_metadata: {
+          employee_code: record.employee_code,
+          full_name: record.fullName,
+          phone_number: record.phoneNumber || "",
+          gender: record.gender,
+          birthday: record.birthday || null,
+          department: record.department,
+          branch: record.branch || "",
+          start_date: record.start_date || null,
+        },
+      });
+
+      if (authError) {
+        throw new Error(authError.message);
+      }
+
+      if (!authData.user) {
+        throw new Error("Failed to create user");
+      }
+
+      successCount++;
+    } catch (error) {
+      failedCount++;
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      errors.push({
+        row: rowNumber,
+        employeeCode: record.employee_code,
+        error: errorMessage,
+      });
+      console.error(`Failed to import employee ${record.employee_code}:`, errorMessage);
+    }
+  }
+
+  // Revalidate the employees page to refresh the list
+  revalidatePath("/employees");
+
+  return {
+    successCount,
+    failedCount,
+    errors,
+  };
+}

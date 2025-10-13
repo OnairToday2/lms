@@ -38,7 +38,7 @@ const MAIN_MENU_LIST: MenuItemType[] = [
         path: "employees/create",
       },
       {
-        title: "Import danh sách",
+        title: "Import user",
         icon: React.createElement(UsersIcon),
         key: "employees/import",
         path: "employees/import",
