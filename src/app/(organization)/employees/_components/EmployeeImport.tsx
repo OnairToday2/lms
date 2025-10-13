@@ -29,6 +29,8 @@ import {
   type ImportResult,
 } from "@/app/actions/employees";
 import { DEFAULT_TEMPLATE_STRUCTURE, type TemplateColumn } from "@/utils/employees/template-parser";
+import { alpha } from "@mui/material/styles";
+import Grid from "@mui/material/Grid";
 
 /**
  * Create dynamic DataGrid columns based on template structure
@@ -311,12 +313,16 @@ const EmployeeImport = () => {
   const validCount = validationResult?.validCount || 0;
   const errorCount = validationResult?.invalidCount || 0;
 
+  const startImportable = !(!file || errorCount > 0 || isProcessing || isImporting);
+
   return (
     <Box sx={{ py: 3 }}>
       <Stack spacing={3}>
         {/* File Upload Area */}
         <Card>
-          <Stack spacing={2}>
+          <Stack sx={{
+            gap: 2,
+          }}>
             <Box
               sx={{
                 p: 4,
@@ -337,10 +343,19 @@ const EmployeeImport = () => {
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
             >
-              <CloudUploadIcon sx={{ fontSize: 48, color: "text.secondary", mb: 2 }} />
-              <Typography variant="h6" gutterBottom>
+              <Button
+                startIcon={
+                  <CloudUploadIcon sx={{ fontSize: 48, color: "text.secondary" }} />
+                }
+                color="inherit"
+                size="small"
+                disabled
+                sx={{
+                  mb: 2,
+                }}
+              >
                 Tải lên
-              </Typography>
+              </Button>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 Kéo thả file vào đây hoặc chọn file
               </Typography>
@@ -357,7 +372,7 @@ const EmployeeImport = () => {
             </Box>
 
             {isProcessing && (
-              <Box sx={{ px: 4, pb: 2 }}>
+              <Box>
                 <LinearProgress />
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
                   Đang xử lý file...
@@ -373,14 +388,14 @@ const EmployeeImport = () => {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  width: "50%",
+                  width: "40%",
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <DescriptionIcon sx={{ color: "success.main" }} />
-                  <Typography variant="body2">{file.name}</Typography>
+                  <Typography color="text.primary" variant="body2" fontWeight={700}>{file.name}</Typography>
                 </Box>
-                <IconButton size="small" onClick={handleRemoveFile} color="error">
+                <IconButton size="small" onClick={handleRemoveFile} color="inherit">
                   <DeleteIcon fontSize="small" />
                 </IconButton>
               </Box>
@@ -390,74 +405,93 @@ const EmployeeImport = () => {
 
         {/* Statistics Cards - Only show if file is uploaded */}
         {file && validationResult && (
-          <>
-            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2 }}>
-              {/* Total Count */}
-              <Card sx={{ p: 3, bgcolor: "grey.100" }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  <PeopleIcon sx={{ fontSize: 40, color: "text.secondary" }} />
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Số lượng nhân viên
-                    </Typography>
-                    <Typography variant="h4" fontWeight="bold">
-                      {totalCount}
-                    </Typography>
+          <Card>
+            <Grid container spacing={2}>
+              <Grid size={4}>
+                <Card sx={{
+                  p: 2,
+                  bgcolor: (theme) =>
+                    alpha(theme.palette.grey[300], 0.2),
+                  borderColor: (theme) =>
+                    alpha(theme.palette.grey[300], 0.2),
+                }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <PeopleIcon sx={{ fontSize: 40, color: "text.secondary" }} />
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Số lượng nhân viên
+                      </Typography>
+                      <Typography variant="h4" fontWeight="bold">
+                        {totalCount}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
-              </Card>
-
-              {/* Valid Count */}
-              <Card sx={{ p: 3, bgcolor: "success.50" }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  <CheckCircleIcon sx={{ fontSize: 40, color: "success.main" }} />
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Hợp lệ
-                    </Typography>
-                    <Typography variant="h4" fontWeight="bold" color="success.main">
-                      {validCount}
-                    </Typography>
+                </Card>
+              </Grid>
+              <Grid size={4}>
+                <Card sx={{
+                  p: 2,
+                  bgcolor: (theme) =>
+                    alpha(theme.palette.success.light, 0.2),
+                  borderColor: (theme) =>
+                    alpha(theme.palette.success.light, 0.2),
+                }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <CheckCircleIcon sx={{ fontSize: 40, color: "success.main" }} />
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Hợp lệ
+                      </Typography>
+                      <Typography variant="h4" fontWeight="bold" color="success.main">
+                        {validCount}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
-              </Card>
-
-              {/* Error Count */}
-              <Card sx={{ p: 3, bgcolor: "error.50" }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  <ErrorIcon sx={{ fontSize: 40, color: "error.main" }} />
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Lỗi
-                    </Typography>
-                    <Typography variant="h4" fontWeight="bold" color="error.main">
-                      {errorCount}
-                    </Typography>
+                </Card>
+              </Grid>
+              <Grid size={4}>
+                <Card sx={{
+                  p: 2,
+                  bgcolor: (theme) =>
+                    alpha(theme.palette.error.light, 0.2),
+                  borderColor: (theme) =>
+                    alpha(theme.palette.error.light, 0.2),
+                }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <ErrorIcon sx={{ fontSize: 40, color: "error.main" }} />
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Lỗi
+                      </Typography>
+                      <Typography variant="h4" fontWeight="bold" color="error.main">
+                        {errorCount}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
-              </Card>
-            </Box>
+                </Card>
+              </Grid>
+            </Grid>
 
             {/* Success/Error Display */}
             {errorCount === 0 ? (
               <Alert
                 severity="success"
-                icon={<CheckCircleIcon />}
-                sx={{
-                  bgcolor: "success.50",
+                icon={<CheckCircleIcon sx={{
+                  color: "success.main",
+                }} />}
+                sx={(theme) => ({
+                  bgcolor: alpha(theme.palette.success.light, 0.3),
                   border: "1px solid",
-                  borderColor: "success.main",
-                }}
+                  borderColor: alpha(theme.palette.success.light, 0.3),
+                  color: "success.darker",
+                })}
               >
-                <AlertTitle sx={{ fontWeight: "bold" }}>
-                  Không có lỗi nào trong tệp
+                <AlertTitle>
+                  Không có lỗi nào trong tệp. Bạn có thể tiếp tục import ngay.
                 </AlertTitle>
-                <Typography variant="body2">
-                  Tất cả {validCount} bản ghi đều hợp lệ. Bạn có thể tiếp tục import ngay.
-                </Typography>
               </Alert>
             ) : (
-              <Card sx={{ p: 3 }}>
+              <Box sx={{ mt: 2 }}>
                 <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
                   <Typography variant="subtitle1" color="text.primary">
                     Xem trước dữ liệu
@@ -506,9 +540,9 @@ const EmployeeImport = () => {
                     }}
                   />
                 </Box>
-              </Card>
+              </Box>
             )}
-          </>
+          </Card>
         )}
 
         {/* Import Result */}
@@ -596,16 +630,18 @@ const EmployeeImport = () => {
           </Card>
         )}
 
-        {/* Action Buttons */}
-        <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
-          <Button
-            variant="contained"
-            onClick={handleImport}
-            disabled={!file || errorCount > 0 || isProcessing || isImporting}
-          >
-            {isImporting ? "Đang import..." : "Thêm hàng loạt"}
-          </Button>
-        </Box>
+        {
+          startImportable && (
+            <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
+              <Button
+                variant="contained"
+                onClick={handleImport}
+              >
+                {isImporting ? "Đang import..." : "Thêm hàng loạt"}
+              </Button>
+            </Box>
+          )
+        }
       </Stack>
     </Box>
   );

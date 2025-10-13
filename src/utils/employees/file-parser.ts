@@ -1,6 +1,6 @@
 /**
  * File Parser Utilities
- * 
+ *
  * This module provides utilities for parsing CSV and Excel files
  * for employee import functionality.
  */
@@ -35,15 +35,35 @@ export function mapHeaderToFieldKey(headerName: string): string {
     'Người quản lý': 'manager',
     'Vai trò': 'role',
   };
-  
+
   return mapping[headerName] || headerName.toLowerCase().replace(/\s+/g, '_');
 }
 
 /**
+ * Check if a row is completely empty (all fields are empty or whitespace)
+ * @param row - Row object to check
+ * @returns True if all fields are empty or contain only whitespace
+ */
+export function isRowEmpty(row: any): boolean {
+  // Get all values from the row object
+  const values = Object.values(row);
+
+  // Check if all values are empty, null, undefined, or whitespace
+  return values.every(value => {
+    if (value === null || value === undefined) {
+      return true;
+    }
+    const stringValue = String(value).trim();
+    return stringValue === '';
+  });
+}
+
+/**
  * Parse CSV text on the server with header mapping
- * 
+ * Automatically filters out completely empty rows
+ *
  * @param text - CSV file content as text
- * @returns Array of parsed records with mapped field keys
+ * @returns Array of parsed records with mapped field keys (empty rows excluded)
  * @throws Error if CSV is empty
  */
 export function parseCSVOnServer(text: string): any[] {
@@ -56,7 +76,7 @@ export function parseCSVOnServer(text: string): any[] {
   const rawHeaders = lines[0].split(',').map(h => h.trim());
   const normalizedHeaders = rawHeaders.map(normalizeHeader);
   const fieldKeys = normalizedHeaders.map(mapHeaderToFieldKey);
-  
+
   console.log("CSV Headers:", {
     raw: rawHeaders,
     normalized: normalizedHeaders,
@@ -64,18 +84,28 @@ export function parseCSVOnServer(text: string): any[] {
   });
 
   const data: any[] = [];
+  let emptyRowCount = 0;
 
   for (let i = 1; i < lines.length; i++) {
     const values = lines[i].split(',');
     const row: any = {};
-    
+
     // Map values to field keys
     fieldKeys.forEach((fieldKey, index) => {
       row[fieldKey] = values[index]?.trim() || '';
     });
-    
+
+    // Skip completely empty rows
+    if (isRowEmpty(row)) {
+      emptyRowCount++;
+      console.log(`Skipping empty row at line ${i + 1}`);
+      continue;
+    }
+
     data.push(row);
   }
+
+  console.log(`CSV parsing complete: ${data.length} data rows, ${emptyRowCount} empty rows skipped`);
 
   return data;
 }
@@ -83,60 +113,72 @@ export function parseCSVOnServer(text: string): any[] {
 /**
  * Parse XLSX buffer on the server
  * Uses the xlsx package to read Excel files
- * 
+ * Automatically filters out completely empty rows
+ *
  * @param buffer - ArrayBuffer containing Excel file data
- * @returns Array of parsed records with mapped field keys
+ * @returns Array of parsed records with mapped field keys (empty rows excluded)
  * @throws Error if Excel is empty or xlsx package is not installed
  */
 export async function parseXLSXOnServer(buffer: ArrayBuffer): Promise<any[]> {
   try {
     // Dynamic import of xlsx
     const XLSX = await import('xlsx');
-    
+
     // Read the workbook
     const workbook = XLSX.read(buffer, { type: 'array' });
-    
+
     // Get the first sheet
     const firstSheetName = workbook.SheetNames[0];
     if (!firstSheetName) {
       throw new Error("File Excel không chứa sheet nào");
     }
-    
+
     const worksheet = workbook.Sheets[firstSheetName];
-    
+
     // Convert to JSON
     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
-    
+
     if (jsonData.length === 0) {
       throw new Error("File Excel rỗng");
     }
-    
+
     // First row contains headers
     const rawHeaders = jsonData[0] as string[];
     const normalizedHeaders = rawHeaders.map(normalizeHeader);
     const fieldKeys = normalizedHeaders.map(mapHeaderToFieldKey);
-    
+
     console.log("Excel Headers:", {
       raw: rawHeaders,
       normalized: normalizedHeaders,
       fieldKeys: fieldKeys,
     });
-    
+
     // Parse data rows
     const data: any[] = [];
+    let emptyRowCount = 0;
+
     for (let i = 1; i < jsonData.length; i++) {
       const values = jsonData[i];
       const row: any = {};
-      
+
       // Map values to field keys
       fieldKeys.forEach((fieldKey, index) => {
         const value = values[index];
         row[fieldKey] = value !== undefined && value !== null ? String(value).trim() : '';
       });
-      
+
+      // Skip completely empty rows
+      if (isRowEmpty(row)) {
+        emptyRowCount++;
+        console.log(`Skipping empty row at line ${i + 1}`);
+        continue;
+      }
+
       data.push(row);
     }
-    
+
+    console.log(`Excel parsing complete: ${data.length} data rows, ${emptyRowCount} empty rows skipped`);
+
     return data;
   } catch (error) {
     console.error("Error parsing XLSX:", error);
