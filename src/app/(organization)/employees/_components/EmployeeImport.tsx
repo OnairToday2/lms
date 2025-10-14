@@ -98,7 +98,6 @@ function createDynamicColumns(templateColumns: TemplateColumn[]): GridColDef[] {
                 gap: 0.5,
                 width: "100%",
                 height: "100%",
-                bgcolor: "error.50",
                 borderRadius: 0.5,
               }}
             >
@@ -107,7 +106,7 @@ function createDynamicColumns(templateColumns: TemplateColumn[]): GridColDef[] {
                 sx={{
                   color: isEmpty ? "text.secondary" : "text.primary",
                   fontStyle: isEmpty ? "italic" : "normal",
-                  fontWeight: "medium",
+                  fontWeight: "normal",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
@@ -120,6 +119,42 @@ function createDynamicColumns(templateColumns: TemplateColumn[]): GridColDef[] {
         );
       },
     });
+  });
+
+  // Add Status column as the last column
+  columns.push({
+    field: "status",
+    headerName: "Trạng thái",
+    width: 150,
+    headerAlign: "center",
+    align: "center",
+    renderCell: (params: GridRenderCellParams) => {
+      const isValid = params.row.isValid;
+
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 0.5,
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{
+              color: isValid ? "success.main" : "error.main",
+              fontWeight: "normal",
+              overflow: "hidden",
+            }}
+          >
+            {isValid ? "Hợp lệ" : "Không hợp lệ"}
+          </Typography>
+        </Box>
+      );
+    },
   });
 
   return columns;
@@ -182,21 +217,6 @@ const EmployeeImport = () => {
       // Send the raw file to server for parsing and validation
       const validation = await validateEmployeeFile(formData);
       setValidationResult(validation);
-
-      if (validation.invalidCount === 0) {
-        notifications.show("File đã được tải lên và xác thực thành công!", {
-          severity: "success",
-          autoHideDuration: 3000,
-        });
-      } else {
-        notifications.show(
-          `Phát hiện ${validation.invalidCount} lỗi trong ${validation.totalCount} bản ghi`,
-          {
-            severity: "warning",
-            autoHideDuration: 5000,
-          },
-        );
-      }
     } catch (error) {
       console.error("Error validating file:", error);
       const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi xác thực file";
@@ -252,18 +272,10 @@ const EmployeeImport = () => {
 
   const handleImport = async () => {
     if (!validationResult || validationResult.invalidCount > 0) {
-      notifications.show("Vui lòng sửa các lỗi trước khi import", {
-        severity: "error",
-        autoHideDuration: 5000,
-      });
       return;
     }
 
     if (validationResult.validRecords.length === 0) {
-      notifications.show("Không có bản ghi hợp lệ để import", {
-        severity: "error",
-        autoHideDuration: 5000,
-      });
       return;
     }
 
@@ -484,13 +496,17 @@ const EmployeeImport = () => {
                   border: "1px solid",
                   borderColor: alpha(theme.palette.success.light, 0.3),
                   color: "success.darker",
+                  mt: 2,
                 })}
               >
                 <AlertTitle>
-                  Không có lỗi nào trong tệp. Bạn có thể tiếp tục import ngay.
+                  <Typography variant="body2">
+                    Không có lỗi nào trong tệp. Bạn có thể tiếp tục import ngay.
+                  </Typography>
                 </AlertTitle>
               </Alert>
             ) : (
+              /* Data Preview Table - Show only when there are invalid rows */
               <Box sx={{ mt: 2 }}>
                 <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
                   <Typography variant="subtitle1" color="text.primary">
@@ -498,24 +514,56 @@ const EmployeeImport = () => {
                   </Typography>
                 </Box>
 
-                {/* Error DataGrid Table with Dynamic Columns */}
+                {/* DataGrid Table with Dynamic Columns - Shows all rows */}
                 <Box sx={{ height: 400, width: "100%" }}>
                   <DataGrid
-                    rows={validationResult.invalidRecords.map((record, index) => {
-                      // Create row data with all fields from the record
-                      const rowData: any = {
-                        id: index,
-                        rowNumber: record.row,
-                        fieldErrors: record.fieldErrors || {},
-                      };
+                    rows={(() => {
+                      // Combine valid and invalid records
+                      const allRows: any[] = [];
+                      let rowIndex = 0;
 
-                      // Add all data fields to the row
-                      DEFAULT_TEMPLATE_STRUCTURE.columns.forEach((col) => {
-                        rowData[col.fieldKey] = record.data[col.fieldKey] || "";
+                      // Add invalid records
+                      validationResult.invalidRecords.forEach((record) => {
+                        const rowData: any = {
+                          id: rowIndex++,
+                          rowNumber: record.row,
+                          fieldErrors: record.fieldErrors || {},
+                          isValid: false,
+                        };
+
+                        // Add all data fields to the row
+                        DEFAULT_TEMPLATE_STRUCTURE.columns.forEach((col) => {
+                          rowData[col.fieldKey] = record.data[col.fieldKey] || "";
+                        });
+
+                        allRows.push(rowData);
                       });
 
-                      return rowData;
-                    })}
+                      // Add valid records
+                      validationResult.validRecords.forEach((record) => {
+                        const rowData: any = {
+                          id: rowIndex++,
+                          rowNumber: rowIndex, // Valid records don't have row numbers, use index
+                          fieldErrors: {},
+                          isValid: true,
+                        };
+
+                        // Add all data fields to the row
+                        DEFAULT_TEMPLATE_STRUCTURE.columns.forEach((col) => {
+                          rowData[col.fieldKey] = (record as any)[col.fieldKey] || "";
+                        });
+
+                        allRows.push(rowData);
+                      });
+
+                      // Sort by row number if available, otherwise by id
+                      return allRows.sort((a, b) => {
+                        if (a.rowNumber && b.rowNumber) {
+                          return a.rowNumber - b.rowNumber;
+                        }
+                        return a.id - b.id;
+                      });
+                    })()}
                     columns={createDynamicColumns(DEFAULT_TEMPLATE_STRUCTURE.columns)}
                     initialState={{
                       pagination: {
@@ -534,97 +582,9 @@ const EmployeeImport = () => {
                         bgcolor: "grey.100",
                         borderColor: "divider",
                       },
-                      "& .MuiDataGrid-row:hover": {
-                        bgcolor: "error.50",
-                      },
                     }}
                   />
                 </Box>
-              </Box>
-            )}
-          </Card>
-        )}
-
-        {/* Import Result */}
-        {importResult && (
-          <Card sx={{ p: 3 }}>
-            <Alert
-              severity={importResult.failedCount === 0 ? "success" : "warning"}
-              icon={importResult.failedCount === 0 ? <CheckCircleIcon /> : <ErrorIcon />}
-              sx={{ mb: importResult.errors.length > 0 ? 2 : 0 }}
-            >
-              <AlertTitle sx={{ fontWeight: "bold" }}>Kết quả import</AlertTitle>
-              <Typography variant="body2">
-                Thành công: {importResult.successCount} nhân viên
-                {importResult.failedCount > 0 && ` | Thất bại: ${importResult.failedCount} nhân viên`}
-              </Typography>
-            </Alert>
-
-            {/* Import Error DataGrid Table */}
-            {importResult.errors.length > 0 && (
-              <Box sx={{ height: 400, width: "100%" }}>
-                <DataGrid
-                  rows={importResult.errors.map((error, index) => ({
-                    id: index,
-                    rowNumber: error.row,
-                    employeeCode: error.employeeCode,
-                    error: error.error,
-                  }))}
-                  columns={[
-                    {
-                      field: "rowNumber",
-                      headerName: "STT",
-                      width: 80,
-                      headerAlign: "center",
-                      align: "center",
-                      renderCell: (params) => (
-                        <Chip
-                          label={params.value}
-                          size="small"
-                          color="warning"
-                          variant="outlined"
-                        />
-                      ),
-                    },
-                    {
-                      field: "employeeCode",
-                      headerName: "Mã nhân viên",
-                      width: 200,
-                    },
-                    {
-                      field: "error",
-                      headerName: "Lỗi",
-                      flex: 1,
-                      minWidth: 400,
-                      renderCell: (params) => (
-                        <Typography variant="body2" color="error">
-                          {params.value}
-                        </Typography>
-                      ),
-                    },
-                  ]}
-                  initialState={{
-                    pagination: {
-                      paginationModel: { page: 0, pageSize: 10 },
-                    },
-                  }}
-                  pageSizeOptions={[5, 10, 25]}
-                  disableRowSelectionOnClick
-                  sx={{
-                    border: "1px solid",
-                    borderColor: "divider",
-                    "& .MuiDataGrid-cell": {
-                      borderColor: "divider",
-                    },
-                    "& .MuiDataGrid-columnHeaders": {
-                      bgcolor: "grey.100",
-                      borderColor: "divider",
-                    },
-                    "& .MuiDataGrid-row:hover": {
-                      bgcolor: "warning.50",
-                    },
-                  }}
-                />
               </Box>
             )}
           </Card>
