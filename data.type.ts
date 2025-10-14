@@ -135,18 +135,41 @@ export type Database = {
       }
       organizations: {
         Row: {
+          admin_id: string | null
           created_at: string
+          employee_limit: number | null
           id: string
+          is_active: boolean | null
+          logo: string | null
+          name: string | null
         }
         Insert: {
+          admin_id?: string | null
           created_at?: string
+          employee_limit?: number | null
           id?: string
+          is_active?: boolean | null
+          logo?: string | null
+          name?: string | null
         }
         Update: {
+          admin_id?: string | null
           created_at?: string
+          employee_limit?: number | null
           id?: string
+          is_active?: boolean | null
+          logo?: string | null
+          name?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "organizations_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       positions: {
         Row: {
@@ -182,6 +205,7 @@ export type Database = {
           avatar: string | null
           birthday: string | null
           created_at: string
+          email: string | null
           employee_id: string
           full_name: string
           gender: Database["public"]["Enums"]["gender"]
@@ -192,6 +216,7 @@ export type Database = {
           avatar?: string | null
           birthday?: string | null
           created_at?: string
+          email?: string | null
           employee_id: string
           full_name: string
           gender: Database["public"]["Enums"]["gender"]
@@ -202,6 +227,7 @@ export type Database = {
           avatar?: string | null
           birthday?: string | null
           created_at?: string
+          email?: string | null
           employee_id?: string
           full_name?: string
           gender?: Database["public"]["Enums"]["gender"]
@@ -217,6 +243,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      test2: {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
       }
     }
     Views: {

@@ -1,48 +1,42 @@
-import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
-import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
-import React from "react";
+import { ClassIcon, GitIcon, HelpIcon, SquareFourIcon, UsersIcon } from "@/shared/assets/icons";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
-import {
-  SquareFourIcon,
-  GitIcon,
-  UsersIcon,
-  HelpIcon,
-  ClassIcon,
-} from "@/shared/assets/icons";
+import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
+import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
+import React from "react";
+import { PATHS } from "./path.contstants";
 
 const MAIN_MENU_LIST: MenuItemType[] = [
   {
     title: "Dashboard",
     icon: React.createElement(SquareFourIcon),
-    key: "dashboard",
-    children: [],
-    path: "/dashboard",
+    key: 'dashboard',
+    path: PATHS.DASHBOARD,
     type: "item",
   },
   {
     title: "Quản lý chi nhánh",
     icon: React.createElement(GitIcon),
     key: "branches",
-    path: "branches",
+    path: PATHS.BRANCHES,
     type: "item",
     children: [
       {
         title: "Danh sách chi nhánh",
         icon: React.createElement(GitIcon),
         key: "branches-list",
-        path: "/department/branches",
+        path: PATHS.LIST_BRANCHES,
       },
       {
         title: "Tạo chi nhánh",
         icon: React.createElement(GitIcon),
         key: "create-branch",
-        path: "/department/branches/create",
+        path: PATHS.CREATE_BRANCH,
       },
       {
         title: "Import chi nhánh",
         icon: React.createElement(GitIcon),
         key: "import-branch",
-        path: "/department/branches/import",
+        path: PATHS.IMPORT_BRANCHES,
       },
     ],
   },
@@ -50,26 +44,26 @@ const MAIN_MENU_LIST: MenuItemType[] = [
     title: "Quản lý phòng ban",
     icon: React.createElement(UsersIcon),
     key: "departments",
-    path: "departments",
+    path: PATHS.DEPARTMENTS,
     type: "item",
     children: [
       {
         title: "Danh sách phòng ban",
         icon: React.createElement(UsersIcon),
         key: "departments-list",
-        path: "/department/departments",
+        path: PATHS.LIST_DEPARTMENTS,
       },
       {
         title: "Tạo phòng ban",
         icon: React.createElement(UsersIcon),
         key: "create-department",
-        path: "/department/departments/create",
+        path: PATHS.CREATE_DEPARTMENT,
       },
       {
         title: "Import phòng ban",
         icon: React.createElement(UsersIcon),
         key: "import-department",
-        path: "/department/departments/import",
+        path: PATHS.IMPORT_DEPARTMENTS,
       },
     ],
   },
@@ -77,33 +71,33 @@ const MAIN_MENU_LIST: MenuItemType[] = [
     title: "Quản lý lớp học",
     icon: React.createElement(ClassIcon),
     key: "class-room",
-    path: "class-room",
+    path: PATHS.CLASSROOMS,
     children: [
       {
         title: "Tạo lớp học",
         icon: React.createElement(ClassIcon),
         key: "class-room/create",
-        path: "class-room/create",
+        path: PATHS.CREATE_CLASSROOM,
       },
     ],
   },
   {
     title: "Danh sách nhân viên",
     icon: React.createElement(UsersIcon),
-    key: "employee",
-    path: "employee",
+    key: "employees",
+    path: PATHS.EMPLOYEES,
     children: [
       {
         title: "Tạo nhân vien",
         icon: React.createElement(UsersIcon),
-        key: "employee",
-        path: "employee",
+        key: 'employees/create',
+        path: PATHS.CREATE_EMPLOYEE,
       },
       {
         title: "Import danh sách",
         icon: React.createElement(UsersIcon),
-        key: "employee",
-        path: "employee",
+        key: 'employees/import',
+        path: PATHS.IMPORT_EMPLOYEES,
       },
     ],
   },
