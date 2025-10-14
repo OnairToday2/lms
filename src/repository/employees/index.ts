@@ -25,6 +25,9 @@ export interface EmployeeListItem {
       type: Database["public"]["Enums"]["organization_unit_type"];
     } | null;
   }>;
+  managers_employees: Array<{
+    manager_id: string;
+  }>;
 }
 
 const getEmployees = async () => {
@@ -53,6 +56,9 @@ const getEmployees = async () => {
           name,
           type
         )
+      ),
+      managers_employees!managers_employees_employee_id_fkey (
+        manager_id
       )
     `)
     .order("created_at", { ascending: false });
@@ -90,6 +96,9 @@ const getEmployeeById = async (id: string) => {
           name,
           type
         )
+      ),
+      managers_employees!managers_employees_employee_id_fkey (
+        manager_id
       )
     `)
     .eq("id", id)
@@ -247,6 +256,31 @@ const updateEmployee = async (payload: UpdateEmployeePayload) => {
 
     if (employmentsError) {
       throw new Error(`Failed to create employments: ${employmentsError.message}`);
+    }
+  }
+
+  // 4. Handle manager-employee relationship
+  // First, delete all existing manager relationships for this employee
+  const { error: deleteManagerError } = await supabase
+    .from("managers_employees")
+    .delete()
+    .eq("employee_id", payload.id);
+
+  if (deleteManagerError) {
+    throw new Error(`Failed to delete old manager relationships: ${deleteManagerError.message}`);
+  }
+
+  // Create new manager relationship if manager_id is provided
+  if (payload.manager_id) {
+    const { error: managerError } = await supabase
+      .from("managers_employees")
+      .insert({
+        employee_id: payload.id,
+        manager_id: payload.manager_id,
+      });
+
+    if (managerError) {
+      throw new Error(`Failed to create manager relationship: ${managerError.message}`);
     }
   }
 

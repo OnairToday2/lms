@@ -25,7 +25,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import { EmployeeFormSchema, EmployeeFormData } from "./schema";
 import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
-import { useGetEmploymentsQuery } from "@/modules/employments/operations/query";
+import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
 import { useGetPositionsQuery } from "@/modules/positions/operations/query";
 import { Constants } from "@/types/supabase.types";
 import "dayjs/locale/vi";
@@ -47,7 +47,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 
   // Fetch data for dropdowns
   const { data: organizationUnits, isLoading: isLoadingOrgUnits } = useGetOrganizationUnitsQuery();
-  const { data: employments, isLoading: isLoadingEmployments } = useGetEmploymentsQuery();
+  const { data: employees, isLoading: isLoadingEmployees } = useGetEmployeesQuery();
   const { data: positions, isLoading: isLoadingPositions } = useGetPositionsQuery();
 
   // Filter organization units by type
@@ -388,14 +388,14 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                       {...field}
                       id="manager_id"
                       displayEmpty
-                      disabled={isLoadingEmployments}
+                      disabled={isLoadingEmployees}
                     >
                       <MenuItem value="">
                         <em>Chọn người quản lý</em>
                       </MenuItem>
-                      {employments?.map((employment: any) => (
-                        <MenuItem key={employment.id} value={employment.id}>
-                          {employment.employees?.profiles?.full_name || employment.employee_id}
+                      {employees?.map((employee) => (
+                        <MenuItem key={employee.id} value={employee.id}>
+                          {employee.profiles?.full_name || employee.employee_code}
                         </MenuItem>
                       ))}
                     </Select>
@@ -485,6 +485,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                         }}
                         slotProps={{
                           textField: {
+                            size: "small",
                             placeholder: "Chọn ngày bắt đầu làm việc",
                             error: !!error,
                             helperText: error?.message,

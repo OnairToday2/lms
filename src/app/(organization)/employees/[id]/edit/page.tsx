@@ -35,6 +35,9 @@ const EditEmployeePage = () => {
       (emp) => emp.organization_units?.type === "branch"
     );
 
+    // Get manager from managers_employees relationship
+    const managerRelationship = employee.managers_employees?.[0];
+
     return {
       email: employee.profiles?.email || "",
       fullName: employee.profiles?.full_name || "",
@@ -44,7 +47,7 @@ const EditEmployeePage = () => {
       employee_code: employee.employee_code || "",
       department: departmentEmployment?.organization_unit_id || "",
       branch: branchEmployment?.organization_unit_id || "",
-      manager_id: "", // Placeholder - will be implemented when manager field is added to DB
+      manager_id: managerRelationship?.manager_id || "",
       role: "", // Placeholder - will be implemented when role field is added to DB
       position_id: "", // Placeholder - will be implemented when position field is added to DB
       start_date: employee.start_date || null,

@@ -69,6 +69,36 @@ export type Database = {
           },
         ]
       }
+      managers_employees: {
+        Row: {
+          employee_id: string
+          manager_id: string
+        }
+        Insert: {
+          employee_id: string
+          manager_id: string
+        }
+        Update: {
+          employee_id?: string
+          manager_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "managers_employees_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "managers_employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_units: {
         Row: {
           created_at: string
