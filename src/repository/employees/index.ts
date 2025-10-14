@@ -126,7 +126,7 @@ export interface CreateEmployeePayload {
   manager_id: string;
   role?: string;
   position_id?: string;
-  start_date?: string | null;
+  start_date: string;
 }
 
 const createEmployee = async (payload: CreateEmployeePayload) => {
@@ -147,7 +147,7 @@ const createEmployee = async (payload: CreateEmployeePayload) => {
 
         // Work Information
         employee_code: payload.employee_code,
-        start_date: payload.start_date || null,
+        start_date: payload.start_date,
         department_id: payload.department,
         branch_id: payload.branch || null,
         manager_id: payload.manager_id,
@@ -184,7 +184,7 @@ export interface UpdateEmployeePayload {
   manager_id: string;
   role?: string;
   position_id?: string;
-  start_date?: string | null;
+  start_date: string;
 }
 
 const updateEmployee = async (payload: UpdateEmployeePayload) => {
@@ -195,7 +195,7 @@ const updateEmployee = async (payload: UpdateEmployeePayload) => {
     .from("employees")
     .update({
       employee_code: payload.employee_code,
-      start_date: payload.start_date || null,
+      start_date: payload.start_date,
     })
     .eq("id", payload.id);
 

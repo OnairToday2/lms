@@ -16,6 +16,7 @@ import {
   Select,
   MenuItem,
   Checkbox,
+  Autocomplete,
 } from "@mui/material";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,11 +24,13 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
-import { EmployeeFormSchema, EmployeeFormData } from "./schema";
+import { EmployeeFormSchema, EmployeeFormData, ROLE_OPTIONS } from "./schema";
 import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
 import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
 import { useGetPositionsQuery } from "@/modules/positions/operations/query";
+import { useCreatePositionMutation } from "@/modules/positions/operations/mutation";
 import { Constants } from "@/types/supabase.types";
+import useNotifications from "@/hooks/useNotifications/useNotifications";
 import "dayjs/locale/vi";
 
 export interface EmployeeFormProps {
@@ -44,11 +47,15 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
   mode = "create",
 }) => {
   const [autoGenerateCode, setAutoGenerateCode] = React.useState(false);
+  const notifications = useNotifications();
 
   // Fetch data for dropdowns
   const { data: organizationUnits, isLoading: isLoadingOrgUnits } = useGetOrganizationUnitsQuery();
   const { data: employees, isLoading: isLoadingEmployees } = useGetEmployeesQuery();
-  const { data: positions, isLoading: isLoadingPositions } = useGetPositionsQuery();
+  const { data: positions, isLoading: isLoadingPositions, refetch: refetchPositions } = useGetPositionsQuery();
+
+  // Mutation for creating new positions
+  const { mutateAsync: createPosition, isPending: isCreatingPosition } = useCreatePositionMutation();
 
   // Filter organization units by type
   const branches = React.useMemo(
@@ -78,7 +85,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
       manager_id: defaultValues?.manager_id || "",
       role: defaultValues?.role || "",
       position_id: defaultValues?.position_id || "",
-      start_date: defaultValues?.start_date || null,
+      start_date: defaultValues?.start_date || "",
     },
     resolver: zodResolver(EmployeeFormSchema),
   });
@@ -160,7 +167,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                   placeholder="Hoạt động"
                   disabled
                   fullWidth
-                  helperText=" "
+                  helperText=""
                 />
               </FormControl>
             </Grid>
@@ -346,25 +353,13 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                 control={control}
                 render={({ field, fieldState: { error } }) => (
                   <FormControl fullWidth>
-                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
-                      <FormLabel htmlFor="employee_code">
-                        Mã nhân viên <span style={{ color: "red" }}>*</span>
-                      </FormLabel>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={autoGenerateCode}
-                            onChange={(e) => setAutoGenerateCode(e.target.checked)}
-                            size="small"
-                          />
-                        }
-                        label={<span style={{ fontSize: "0.875rem" }}>Tạo tự động</span>}
-                      />
-                    </Box>
+                    <FormLabel htmlFor="employee_code">
+                      Mã nhân viên <span style={{ color: "red" }}>*</span>
+                    </FormLabel>
                     <TextField
                       {...field}
                       id="employee_code"
-                      placeholder="Nhập mã nhân viên"
+                      placeholder="Hệ thống tạo hoặc bạn có thể tự nhập"
                       error={!!error}
                       helperText={error?.message}
                       fullWidth
@@ -414,44 +409,21 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                 name="role"
                 control={control}
                 render={({ field, fieldState: { error } }) => (
-                  <FormControl fullWidth>
+                  <FormControl fullWidth error={!!error}>
                     <FormLabel htmlFor="role" sx={{ mb: 1 }}>
                       Vai trò
                     </FormLabel>
-                    <TextField
-                      {...field}
-                      id="role"
-                      placeholder="Nhập vai trò"
-                      error={!!error}
-                      helperText={error?.message}
-                      fullWidth
-                    />
-                  </FormControl>
-                )}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Controller
-                name="position_id"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <FormControl fullWidth error={!!error}>
-                    <FormLabel htmlFor="position_id" sx={{ mb: 1 }}>
-                      Chức danh
-                    </FormLabel>
                     <Select
                       {...field}
-                      id="position_id"
+                      id="role"
                       displayEmpty
-                      disabled={isLoadingPositions}
                     >
                       <MenuItem value="">
-                        <em>Chọn chức danh</em>
+                        <em>Chọn vai trò</em>
                       </MenuItem>
-                      {positions?.map((position) => (
-                        <MenuItem key={position.id} value={position.id}>
-                          {position.title}
+                      {ROLE_OPTIONS.map((role) => (
+                        <MenuItem key={role} value={role}>
+                          {role}
                         </MenuItem>
                       ))}
                     </Select>
@@ -467,11 +439,115 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 
             <Grid size={{ xs: 12, md: 6 }}>
               <Controller
+                name="position_id"
+                control={control}
+                render={({ field: { onChange, value, ...field }, fieldState: { error } }) => {
+                  // Find the selected position object
+                  const selectedPosition = positions?.find((p) => p.id === value);
+
+                  // Handler for creating new position
+                  const handleCreatePosition = async (positionName: string) => {
+                    try {
+                      const newPosition = await createPosition(positionName);
+                      // Refetch positions to update the list
+                      await refetchPositions();
+                      // Set the new position's UUID as the value
+                      onChange(newPosition.id);
+                      notifications.show(`Chức danh "${positionName}" đã được tạo thành công!`, {
+                        severity: "success",
+                        autoHideDuration: 3000,
+                      });
+                    } catch (error) {
+                      notifications.show(
+                        error instanceof Error ? error.message : "Không thể tạo chức danh mới",
+                        {
+                          severity: "error",
+                          autoHideDuration: 5000,
+                        }
+                      );
+                    }
+                  };
+
+                  return (
+                    <FormControl fullWidth error={!!error}>
+                      <FormLabel htmlFor="position_id" sx={{ mb: 1 }}>
+                        Chức danh
+                      </FormLabel>
+                      <Autocomplete
+                        {...field}
+                        id="position_id"
+                        options={positions || []}
+                        getOptionLabel={(option) => {
+                          // Handle both position objects and string values
+                          if (typeof option === "string") return option;
+                          return option.title;
+                        }}
+                        value={selectedPosition || null}
+                        onChange={async (_, newValue) => {
+                          if (newValue === null) {
+                            onChange("");
+                          } else if (typeof newValue === "string") {
+                            // User typed a new position name - create it immediately
+                            await handleCreatePosition(newValue);
+                          } else {
+                            // User selected an existing position
+                            onChange(newValue.id);
+                          }
+                        }}
+                        freeSolo
+                        loading={isLoadingPositions || isCreatingPosition}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            placeholder="Chọn hoặc nhập chức danh mới"
+                            error={!!error}
+                            helperText={error?.message}
+                            onKeyDown={async (e) => {
+                              if (e.key === "Enter") {
+                                // Prevent form submission
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                // Get the current input value
+                                const inputValue = (e.target as HTMLInputElement).value?.trim();
+
+                                if (inputValue) {
+                                  // Check if this is a new position (not in the existing list)
+                                  const existingPosition = positions?.find(
+                                    (p) => p.title.toLowerCase() === inputValue.toLowerCase()
+                                  );
+
+                                  if (!existingPosition) {
+                                    // Create new position
+                                    await handleCreatePosition(inputValue);
+                                  } else {
+                                    // Select existing position
+                                    onChange(existingPosition.id);
+                                  }
+                                }
+                              }
+                            }}
+                          />
+                        )}
+                        isOptionEqualToValue={(option, value) => {
+                          return option.id === value?.id;
+                        }}
+                      />
+                    </FormControl>
+                  );
+                }}
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Controller
                 name="start_date"
                 control={control}
                 render={({ field, fieldState: { error } }) => (
-                  <FormControl fullWidth>
-                    <FormLabel sx={{ mb: 1 }}>Ngày bắt đầu làm việc</FormLabel>
+                  <FormControl fullWidth error={!!error}>
+                    <FormLabel sx={{ mb: 1 }}>
+                      Ngày bắt đầu làm việc <span style={{ color: 'red' }}>*</span>
+                    </FormLabel>
                     <LocalizationProvider
                       dateAdapter={AdapterDayjs}
                       adapterLocale="vi"
@@ -480,7 +556,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                         value={field.value ? dayjs(field.value) : null}
                         onChange={(newValue: Dayjs | null) => {
                           field.onChange(
-                            newValue ? newValue.format("YYYY-MM-DD") : null
+                            newValue ? newValue.format("YYYY-MM-DD") : ""
                           );
                         }}
                         slotProps={{

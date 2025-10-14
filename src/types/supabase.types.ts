@@ -13,25 +13,42 @@ export type Database = {
         Row: {
           created_at: string
           employee_code: string
+          employee_order: number | null
           id: string
+          position_id: string | null
           start_date: string | null
+          status: Database["public"]["Enums"]["employee_status"]
           user_id: string
         }
         Insert: {
           created_at?: string
           employee_code: string
+          employee_order?: number | null
           id?: string
+          position_id?: string | null
           start_date?: string | null
+          status: Database["public"]["Enums"]["employee_status"]
           user_id: string
         }
         Update: {
           created_at?: string
           employee_code?: string
+          employee_order?: number | null
           id?: string
+          position_id?: string | null
           start_date?: string | null
+          status?: Database["public"]["Enums"]["employee_status"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "employees_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       employments: {
         Row: {
@@ -237,6 +254,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      employee_status: "active" | "inactive"
       gender: "male" | "female" | "other"
       organization_unit_type: "branch" | "department"
     }
@@ -366,6 +384,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      employee_status: ["active", "inactive"],
       gender: ["male", "female", "other"],
       organization_unit_type: ["branch", "department"],
     },
