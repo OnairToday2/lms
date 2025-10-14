@@ -49,7 +49,7 @@ const EditEmployeePage = () => {
       branch: branchEmployment?.organization_unit_id || "",
       manager_id: managerRelationship?.manager_id || "",
       role: "", // Placeholder - will be implemented when role field is added to DB
-      position_id: "", // Placeholder - will be implemented when position field is added to DB
+      position_id: employee.position_id || "",
       start_date: employee.start_date || null,
     };
   }, [employee]);

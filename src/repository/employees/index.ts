@@ -5,6 +5,7 @@ export interface EmployeeListItem {
   id: string;
   employee_code: string;
   start_date: string | null;
+  position_id: string | null;
   user_id: string;
   created_at: string;
   profiles: {
@@ -37,6 +38,7 @@ const getEmployees = async () => {
       id,
       employee_code,
       start_date,
+      position_id,
       user_id,
       created_at,
       profiles!profiles_employee_id_fkey (
@@ -77,6 +79,7 @@ const getEmployeeById = async (id: string) => {
       id,
       employee_code,
       start_date,
+      position_id,
       user_id,
       created_at,
       profiles!profiles_employee_id_fkey (
@@ -136,6 +139,7 @@ const updateEmployee = async (payload: UpdateEmployeePayload) => {
     .update({
       employee_code: payload.employee_code,
       start_date: payload.start_date,
+      position_id: payload.position_id || null,
     })
     .eq("id", payload.id);
 
