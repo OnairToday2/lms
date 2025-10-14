@@ -24,7 +24,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import {
   validateEmployeeFile,
-  importEmployeesAction,
+  importEmployeesFile,
   type ValidationResult,
   type ImportResult,
 } from "@/app/actions/employees";
@@ -271,11 +271,27 @@ const EmployeeImport = () => {
   };
 
   const handleImport = async () => {
+    if (!file) {
+      notifications.show("Vui lòng chọn file để import", {
+        severity: "error",
+        autoHideDuration: 3000,
+      });
+      return;
+    }
+
     if (!validationResult || validationResult.invalidCount > 0) {
+      notifications.show("Vui lòng sửa các lỗi trước khi import", {
+        severity: "error",
+        autoHideDuration: 3000,
+      });
       return;
     }
 
     if (validationResult.validRecords.length === 0) {
+      notifications.show("Không có bản ghi hợp lệ để import", {
+        severity: "warning",
+        autoHideDuration: 3000,
+      });
       return;
     }
 
@@ -283,8 +299,12 @@ const EmployeeImport = () => {
     setImportResult(null);
 
     try {
-      // Call the import server action
-      const result = await importEmployeesAction(validationResult.validRecords);
+      // Create FormData and append the file
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Call the import server action with FormData
+      const result = await importEmployeesFile(formData);
       setImportResult(result);
 
       if (result.failedCount === 0) {

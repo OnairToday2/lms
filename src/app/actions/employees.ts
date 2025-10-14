@@ -230,67 +230,117 @@ export async function validateEmployeeFile(
 /**
  * Import validated employee records into the database
  * Uses the service role client and relies on the handle_new_employee trigger
+ * This server action accepts FormData containing the file and validates it before importing
  *
- * @param records - Array of validated employee records
+ * @param formData - FormData containing the file to import
  * @returns Import result with success/failure counts and errors
  */
-export async function importEmployeesAction(
-  records: EmployeeImportData[],
+export async function importEmployeesFile(
+  formData: FormData,
 ): Promise<ImportResult> {
   const supabase = createServiceRoleClient();
 
-  let successCount = 0;
-  let failedCount = 0;
-  const errors: Array<{ row: number; employeeCode: string; error: string }> = [];
+  try {
+    console.log("=== IMPORT EMPLOYEES FILE START ===");
 
-  for (let i = 0; i < records.length; i++) {
-    const record = records[i];
-    const rowNumber = i + 2; // +2 because index is 0-based and row 1 is header
+    // Step 1: Validate the file first to get valid records
+    const validationResult = await validateEmployeeFile(formData);
 
-    try {
-      // Create auth user - the database trigger will handle the rest
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: record.email,
-        email_confirm: true,
-        user_metadata: {
-          employee_code: record.employee_code,
-          full_name: record.fullName,
-          phone_number: record.phoneNumber || "",
-          gender: record.gender,
-          birthday: record.birthday || null,
-          department: record.department,
-          branch: record.branch || "",
-          start_date: record.start_date || null,
-        },
-      });
+    console.log("Validation result:", {
+      totalCount: validationResult.totalCount,
+      validCount: validationResult.validCount,
+      invalidCount: validationResult.invalidCount,
+    });
 
-      if (authError) {
-        throw new Error(authError.message);
-      }
-
-      if (!authData.user) {
-        throw new Error("Failed to create user");
-      }
-
-      successCount++;
-    } catch (error) {
-      failedCount++;
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      errors.push({
-        row: rowNumber,
-        employeeCode: record.employee_code,
-        error: errorMessage,
-      });
-      console.error(`Failed to import employee ${record.employee_code}:`, errorMessage);
+    // Step 2: Check if there are any valid records to import
+    if (validationResult.validCount === 0) {
+      console.log("No valid records to import");
+      return {
+        successCount: 0,
+        failedCount: 0,
+        errors: [],
+      };
     }
+
+    // Step 3: Check if there are any invalid records
+    if (validationResult.invalidCount > 0) {
+      throw new Error(
+        `File chứa ${validationResult.invalidCount} bản ghi không hợp lệ. Vui lòng sửa lỗi trước khi import.`
+      );
+    }
+
+    // Step 4: Import the valid records
+    const records = validationResult.validRecords;
+    let successCount = 0;
+    let failedCount = 0;
+    const errors: Array<{ row: number; employeeCode: string; error: string }> = [];
+
+    console.log(`Starting import of ${records.length} valid records...`);
+
+    for (let i = 0; i < records.length; i++) {
+      const record = records[i];
+      const rowNumber = i + 2; // +2 because index is 0-based and row 1 is header
+
+      try {
+        // Create auth user - the database trigger will handle the rest
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+          email: record.email,
+          email_confirm: true,
+          user_metadata: {
+            full_name: record.fullName,
+            phone_number: record.phoneNumber || "",
+            gender: record.gender,
+            birthday: record.birthday || null,
+            employee_code: record.employee_code || "",
+            start_date: record.start_date || null,
+            department_id: record.department,
+            branch_id: record.branch || null,
+            manager_id: null,
+          },
+        });
+
+        if (authError) {
+          throw new Error(authError.message);
+        }
+
+        if (!authData.user) {
+          throw new Error("Failed to create user");
+        }
+
+        successCount++;
+        console.log(`Successfully imported employee ${record.employee_code} (${successCount}/${records.length})`);
+      } catch (error) {
+        failedCount++;
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        errors.push({
+          row: rowNumber,
+          employeeCode: record.employee_code,
+          error: errorMessage,
+        });
+        console.error(`Failed to import employee ${record.employee_code}:`, errorMessage);
+      }
+    }
+
+    console.log("Import complete:", {
+      successCount,
+      failedCount,
+      totalErrors: errors.length,
+    });
+
+    // Revalidate the employees page to refresh the list
+    revalidatePath("/employees");
+
+    console.log("=== IMPORT EMPLOYEES FILE END ===");
+
+    return {
+      successCount,
+      failedCount,
+      errors,
+    };
+  } catch (error) {
+    console.error("Error importing employee file:", error);
+    throw error instanceof Error
+      ? error
+      : new Error("Có lỗi xảy ra khi import file nhân viên");
   }
-
-  // Revalidate the employees page to refresh the list
-  revalidatePath("/employees");
-
-  return {
-    successCount,
-    failedCount,
-    errors,
-  };
 }
