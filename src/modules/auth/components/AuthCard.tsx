@@ -1,27 +1,8 @@
-"use client";
 import * as React from "react";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
-import { styled } from "@mui/material/styles";
 import { LogoOnairIcon } from "@/shared/assets/icons";
-
-const Card = styled(MuiCard)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignSelf: "center",
-  width: "100%",
-  gap: theme.spacing(2),
-  margin: "auto",
-  border: "none",
-  padding: 0,
-  overflow: "visible",
-}));
-
-const CardContainer = styled(Stack)(({ theme }) => ({
-  padding: theme.spacing(2),
-}));
-
 export interface AuhCardProps extends React.PropsWithChildren {
   title?: React.ReactNode;
   description?: React.ReactNode;
@@ -34,12 +15,28 @@ const AuhCard: React.FC<AuhCardProps> = ({
   className,
 }) => {
   return (
-    <CardContainer
+    <Stack
+      component="div"
       direction="column"
       justifyContent="space-between"
+      sx={{ padding: 2 }}
       className={className}
     >
-      <Card variant="outlined">
+      <MuiCard
+        variant="outlined"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignSelf: "center",
+          width: "100%",
+          gap: 2,
+          margin: "auto",
+          border: "none",
+          padding: 0,
+          overflow: "visible",
+        }}
+        className="bg-transparent"
+      >
         <LogoOnairIcon className="w-auto h-12 mr-auto" />
         <Typography
           component="h1"
@@ -50,7 +47,7 @@ const AuhCard: React.FC<AuhCardProps> = ({
         </Typography>
         {description ? (
           <Typography
-            component="div"
+            component="p"
             variant="body1"
             className="text-sm text-gray-600"
           >
@@ -58,8 +55,8 @@ const AuhCard: React.FC<AuhCardProps> = ({
           </Typography>
         ) : null}
         {children}
-      </Card>
-    </CardContainer>
+      </MuiCard>
+    </Stack>
   );
 };
 export default React.memo(AuhCard);

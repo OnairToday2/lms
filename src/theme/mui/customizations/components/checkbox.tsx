@@ -32,8 +32,9 @@ export const checkboxCustomizations: Components<Theme> = {
         height: "1.125rem",
         width: "1.125rem",
         borderRadius: "0.375rem",
-        border: "2px solid ",
-        borderColor: grey[600],
+        border: "2px solid",
+        padding: "8px",
+        borderColor: theme.palette.grey[400],
         transition: "border-color, background-color, 120ms ease-in",
         // ...theme.applyStyles("dark", {
         //   borderColor: alpha(gray[700], 0.8),
@@ -214,13 +215,14 @@ export const checkboxCustomizations: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         margin: 10,
-        height: 16,
-        width: 16,
-        borderRadius: 16,
-        border: "1px solid ",
-        // borderColor: alpha(gray[300], 0.8),
-        // boxShadow: "0 0 0 1.5px hsla(210, 0%, 0%, 0.04) inset",
-        backgroundColor: alpha(grey[100], 0.4),
+        height: "1.125rem",
+        width: "1.125rem",
+        borderRadius: "1.125rem",
+        // border: "1px solid ",
+        // borderColor: alpha(theme.palette.grey[400], 1),
+        color: theme.palette.grey[400],
+        boxShadow: "0 0 0 1.5px hsla(210, 0%, 0%, 0.04) inset",
+        backgroundColor: alpha(grey[100], 1),
         transition: "border-color, background-color, 120ms ease-in",
         variants: [
           {
@@ -228,7 +230,6 @@ export const checkboxCustomizations: Components<Theme> = {
               color: "primary",
             },
             style: {
-              color: primary["main"],
               "&:hover": {
                 borderColor: primary["main"],
               },
@@ -245,7 +246,6 @@ export const checkboxCustomizations: Components<Theme> = {
               color: "secondary",
             },
             style: {
-              color: secondary["main"],
               "&:hover": {
                 borderColor: secondary["main"],
               },
@@ -262,7 +262,6 @@ export const checkboxCustomizations: Components<Theme> = {
               color: "success",
             },
             style: {
-              color: success["main"],
               "&:hover": {
                 borderColor: success["main"],
               },
@@ -279,7 +278,6 @@ export const checkboxCustomizations: Components<Theme> = {
               color: "warning",
             },
             style: {
-              color: warning["main"],
               "&:hover": {
                 borderColor: warning["main"],
               },
@@ -296,7 +294,6 @@ export const checkboxCustomizations: Components<Theme> = {
               color: "error",
             },
             style: {
-              color: error["main"],
               "&:hover": {
                 borderColor: error["main"],
               },
@@ -313,7 +310,6 @@ export const checkboxCustomizations: Components<Theme> = {
               color: "info",
             },
             style: {
-              color: info["main"],
               "&:hover": {
                 borderColor: info["main"],
               },
@@ -330,7 +326,7 @@ export const checkboxCustomizations: Components<Theme> = {
               color: "default",
             },
             style: {
-              color: grey[800],
+              color: theme.palette.grey[400],
               "&:hover": {
                 borderColor: grey[800],
               },

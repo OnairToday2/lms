@@ -51,22 +51,26 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                 {actions}
               </Box>
             </PageContentHeader>
-            <PageHeaderBreadcrumbs
-              aria-label="breadcrumb"
-              separator={
-                <span className="text-sm mx-1 mt-[1px] inline-block text-gray-600">
-                  /
-                </span>
-              }
-            >
-              {breadcrumbs?.map((breadcrumb, index) => (
-                <BreadcrumbItem
-                  key={index}
-                  title={breadcrumb.title}
-                  path={breadcrumb.path}
-                />
-              ))}
-            </PageHeaderBreadcrumbs>
+            {breadcrumbs ? (
+              <PageHeaderBreadcrumbs
+                aria-label="breadcrumb"
+                separator={
+                  <span className="text-sm mx-1 mt-[1px] inline-block text-gray-600">
+                    /
+                  </span>
+                }
+                className="mt-1"
+              >
+                {breadcrumbs?.map((breadcrumb, index) => (
+                  <BreadcrumbItem
+                    key={index}
+                    title={breadcrumb.title}
+                    path={breadcrumb.path}
+                    className="text-xs"
+                  />
+                ))}
+              </PageHeaderBreadcrumbs>
+            ) : null}
           </Stack>
         </Stack>
         <Stack
@@ -86,21 +90,26 @@ export default PageHeader;
 interface BreadcrumbItemProps {
   path?: string;
   title?: string;
+  className?: string;
 }
-const BreadcrumbItem: React.FC<BreadcrumbItemProps> = ({ path, title }) => {
+const BreadcrumbItem: React.FC<BreadcrumbItemProps> = ({
+  path,
+  title,
+  className,
+}) => {
   if (path)
     return (
-      <Link color="inherit" href={path} className="text-sm">
+      <Link color="inherit" href={path} className={className}>
         {title}
       </Link>
     );
 
   return (
     <Typography
+      className={className}
       sx={{
         color: "text.primary",
       }}
-      className="text-sm"
     >
       {title}
     </Typography>
