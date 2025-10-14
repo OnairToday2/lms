@@ -55,7 +55,6 @@ const SignInFormClient: React.FC<SignInFormClientProps> = ({
               fullWidth
               id="email"
               placeholder="your@email.com"
-              name="email"
               autoComplete="email"
               variant="outlined"
               error={!!error}
@@ -77,7 +76,6 @@ const SignInFormClient: React.FC<SignInFormClientProps> = ({
               {...field}
               required
               fullWidth
-              name="password"
               placeholder="Mật khẩu của bạn"
               type={isShowPassword ? "text" : "password"}
               id="password"

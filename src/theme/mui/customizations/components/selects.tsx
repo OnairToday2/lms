@@ -1,25 +1,9 @@
 import React from "react";
 import { alpha, Theme, Components } from "@mui/material/styles";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { selectClasses, SvgIconProps } from "@mui/material";
+import { inputBaseClasses, selectClasses, SvgIconProps } from "@mui/material";
 import { grey } from "../../theme-color";
 export const selectsCustomizations: Components<Theme> = {
-  MuiButtonBase: {
-    defaultProps: {
-      disableTouchRipple: false,
-      disableRipple: false,
-    },
-    styleOverrides: {
-      root: ({ theme }) => ({
-        boxSizing: "border-box",
-        transition: "all 100ms ease-in",
-        "&:focus-visible": {
-          outline: `3px solid ${alpha(theme.palette.primary.main, 0.5)}`,
-          outlineOffset: "2px",
-        },
-      }),
-    },
-  },
   MuiSelect: {
     defaultProps: {
       IconComponent: React.forwardRef<SVGSVGElement, SvgIconProps>(
@@ -30,63 +14,64 @@ export const selectsCustomizations: Components<Theme> = {
     },
     styleOverrides: {
       root: ({ theme }) => ({
-        borderRadius: (theme.vars || theme).shape.borderRadius,
-        border: "1px solid",
-        borderColor: grey[200],
-        backgroundColor: (theme.vars || theme).palette.background.paper,
-        boxShadow: `inset 0 1px 0 1px hsla(220, 0%, 100%, 0.6), inset 0 -1px 0 1px hsla(220, 35%, 90%, 0.5)`,
-        "&:hover": {
-          borderColor: grey[300],
-          backgroundColor: (theme.vars || theme).palette.background.paper,
-          boxShadow: "none",
+        [`& .${inputBaseClasses.root}`]: {
+          borderBottom: "1px solid",
         },
-        [`&.${selectClasses.focused}`]: {
-          outlineOffset: 0,
-          borderColor: grey[400],
-        },
-        "&:before, &:after": {
-          display: "none",
-        },
-
-        ...theme.applyStyles("dark", {
-          borderRadius: (theme.vars || theme).shape.borderRadius,
-          borderColor: grey[700],
-          backgroundColor: (theme.vars || theme).palette.background.paper,
-          boxShadow: `inset 0 1px 0 1px ${alpha(
-            grey[700],
-            0.15,
-          )}, inset 0 -1px 0 1px hsla(220, 0%, 0%, 0.7)`,
-          "&:hover": {
-            borderColor: alpha(grey[700], 0.7),
-            backgroundColor: (theme.vars || theme).palette.background.paper,
-            boxShadow: "none",
-          },
-          [`&.${selectClasses.focused}`]: {
-            outlineOffset: 0,
-            borderColor: grey[900],
-          },
-          "&:before, &:after": {
-            display: "none",
-          },
-        }),
-        variants: [
-          {
-            props: {
-              size: "small",
-            },
-            style: {
-              height: "2.25rem",
-            },
-          },
-          {
-            props: {
-              size: "medium",
-            },
-            style: {
-              height: "2.5rem",
-            },
-          },
-        ],
+        // borderRadius: (theme.vars || theme).shape.borderRadius,
+        // // border: "1px solid",
+        // borderColor: theme.palette.grey[400],
+        // backgroundColor: (theme.vars || theme).palette.background.paper,
+        // // boxShadow: `inset 0 1px 0 1px hsla(220, 0%, 100%, 0.6), inset 0 -1px 0 1px hsla(220, 35%, 90%, 0.5)`,
+        // "&:hover": {
+        //   borderColor: grey[400],
+        //   backgroundColor: (theme.vars || theme).palette.background.paper,
+        //   boxShadow: "none",
+        // },
+        // [`&.${selectClasses.focused}`]: {
+        //   outlineOffset: 0,
+        //   borderColor: theme.palette.primary["main"],
+        // },
+        // "&:before, &:after": {
+        //   display: "none",
+        // },
+        // ...theme.applyStyles("dark", {
+        //   borderColor: grey[700],
+        //   backgroundColor: (theme.vars || theme).palette.background.paper,
+        //   boxShadow: `inset 0 1px 0 1px ${alpha(
+        //     grey[700],
+        //     0.15,
+        //   )}, inset 0 -1px 0 1px hsla(220, 0%, 0%, 0.7)`,
+        //   "&:hover": {
+        //     borderColor: alpha(grey[700], 0.7),
+        //     backgroundColor: (theme.vars || theme).palette.background.paper,
+        //     boxShadow: "none",
+        //   },
+        //   [`&.${selectClasses.focused}`]: {
+        //     outlineOffset: 0,
+        //     borderColor: grey[900],
+        //   },
+        //   "&:before, &:after": {
+        //     display: "none",
+        //   },
+        // }),
+        // variants: [
+        //   {
+        //     props: {
+        //       size: "small",
+        //     },
+        //     style: {
+        //       height: "2.25rem",
+        //     },
+        //   },
+        //   {
+        //     props: {
+        //       size: "medium",
+        //     },
+        //     style: {
+        //       height: "2.5rem",
+        //     },
+        //   },
+        // ],
       }),
       select: ({ theme }) => ({
         display: "flex",

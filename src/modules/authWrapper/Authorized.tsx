@@ -2,29 +2,36 @@ import React from "react";
 import { AuthProvider } from "@/modules/auth/store/AuthProvider";
 import { getCurrentUser } from "@/modules/auth/actions/getCurrentUser";
 import { redirect, RedirectType } from "next/navigation";
+import { AuthData } from "../auth/types";
 interface Props {
   children: React.ReactNode;
 }
 const Authorized: React.FC<Props> = async ({ children }) => {
   const currentUser = await getCurrentUser();
-
+  let userInfo: AuthData | undefined;
   if (!currentUser) {
     redirect("/auth/signin", RedirectType.replace);
   }
-  const userInfo = currentUser.user_metadata;
 
-  return (
-    <AuthProvider
-      data={{
-        id: userInfo.sub,
-        name: userInfo.name,
-        email: userInfo.email,
-        avatarUrl: userInfo.avatar_url,
-        accessToken: userInfo.accessToken,
-      }}
-    >
-      {children}
-    </AuthProvider>
-  );
+  if (currentUser.app_metadata.provider === "email") {
+    userInfo = {
+      id: currentUser.id,
+      name: "",
+      email: currentUser?.email || "",
+      avatarUrl: "",
+      accessToken: "",
+    };
+  }
+  if (currentUser.app_metadata.provider === "gmail") {
+    userInfo = {
+      id: currentUser.user_metadata.sub,
+      name: currentUser.user_metadata.name,
+      email: currentUser.user_metadata.email,
+      avatarUrl: currentUser.user_metadata.avatar_url,
+      accessToken: currentUser.user_metadata.accessToken,
+    };
+  }
+
+  return <AuthProvider data={userInfo}>{children}</AuthProvider>;
 };
 export default Authorized;

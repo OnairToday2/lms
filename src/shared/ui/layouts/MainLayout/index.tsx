@@ -15,7 +15,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const [isMobileNavigationExpanded, setIsMobileNavigationExpanded] =
     useState(false);
 
-  const isOverLGViewport = useMediaQuery(theme.breakpoints.up("lg"));
+  const isOverLGViewport = useMediaQuery(theme.breakpoints.up("lg"), {
+    defaultMatches: true,
+  });
 
   const isNavigationExpanded = isOverLGViewport
     ? isDesktopNavigationExpanded
@@ -64,7 +66,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       />
       {/* Main content */}
       <Box
-        sx={(theme) => ({
+        sx={{
           display: "flex",
           flexDirection: "column",
           flex: 1,
@@ -73,7 +75,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
           ...theme.applyStyles("dark", {
             background: "rgb(5 7 10)",
           }),
-        })}
+        }}
       >
         <Box
           component="main"

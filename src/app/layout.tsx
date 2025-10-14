@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import ReactQueryClientProvider from "@/shared/providers/ReactQueryClientProvider";
 import MUIThemeProvider from "@/shared/providers/MUIThemeProvider";
 import NotificationsProvider from "@/hooks/useNotifications/NotificationsProvider";
+import MUILocalizationProvider from "@/shared/providers/MUILocationProvider";
+
 import DialogsProvider from "@/hooks/useDialogs/DialogsProvider";
 import { Inter } from "next/font/google";
 import "../theme/palette.css";
@@ -20,7 +22,6 @@ export const metadata: Metadata = {
     default: "ONAIR", // a default is required when creating a template
   },
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -31,9 +32,11 @@ export default function RootLayout({
       <html lang="vi" suppressHydrationWarning className={inter.variable}>
         <body>
           <MUIThemeProvider>
-            <NotificationsProvider>
-              <DialogsProvider>{children}</DialogsProvider>
-            </NotificationsProvider>
+            <MUILocalizationProvider>
+              <NotificationsProvider>
+                <DialogsProvider>{children}</DialogsProvider>
+              </NotificationsProvider>
+            </MUILocalizationProvider>
           </MUIThemeProvider>
         </body>
       </html>

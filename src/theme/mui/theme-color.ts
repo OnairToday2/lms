@@ -196,6 +196,19 @@ declare module "@mui/material/styles" {
     baseShadow: string;
   }
 }
+
+declare module "@mui/material/styles" {
+  interface PaletteColor {
+    darker: string;
+    lighter: string;
+  }
+
+  interface SimplePaletteColorOptions {
+    darker: string;
+    lighter: string;
+  }
+}
+
 /* [Core] Colors - Value */
 
 // $other-facebook: hsla(214, 89%, 52%, 1);
