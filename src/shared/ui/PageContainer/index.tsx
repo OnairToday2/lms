@@ -19,7 +19,7 @@ export default function PageContainer(props: PageContainerProps) {
   const { children, breadcrumbs, title, actions = null } = props;
   return (
     <div className="page-container">
-      <Toolbar />
+      <div className="h-6"></div>
       <PageHeader
         breadcrumbs={breadcrumbs}
         actions={actions}
@@ -33,6 +33,7 @@ export default function PageContainer(props: PageContainerProps) {
           </Stack>
         }
       />
+      <div className="h-6"></div>
       <Container
         sx={{
           flex: 1,
@@ -44,9 +45,7 @@ export default function PageContainer(props: PageContainerProps) {
         className="!px-0"
         maxWidth={false}
       >
-        <Box sx={{ flex: 1, display: "flex", my: 2, flexDirection: "column" }}>
-          {children}
-        </Box>
+        {children}
       </Container>
     </div>
   );

@@ -7,6 +7,7 @@ import {
   GitIcon,
   UsersIcon,
   HelpIcon,
+  ClassIcon,
 } from "@/shared/assets/icons";
 
 const MAIN_MENU_LIST: MenuItemType[] = [
@@ -69,6 +70,20 @@ const MAIN_MENU_LIST: MenuItemType[] = [
         icon: React.createElement(UsersIcon),
         key: "import-department",
         path: "/department/departments/import",
+      },
+    ],
+  },
+  {
+    title: "Quản lý lớp học",
+    icon: React.createElement(ClassIcon),
+    key: "class-room",
+    path: "class-room",
+    children: [
+      {
+        title: "Tạo lớp học",
+        icon: React.createElement(ClassIcon),
+        key: "class-room/create",
+        path: "class-room/create",
       },
     ],
   },

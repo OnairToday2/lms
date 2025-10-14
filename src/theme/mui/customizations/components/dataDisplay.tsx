@@ -11,10 +11,10 @@ export const dataDisplayCustomizations: Components<Theme> = {
   MuiList: {
     styleOverrides: {
       root: {
-        padding: "8px",
+        padding: "12px",
         display: "flex",
         flexDirection: "column",
-        gap: 0,
+        gap: "0.5rem",
       },
     },
   },
@@ -223,6 +223,13 @@ export const dataDisplayCustomizations: Components<Theme> = {
           width: 36,
           height: 36,
         },
+      },
+    },
+  },
+  MuiPaper: {
+    styleOverrides: {
+      root: {
+        background: "white",
       },
     },
   },

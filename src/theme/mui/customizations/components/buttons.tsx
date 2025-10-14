@@ -777,7 +777,7 @@ export const buttonsCustomizations: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         boxShadow: "none",
-        borderRadius: (theme.vars || theme).shape.borderRadius,
+        // borderRadius: (theme.vars || theme).shape.borderRadius,
         textTransform: "none",
         fontWeight: theme.typography.fontWeightMedium,
         letterSpacing: 0,
