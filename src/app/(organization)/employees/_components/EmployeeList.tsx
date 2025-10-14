@@ -155,13 +155,6 @@ export default function EmployeeList() {
     handleMenuClose();
   };
 
-  const handleViewDetails = () => {
-    if (selectedEmployeeId) {
-      router.push(`/employees/${selectedEmployeeId}`);
-    }
-    handleMenuClose();
-  };
-
   const handleDelete = async () => {
     if (!selectedEmployeeId) return;
 
@@ -419,12 +412,6 @@ export default function EmployeeList() {
                 <EditIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText>Chỉnh sửa</ListItemText>
-            </MenuItem>
-            <MenuItem onClick={handleViewDetails}>
-              <ListItemIcon>
-                <VisibilityIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Xem chi tiết</ListItemText>
             </MenuItem>
             <MenuItem onClick={handleDelete} disabled={isDeleting}>
               <ListItemIcon>

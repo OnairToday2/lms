@@ -40,8 +40,8 @@ const EditEmployeePage = () => {
 
     return {
       email: employee.profiles?.email || "",
-      fullName: employee.profiles?.full_name || "",
-      phoneNumber: employee.profiles?.phone_number || "",
+      full_name: employee.profiles?.full_name || "",
+      phone_number: employee.profiles?.phone_number || "",
       gender: employee.profiles?.gender || "male",
       birthday: employee.profiles?.birthday || null,
       employee_code: employee.employee_code || "",
@@ -59,8 +59,8 @@ const EditEmployeePage = () => {
       await updateEmployee({
         id: employeeId,
         email: formData.email,
-        fullName: formData.fullName,
-        phoneNumber: formData.phoneNumber,
+        full_name: formData.full_name,
+        phone_number: formData.phone_number,
         gender: formData.gender,
         birthday: formData.birthday || null,
         employee_code: formData.employee_code,

@@ -7,6 +7,7 @@ import type { EmployeeFormData } from "@/modules/employees/components/EmployeeFo
 import { useCreateEmployeeMutation } from "@/modules/employees/operations/mutation";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { Box } from "@mui/material";
+import type { CreateEmployeePayload } from "@/app/actions/employees";
 
 const CreateEmployeePage = () => {
   const pageTitle = "Tạo nhân viên";
@@ -15,7 +16,23 @@ const CreateEmployeePage = () => {
   const { mutate: createEmployee, isPending } = useCreateEmployeeMutation();
 
   const handleSubmit = async (data: EmployeeFormData) => {
-    createEmployee(data, {
+    // Map EmployeeFormData to CreateEmployeePayload
+    const payload: CreateEmployeePayload = {
+      email: data.email,
+      full_name: data.full_name,
+      phone_number: data.phone_number,
+      gender: data.gender,
+      birthday: data.birthday,
+      branch: data.branch,
+      department: data.department,
+      employee_code: data.employee_code,
+      manager_id: data.manager_id,
+      role: data.role,
+      position_id: data.position_id,
+      start_date: data.start_date,
+    };
+
+    createEmployee(payload, {
       onSuccess: () => {
         notifications.show("Tạo nhân viên thành công!", {
           severity: "success",

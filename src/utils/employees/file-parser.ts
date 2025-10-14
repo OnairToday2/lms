@@ -16,16 +16,17 @@ export function normalizeHeader(header: string): string {
 
 /**
  * Map Vietnamese header names to internal field keys
+ * All field keys use snake_case convention to match database schema
  * @param headerName - Normalized header name
- * @returns Internal field key
+ * @returns Internal field key in snake_case
  */
 export function mapHeaderToFieldKey(headerName: string): string {
   const mapping: Record<string, string> = {
     "Mã nhân viên": "employee_code",
-    "Họ và tên": "fullName",
-    "Họ tên": "fullName",
+    "Họ và tên": "full_name",
+    "Họ tên": "full_name",
     "Email": "email",
-    "Số điện thoại": "phoneNumber",
+    "Số điện thoại": "phone_number",
     "Giới tính": "gender",
     "Ngày sinh": "birthday",
     "Phòng ban": "department",

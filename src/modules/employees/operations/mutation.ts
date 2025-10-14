@@ -1,12 +1,12 @@
 import { useTMutation } from "@/lib/queryClient";
 import { employeesRepository } from "@/repository";
-import type { CreateEmployeePayload, UpdateEmployeePayload } from "@/repository/employees";
-import { deleteEmployeeAction } from "@/app/actions/employees";
+import type { UpdateEmployeePayload } from "@/repository/employees";
+import { deleteEmployeeAction, createEmployeeAction, type CreateEmployeePayload } from "@/app/actions/employees";
 
 export const useCreateEmployeeMutation = () => {
   return useTMutation({
     mutationFn: (payload: CreateEmployeePayload) =>
-      employeesRepository.createEmployee(payload),
+      createEmployeeAction(payload),
   });
 };
 

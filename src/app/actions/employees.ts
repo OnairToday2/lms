@@ -31,6 +31,102 @@ export interface ImportResult {
   }>;
 }
 
+export interface CreateEmployeePayload {
+  // Personal Information
+  email: string;
+  full_name: string;
+  phone_number?: string;
+  gender: string;
+  birthday?: string | null;
+
+  // Work Information
+  branch?: string;
+  department: string;
+  employee_code?: string;
+  manager_id: string;
+  role?: string;
+  position_id?: string;
+  start_date: string;
+}
+
+/**
+ * Server action to create a new employee
+ * This uses the service role client to bypass RLS policies
+ * Relies on the handle_new_employee database trigger to create related records
+ *
+ * @param payload - Employee data to create
+ * @returns Success result with employee ID or throws an error
+ */
+export async function createEmployeeAction(payload: CreateEmployeePayload) {
+  console.log("=== CREATE EMPLOYEE ACTION START ===");
+  console.log("Payload received:", {
+    email: payload.email,
+    full_name: payload.full_name,
+    department: payload.department,
+    branch: payload.branch,
+  });
+
+  const supabase = createServiceRoleClient();
+
+  try {
+    // Generate a temporary password for the new employee
+    const temporaryPassword = "123123123aA";
+
+    console.log("Creating auth user with email:", payload.email);
+
+    // Create auth user - the database trigger will handle the rest
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: payload.email,
+      password: temporaryPassword,
+      email_confirm: true,
+      user_metadata: {
+        // Personal Information
+        full_name: payload.full_name,
+        phone_number: payload.phone_number || "",
+        gender: payload.gender,
+        birthday: payload.birthday || null,
+
+        // Work Information
+        employee_code: payload.employee_code || "",
+        start_date: payload.start_date,
+        department_id: payload.department,
+        branch_id: payload.branch || null,
+        manager_id: payload.manager_id,
+        role: payload.role || null,
+        position_id: payload.position_id || null,
+      },
+    });
+
+    if (authError) {
+      console.error("Auth error:", authError);
+      throw new Error(`Lỗi tạo tài khoản: ${authError.message}`);
+    }
+
+    if (!authData.user) {
+      throw new Error("Không thể tạo người dùng");
+    }
+
+    console.log("Auth user created successfully:", authData.user.id);
+    console.log("Database trigger will handle employee, profile, and employment records");
+
+    // Revalidate the employees page to refresh the list
+    revalidatePath("/employees");
+
+    console.log("=== CREATE EMPLOYEE ACTION END ===");
+
+    return {
+      success: true,
+      message: "Tạo nhân viên thành công",
+      userId: authData.user.id,
+    };
+  } catch (error) {
+    console.error("Error creating employee:", error);
+    throw error instanceof Error
+      ? error
+      : new Error("Có lỗi xảy ra khi tạo nhân viên");
+  }
+}
+
 /**
  * Server action to delete an employee and all related records
  * This uses the service role client to bypass RLS policies
@@ -288,8 +384,8 @@ export async function importEmployeesFile(
           password: "123123123aA",
           email_confirm: true,
           user_metadata: {
-            full_name: record.fullName,
-            phone_number: record.phoneNumber || "",
+            full_name: record.full_name,
+            phone_number: record.phone_number || "",
             gender: record.gender,
             birthday: record.birthday || null,
             employee_code: record.employee_code || "",

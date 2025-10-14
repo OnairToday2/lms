@@ -74,8 +74,8 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
   } = useForm<EmployeeFormData>({
     defaultValues: {
       email: defaultValues?.email || "",
-      fullName: defaultValues?.fullName || "",
-      phoneNumber: defaultValues?.phoneNumber || undefined,
+      full_name: defaultValues?.full_name || "",
+      phone_number: defaultValues?.phone_number || undefined,
       gender: defaultValues?.gender || "male",
       birthday: defaultValues?.birthday || null,
       branch: defaultValues?.branch || "",
@@ -112,16 +112,16 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 6 }}>
               <Controller
-                name="fullName"
+                name="full_name"
                 control={control}
                 render={({ field, fieldState: { error } }) => (
                   <FormControl fullWidth>
-                    <FormLabel htmlFor="fullName" sx={{ mb: 1 }}>
+                    <FormLabel htmlFor="full_name" sx={{ mb: 1 }}>
                       Họ và tên <span style={{ color: "red" }}>*</span>
                     </FormLabel>
                     <TextField
                       {...field}
-                      id="fullName"
+                      id="full_name"
                       placeholder="Nhập họ và tên nhân viên"
                       error={!!error}
                       helperText={error?.message}
@@ -209,16 +209,16 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 
             <Grid size={{ xs: 12, md: 6 }}>
               <Controller
-                name="phoneNumber"
+                name="phone_number"
                 control={control}
                 render={({ field, fieldState: { error } }) => (
                   <FormControl fullWidth>
-                    <FormLabel htmlFor="phoneNumber" sx={{ mb: 1 }}>
+                    <FormLabel htmlFor="phone_number" sx={{ mb: 1 }}>
                       Số điện thoại
                     </FormLabel>
                     <TextField
                       {...field}
-                      id="phoneNumber"
+                      id="phone_number"
                       type="tel"
                       placeholder="Nhập số điện thoại"
                       error={!!error}

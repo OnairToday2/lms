@@ -111,71 +111,11 @@ const getEmployeeById = async (id: string) => {
   return data as unknown as EmployeeListItem;
 };
 
-export interface CreateEmployeePayload {
-  // Personal Information
-  email: string;
-  fullName: string;
-  phoneNumber?: string;
-  gender: Database["public"]["Enums"]["gender"];
-  birthday?: string | null;
-
-  // Work Information
-  branch?: string;
-  department: string;
-  employee_code?: string;
-  manager_id: string;
-  role?: string;
-  position_id?: string;
-  start_date: string;
-}
-
-const createEmployee = async (payload: CreateEmployeePayload) => {
-  // Generate a temporary password for the new employee
-  const temporaryPassword = "123123123aA";
-
-  // Sign up the user with metadata that will be used by the database trigger
-  const { data, error } = await supabase.auth.signUp({
-    email: payload.email,
-    password: temporaryPassword,
-    options: {
-      data: {
-        // Personal Information
-        full_name: payload.fullName,
-        phone_number: payload.phoneNumber || "",
-        gender: payload.gender,
-        birthday: payload.birthday || null,
-
-        // Work Information
-        employee_code: payload.employee_code || "",
-        start_date: payload.start_date,
-        department_id: payload.department,
-        branch_id: payload.branch || null,
-        manager_id: payload.manager_id,
-        role: payload.role || null,
-        position_id: payload.position_id || null,
-      },
-    },
-  });
-
-  if (error) {
-    throw new Error(`Failed to create employee: ${error.message}`);
-  }
-
-  if (!data.user) {
-    throw new Error("Failed to create employee: No user data returned");
-  }
-
-  return {
-    user: data.user,
-    temporaryPassword,
-  };
-};
-
 export interface UpdateEmployeePayload {
   id: string;
   email: string;
-  fullName: string;
-  phoneNumber?: string;
+  full_name: string;
+  phone_number?: string;
   gender: Database["public"]["Enums"]["gender"];
   birthday?: string | null;
   employee_code: string;
@@ -207,9 +147,9 @@ const updateEmployee = async (payload: UpdateEmployeePayload) => {
   const { error: profileError } = await supabase
     .from("profiles")
     .update({
-      full_name: payload.fullName,
+      full_name: payload.full_name,
       email: payload.email,
-      phone_number: payload.phoneNumber || "",
+      phone_number: payload.phone_number || "",
       gender: payload.gender,
       birthday: payload.birthday || null,
     })
@@ -291,6 +231,5 @@ const updateEmployee = async (payload: UpdateEmployeePayload) => {
 export {
   getEmployees,
   getEmployeeById,
-  createEmployee,
   updateEmployee,
 };

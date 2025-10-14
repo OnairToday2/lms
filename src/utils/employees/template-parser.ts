@@ -14,12 +14,6 @@ export interface TemplateColumn {
 export interface TemplateStructure {
   /** List of all columns in the template */
   columns: TemplateColumn[];
-  /** List of required field keys */
-  requiredFields: string[];
-  /** Map of header names to field keys */
-  headerToKeyMap: Record<string, string>;
-  /** Map of field keys to header names */
-  keyToHeaderMap: Record<string, string>;
 }
 
 /**
@@ -38,7 +32,7 @@ export const DEFAULT_TEMPLATE_STRUCTURE: TemplateStructure = {
     {
       headerName: "Họ và tên*",
       fieldName: "Họ và tên",
-      fieldKey: "fullName",
+      fieldKey: "full_name",
       required: true,
       width: 200,
     },
@@ -52,7 +46,7 @@ export const DEFAULT_TEMPLATE_STRUCTURE: TemplateStructure = {
     {
       headerName: "Số điện thoại",
       fieldName: "Số điện thoại",
-      fieldKey: "phoneNumber",
+      fieldKey: "phone_number",
       required: false,
       width: 150,
     },
@@ -92,27 +86,4 @@ export const DEFAULT_TEMPLATE_STRUCTURE: TemplateStructure = {
       width: 130,
     },
   ],
-  requiredFields: ["employee_code", "fullName", "email", "department"],
-  headerToKeyMap: {
-    "Mã nhân viên": "employee_code",
-    "Họ và tên": "fullName",
-    "Email": "email",
-    "Số điện thoại": "phoneNumber",
-    "Giới tính": "gender",
-    "Ngày sinh": "birthday",
-    "Phòng ban": "department",
-    "Chi nhánh": "branch",
-    "Ngày bắt đầu": "start_date",
-  },
-  keyToHeaderMap: {
-    "employee_code": "Mã nhân viên",
-    "fullName": "Họ và tên",
-    "email": "Email",
-    "phoneNumber": "Số điện thoại",
-    "gender": "Giới tính",
-    "birthday": "Ngày sinh",
-    "department": "Phòng ban",
-    "branch": "Chi nhánh",
-    "start_date": "Ngày bắt đầu",
-  },
 };

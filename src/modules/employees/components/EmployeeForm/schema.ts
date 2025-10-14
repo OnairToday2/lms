@@ -15,12 +15,12 @@ export const EmployeeFormSchema = z.object({
   email: z
     .email()
     .min(1, { message: "Vui lòng nhập email" }),
-  fullName: z
+  full_name: z
     .string()
     .trim()
     .min(1, { message: "Vui lòng nhập họ và tên" })
     .min(3, { message: "Họ và tên phải có ít nhất 3 ký tự" }),
-  phoneNumber: z
+  phone_number: z
     .string()
     .optional()
     .refine(

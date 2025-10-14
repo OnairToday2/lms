@@ -12,13 +12,15 @@ import { EmployeeFormSchema } from "@/modules/employees/components/EmployeeForm/
 // Re-export types that are used by validation functions
 export interface EmployeeImportData {
   employee_code: string;
-  fullName: string;
+  full_name: string;
   email: string;
-  phoneNumber?: string;
+  phone_number?: string;
   gender: Database["public"]["Enums"]["gender"];
   birthday?: string;
-  department: string;
-  branch?: string;
+  department: string; // Department ID (mapped from name during validation)
+  department_name?: string; // Original department name from import file
+  branch?: string; // Branch ID (mapped from name during validation)
+  branch_name?: string; // Original branch name from import file
   start_date?: string;
 }
 
@@ -46,12 +48,12 @@ const EmployeeImportSchema = EmployeeFormSchema.partial({
   position_id: true,
   employee_code: true,
   branch: true,
-  phoneNumber: true,
+  phone_number: true,
   birthday: true,
   start_date: true,
 }).required({
   email: true,
-  fullName: true,
+  full_name: true,
   gender: true,
   department: true,
 });
@@ -88,8 +90,8 @@ export function validateParsedData(data: any[]): ValidationResult {
     // Prepare data for Zod validation
     const recordToValidate = {
       email: row.email,
-      fullName: row.fullName,
-      phoneNumber: row.phoneNumber,
+      full_name: row.full_name,
+      phone_number: row.phone_number,
       gender: row.gender ? String(row.gender).toLowerCase() : undefined,
       birthday: row.birthday || null,
       branch: row.branch,
@@ -147,9 +149,9 @@ export function validateParsedData(data: any[]): ValidationResult {
       // Normalize the data - at this point we know it's valid
       const validRecord: EmployeeImportData = {
         employee_code: row.employee_code ? String(row.employee_code).trim() : "",
-        fullName: String(row.fullName).trim(),
+        full_name: String(row.full_name).trim(),
         email: String(row.email).trim().toLowerCase(),
-        phoneNumber: row.phoneNumber ? String(row.phoneNumber).trim() : undefined,
+        phone_number: row.phone_number ? String(row.phone_number).trim() : undefined,
         gender: (row.gender ? String(row.gender).toLowerCase() : "male") as Database["public"]["Enums"]["gender"],
         birthday: row.birthday ? String(row.birthday).trim() : undefined,
         department: String(row.department).trim(),
