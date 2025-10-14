@@ -7,6 +7,7 @@
 
 import { createServiceRoleClient } from "@/services/supabase/service-role-client";
 import type { Database } from "@/types/supabase.types";
+import { EmployeeFormSchema } from "@/modules/employees/components/EmployeeForm/schema";
 
 // Re-export types that are used by validation functions
 export interface EmployeeImportData {
@@ -35,8 +36,30 @@ export interface ValidationResult {
 }
 
 /**
+ * Create a partial schema for employee import validation
+ * This schema reuses the EmployeeFormSchema but makes certain fields optional
+ * since they may not be present in import files (e.g., manager_id, position_id)
+ */
+const EmployeeImportSchema = EmployeeFormSchema.partial({
+  manager_id: true,
+  role: true,
+  position_id: true,
+  employee_code: true,
+  branch: true,
+  phoneNumber: true,
+  birthday: true,
+  start_date: true,
+}).required({
+  email: true,
+  fullName: true,
+  gender: true,
+  department: true,
+});
+
+/**
  * Validate parsed employee data for format and required fields
  * This is the first step of validation (format validation)
+ * Now leverages Zod schema for consistent validation with the employee form
  *
  * @param data - Array of employee records to validate
  * @returns Validation result with valid and invalid records
@@ -45,7 +68,7 @@ export function validateParsedData(data: any[]): ValidationResult {
   const validRecords: EmployeeImportData[] = [];
   const invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }> = [];
 
-  // Track employee codes to check for duplicates
+  // Track employee codes to check for duplicates within the file
   const employeeCodes = new Set<string>();
 
   console.log("=== VALIDATE PARSED DATA START ===");
@@ -62,37 +85,44 @@ export function validateParsedData(data: any[]): ValidationResult {
       console.log(`Row ${rowNumber} keys:`, Object.keys(row));
     }
 
-    // Validate required fields
-    if (!row.employee_code || String(row.employee_code).trim() === "") {
-      const errorMsg = "Thiếu mã nhân viên";
-      errors.push(errorMsg);
-      fieldErrors['employee_code'] = errorMsg;
-      if (index < 3) console.log(`Row ${rowNumber}: Missing employee_code`);
-    }
-    if (!row.fullName || String(row.fullName).trim() === "") {
-      const errorMsg = "Thiếu họ tên";
-      errors.push(errorMsg);
-      fieldErrors['fullName'] = errorMsg;
-      if (index < 3) console.log(`Row ${rowNumber}: Missing fullName`);
-    }
-    if (!row.email || String(row.email).trim() === "") {
-      const errorMsg = "Thiếu email";
-      errors.push(errorMsg);
-      fieldErrors['email'] = errorMsg;
-      if (index < 3) console.log(`Row ${rowNumber}: Missing email`);
-    }
-    if (!row.department || String(row.department).trim() === "") {
-      const errorMsg = "Thiếu phòng ban";
-      errors.push(errorMsg);
-      fieldErrors['department'] = errorMsg;
-      if (index < 3) console.log(`Row ${rowNumber}: Missing department`);
-    }
+    // Prepare data for Zod validation
+    const recordToValidate = {
+      email: row.email,
+      fullName: row.fullName,
+      phoneNumber: row.phoneNumber,
+      gender: row.gender ? String(row.gender).toLowerCase() : undefined,
+      birthday: row.birthday || null,
+      branch: row.branch,
+      department: row.department,
+      employee_code: row.employee_code,
+      start_date: row.start_date,
+      // These fields are not required for import but needed for schema
+      manager_id: undefined,
+      role: undefined,
+      position_id: undefined,
+    };
 
-    // Validate email format
-    if (row.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(row.email))) {
-      const errorMsg = "Email không hợp lệ";
-      errors.push(errorMsg);
-      fieldErrors['email'] = errorMsg;
+    // Validate using Zod schema
+    const validationResult = EmployeeImportSchema.safeParse(recordToValidate);
+
+    if (!validationResult.success) {
+
+      // Extract Zod validation errors
+      const zodErrors = validationResult.error.issues;
+
+      zodErrors.forEach((error) => {
+        const field = error.path.join('.');
+        const message = error.message;
+
+        // Map field names to Vietnamese error messages if needed
+        fieldErrors[field] = message;
+        errors.push(`${field}: ${message}`);
+      });
+
+      if (index < 3) {
+        console.log(`Row ${rowNumber}: Zod validation FAILED -`, errors);
+        console.log(`Row ${rowNumber}: Field Errors:`, fieldErrors);
+      }
     }
 
     // Check for duplicate employee codes within the file
@@ -107,29 +137,6 @@ export function validateParsedData(data: any[]): ValidationResult {
       }
     }
 
-    // Validate gender if provided
-    if (row.gender) {
-      const validGenders = ["male", "female", "other"];
-      if (!validGenders.includes(String(row.gender).toLowerCase())) {
-        const errorMsg = "Giới tính không hợp lệ (phải là: male, female, hoặc other)";
-        errors.push(errorMsg);
-        fieldErrors['gender'] = errorMsg;
-      }
-    }
-
-    // Validate date formats
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (row.birthday && !dateRegex.test(String(row.birthday))) {
-      const errorMsg = "Ngày sinh không đúng định dạng (YYYY-MM-DD)";
-      errors.push(errorMsg);
-      fieldErrors['birthday'] = errorMsg;
-    }
-    if (row.start_date && !dateRegex.test(String(row.start_date))) {
-      const errorMsg = "Ngày bắt đầu không đúng định dạng (YYYY-MM-DD)";
-      errors.push(errorMsg);
-      fieldErrors['start_date'] = errorMsg;
-    }
-
     if (errors.length > 0) {
       invalidRecords.push({ row: rowNumber, data: row, errors, fieldErrors });
       if (index < 3) {
@@ -137,9 +144,9 @@ export function validateParsedData(data: any[]): ValidationResult {
         console.log(`Row ${rowNumber}: Field Errors:`, fieldErrors);
       }
     } else {
-      // Normalize the data
+      // Normalize the data - at this point we know it's valid
       const validRecord: EmployeeImportData = {
-        employee_code: String(row.employee_code).trim(),
+        employee_code: row.employee_code ? String(row.employee_code).trim() : "",
         fullName: String(row.fullName).trim(),
         email: String(row.email).trim().toLowerCase(),
         phoneNumber: row.phoneNumber ? String(row.phoneNumber).trim() : undefined,
