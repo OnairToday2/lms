@@ -46,7 +46,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
   defaultValues,
   mode = "create",
 }) => {
-  const [autoGenerateCode, setAutoGenerateCode] = React.useState(false);
   const notifications = useNotifications();
 
   // Fetch data for dropdowns
@@ -90,13 +89,9 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
     resolver: zodResolver(EmployeeFormSchema),
   });
 
-  // Auto-generate employee code
-  React.useEffect(() => {
-    if (autoGenerateCode) {
-      const generatedCode = `EMP${Date.now().toString().slice(-6)}`;
-      setValue("employee_code", generatedCode);
-    }
-  }, [autoGenerateCode, setValue]);
+  // Auto-generate employee code (now handled by database trigger)
+  // Removed client-side auto-generation logic
+  // The database will auto-generate the code if left empty
 
   const submitForm: SubmitHandler<EmployeeFormData> = async (formData) => {
     await onSubmit?.(formData);
@@ -354,7 +349,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                 render={({ field, fieldState: { error } }) => (
                   <FormControl fullWidth>
                     <FormLabel htmlFor="employee_code">
-                      Mã nhân viên <span style={{ color: "red" }}>*</span>
+                      Mã nhân viên
                     </FormLabel>
                     <TextField
                       {...field}
@@ -363,7 +358,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                       error={!!error}
                       helperText={error?.message}
                       fullWidth
-                      disabled={autoGenerateCode}
                     />
                   </FormControl>
                 )}

@@ -122,7 +122,7 @@ export interface CreateEmployeePayload {
   // Work Information
   branch?: string;
   department: string;
-  employee_code: string;
+  employee_code?: string;
   manager_id: string;
   role?: string;
   position_id?: string;
@@ -146,7 +146,7 @@ const createEmployee = async (payload: CreateEmployeePayload) => {
         birthday: payload.birthday || null,
 
         // Work Information
-        employee_code: payload.employee_code,
+        employee_code: payload.employee_code || "",
         start_date: payload.start_date,
         department_id: payload.department,
         branch_id: payload.branch || null,

@@ -302,10 +302,6 @@ export default function EmployeeList() {
                 Trạng thái: Tất cả
               </Typography>
 
-              <IconButton size="small">
-                <FileDownloadOutlinedIcon />
-              </IconButton>
-
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}

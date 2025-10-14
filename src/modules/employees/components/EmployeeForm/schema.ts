@@ -40,7 +40,7 @@ export const EmployeeFormSchema = z.object({
   // Work Information
   branch: z.string().optional(),
   department: z.string().min(1, { message: "Vui lòng chọn phòng ban" }),
-  employee_code: z.string().min(1, { message: "Vui lòng nhập mã nhân viên" }),
+  employee_code: z.string().optional(),
   manager_id: z.string().min(1, { message: "Vui lòng chọn người quản lý" }),
   role: z.string().optional(),
   position_id: z.string().optional(),
