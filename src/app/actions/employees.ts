@@ -285,6 +285,7 @@ export async function importEmployeesFile(
         // Create auth user - the database trigger will handle the rest
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
           email: record.email,
+          password: "123123123aA",
           email_confirm: true,
           user_metadata: {
             full_name: record.fullName,

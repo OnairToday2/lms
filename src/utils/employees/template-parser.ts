@@ -29,10 +29,10 @@ export interface TemplateStructure {
 export const DEFAULT_TEMPLATE_STRUCTURE: TemplateStructure = {
   columns: [
     {
-      headerName: "Mã nhân viên*",
+      headerName: "Mã nhân viên",
       fieldName: "Mã nhân viên",
       fieldKey: "employee_code",
-      required: true,
+      required: false,
       width: 150,
     },
     {
