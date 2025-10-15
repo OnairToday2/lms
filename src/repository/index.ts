@@ -1,2 +1,2 @@
 export * as authRepository from "./auth";
-export * as classRoomRepository from "./classRoom";
+export * as classRoomRepository from "./classRooms";

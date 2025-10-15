@@ -12,8 +12,12 @@ import {
   Grid,
 } from "@mui/material";
 import { ClassRoom } from "../types/types";
-import { getClassRoomStatus, getColorClassRoomStatus } from "../utils/status";
+import {
+  getClassRoomStatus,
+  getColorClassRoomStatus
+} from "../utils/status";
 import { fDateTime } from "@/lib";
+import { resolveSessionStatus } from "@/modules/class-room-management/utils/runtimeStatus";
 
 interface ClassRoomDetailDialogProps {
   open: boolean;
@@ -63,6 +67,7 @@ export default function ClassRoomDetailDialog({
           <Typography variant="subtitle1">Danh sách buổi học</Typography>
           <Stack spacing={1}>
             {classRoom?.class_sessions?.map((session) => {
+              const sessionStatus = session.runtimeStatus ?? resolveSessionStatus(session);
 
               return (
                 <Stack
@@ -82,8 +87,8 @@ export default function ClassRoomDetailDialog({
                       </Typography>
                       <Chip
                         size="small"
-                        label={getClassRoomStatus(session?.start_at as string, session?.end_at as string)}
-                        color={getColorClassRoomStatus(session?.start_at as string, session?.end_at as string)}
+                        label={getClassRoomStatus(sessionStatus)}
+                        color={getColorClassRoomStatus(sessionStatus)}
                       />
                     </Stack>
                     <Typography variant="body2">

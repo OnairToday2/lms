@@ -14,14 +14,14 @@ import {
   Divider,
   Typography,
 } from "@mui/material";
-import { ClassRoomRuntimeStatus, ClassRoomWithStatus } from "../types/types";
-import { resolveSessionStatus } from "../utils/status";
+import { ClassRoomRuntimeStatus, ClassRoom } from "../types/types";
+import { resolveSessionStatus } from "@/modules/class-room-management/utils/runtimeStatus";
 
 interface SessionListDialogProps {
   open: boolean;
   onClose: () => void;
-  classRoom: ClassRoomWithStatus;
-  onJoinSession?: (session: ClassRoomWithStatus["sessions"][number]) => void;
+  classRoom: ClassRoom;
+  onJoinSession?: (session: ClassRoom["class_sessions"][number]) => void;
 }
 
 const STATUS_COLORS: Record<ClassRoomRuntimeStatus, "default" | "success" | "info" | "warning" | "error"> =
@@ -67,14 +67,15 @@ export default function SessionListDialog({
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Danh sách buổi học - {classRoom?.title}</DialogTitle>
       <DialogContent dividers>
-        {classRoom?.sessions?.length === 0 ? (
+        {classRoom?.class_sessions?.length === 0 ? (
           <Typography variant="body2" color="text.secondary">
             Khóa học chưa có thông tin buổi học.
           </Typography>
         ) : (
           <List disablePadding>
-            {classRoom?.sessions?.map((session, index) => {
-              const status = resolveSessionStatus(session, now);
+            {classRoom?.class_sessions?.map((session, index) => {
+              const status =
+                session.runtimeStatus ?? resolveSessionStatus(session, now);
               return (
                 <Stack key={session.id} spacing={1}>
                   <ListItem
@@ -107,7 +108,7 @@ export default function SessionListDialog({
                       secondary={
                         <>
                           <Typography component="div" variant="body2">
-                            {formatSessionRange(session.startAt, session.endAt)}
+                            {formatSessionRange(session.start_at ?? "", session.end_at ?? undefined)}
                           </Typography>
                           {session?.description ? (
                             <Typography variant="body2" color="text.secondary">
@@ -118,7 +119,7 @@ export default function SessionListDialog({
                       }
                     />
                   </ListItem>
-                  {index < classRoom?.sessions.length - 1 ? <Divider /> : null}
+                  {index < classRoom?.class_sessions.length - 1 ? <Divider /> : null}
                 </Stack>
               );
             })}

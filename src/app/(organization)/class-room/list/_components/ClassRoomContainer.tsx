@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import PageContainer from "@/shared/ui/PageContainer";
 import {
-  ClassRoom,
   ClassRoomFilters,
   ClassRoomRuntimeStatus,
 } from "../types/types";
@@ -21,8 +20,9 @@ import {
   GetClassRoomsQueryInput,
   useCountStatusClassRoomsQuery,
   useGetClassRoomsQuery,
-} from "@/modules/classRoom/query";
+} from "@/modules/class-room-management/operations/query";
 import ClassRoomGrid from "./ClassRoomGrid";
+import { Pagination } from "@/shared/ui/Pagination";
 
 const initialFilters: ClassRoomFilters = {
   search: "",
@@ -31,8 +31,11 @@ const initialFilters: ClassRoomFilters = {
   endDate: null,
 };
 
+const PAGE_SIZE = 9;
+
 export default function ClassRoomContainer() {
   const [filters, setFilters] = useState<ClassRoomFilters>(initialFilters);
+  const [page, setPage] = useState(1);
 
   const queryInput = useMemo<GetClassRoomsQueryInput>(() => {
     const trimmedSearch = filters.search.trim();
@@ -45,16 +48,21 @@ export default function ClassRoomContainer() {
         ? dayjs(filters.endDate).endOf("day").toISOString()
         : undefined,
       status: filters.status,
+      page,
+      limit: PAGE_SIZE,
     };
-  }, [filters.search, filters.startDate, filters.endDate, filters.status]);
+  }, [filters.search, filters.startDate, filters.endDate, filters.status, page]);
 
-  const { data: classRooms, isLoading, isError, refetch } =
+  const { data: classRoomsResult, isLoading, isError, refetch } =
     useGetClassRoomsQuery(queryInput);
 
+  const classRooms = classRoomsResult?.items ?? [];
+  const totalClassRooms = classRoomsResult?.total ?? 0;
   const { data: countStatus } = useCountStatusClassRoomsQuery()
 
 
   const handleSearchChange = (value: string) => {
+    setPage(1);
     setFilters((prev) => ({
       ...prev,
       search: value,
@@ -65,6 +73,7 @@ export default function ClassRoomContainer() {
     field: "startDate" | "endDate",
     value: string | null,
   ) => {
+    setPage(1);
     setFilters((prev) => ({
       ...prev,
       [field]: value,
@@ -72,6 +81,7 @@ export default function ClassRoomContainer() {
   };
 
   const handleResetFilters = () => {
+    setPage(1);
     setFilters((prev) => ({
       ...prev,
       search: "",
@@ -81,13 +91,16 @@ export default function ClassRoomContainer() {
   };
 
   const handleStatusChange = (status: ClassRoomRuntimeStatus) => {
+    setPage(1);
     setFilters((prev) => ({
       ...prev,
       status,
     }));
   };
 
-  console.log("classRoom", classRooms);
+  const handlePaginationChange = (nextPage: number) => {
+    setPage(nextPage);
+  };
 
 
   return (
@@ -137,7 +150,7 @@ export default function ClassRoomContainer() {
         ) : null}
 
         {!isLoading && !isError ? (
-          classRooms?.length === 0 ? (
+          classRooms.length === 0 ? (
             <Box
               sx={{
                 py: 6,
@@ -161,6 +174,17 @@ export default function ClassRoomContainer() {
           )
         ) : null}
       </Stack>
+      {totalClassRooms > 0 ? (
+        <Box mt={2}>
+          <Pagination
+            onChange={handlePaginationChange}
+            total={totalClassRooms}
+            take={PAGE_SIZE}
+            value={page}
+            name="Lớp học"
+          />
+        </Box>
+      ) : null}
     </PageContainer>
   );
 }

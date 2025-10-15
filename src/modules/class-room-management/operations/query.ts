@@ -1,4 +1,7 @@
-import { ClassRoomRuntimeStatus } from "@/app/(organization)/class-room/list/types/types";
+import {
+  ClassRoom,
+  ClassRoomRuntimeStatus,
+} from "@/app/(organization)/class-room/list/types/types";
 import { useTQuery } from "@/lib/queryClient";
 import {
   classRoomRepository,
@@ -9,12 +12,21 @@ export interface GetClassRoomsQueryInput {
   from?: string | null;
   to?: string | null;
   status?: ClassRoomRuntimeStatus;
+  page?: number;
+  limit?: number;
+}
+
+export interface GetClassRoomsQueryResult {
+  items: ClassRoom[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 export const useGetClassRoomsQuery = (
   input: GetClassRoomsQueryInput = {},
 ) => {
-  return useTQuery({
+  return useTQuery<GetClassRoomsQueryResult>({
     queryKey: ["class-rooms", input],
     queryFn: () => classRoomRepository.getClassRooms(input),
   });

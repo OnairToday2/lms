@@ -1,21 +1,13 @@
 "use client";
 import { Tabs, Tab, Stack, Chip } from "@mui/material";
-import { ClassRoomRuntimeStatus, COURSE_RUNTIME_STATUS_LABEL } from "../types/types";
+import { ClassRoomRuntimeStatus } from "../types/types";
+import { COURSE_RUNTIME_STATUS_LABEL, STATUS_ORDER } from "../utils/status";
 
 interface ClassRoomStatusTabsProps {
   value: ClassRoomRuntimeStatus;
   counts: any;
   onChange: (status: ClassRoomRuntimeStatus) => void;
 }
-
-const STATUS_ORDER: ClassRoomRuntimeStatus[] = [
-  ClassRoomRuntimeStatus.All,
-  ClassRoomRuntimeStatus.Ongoing,
-  ClassRoomRuntimeStatus.Today,
-  ClassRoomRuntimeStatus.Upcoming,
-  ClassRoomRuntimeStatus.Past,
-  ClassRoomRuntimeStatus.Draft,
-];
 
 export default function ClassRoomStatusTabs({
   value,

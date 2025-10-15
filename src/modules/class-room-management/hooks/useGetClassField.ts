@@ -1,5 +1,5 @@
 import { useTQuery } from "@/lib";
-import { getClassFieldList, getClassHasTagList } from "@/repository/classRoom";
+import { getClassFieldList, getClassHasTagList } from "@/repository/classRooms";
 import { queryKeys } from "@/constants/query-key.constant";
 
 const useGetClassFieldQuery = () => {

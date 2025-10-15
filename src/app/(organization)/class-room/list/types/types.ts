@@ -9,19 +9,14 @@ export enum ClassRoomRuntimeStatus {
   Draft = "draft",
 }
 
-export const COURSE_RUNTIME_STATUS_LABEL: Record<ClassRoomRuntimeStatus, string> = {
-  [ClassRoomRuntimeStatus.All]: "Tất cả",
-  [ClassRoomRuntimeStatus.Ongoing]: "Đang diễn ra",
-  [ClassRoomRuntimeStatus.Today]: "Diễn ra hôm nay",
-  [ClassRoomRuntimeStatus.Upcoming]: "Sắp diễn ra",
-  [ClassRoomRuntimeStatus.Past]: "Đã diễn ra",
-  [ClassRoomRuntimeStatus.Draft]: "Bản nháp",
-};
-
 export type ClassRoomSession = Tables<"class_sessions">;
 
-export interface ClassRoom extends Tables<"class_rooms"> {
-  class_sessions: ClassRoomSession[];
+export type ClassRoomSessionWithRuntime = ClassRoomSession & {
+  runtimeStatus?: ClassRoomRuntimeStatus;
+};
+
+export interface ClassRoom extends Tables<"class_rooms_priority_v2"> {
+  class_sessions: ClassRoomSessionWithRuntime[];
 }
 
 export type AttendanceStatus = "attended" | "absent" | "pending";

@@ -16,13 +16,17 @@ import {
   DialogActions,
 } from "@mui/material";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
-import { ClassRoom, ClassRoomSession } from "../types/types";
-import { getClassRoomStatus, getColorClassRoomStatus, getLabelBtn } from "../utils/status";
+import { ClassRoom, ClassRoomRuntimeStatus, ClassRoomSession } from "../types/types";
+import {
+  getClassRoomStatus,
+  getColorClassRoomStatus,
+  getStatusAndLabelBtnJoin
+} from "../utils/status";
 import ClassRoomParticipantsDialog from "./ClassRoomParticipantsDialog";
 import SessionListDialog from "./SessionListDialog";
 import ClassRoomDetailDialog from "./ClassRoomDetailDialog";
-import Image from "next/image";
 import { fDateTime } from "@/lib";
+import { Image } from "@/shared/ui/Image";
 
 interface ClassRoomCardProps {
   classRoom: ClassRoom;
@@ -37,6 +41,8 @@ export default function ClassRoomCard({ classRoom }: ClassRoomCardProps) {
     null,
   );
   const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const runtimeStatus = classRoom?.runtime_status as ClassRoomRuntimeStatus;
+  const { disabled, label } = getStatusAndLabelBtnJoin(runtimeStatus)
   const handleJoin = () => {
 
   };
@@ -56,19 +62,19 @@ export default function ClassRoomCard({ classRoom }: ClassRoomCardProps) {
           <Stack spacing={2} flex={1}>
             <Stack direction="row" justifyContent="space-between">
               <Chip
-                label={getClassRoomStatus(classRoom?.start_at as string, classRoom?.end_at as string, classRoom?.status)}
-                color={getColorClassRoomStatus(classRoom?.start_at as string, classRoom?.end_at as string, classRoom?.status)}
+                label={getClassRoomStatus(runtimeStatus)}
+                color={getColorClassRoomStatus(runtimeStatus)}
                 size="medium"
               />
               <Chip
                 label={classRoom.room_type === "single" ? "Lớp học đơn" : "lớp học chuỗi"}
-                color={classRoom.room_type === "single" ? "primary" : "secondary"}
+                color={classRoom.room_type === "single" ? "primary" : "warning"}
                 size="medium"
               />
             </Stack>
 
             <Image
-              src="/assets/images/auth/auth-background.png"
+              src={classRoom.thumbnail_url}
               alt=""
               width={1}
               height={1}
@@ -121,23 +127,23 @@ export default function ClassRoomCard({ classRoom }: ClassRoomCardProps) {
           <Button
             variant="contained"
             startIcon={<PlayArrowRoundedIcon />}
-            // disabled={disabled}
+            disabled={disabled}
             onClick={handleJoin}
           >
-            {getLabelBtn(classRoom.start_at as string, classRoom.end_at as string, classRoom.status)}
+            {label}
           </Button>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
             <Button variant="outlined" onClick={() => setShowAssigned(true)}>
-              Người được gán (100)
+              Người được gán
             </Button>
             <Button variant="outlined" onClick={() => setShowAttended(true)}>
-              Người tham gia (100)
+              Người tham gia
             </Button>
           </Stack>
         </CardActions>
       </Card>
 
-      <ClassRoomParticipantsDialog
+      {/* <ClassRoomParticipantsDialog
         open={showAssigned}
         onClose={() => setShowAssigned(false)}
         title="Người được gán vào lớp học"
@@ -150,7 +156,7 @@ export default function ClassRoomCard({ classRoom }: ClassRoomCardProps) {
         title="Người đã tham gia lớp học"
         participants={Array(123)}
         getSessionName={(sessionId) => sessionMap.get(sessionId) ?? sessionId}
-      />
+      /> */}
       <SessionListDialog
         open={showSessions}
         onClose={() => setShowSessions(false)}

@@ -14,4 +14,5 @@ export const PATHS = {
     CREATE_ROLE: '/roles/create',
     CLASSROOMS: '/class-room',
     CREATE_CLASSROOM: '/class-room/create',
+    LIST_CLASSROOM: '/class-room/list',
 }

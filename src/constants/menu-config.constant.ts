@@ -32,6 +32,12 @@ const MAIN_MENU_LIST: MenuItemType[] = [
         key: "class-room/create",
         path: PATHS.CREATE_CLASSROOM,
       },
+      {
+        title: "Danh sách lớp học",
+        icon: React.createElement(ClassIcon),
+        key: "class-room/list",
+        path: PATHS.LIST_CLASSROOM,
+      },
     ],
   },
   {

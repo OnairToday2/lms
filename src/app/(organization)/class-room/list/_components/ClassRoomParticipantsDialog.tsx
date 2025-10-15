@@ -23,7 +23,6 @@ import {
   Divider,
 } from "@mui/material";
 import { ClassRoomParticipant } from "../types/types";
-import { normalizeText } from "../utils/filter";
 
 interface ClassRoomParticipantsDialogProps {
   open: boolean;
@@ -90,7 +89,7 @@ export default function ClassRoomParticipantsDialog(
   const filteredParticipants = useMemo(() => {
     return participants?.filter((participant) => {
       if (search.trim()) {
-        const normalizedValue = normalizeText(search);
+        const normalizedValue = (search);
         const fields = [
           participant.fullName,
           participant.email,
@@ -98,7 +97,7 @@ export default function ClassRoomParticipantsDialog(
           participant.userCode,
         ];
         const matchesSearch = fields.some((field) =>
-          field ? normalizeText(field).includes(normalizedValue) : false,
+          field ? (field).includes(normalizedValue) : false,
         );
         if (!matchesSearch) {
           return false;

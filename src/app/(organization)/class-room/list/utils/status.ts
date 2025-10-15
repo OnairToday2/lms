@@ -1,98 +1,64 @@
-import dayjs from "dayjs";
-import isBetween from "dayjs/plugin/isBetween";
+import { ClassRoomRuntimeStatus } from "../types/types";
 
-dayjs.extend(isBetween);
-
-type Kind =
-  | "draft"
-  | "today"
-  | "ongoing"
-  | "upcoming"
-  | "ended"
-  | "unknown";
-
-const LABEL_MAP: Record<Kind, string> = {
-  draft: "Nháp",
-  today: "Diễn ra hôm nay",
-  ongoing: "Đang diễn ra",
-  upcoming: "Sắp diễn ra",
-  ended: "Đã kết thúc",
-  unknown: "Không xác định",
+const STATUS_COLOR_MAP: Record<
+  ClassRoomRuntimeStatus,
+  "primary" | "error" | "secondary" | "default" | "info" | "success"
+> = {
+  [ClassRoomRuntimeStatus.All]: "default",
+  [ClassRoomRuntimeStatus.Ongoing]: "error",
+  [ClassRoomRuntimeStatus.Today]: "primary",
+  [ClassRoomRuntimeStatus.Upcoming]: "success",
+  [ClassRoomRuntimeStatus.Past]: "default",
+  [ClassRoomRuntimeStatus.Draft]: "info",
 };
 
-const COLOR_MAP: Record<Kind, "primary" | "error" | "secondary" | "default" | "info" | "success"> = {
-  today: "primary",
-  ongoing: "error",
-  upcoming: "secondary",
-  ended: "default",
-  draft: "default",
-  unknown: "default",
+export const STATUS_ORDER: ClassRoomRuntimeStatus[] = [
+  ClassRoomRuntimeStatus.All,
+  ClassRoomRuntimeStatus.Ongoing,
+  ClassRoomRuntimeStatus.Today,
+  ClassRoomRuntimeStatus.Upcoming,
+  ClassRoomRuntimeStatus.Past,
+  ClassRoomRuntimeStatus.Draft,
+];
+
+export const COURSE_RUNTIME_STATUS_LABEL: Record<ClassRoomRuntimeStatus, string> = {
+  [ClassRoomRuntimeStatus.All]: "Tất cả",
+  [ClassRoomRuntimeStatus.Ongoing]: "Đang diễn ra",
+  [ClassRoomRuntimeStatus.Today]: "Diễn ra hôm nay",
+  [ClassRoomRuntimeStatus.Upcoming]: "Sắp diễn ra",
+  [ClassRoomRuntimeStatus.Past]: "Đã diễn ra",
+  [ClassRoomRuntimeStatus.Draft]: "Bản nháp",
 };
 
-const BUTTON_LABEL_MAP: Record<Kind, string> = {
-  draft: "Đăng tải",
-  today: "Vào lớp học",
-  ongoing: "Vào lớp học",
-  upcoming: "Vào lớp học",
-  ended: "Đã diễn ra",
-  unknown: "Không xác định",
-};
+export const getClassRoomStatus = (status: ClassRoomRuntimeStatus) =>
+  COURSE_RUNTIME_STATUS_LABEL[status] ?? COURSE_RUNTIME_STATUS_LABEL[ClassRoomRuntimeStatus.All];
 
+export const getColorClassRoomStatus = (status: ClassRoomRuntimeStatus) =>
+  STATUS_COLOR_MAP[status] ?? STATUS_COLOR_MAP[ClassRoomRuntimeStatus.All];
 
-function computeClassRoomStatusKind(
-  startDate: string,
-  endDate: string,
-  status: any
-): Kind {
-  if (String(status ?? "").toLowerCase() === "draft") return "draft";
-
-  const start = dayjs(startDate);
-  const end = dayjs(endDate);
-  const now = dayjs();
-
-  if (!start.isValid() || !end.isValid()) return "unknown";
-
-  const isSameDay = start.isSame(end, "day");
-
-  // Nếu cùng ngày nhưng đã qua rồi → Đã kết thúc
-  if (isSameDay) {
-    if (now.isSame(start, "day")) {
-      if (now.isBefore(start)) return "upcoming";
-      if (now.isAfter(end)) return "ended";
-      return "today"; // trong khoảng start-end của hôm nay
-    }
-    if (now.isBefore(start)) return "upcoming";
-    if (now.isAfter(end)) return "ended";
+export const getStatusAndLabelBtnJoin = (status: ClassRoomRuntimeStatus): { label: string, disabled: boolean } => {
+  switch (status) {
+    case ClassRoomRuntimeStatus.Draft:
+      return {
+        label: "Đăng tải",
+        disabled: false,
+      }
+    case ClassRoomRuntimeStatus.Upcoming:
+    case ClassRoomRuntimeStatus.Today:
+    case ClassRoomRuntimeStatus.Ongoing:
+      return {
+        label: "Vào lớp học",
+        disabled: false,
+      }
+    case ClassRoomRuntimeStatus.Past:
+      return {
+        label: "Đã diễn ra",
+        disabled: true,
+      }
+    default:
+      return {
+        label: "Mặc định",
+        disabled: false,
+      }
   }
-
-  // Nhiều ngày
-  if (now.isAfter(start) && now.isBefore(end)) return "ongoing";
-  if (now.isBefore(start)) return "upcoming";
-  if (now.isAfter(end)) return "ended";
-
-  return "unknown";
-}
-
-export function getClassRoomStatus(
-  startDate: string,
-  endDate: string,
-  status?: any
-) {
-  return LABEL_MAP[computeClassRoomStatusKind(startDate, endDate, status)];
-}
-
-export function getColorClassRoomStatus(
-  startDate: string,
-  endDate: string,
-  status?: any
-) {
-  return COLOR_MAP[computeClassRoomStatusKind(startDate, endDate, status)];
-}
-
-export function getLabelBtn(
-  startDate: string,
-  endDate: string,
-  status?: any
-) {
-  return BUTTON_LABEL_MAP[computeClassRoomStatusKind(startDate, endDate, status)];
-}
+} 
