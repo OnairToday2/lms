@@ -1,3 +1,4 @@
+"use client";
 import { createTheme, alpha, Shadows } from "@mui/material/styles";
 import { grey, primary, info, warning, error, success } from "./theme-color";
 export * from "./primitive/typography";
@@ -76,27 +77,37 @@ export const colorSchemes = {
         light: primary["light"],
         main: primary["main"],
         dark: primary["dark"],
+        darker: primary["darker"],
+        lighter: primary["lighter"],
       },
       info: {
         contrastText: info["lighter"],
         light: info["light"],
         main: info["main"],
         dark: info["dark"],
+        darker: info["darker"],
+        lighter: info["lighter"],
       },
       warning: {
         light: warning["light"],
         main: warning["main"],
         dark: warning["dark"],
+        darker: warning["darker"],
+        lighter: warning["lighter"],
       },
       error: {
         light: error["light"],
         main: error["main"],
         dark: error["dark"],
+        darker: error["darker"],
+        lighter: error["lighter"],
       },
       success: {
         light: success["light"],
         main: success["main"],
         dark: success["dark"],
+        darker: success["darker"],
+        lighter: success["lighter"],
       },
       grey: {
         ...grey,

@@ -1,3 +1,4 @@
+export { getClassFieldList, getClassHasTagList };
 import dayjs, { Dayjs } from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import {
@@ -317,4 +318,12 @@ export const getCountStatusClassRooms = async () => {
   }
 
   return data;
+};
+
+const getClassFieldList = async () => {
+  return await supabase.from("class_fields").select("*");
+};
+
+const getClassHasTagList = async () => {
+  return await supabase.from("hash_tags").select("*");
 };

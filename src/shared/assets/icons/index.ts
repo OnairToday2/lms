@@ -11,6 +11,18 @@ import BellIcon from "./BellIcon";
 import EyeIcon from "./EyeIcon";
 import EyeOffIcon from "./EyeOffIcon";
 import Loading from "./LoadingIcon";
+import ClassIcon from "./ClassIcon";
+import YoutubeIcon from "./YoutubeIcon";
+import ParagraphIcon from "./ParagraphIcon";
+import ImageIcon from "./ImageIcon";
+import InforCircleIcon from "./InforCircleIcon";
+import CalendarDateIcon from "./CalendarDateIcon";
+import UsersIcon2 from "./UsersIcon2";
+import ClipboardIcon from "./ClipboardIcon";
+import TrashIcon1 from "./TrashIcon1";
+import CloseIcon from "./CloseIcon";
+import CalendarIcon2 from "./CalendaIcon2";
+import ChevronRightDoubleIcon from "./ChevronRightDoubleIcon";
 
 export {
   FacebookIcon,
@@ -26,4 +38,16 @@ export {
   EyeIcon,
   EyeOffIcon,
   Loading,
+  ClassIcon,
+  YoutubeIcon,
+  ParagraphIcon,
+  ImageIcon,
+  InforCircleIcon,
+  CalendarDateIcon,
+  UsersIcon2,
+  ClipboardIcon,
+  TrashIcon1,
+  CloseIcon,
+  CalendarIcon2,
+  ChevronRightDoubleIcon,
 };

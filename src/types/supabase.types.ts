@@ -9,9 +9,35 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  public: {
+    Tables: {
       class_fields: {
         Row: {
           created_at: string
+          description: string | null
           id: string
           name: string | null
           slug: string | null
@@ -19,6 +45,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: string
           name?: string | null
           slug?: string | null
@@ -26,6 +53,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: string
           name?: string | null
           slug?: string | null
@@ -88,22 +116,7 @@ export type Database = {
           employee_id?: string | null
           id?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "class_room_employee_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "class_room_employee_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       class_room_field: {
         Row: {
@@ -175,54 +188,42 @@ export type Database = {
       }
       class_rooms: {
         Row: {
-          class_field_id: number | null
-          community_info: string | null
+          comunity_info: Json | null
           created_at: string
           description: string | null
-          end_at: string | null
           id: string
           resource_id: string | null
-          room_type: string | null
+          room_type: Database["public"]["Enums"]["class_room_type"] | null
           slug: string | null
-          start_at: string | null
-          status: string | null
+          status: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url: string | null
           title: string | null
-          updated_at: string | null
           user_id: string
         }
         Insert: {
-          class_field_id?: number | null
-          community_info?: string | null
+          comunity_info?: Json | null
           created_at?: string
           description?: string | null
-          end_at?: string | null
           id?: string
           resource_id?: string | null
-          room_type?: string | null
+          room_type?: Database["public"]["Enums"]["class_room_type"] | null
           slug?: string | null
-          start_at?: string | null
-          status?: string | null
+          status?: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url?: string | null
           title?: string | null
-          updated_at?: string | null
           user_id?: string
         }
         Update: {
-          class_field_id?: number | null
-          community_info?: string | null
+          comunity_info?: Json | null
           created_at?: string
           description?: string | null
-          end_at?: string | null
           id?: string
           resource_id?: string | null
-          room_type?: string | null
+          room_type?: Database["public"]["Enums"]["class_room_type"] | null
           slug?: string | null
-          start_at?: string | null
-          status?: string | null
+          status?: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url?: string | null
           title?: string | null
-          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -295,7 +296,9 @@ export type Database = {
       class_sessions: {
         Row: {
           channel_info: Json | null
-          channel_provider: string | null
+          channel_provider:
+          | Database["public"]["Enums"]["channel_provider"]
+          | null
           class_room_id: string | null
           created_at: string
           description: string | null
@@ -310,7 +313,9 @@ export type Database = {
         }
         Insert: {
           channel_info?: Json | null
-          channel_provider?: string | null
+          channel_provider?:
+          | Database["public"]["Enums"]["channel_provider"]
+          | null
           class_room_id?: string | null
           created_at?: string
           description?: string | null
@@ -325,7 +330,9 @@ export type Database = {
         }
         Update: {
           channel_info?: Json | null
-          channel_provider?: string | null
+          channel_provider?:
+          | Database["public"]["Enums"]["channel_provider"]
+          | null
           class_room_id?: string | null
           created_at?: string
           description?: string | null
@@ -348,82 +355,70 @@ export type Database = {
           },
         ]
       }
-      employees: {
+      class_sessions_agendas: {
         Row: {
+          class_session_id: string | null
           created_at: string
-          employee_code: string
-          employee_order: number | null
+          description: string | null
+          end_at: string | null
           id: string
-          position_id: string | null
-          start_date: string | null
-          status: string
-          user_id: string
+          start_at: string | null
+          thumbnail_url: string | null
+          title: string | null
+          updated_at: string | null
         }
         Insert: {
+          class_session_id?: string | null
           created_at?: string
-          employee_code: string
-          employee_order?: number | null
+          description?: string | null
+          end_at?: string | null
           id?: string
-          position_id?: string | null
-          start_date?: string | null
-          status: string
-          user_id: string
+          start_at?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string | null
         }
         Update: {
+          class_session_id?: string | null
           created_at?: string
-          employee_code?: string
-          employee_order?: number | null
+          description?: string | null
+          end_at?: string | null
           id?: string
-          position_id?: string | null
-          start_date?: string | null
-          status?: string
-          user_id?: string
+          start_at?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "employees_position_id_fkey"
-            columns: ["position_id"]
+            foreignKeyName: "class_sessions_agendas_class_session_id_fkey"
+            columns: ["class_session_id"]
             isOneToOne: false
-            referencedRelation: "positions"
+            referencedRelation: "class_sessions"
             referencedColumns: ["id"]
           },
         ]
       }
-      employments: {
+      employees: {
         Row: {
           created_at: string
-          employee_id: string
-          id: string
-          organization_unit_id: string
+          email: string | null
+          id: number
+          name: string | null
         }
         Insert: {
           created_at?: string
-          employee_id: string
-          id?: string
-          organization_unit_id: string
+          email?: string | null
+          id?: number
+          name?: string | null
         }
         Update: {
           created_at?: string
-          employee_id?: string
-          id?: string
-          organization_unit_id?: string
+          email?: string | null
+          id?: number
+          name?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "employments_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employments_organization_unit_id_fkey"
-            columns: ["organization_unit_id"]
-            isOneToOne: false
-            referencedRelation: "organization_units"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       hash_tags: {
         Row: {
@@ -455,177 +450,17 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          id?: never
+          id?: number
           resource_name?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
-          id?: never
+          id?: number
           resource_name?: string | null
           user_id?: string | null
         }
         Relationships: []
-      }
-      managers_employees: {
-        Row: {
-          employee_id: string
-          manager_id: string
-        }
-        Insert: {
-          employee_id: string
-          manager_id: string
-        }
-        Update: {
-          employee_id?: string
-          manager_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "managers_employees_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "managers_employees_manager_id_fkey"
-            columns: ["manager_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      organization_units: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          organization_id: string
-          parent_id: string | null
-          type: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          organization_id: string
-          parent_id?: string | null
-          type: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          organization_id?: string
-          parent_id?: string | null
-          type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organization_units_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_units_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "organization_units"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      organizations: {
-        Row: {
-          created_at: string
-          id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-        }
-        Relationships: []
-      }
-      positions: {
-        Row: {
-          created_at: string
-          id: string
-          organization_id: string
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          organization_id: string
-          title: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          organization_id?: string
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "positions_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      profiles: {
-        Row: {
-          avatar: string | null
-          birthday: string | null
-          created_at: string
-          email: string
-          employee_id: string
-          full_name: string
-          gender: string
-          id: string
-          phone_number: string
-        }
-        Insert: {
-          avatar?: string | null
-          birthday?: string | null
-          created_at?: string
-          email: string
-          employee_id: string
-          full_name: string
-          gender: string
-          id?: string
-          phone_number: string
-        }
-        Update: {
-          avatar?: string | null
-          birthday?: string | null
-          created_at?: string
-          email?: string
-          employee_id?: string
-          full_name?: string
-          gender?: string
-          id?: string
-          phone_number?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: true
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       resources: {
         Row: {
@@ -695,7 +530,16 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      channel_provider: "google_meet" | "zoom" | "microsoft_teams"
+      class_room_status:
+      | "publish"
+      | "active"
+      | "deactive"
+      | "pending"
+      | "deleted"
+      | "draft"
+      class_room_statuss: "draft" | "published" | "archived"
+      class_room_type: "single" | "multiple"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -822,7 +666,19 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      channel_provider: ["google_meet", "zoom", "microsoft_teams"],
+      class_room_status: [
+        "publish",
+        "active",
+        "deactive",
+        "pending",
+        "deleted",
+        "draft",
+      ],
+      class_room_statuss: ["draft", "published", "archived"],
+      class_room_type: ["single", "multiple"],
+    },
   },
 } as const
 

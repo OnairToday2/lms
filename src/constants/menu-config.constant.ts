@@ -1,47 +1,56 @@
-import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
-import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
-import React from "react";
+import { ClassIcon, GitIcon, HelpIcon, SquareFourIcon, UsersIcon } from "@/shared/assets/icons";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
-import {
-  SquareFourIcon,
-  GitIcon,
-  UsersIcon,
-  HelpIcon,
-} from "@/shared/assets/icons";
+import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
+import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
+import React from "react";
+import { PATHS } from "./path.contstants";
 
 const MAIN_MENU_LIST: MenuItemType[] = [
   {
     title: "Dashboard",
     icon: React.createElement(SquareFourIcon),
-    key: "dashboard",
-    children: [],
-    path: "/dashboard",
+    key: 'dashboard',
+    path: PATHS.DASHBOARD,
     type: "item",
   },
   {
     title: "Quản lý phòng ban",
     icon: React.createElement(GitIcon),
-    key: "department",
-    path: "department",
+    key: 'departments',
+    path: PATHS.DEPARTMENTS,
     type: "item",
+  },
+  {
+    title: "Quản lý lớp học",
+    icon: React.createElement(ClassIcon),
+    key: "class-room",
+    path: PATHS.CLASSROOMS,
+    children: [
+      {
+        title: "Tạo lớp học",
+        icon: React.createElement(ClassIcon),
+        key: "class-room/create",
+        path: PATHS.CREATE_CLASSROOM,
+      },
+    ],
   },
   {
     title: "Danh sách nhân viên",
     icon: React.createElement(UsersIcon),
-    key: "employee",
-    path: "employee",
+    key: "employees",
+    path: PATHS.EMPLOYEES,
     children: [
       {
         title: "Tạo nhân vien",
         icon: React.createElement(UsersIcon),
-        key: "employee",
-        path: "employee",
+        key: 'employees/create',
+        path: PATHS.CREATE_EMPLOYEE,
       },
       {
         title: "Import danh sách",
         icon: React.createElement(UsersIcon),
-        key: "employee",
-        path: "employee",
+        key: 'employees/import',
+        path: PATHS.IMPORT_EMPLOYEES,
       },
     ],
   },

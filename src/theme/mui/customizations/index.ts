@@ -12,3 +12,4 @@ export { surfacesCustomizations } from "./components/surfaces";
 export { buttonsCustomizations } from "./components/buttons";
 export { toggleButtonsCustomizations } from "./components/toggleButtons";
 export { checkboxCustomizations } from "./components/checkbox";
+export { tabsCustomization } from "./components/tabs";
