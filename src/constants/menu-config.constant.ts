@@ -24,13 +24,13 @@ const MAIN_MENU_LIST: MenuItemType[] = [
     title: "Quản lý lớp học",
     icon: React.createElement(ClassIcon),
     key: "class-room",
-    path: PATHS.CLASSROOMS,
+    path: PATHS.CLASSROOMS.ROOT,
     children: [
       {
         title: "Tạo lớp học",
         icon: React.createElement(ClassIcon),
         key: "class-room/create",
-        path: PATHS.CREATE_CLASSROOM,
+        path: PATHS.CLASSROOMS.CREATE_CLASSROOM,
       },
     ],
   },
@@ -38,19 +38,19 @@ const MAIN_MENU_LIST: MenuItemType[] = [
     title: "Danh sách nhân viên",
     icon: React.createElement(UsersIcon),
     key: "employees",
-    path: PATHS.EMPLOYEES,
+    path: PATHS.EMPLOYEE.ROOT,
     children: [
       {
         title: "Tạo nhân vien",
         icon: React.createElement(UsersIcon),
         key: 'employees/create',
-        path: PATHS.CREATE_EMPLOYEE,
+        path: PATHS.EMPLOYEE.CREATE_EMPLOYEE,
       },
       {
         title: "Import danh sách",
         icon: React.createElement(UsersIcon),
         key: 'employees/import',
-        path: PATHS.IMPORT_EMPLOYEES,
+        path: PATHS.EMPLOYEE.IMPORT_EMPLOYEES,
       },
     ],
   },
