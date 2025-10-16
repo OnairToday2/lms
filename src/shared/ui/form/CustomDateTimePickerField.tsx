@@ -2,6 +2,7 @@ import { DateTimePickerProps, DateTimePicker } from "@mui/x-date-pickers";
 import { FormControl, FormLabel, FormHelperText, alpha, styled } from "@mui/material";
 import { useId } from "react";
 import { cn } from "@/utils";
+import dayjs from "dayjs";
 export interface CustomDateTimePickerFieldProps extends DateTimePickerProps {
   helperText?: string;
   error?: boolean;
@@ -28,7 +29,21 @@ const CustomDateTimePickerField: React.FC<CustomDateTimePickerFieldProps> = ({
           {label} {required ? <span className="text-red-600">*</span> : null}
         </FormLabel>
       ) : null}
-      <DateTimePicker {...restProps} />
+      <DateTimePicker
+        {...restProps}
+        dayOfWeekFormatter={(day) => {
+          const map: Record<string, string> = {
+            0: "CN",
+            1: "T2",
+            2: "T3",
+            3: "T4",
+            4: "T5",
+            5: "T6",
+            6: "T7",
+          };
+          return map[dayjs(day).get("days")] || "unknown";
+        }}
+      />
       {helperText ? <FormHelperText error={!!error}>{helperText}</FormHelperText> : null}
     </StyledFormControl>
   );

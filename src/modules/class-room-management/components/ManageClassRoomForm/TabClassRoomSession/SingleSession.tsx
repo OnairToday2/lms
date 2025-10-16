@@ -8,36 +8,30 @@ import RHFTextField from "@/shared/ui/form/RHFTextField";
 import EmployeeQuantity from "./EmpoyeeQuantity";
 import { useFieldArray } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
-const SingleSession = () => {
-  const { control } = useFormContext<ClassRoom>();
+import ClassRoomSessionFromToDate from "./ClassRoomSessionFromToDate";
+import TeacherSelectionContainer from "../TeacherSelectionContainer";
+import DialogTeacherContainer from "@/modules/teacher/container/DialogTeacherContainer";
+interface SingleSessionProps {}
+const SingleSession: React.FC<SingleSessionProps> = () => {
+  const { control, getValues } = useFormContext<ClassRoom>();
+
   const { fields: classSessionsFields } = useFieldArray({
     control,
     name: "classRoomSessions",
-    keyName: "_fieldId",
+    keyName: "_sessionId",
     rules: {
       minLength: 1,
+      maxLength: 1,
     },
   });
 
   return (
     <div>
-      {classSessionsFields.map((sessionFields, _index) => (
-        <>
-          <div className="flex flex-col gap-6 bg-white rounded-xl p-6 mb-6" key={_index}>
-            <div className="flex items-center gap-4">
-              <RHFDateTimePicker
-                label="Thời gian bắt đầu"
-                name={`classRoomSessions.${_index}.startDate`}
-                required
-                control={control}
-              />
-              <RHFDateTimePicker
-                label="Thời gian kết thúc"
-                name={`classRoomSessions.${_index}.endDate`}
-                required
-                control={control}
-              />
-            </div>
+      {classSessionsFields.map((sessionField, _index) => (
+        <div key={sessionField._sessionId}>
+          <div className="flex flex-col gap-6 bg-white rounded-xl p-6 mb-6">
+            <ClassRoomSessionFromToDate index={_index} control={control} />
+            <EmployeeQuantity control={control} fieldIndex={_index} />
             <div className="flex flex-col gap-4">
               <RHFRadioGroupField
                 label="Nền tảng"
@@ -70,21 +64,11 @@ const SingleSession = () => {
                   placeholder="Nhập mật khẩu"
                 />
               </div>
-              <EmployeeQuantity control={control} fieldIndex={_index} />
             </div>
           </div>
-          <div className="bg-white rounded-xl p-6 flex items-center" key={_index}>
-            <div className="pr-6">
-              <FormLabel component="div">Giảng viên phụ trách</FormLabel>
-              <Typography className="text-xs text-gray-600">
-                Chỉ định giảng viên phụ trách nội dung, quản lý lớp học và hỗ trợ người học trong buổi học.
-              </Typography>
-            </div>
-            <div className="flex items-center gap-4">
-              <Button variant="fill">Chọn</Button>
-            </div>
-          </div>
-        </>
+
+          <TeacherSelectionContainer />
+        </div>
       ))}
     </div>
   );

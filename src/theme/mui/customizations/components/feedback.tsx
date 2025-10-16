@@ -6,17 +6,27 @@ export const feedbackCustomizations: Components<Theme> = {
   MuiAlert: {
     styleOverrides: {
       root: ({ theme }) => ({
-        borderRadius: 10,
-        backgroundColor: warning["main"],
+        borderRadius: 8,
         color: (theme.vars || theme).palette.text.primary,
-        border: `1px solid ${alpha(warning["main"], 0.5)}`,
-        "& .MuiAlert-icon": {
-          color: warning["main"],
-        },
         ...theme.applyStyles("dark", {
-          backgroundColor: `${alpha(warning["main"], 0.5)}`,
-          border: `1px solid ${alpha(warning["main"], 0.5)}`,
+          // backgroundColor: `${alpha(warning["main"], 0.5)}`,
+          // border: `1px solid ${alpha(warning["main"], 0.5)}`,
         }),
+        variants: [
+          {
+            props: {
+              severity: "error",
+              variant: "filled",
+            },
+            style: ({ theme }) => ({
+              // color: "white",
+              // backgroundColor: theme.palette.error.main,
+              // "& .MuiAlert-icon": {
+              //   color: warning["main"],
+              // },
+            }),
+          },
+        ],
       }),
     },
   },
@@ -27,6 +37,10 @@ export const feedbackCustomizations: Components<Theme> = {
           borderRadius: "10px",
           border: "1px solid",
           borderColor: (theme.vars || theme).palette.divider,
+          backgroundColor: "white",
+        },
+        "& .MuiDialogContent-root": {
+          scrollbarWidth: "thin",
         },
       }),
     },

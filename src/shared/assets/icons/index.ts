@@ -23,6 +23,9 @@ import TrashIcon1 from "./TrashIcon1";
 import CloseIcon from "./CloseIcon";
 import CalendarIcon2 from "./CalendaIcon2";
 import ChevronRightDoubleIcon from "./ChevronRightDoubleIcon";
+import ZaloIcon from "./ZaloIcon";
+import LinkIcon from "./LinkIcon";
+import SearchIcon from "./SearchIcon";
 
 export {
   FacebookIcon,
@@ -50,4 +53,7 @@ export {
   CloseIcon,
   CalendarIcon2,
   ChevronRightDoubleIcon,
+  ZaloIcon,
+  LinkIcon,
+  SearchIcon,
 };

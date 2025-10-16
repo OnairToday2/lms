@@ -1,42 +1,68 @@
 "use client";
-import { FormLabel } from "@mui/material";
+import { FormControlLabel, FormLabel, Radio, RadioGroup, Typography } from "@mui/material";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
-import { Control, useController } from "react-hook-form";
-import { ClassRoom, ClassRoomSession } from "../../classroom-form.schema";
-import CheckboxField from "@/shared/ui/form/CheckboxField";
-import { useState } from "react";
+import { Control, useWatch } from "react-hook-form";
+import { ClassRoom } from "../../classroom-form.schema";
+import { Controller } from "react-hook-form";
 interface EmployeeQuantityProps {
   control: Control<ClassRoom>;
   fieldIndex: number;
 }
+type QuantityType = "unlimit" | "limit";
 const EmployeeQuantity = ({ control, fieldIndex }: EmployeeQuantityProps) => {
-  const { field, fieldState, formState } = useController({
-    control,
-    name: `classRoomSessions.${fieldIndex}.limitPerson`,
-  });
-  const [isUnlimited, setIsUnlimited] = useState(false);
-  const handleSetUnlimited = () => {
-    setIsUnlimited((prev) => !prev);
-    field.onChange("");
-  };
+  const watchIsUnlimited = useWatch({ control, name: `classRoomSessions.${fieldIndex}.isUnlimited` });
   return (
     <div>
       <FormLabel component="div">Số lượng tham dự</FormLabel>
-      <div className="flex items-center gap-4">
-        <CheckboxField
-          value={isUnlimited}
-          onChange={handleSetUnlimited}
-          label="Không giới hạn"
-        />
-
-        <RHFTextField
-          name={`classRoomSessions.${fieldIndex}.limitPerson`}
+      <RadioGroup row={true} className="gap-6">
+        <Controller
           control={control}
-          placeholder="Số lượng"
-          type="number"
-          disabled={isUnlimited}
+          name={`classRoomSessions.${fieldIndex}.isUnlimited`}
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
+            <FormControlLabel
+              control={<Radio />}
+              value={true}
+              checked={value === true}
+              onChange={() => onChange(true)}
+              label="Không giới hạn"
+              sx={{
+                ".MuiTypography-root": {
+                  fontSize: "0.875rem",
+                },
+              }}
+            />
+          )}
         />
-      </div>
+        <div className="flex items-center whitespace-nowrap gap-1">
+          <Controller
+            control={control}
+            name={`classRoomSessions.${fieldIndex}.isUnlimited`}
+            render={({ field: { onChange, value }, fieldState: { error } }) => (
+              <FormControlLabel
+                control={<Radio />}
+                value={false}
+                checked={value === false}
+                onChange={() => onChange(false)}
+                label="Giới hạn"
+                sx={{
+                  ".MuiTypography-root": {
+                    fontSize: "0.875rem",
+                  },
+                }}
+              />
+            )}
+          />
+          <RHFTextField
+            name={`classRoomSessions.${fieldIndex}.limitPerson`}
+            control={control}
+            placeholder="Số lượng"
+            type="number"
+            disabled={watchIsUnlimited}
+            className="max-w-30"
+          />
+          <Typography>học viên</Typography>
+        </div>
+      </RadioGroup>
     </div>
   );
 };

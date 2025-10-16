@@ -15,16 +15,14 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
         border: `1px solid ${(theme.vars || theme).palette.divider}`,
         backgroundImage: "none",
         background: "hsl(0, 0%, 100%)",
-        boxShadow:
-          "hsla(220, 30%, 5%, 0.07) 0px 4px 16px 0px, hsla(220, 25%, 10%, 0.07) 0px 8px 16px -5px",
+        boxShadow: "hsla(220, 30%, 5%, 0.07) 0px 4px 16px 0px, hsla(220, 25%, 10%, 0.07) 0px 8px 16px -5px",
         [`& .${menuItemClasses.root}`]: {
           borderRadius: 6,
           margin: "0 6px",
         },
         ...theme.applyStyles("dark", {
           background: grey[900],
-          boxShadow:
-            "hsla(220, 30%, 5%, 0.7) 0px 4px 16px 0px, hsla(220, 25%, 10%, 0.8) 0px 8px 16px -5px",
+          boxShadow: "hsla(220, 30%, 5%, 0.7) 0px 4px 16px 0px, hsla(220, 25%, 10%, 0.8) 0px 8px 16px -5px",
         }),
       }),
     },
@@ -53,7 +51,7 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
     styleOverrides: {
       button: ({ theme }) => ({
         fontSize: theme.typography.body1.fontSize,
-        color: (theme.vars || theme).palette.grey[600],
+        color: (theme.vars || theme).palette.grey[800],
         padding: theme.spacing(0.5),
         borderRadius: theme.shape.borderRadius,
         "&:hover": {
@@ -95,7 +93,7 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
     styleOverrides: {
       button: ({ theme }) => ({
         fontSize: theme.typography.body1.fontSize,
-        color: (theme.vars || theme).palette.grey[600],
+        color: (theme.vars || theme).palette.grey[800],
         padding: theme.spacing(0.5),
         borderRadius: theme.shape.borderRadius,
         height: "fit-content",
@@ -137,22 +135,20 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
   MuiPickersDay: {
     styleOverrides: {
       root: ({ theme }) => ({
-        fontSize: theme.typography.body1.fontSize,
-        color: (theme.vars || theme).palette.grey[600],
+        fontSize: "0.875rem",
+        color: (theme.vars || theme).palette.grey[800],
         padding: theme.spacing(0.5),
         borderRadius: theme.shape.borderRadius,
         "&:hover": {
           backgroundColor: (theme.vars || theme).palette.action.hover,
         },
         [`&.${pickersDayClasses.selected}`]: {
-          backgroundColor: grey[700],
+          backgroundColor: theme.palette.primary["main"],
           fontWeight: theme.typography.fontWeightMedium,
         },
         "&:focus": {
-          outline: `3px solid ${alpha(primary["main"], 0.5)}`,
-          outlineOffset: "2px",
           backgroundColor: "transparent",
-          [`&.${pickersDayClasses.selected}`]: { backgroundColor: grey[700] },
+          [`&.${pickersDayClasses.selected}`]: { backgroundColor: theme.palette.primary["main"] },
         },
         ...theme.applyStyles("dark", {
           color: (theme.vars || theme).palette.grey[300],
@@ -171,6 +167,20 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
             [`&.${pickersDayClasses.selected}`]: { backgroundColor: grey[300] },
           },
         }),
+      }),
+    },
+  },
+  MuiMultiSectionDigitalClock: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        fontSize: "0.875rem",
+        "& .MuiMultiSectionDigitalClockSection-root": {
+          scrollbarWidth: "none",
+        },
+        "& .MuiMultiSectionDigitalClockSection-item": {
+          fontSize: "0.875rem",
+          width: "auto",
+        },
       }),
     },
   },

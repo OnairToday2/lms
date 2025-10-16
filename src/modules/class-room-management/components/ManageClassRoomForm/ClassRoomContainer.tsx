@@ -5,7 +5,7 @@ import TabClassRoomInformation from "./TabClassRoomInformation";
 import TabClassRoomResource from "./TabClassRoomResource";
 import TabClassRoomSession from "./TabClassRoomSession";
 import TabClassRoomSetting from "./TabClassRoomSetting";
-import { FormProvider, SubmitHandler, useForm, UseFormHandleSubmit } from "react-hook-form";
+import { FormProvider, SubmitHandler, useForm, UseFormHandleSubmit, UseFormReturn } from "react-hook-form";
 import { classRoomSchema, ClassRoom } from "../classroom-form.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, IconButton } from "@mui/material";
@@ -15,10 +15,7 @@ import { CalendarDateIcon, ClipboardIcon, CloseIcon, EyeIcon, InforCircleIcon } 
 import { UsersIcon2 } from "@/shared/assets/icons";
 import ClassRoomPreview from "./ClassRoomPreview";
 import ClassRoomTypeSelector, { ClassRoomTypeSelectorProps } from "./ClassRoomTypeSelector";
-
-interface ClassRoomContainer {
-  onSubmit?: () => void;
-}
+import { getClassSessionInitData } from "./TabClassRoomSession/MultipleSession";
 
 export const CLASS_ROOM_TAB_KEYS = {
   "clsTab-information": "clsTab-information",
@@ -27,7 +24,11 @@ export const CLASS_ROOM_TAB_KEYS = {
   "clsTab-setting": "clsTab-setting",
 } as const;
 
-const ClassRoomContainer: React.FC<ClassRoomContainer> = () => {
+export interface ClassRoomContainerProps {
+  onSubmit?: (formData: ClassRoom) => void;
+}
+
+const ClassRoomContainer: React.FC<ClassRoomContainerProps> = () => {
   const formSubmitRef = React.useRef<boolean>(false);
   const methods = useForm<ClassRoom>({
     resolver: zodResolver(classRoomSchema),
@@ -49,22 +50,7 @@ const ClassRoomContainer: React.FC<ClassRoomContainer> = () => {
       forWhom: [],
       whies: [],
       galleries: [],
-      classRoomSessions: [
-        {
-          title: "",
-          description: "",
-          startDate: undefined,
-          endDate: undefined,
-          channelInfo: { url: "", password: "", providerId: "" },
-          channelProvider: "zoom",
-          thumbnailUrl: "",
-          classRoomId: "",
-          createdAt: "",
-          limitPerson: 0,
-          isOnline: true,
-          agendas: [],
-        },
-      ],
+      classRoomSessions: [getClassSessionInitData()],
     },
   });
 
@@ -76,18 +62,15 @@ const ClassRoomContainer: React.FC<ClassRoomContainer> = () => {
     control,
     trigger,
     watch,
+    reset,
   } = methods;
 
-  console.log(errors);
+  console.log({ errors, vale: getValues() });
   const watchRoomType = watch("roomType");
 
   const handleSelectRoomType: ClassRoomTypeSelectorProps["onSelect"] = React.useCallback((type) => {
     setValue("roomType", type);
   }, []);
-
-  const submitForm: SubmitHandler<ClassRoom> = (data) => {
-    console.log(data);
-  };
 
   const handleTriggerThenSubmitForm = (submitHandler: UseFormHandleSubmit<ClassRoom>) => async () => {
     formSubmitRef.current = true;
@@ -100,7 +83,9 @@ const ClassRoomContainer: React.FC<ClassRoomContainer> = () => {
       console.log(error);
     }
   };
-
+  const submitForm: SubmitHandler<ClassRoom> = (data) => {
+    console.log(data);
+  };
   const CLASS_ROOM_TAB_LIST: ClassRoomTabContainerProps["items"] = [
     {
       tabName: "Thông tin chung",
@@ -153,7 +138,7 @@ const ClassRoomContainer: React.FC<ClassRoomContainer> = () => {
           previewUI={<ClassRoomPreview control={control} />}
           actions={
             <div className="flex items-center gap-2">
-              <IconButton className="border rounded-lg border-gray-400 bg-white">
+              <IconButton className="border rounded-lg border-gray-400 bg-white" onClick={() => reset()}>
                 <CloseIcon />
               </IconButton>
               <IconButton className="border rounded-lg border-gray-400 bg-white">
