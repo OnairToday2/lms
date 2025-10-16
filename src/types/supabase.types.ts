@@ -494,27 +494,30 @@ export type Database = {
       }
       teachers: {
         Row: {
+          avatar_url: string | null
           birth_of_date: string | null
-          code: string | null
           created_at: string
           email: string | null
           id: string
+          identity_code: string | null
           name: string | null
         }
         Insert: {
+          avatar_url?: string | null
           birth_of_date?: string | null
-          code?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          identity_code?: string | null
           name?: string | null
         }
         Update: {
+          avatar_url?: string | null
           birth_of_date?: string | null
-          code?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          identity_code?: string | null
           name?: string | null
         }
         Relationships: []

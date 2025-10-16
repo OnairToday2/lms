@@ -15,6 +15,7 @@ const ClassHashTagSelector: React.FC<ClassHashTagSelectorProps> = ({ control }) 
       control={control}
       name="hashTags"
       placeholder="Hash tags"
+      multiple={false}
       optionField={{
         value: "id",
         label: "name",

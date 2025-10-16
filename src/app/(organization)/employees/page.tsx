@@ -20,11 +20,7 @@ import PageContainer from "@/shared/ui/PageContainer";
 import { AlertDialog, useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 
-import {
-  deleteOne as deleteEmployee,
-  getMany as getEmployees,
-  type Employee,
-} from "./data/employees";
+import { deleteOne as deleteEmployee, getMany as getEmployees, type Employee } from "./data/employees";
 
 const INITIAL_PAGE_SIZE = 10;
 
@@ -36,17 +32,12 @@ const PageEmployee = () => {
   const dialogs = useDialogs();
   const notifications = useNotifications();
 
-  const [paginationModel, setPaginationModel] =
-    React.useState<GridPaginationModel>({
-      page: searchParams.get("page") ? Number(searchParams.get("page")) : 0,
-      pageSize: searchParams.get("pageSize")
-        ? Number(searchParams.get("pageSize"))
-        : INITIAL_PAGE_SIZE,
-    });
+  const [paginationModel, setPaginationModel] = React.useState<GridPaginationModel>({
+    page: searchParams.get("page") ? Number(searchParams.get("page")) : 0,
+    pageSize: searchParams.get("pageSize") ? Number(searchParams.get("pageSize")) : INITIAL_PAGE_SIZE,
+  });
   const [filterModel, setFilterModel] = React.useState<GridFilterModel>(
-    searchParams.get("filter")
-      ? JSON.parse(searchParams.get("filter") ?? "")
-      : { items: [] },
+    searchParams.get("filter") ? JSON.parse(searchParams.get("filter") ?? "") : { items: [] },
   );
   const [sortModel, setSortModel] = React.useState<GridSortModel>(
     searchParams.get("sort") ? JSON.parse(searchParams.get("sort") ?? "") : [],
@@ -77,10 +68,7 @@ const PageEmployee = () => {
     [navigate, pathname, searchParams],
   );
 
-  const handleSortModelChange = React.useCallback(
-    (model: GridSortModel) => {},
-    [navigate, pathname, searchParams],
-  );
+  const handleSortModelChange = React.useCallback((model: GridSortModel) => {}, [navigate, pathname, searchParams]);
 
   const loadData = React.useCallback(async () => {
     setError(null);
@@ -114,31 +102,22 @@ const PageEmployee = () => {
     }
   }, [isLoading, loadData]);
 
-  const handleRowClick = React.useCallback<GridEventListener<"rowClick">>(
-    ({ row }) => {},
-    [navigate],
-  );
+  const handleRowClick = React.useCallback<GridEventListener<"rowClick">>(({ row }) => {}, [navigate]);
 
   const handleCreateClick = React.useCallback(() => {
     navigate.push("/employees/create");
   }, [navigate]);
 
-  const handleRowEdit = React.useCallback(
-    (employee: Employee) => () => {},
-    [navigate],
-  );
+  const handleRowEdit = React.useCallback((employee: Employee) => () => {}, [navigate]);
 
   const handleRowDelete = React.useCallback(
     (employee: Employee) => async () => {
-      const confirmed = await dialogs.confirm(
-        `Do you wish to delete ${employee.name}?`,
-        {
-          title: `Delete employee?`,
-          severity: "error",
-          okText: "Delete",
-          cancelText: "Cancel",
-        },
-      );
+      const confirmed = await dialogs.confirm(`Do you wish to delete ${employee.name}?`, {
+        title: `Delete employee?`,
+        severity: "error",
+        okText: "Delete",
+        cancelText: "Cancel",
+      });
 
       if (confirmed) {
         setIsLoading(true);
@@ -151,15 +130,10 @@ const PageEmployee = () => {
           });
           loadData();
         } catch (deleteError) {
-          notifications.show(
-            `Failed to delete employee. Reason:' ${
-              (deleteError as Error).message
-            }`,
-            {
-              severity: "error",
-              autoHideDuration: 3000,
-            },
-          );
+          notifications.show(`Failed to delete employee. Reason:' ${(deleteError as Error).message}`, {
+            severity: "error",
+            autoHideDuration: 3000,
+          });
         }
         setIsLoading(false);
       }
@@ -200,18 +174,8 @@ const PageEmployee = () => {
         flex: 1,
         align: "right",
         getActions: ({ row }) => [
-          <GridActionsCellItem
-            key="edit-item"
-            icon={<EditIcon />}
-            label="Edit"
-            onClick={handleRowEdit(row)}
-          />,
-          <GridActionsCellItem
-            key="delete-item"
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={handleRowDelete(row)}
-          />,
+          <GridActionsCellItem key="edit-item" icon={<EditIcon />} label="Edit" onClick={handleRowEdit(row)} />,
+          <GridActionsCellItem key="delete-item" icon={<DeleteIcon />} label="Delete" onClick={handleRowDelete(row)} />,
         ],
       },
     ],
@@ -226,25 +190,57 @@ const PageEmployee = () => {
         <Stack direction="row" alignItems="center" spacing={1}>
           <Tooltip title="Reload data" placement="right" enterDelay={1000}>
             <div>
-              <IconButton
-                size="small"
-                aria-label="refresh"
-                onClick={handleRefresh}
-              >
+              <IconButton size="small" aria-label="refresh" onClick={handleRefresh}>
                 <RefreshIcon />
               </IconButton>
             </div>
           </Tooltip>
-          <Button
-            variant="contained"
-            onClick={handleCreateClick}
-            startIcon={<AddIcon />}
-          >
+          <Button variant="contained" onClick={handleCreateClick} startIcon={<AddIcon />}>
             Create
           </Button>
         </Stack>
       </div>
       <Box sx={{ flex: 1, width: "100%" }}>
+        <Box sx={{ flexGrow: 1 }}>
+          <Alert severity="info" color="info" variant="filled">
+            info filled
+          </Alert>
+          <Alert severity="success" color="success" variant="filled">
+            success filled
+          </Alert>
+          <Alert severity="warning" variant="filled">
+            warning filled
+          </Alert>
+          <Alert severity="error" variant="filled">
+            error filled
+          </Alert>
+          <div className="h-6"></div>
+          <Alert severity="info" color="info" variant="outlined">
+            info outlined
+          </Alert>
+          <Alert severity="success" color="success" variant="outlined">
+            success outlined
+          </Alert>
+          <Alert severity="warning" variant="outlined">
+            warning outlined
+          </Alert>
+          <Alert severity="error" variant="outlined">
+            error outlined
+          </Alert>
+          <div className="h-6"></div>
+          <Alert severity="info" color="info" variant="standard">
+            info standard
+          </Alert>
+          <Alert severity="success" color="success" variant="standard">
+            success standard
+          </Alert>
+          <Alert severity="warning" variant="standard">
+            warning standard
+          </Alert>
+          <Alert severity="error" variant="standard">
+            error standard
+          </Alert>
+        </Box>
         {error ? (
           <Box sx={{ flexGrow: 1 }}>
             <Alert severity="error">{error.message}</Alert>
@@ -274,10 +270,9 @@ const PageEmployee = () => {
               [`& .${gridClasses.columnHeader}, & .${gridClasses.cell}`]: {
                 outline: "transparent",
               },
-              [`& .${gridClasses.columnHeader}:focus-within, & .${gridClasses.cell}:focus-within`]:
-                {
-                  outline: "none",
-                },
+              [`& .${gridClasses.columnHeader}:focus-within, & .${gridClasses.cell}:focus-within`]: {
+                outline: "none",
+              },
               [`& .${gridClasses.row}:hover`]: {
                 cursor: "pointer",
               },

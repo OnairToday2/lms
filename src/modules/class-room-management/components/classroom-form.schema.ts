@@ -1,3 +1,4 @@
+import { forEach } from "lodash";
 import * as zod from "zod";
 
 const classRoomSessionAgendaSchema = zod.object({
@@ -14,12 +15,11 @@ const classRoomSessionAgendaSchema = zod.object({
 
 const classRoomSessionSchema = zod.object({
   id: zod.string().optional(),
-  title: zod.string().min(1, { message: "Tên lớn học không bỏ trống." }).max(200, "Vui lòng nhập tối đa 200 ký tự"),
-  description: zod.string(),
-  thumbnailUrl: zod.string(),
-  classRoomId: zod.string(),
-  startDate: zod.date(),
-  endDate: zod.string(),
+  title: zod.string().min(1, { message: "Tên lớn học không bỏ trống." }).max(100, "Vui lòng nhập tối đa 200 ký tự"),
+  description: zod.string().min(1, { message: "Tên lớn học không bỏ trống." }),
+  thumbnailUrl: zod.string().min(1, { message: "Tên lớn học không bỏ trống." }),
+  startDate: zod.iso.datetime({ error: "Ngày bắt đầu không hợp lệ." }),
+  endDate: zod.iso.datetime({ error: "Ngày kết thúc không hợp lệ." }),
   recourses: zod.array(
     zod.object({
       id: zod.string(),
@@ -33,8 +33,7 @@ const classRoomSessionSchema = zod.object({
     password: zod.string(),
   }),
   limitPerson: zod.number(),
-  createdAt: zod.string(),
-  updatedAt: zod.string(),
+  isUnlimited: zod.boolean(),
   agendas: zod.array(classRoomSessionAgendaSchema),
 });
 
@@ -43,56 +42,79 @@ const classRoomSessionTeacherSchema = zod.object({
   name: zod.string().optional(),
 });
 
-const classRoomSchema = zod
-  .object({
-    title: zod.string().min(1, { message: "Tên lớn học không bỏ trống." }).max(200, "Vui lòng nhập tối đa 200 ký tự"),
-    description: zod.string(),
-    slug: zod.string(),
-    thumbnailUrl: zod.string(),
-    classRoomField: zod.array(zod.string()).min(1, "Chọn tối thiểu 1 lĩnh vực").max(3, "Lĩnh vực tối đa 3."),
-    hashTags: zod.array(zod.string()),
-    classRoomId: zod.string(),
-    status: zod.enum(["publish", "draft"]),
-    roomType: zod.enum(["single", "multiple"]),
-    classRoomSessions: zod.array(classRoomSessionSchema),
-    whies: zod.array(zod.string()),
-    communityInfo: zod.object({
-      name: zod.string(),
-      url: zod.string(),
+const classRoomSchema = zod.object({
+  title: zod.string().min(1, { message: "Tên lớn học không bỏ trống." }).max(200, "Vui lòng nhập tối đa 200 ký tự"),
+  description: zod.string(),
+  slug: zod.string(),
+  thumbnailUrl: zod
+    .string()
+    .min(1, { error: "Ảnh bìa không bỏ trống." })
+    .superRefine((value, ctx) => {
+      if (!value.startsWith("http://"))
+        ctx.addIssue({
+          code: "invalid_format",
+          format: "starts_with",
+          message: "Đường dẫn không hợp lệ.",
+        });
     }),
-    faqs: zod.array(
+  classRoomField: zod.array(zod.string()).min(1, "Chọn tối thiểu 1 lĩnh vực").max(3, "Lĩnh vực tối đa 3."),
+  hashTags: zod.array(zod.string()),
+  classRoomId: zod.string(),
+  status: zod.enum(["publish", "draft"]),
+  roomType: zod.enum(["single", "multiple"]),
+  classRoomSessions: zod.array(classRoomSessionSchema),
+  whies: zod.array(zod.string()),
+  communityInfo: zod.object({
+    name: zod.string(),
+    url: zod.url({ protocol: /^https?$/, error: "Đường dẫn không hợp lệ." }),
+  }),
+  faqs: zod
+    .array(
       zod.object({
         id: zod.string().optional(),
         question: zod.string(),
         answer: zod.string(),
       }),
-    ),
-    forWhom: zod.array(
-      zod.object({
-        id: zod.string().optional(),
-        description: zod.string(),
-      }),
-    ),
-    galleries: zod.array(zod.string()),
-  })
-  .superRefine((formValues, context) => {
-    if (formValues.faqs.length) {
-      for (let i = 0; i < formValues.faqs.length; i++) {
-        if (!formValues?.faqs[i]?.answer.length || !formValues?.faqs[i]?.answer) {
-          context.addIssue({
-            code: "custom",
-            message: `faq ${i + 1} khong bo trong cau hoi`,
-          });
-        }
-        if (!formValues?.faqs[i]?.question.length) {
-          context.addIssue({
-            code: "custom",
-            message: `faq ${i + 1} khong bo trong cau tra loi`,
-          });
-        }
+    )
+    .superRefine((values, context) => {
+      if (values.length) {
+        values.forEach((v, i) => {
+          if (!values[i]?.answer.length || !values[i]?.answer) {
+            context.addIssue({
+              code: "custom",
+              message: `Không bỏ trống câu hỏi.`,
+              path: [i, "answer"],
+            });
+          }
+          if (!values[i]?.question.length) {
+            context.addIssue({
+              code: "custom",
+              message: `Không bỏ trống câu trả lời.`,
+              path: [i, "question"],
+            });
+          }
+        });
       }
-    }
-  });
+    }),
+  forWhom: zod.array(
+    zod.object({
+      id: zod.string().optional(),
+      description: zod.string(),
+    }),
+  ),
+  galleries: zod.array(zod.string()).superRefine((values, ctx) => {
+    if (values.length)
+      values.forEach((v, i) => {
+        if (!v.startsWith("http://")) {
+          ctx.addIssue({
+            code: "invalid_format",
+            format: "starts_with",
+            message: `Đường dẫn ${i} không hợp lệ.`,
+          });
+        }
+      });
+  }),
+});
 
 type ClassRoomSession = zod.infer<typeof classRoomSessionSchema>;
 type ClassRoomSessionTeacher = zod.infer<typeof classRoomSessionTeacherSchema>;
@@ -106,91 +128,3 @@ export {
   type ClassRoomSessionTeacher,
   type ClassRoom,
 };
-
-// import { z as zod } from "zod";
-// import { SurveyFieldOptionType, SurveyFieldType } from "@onair/repositories";
-
-// export const SurveyQuestionFormFieldSchema = zod
-// 	.object({
-// 		type: zod.enum(
-// 			[
-// 				SurveyFieldType.CHECKBOX,
-// 				SurveyFieldType.RADIO,
-// 				SurveyFieldType.RATING,
-// 				SurveyFieldType.SELECT,
-// 				SurveyFieldType.TEXTAREA,
-// 			],
-// 			{ message: "type khong hop le" },
-// 		),
-// 		label: zod.string().min(1, { message: "Vui lòng nhập câu hỏi" }),
-// 		placeholder: zod.string(),
-// 		required: zod.boolean(),
-// 		options: zod.array(
-// 			zod
-// 				.object({
-// 					id: zod.string().optional(),
-// 					label: zod.string(),
-// 					type: zod.enum(
-// 						[SurveyFieldOptionType.DEFAULT, SurveyFieldOptionType.OTHER],
-// 						{ message: "Type invalid" },
-// 					),
-// 				})
-// 				.superRefine((values, context) => {
-// 					if (values.type === SurveyFieldOptionType.DEFAULT && !values.label) {
-// 						context.addIssue({
-// 							code: zod.ZodIssueCode.custom,
-// 							message: "Vui lòng nhập lựa chọn.",
-// 							path: ["label"],
-// 						});
-// 					} else if (
-// 						values.type === SurveyFieldOptionType.OTHER &&
-// 						values.label
-// 					) {
-// 						context.addIssue({
-// 							code: zod.ZodIssueCode.custom,
-// 							message: "Vui lòng không nhập gì.",
-// 							path: ["label"],
-// 						});
-// 					}
-// 				}),
-// 		),
-// 		id: zod.string().optional(),
-// 	})
-// 	.superRefine((values, context) => {
-// 		if (
-// 			(values.type === SurveyFieldType.CHECKBOX ||
-// 				values.type === SurveyFieldType.RADIO ||
-// 				values.type === SurveyFieldType.SELECT) &&
-// 			!values.options.length
-// 		) {
-// 			context.addIssue({
-// 				code: zod.ZodIssueCode.custom,
-// 				message: "Vui lòng thêm lựa chọn với loại câu hỏi này.",
-// 				path: ["options"],
-// 			});
-// 		}
-// 	});
-
-// export type SurveyFormActions = "Create" | "SoftCreate" | "Update";
-// export const SurveyFormSchema = zod
-// 	.object({
-// 		action: zod.enum(["Create", "SoftCreate", "Update"]),
-// 		title: zod
-// 			.string()
-// 			.min(1, { message: "Vui lòng nhập tiêu đề" })
-// 			.max(200, "Vui lòng nhập tối đa 200 ký tự"),
-// 		description: zod.string(),
-// 		banner: zod.string(),
-// 		fields: zod.array(SurveyQuestionFormFieldSchema),
-// 	})
-// 	.superRefine((values, context) => {
-// 		if (values.action === "Create" || values.action === "Update") {
-// 			if (!values.fields.length) {
-// 				context.addIssue({
-// 					code: zod.ZodIssueCode.custom,
-// 					message: "Thêm ít nhất 1 câu hỏi.",
-// 					path: ["fields"],
-// 				});
-// 			}
-// 		}
-// 	});

@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
+import { fa } from "zod/v4/locales";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  reactStrictMode: false,
   // typedRoutes: true,
   // compiler: {
   //   styledComponents: true, // Enable SWC transform for styled-components

@@ -11,10 +11,4 @@ const getQueryClient = () => {
     },
   });
 };
-
-export {
-  getQueryClient,
-  useQuery as useTQuery,
-  useMutation as useTMutation,
-  useQueries as useTQueries,
-};
+export { getQueryClient, useQuery as useTQuery, useMutation as useTMutation, useQueries as useTQueries };
