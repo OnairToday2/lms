@@ -26,7 +26,7 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = () => {
   });
 
   const handleAddMore = useCallback(() => {
-    append({ id: "", title: "", question: "" });
+    // append({ id: "", title: "", question: "" });
   }, []);
   return (
     <ResourceFieldBox

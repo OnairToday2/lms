@@ -2,7 +2,7 @@ import { ClassRoomProvider } from "../../store/class-room-context";
 import ClassRoomContainer, { ClassRoomContainerProps } from "./ClassRoomContainer";
 
 interface FormManageClassRoomProps {
-  onSubmit: ClassRoomContainerProps["onSubmit"];
+  onSubmit?: ClassRoomContainerProps["onSubmit"];
 }
 const FormManageClassRoom: React.FC<FormManageClassRoomProps> = ({ onSubmit }) => {
   return (

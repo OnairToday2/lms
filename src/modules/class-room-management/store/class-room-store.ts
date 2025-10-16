@@ -5,18 +5,8 @@ import { ClassRoomActions } from "./class-room-actions";
 import { Dayjs } from "dayjs";
 import { ClassSessionChannelProvider } from "@/model/class-session.model";
 
-import {
-  ClassRoomInformation,
-  ClassRoomSessionTeacher,
-  ClassRoomSession,
-} from "../validation";
-
 type ClassRoomState = {
-  formData?: {
-    clsInformation: ClassRoomInformation;
-    clsSession: ClassRoomSession[];
-    clsTeacher: ClassRoomSessionTeacher[];
-  };
+  formData?: {};
 };
 
 type ClassRoomStore = ClassRoomState & ClassRoomActions;
