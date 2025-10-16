@@ -18,10 +18,12 @@ export default function ColorCheckboxes() {
   };
 
   const handleChange2 = (event: React.ChangeEvent<HTMLInputElement>) => {
+    //@ts-ignore
     setChecked([event.target.checked, checked[1]]);
   };
 
   const handleChange3 = (event: React.ChangeEvent<HTMLInputElement>) => {
+    //@ts-ignore
     setChecked([checked[0], event.target.checked]);
   };
 
@@ -60,110 +62,41 @@ export default function ColorCheckboxes() {
         <Box sx={{ display: "flex", flexDirection: "column", ml: 3 }}>
           <FormControlLabel
             label="Primary large"
-            control={
-              <Checkbox
-                checked={checked[0]}
-                onChange={handleChange2}
-                color="primary"
-                size="large"
-              />
-            }
+            control={<Checkbox checked={checked[0]} onChange={handleChange2} color="primary" size="large" />}
           />
           <FormControlLabel
             label="Secondary small"
-            control={
-              <Checkbox
-                checked={checked[0]}
-                onChange={handleChange2}
-                color="secondary"
-                size="small"
-              />
-            }
+            control={<Checkbox checked={checked[0]} onChange={handleChange2} color="secondary" size="small" />}
           />
           <FormControlLabel
             label="Warning"
-            control={
-              <Checkbox
-                checked={checked[0]}
-                onChange={handleChange2}
-                color="warning"
-              />
-            }
+            control={<Checkbox checked={checked[0]} onChange={handleChange2} color="warning" />}
           />
           <FormControlLabel
             label="Success"
-            control={
-              <Checkbox
-                checked={checked[0]}
-                onChange={handleChange2}
-                color="success"
-              />
-            }
+            control={<Checkbox checked={checked[0]} onChange={handleChange2} color="success" />}
           />
           <FormControlLabel
             label="Error"
-            control={
-              <Checkbox
-                checked={checked[0]}
-                onChange={handleChange2}
-                color="error"
-              />
-            }
+            control={<Checkbox checked={checked[0]} onChange={handleChange2} color="error" />}
           />
           <FormControlLabel
             label="default"
-            control={
-              <Checkbox
-                checked={checked[0]}
-                onChange={handleChange2}
-                color="default"
-              />
-            }
+            control={<Checkbox checked={checked[0]} onChange={handleChange2} color="default" />}
           />
-          <FormControlLabel
-            label="Child 2"
-            control={<Checkbox checked={checked[1]} onChange={handleChange3} />}
-          />
+          <FormControlLabel label="Child 2" control={<Checkbox checked={checked[1]} onChange={handleChange3} />} />
         </Box>
       </div>
       <div>
         <FormControl>
           <FormLabel id="demo-radio-buttons-group-label">Gender</FormLabel>
-          <RadioGroup
-            aria-labelledby="demo-radio-buttons-group-label"
-            defaultValue="female"
-            name="radio-buttons-group"
-          >
-            <FormControlLabel
-              value="male"
-              control={<Radio color="primary" />}
-              label="Primary"
-            />
-            <FormControlLabel
-              value="male"
-              control={<Radio color="error" />}
-              label="error"
-            />
-            <FormControlLabel
-              value="male"
-              control={<Radio color="success" />}
-              label="Success"
-            />
-            <FormControlLabel
-              value="male"
-              control={<Radio color="info" />}
-              label="Info"
-            />
-            <FormControlLabel
-              value="male"
-              control={<Radio color="warning" />}
-              label="warning"
-            />
-            <FormControlLabel
-              value="male"
-              control={<Radio color="secondary" />}
-              label="Secondary"
-            />
+          <RadioGroup aria-labelledby="demo-radio-buttons-group-label" defaultValue="female" name="radio-buttons-group">
+            <FormControlLabel value="male" control={<Radio color="primary" />} label="Primary" />
+            <FormControlLabel value="male" control={<Radio color="error" />} label="error" />
+            <FormControlLabel value="male" control={<Radio color="success" />} label="Success" />
+            <FormControlLabel value="male" control={<Radio color="info" />} label="Info" />
+            <FormControlLabel value="male" control={<Radio color="warning" />} label="warning" />
+            <FormControlLabel value="male" control={<Radio color="secondary" />} label="Secondary" />
           </RadioGroup>
         </FormControl>
         <FormControl>
@@ -173,36 +106,12 @@ export default function ColorCheckboxes() {
             // defaultValue="female"
             name="radio-buttons-group"
           >
-            <FormControlLabel
-              value="male"
-              control={<Radio color="primary" />}
-              label="Primary"
-            />
-            <FormControlLabel
-              value="male"
-              control={<Radio color="error" />}
-              label="error"
-            />
-            <FormControlLabel
-              value="male"
-              control={<Radio color="success" />}
-              label="Success"
-            />
-            <FormControlLabel
-              value="male"
-              control={<Radio color="info" />}
-              label="Info"
-            />
-            <FormControlLabel
-              value="male"
-              control={<Radio color="warning" />}
-              label="warning"
-            />
-            <FormControlLabel
-              value="male"
-              control={<Radio color="secondary" />}
-              label="Secondary"
-            />
+            <FormControlLabel value="male" control={<Radio color="primary" />} label="Primary" />
+            <FormControlLabel value="male" control={<Radio color="error" />} label="error" />
+            <FormControlLabel value="male" control={<Radio color="success" />} label="Success" />
+            <FormControlLabel value="male" control={<Radio color="info" />} label="Info" />
+            <FormControlLabel value="male" control={<Radio color="warning" />} label="warning" />
+            <FormControlLabel value="male" control={<Radio color="secondary" />} label="Secondary" />
           </RadioGroup>
         </FormControl>
         <div>
