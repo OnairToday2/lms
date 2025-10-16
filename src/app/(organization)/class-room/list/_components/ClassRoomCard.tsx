@@ -16,7 +16,7 @@ import {
   DialogActions,
 } from "@mui/material";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
-import { ClassRoom, ClassRoomRuntimeStatus, ClassRoomSession } from "../types/types";
+import { ClassRoomPriority, ClassRoomRuntimeStatus } from "../types/types";
 import {
   getClassRoomStatus,
   getColorClassRoomStatus,
@@ -27,9 +27,10 @@ import SessionListDialog from "./SessionListDialog";
 import ClassRoomDetailDialog from "./ClassRoomDetailDialog";
 import { fDateTime } from "@/lib";
 import { Image } from "@/shared/ui/Image";
+import { ClassSession } from "@/model/class-session.model";
 
 interface ClassRoomCardProps {
-  classRoom: ClassRoom;
+  classRoom: ClassRoomPriority;
 }
 
 export default function ClassRoomCard({ classRoom }: ClassRoomCardProps) {
@@ -37,7 +38,7 @@ export default function ClassRoomCard({ classRoom }: ClassRoomCardProps) {
   const [showAttended, setShowAttended] = useState(false);
   const [showSessions, setShowSessions] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
-  const [countdownSession, setCountdownSession] = useState<ClassRoomSession | null>(
+  const [countdownSession, setCountdownSession] = useState<ClassSession | null>(
     null,
   );
   const [showPublishDialog, setShowPublishDialog] = useState(false);

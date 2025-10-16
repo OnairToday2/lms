@@ -1,4 +1,5 @@
-import { Tables } from "@/types/supabase.types";
+import { ClassRoomPriority as ClassRoomPriorityBase } from "@/model/class-room-priority.model";
+import { ClassSession } from "@/model/class-session.model";
 
 export enum ClassRoomRuntimeStatus {
   All = "all",
@@ -8,14 +9,10 @@ export enum ClassRoomRuntimeStatus {
   Past = "past",
   Draft = "draft",
 }
-
-export type ClassRoomSession = Tables<"class_sessions">;
-
-export type ClassRoomSessionWithRuntime = ClassRoomSession & {
+export type ClassRoomSessionWithRuntime = ClassSession & {
   runtimeStatus?: ClassRoomRuntimeStatus;
 };
-
-export interface ClassRoom extends Tables<"class_rooms_priority_v2"> {
+export interface ClassRoomPriority extends ClassRoomPriorityBase {
   class_sessions: ClassRoomSessionWithRuntime[];
 }
 

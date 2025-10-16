@@ -14,14 +14,14 @@ import {
   Divider,
   Typography,
 } from "@mui/material";
-import { ClassRoomRuntimeStatus, ClassRoom } from "../types/types";
+import { ClassRoomRuntimeStatus, ClassRoomPriority } from "../types/types";
 import { resolveSessionStatus } from "@/modules/class-room-management/utils/runtimeStatus";
 
 interface SessionListDialogProps {
   open: boolean;
   onClose: () => void;
-  classRoom: ClassRoom;
-  onJoinSession?: (session: ClassRoom["class_sessions"][number]) => void;
+  classRoom: ClassRoomPriority;
+  onJoinSession?: (session: ClassRoomPriority["class_sessions"][number]) => void;
 }
 
 const STATUS_COLORS: Record<ClassRoomRuntimeStatus, "default" | "success" | "info" | "warning" | "error"> =

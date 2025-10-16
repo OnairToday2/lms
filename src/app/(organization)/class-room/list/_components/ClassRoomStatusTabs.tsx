@@ -5,15 +5,28 @@ import { COURSE_RUNTIME_STATUS_LABEL, STATUS_ORDER } from "../utils/status";
 
 interface ClassRoomStatusTabsProps {
   value: ClassRoomRuntimeStatus;
-  counts: any;
+  counts?: {
+    runtime_status: string;
+    total: number;
+  }[];
   onChange: (status: ClassRoomRuntimeStatus) => void;
 }
+const countFormatter = new Intl.NumberFormat("vi-VN");
 
 export default function ClassRoomStatusTabs({
   value,
   counts,
   onChange,
 }: ClassRoomStatusTabsProps) {
+
+  const getCount = (status: string) => {
+    const matched = counts?.find((c) =>
+      c.runtime_status === status ||
+      (c.runtime_status === null && status === "all")
+    );
+    return matched?.total ?? 0;
+  };
+
   return (
     <Tabs
       value={value}
@@ -24,6 +37,7 @@ export default function ClassRoomStatusTabs({
     >
       {
         STATUS_ORDER.map((status) => {
+          const count = getCount(status);
           return (
             <Tab
               key={status}
@@ -33,8 +47,8 @@ export default function ClassRoomStatusTabs({
                   <span>{COURSE_RUNTIME_STATUS_LABEL[status]}</span>
                   <Chip
                     size="small"
-                    color="primary"
-                    label={counts?.[status] ?? 0}
+                    color={count > 0 ? "primary" : "default"}
+                    label={countFormatter.format(count)}
                   />
                 </Stack>
               }

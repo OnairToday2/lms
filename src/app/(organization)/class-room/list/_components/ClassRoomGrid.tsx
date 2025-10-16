@@ -1,10 +1,10 @@
 "use client";
 import { Grid } from "@mui/material";
 import ClassRoomCard from "./ClassRoomCard";
-import { ClassRoom } from "../types/types";
+import { ClassRoomPriority } from "../types/types";
 
 interface ClassRoomGridProps {
-  classRooms: ClassRoom[];
+  classRooms: ClassRoomPriority[];
 }
 
 export default function ClassRoomGrid({ classRooms }: ClassRoomGridProps) {

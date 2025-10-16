@@ -18,11 +18,13 @@ import CourseFiltersBar from "./ClassRoomCourseFilters";
 import CourseStatusTabs from "./ClassRoomStatusTabs";
 import {
   GetClassRoomsQueryInput,
+  GetClassRoomStatusCountsInput,
   useCountStatusClassRoomsQuery,
   useGetClassRoomsQuery,
 } from "@/modules/class-room-management/operations/query";
 import ClassRoomGrid from "./ClassRoomGrid";
 import { Pagination } from "@/shared/ui/Pagination";
+import { useAuthStore } from "@/modules/auth/store/AuthProvider";
 
 const initialFilters: ClassRoomFilters = {
   search: "",
@@ -36,6 +38,7 @@ const PAGE_SIZE = 9;
 export default function ClassRoomContainer() {
   const [filters, setFilters] = useState<ClassRoomFilters>(initialFilters);
   const [page, setPage] = useState(1);
+  const ownerId = useAuthStore((state) => state.data?.id);
 
   const queryInput = useMemo<GetClassRoomsQueryInput>(() => {
     const trimmedSearch = filters.search.trim();
@@ -50,15 +53,33 @@ export default function ClassRoomContainer() {
       status: filters.status,
       page,
       limit: PAGE_SIZE,
+      ownerId,
     };
-  }, [filters.search, filters.startDate, filters.endDate, filters.status, page]);
+  }, [
+    filters.search,
+    filters.startDate,
+    filters.endDate,
+    filters.status,
+    page,
+    ownerId,
+  ]);
 
   const { data: classRoomsResult, isLoading, isError, refetch } =
     useGetClassRoomsQuery(queryInput);
 
   const classRooms = classRoomsResult?.items ?? [];
   const totalClassRooms = classRoomsResult?.total ?? 0;
-  const { data: countStatus } = useCountStatusClassRoomsQuery()
+  const countQueryInput = useMemo<GetClassRoomStatusCountsInput>(
+    () => ({
+      ownerId,
+      q: queryInput.q,
+      from: queryInput.from,
+      to: queryInput.to,
+    }),
+    [ownerId, queryInput.q, queryInput.from, queryInput.to],
+  );
+  const { data: countStatus } = useCountStatusClassRoomsQuery(countQueryInput);
+  const isFetchingClassRooms = !ownerId || isLoading;
 
 
   const handleSearchChange = (value: string) => {
@@ -122,7 +143,7 @@ export default function ClassRoomContainer() {
           counts={countStatus}
         />
 
-        {isLoading ? (
+        {isFetchingClassRooms ? (
           <Stack
             alignItems="center"
             justifyContent="center"
@@ -136,7 +157,7 @@ export default function ClassRoomContainer() {
           </Stack>
         ) : null}
 
-        {isError ? (
+        {isError && ownerId ? (
           <Alert
             severity="error"
             action={
@@ -149,7 +170,7 @@ export default function ClassRoomContainer() {
           </Alert>
         ) : null}
 
-        {!isLoading && !isError ? (
+        {!isFetchingClassRooms && !isError ? (
           classRooms.length === 0 ? (
             <Box
               sx={{
