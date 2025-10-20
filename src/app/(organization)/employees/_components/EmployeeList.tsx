@@ -32,7 +32,6 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PageContainer from "@/shared/ui/PageContainer";
 import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
@@ -80,7 +79,6 @@ export default function EmployeeList() {
         employee.profiles?.full_name.toLowerCase().includes(searchLower) ||
         employee.profiles?.email.toLowerCase().includes(searchLower);
 
-      // Role filter (placeholder - you'll need to add role to your data)
       const matchesRole = roleFilter === "all";
 
       // Department filter
@@ -201,15 +199,6 @@ export default function EmployeeList() {
     }
   };
 
-  // Helper function to get department/branch names
-  const getOrganizationUnits = (employee: EmployeeListItem) => {
-    const units = employee.employments
-      .map((emp) => emp.organization_units?.name)
-      .filter(Boolean);
-    return units.length > 0 ? units.join(", ") : "-";
-  };
-
-  // Helper function to get department name
   const getDepartmentName = (employee: EmployeeListItem) => {
     const dept = employee.employments.find(
       (emp) => emp.organization_units?.type === "department"
@@ -217,7 +206,6 @@ export default function EmployeeList() {
     return dept?.organization_units?.name || "-";
   };
 
-  // Helper function to get branch name
   const getBranchName = (employee: EmployeeListItem) => {
     const branch = employee.employments.find(
       (emp) => emp.organization_units?.type === "branch"

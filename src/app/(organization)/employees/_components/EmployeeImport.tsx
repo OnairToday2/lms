@@ -32,10 +32,6 @@ import { DEFAULT_TEMPLATE_STRUCTURE, type TemplateColumn } from "@/utils/employe
 import { alpha } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 
-/**
- * Create dynamic DataGrid columns based on template structure
- * Errors are displayed inline in the respective columns
- */
 function createDynamicColumns(templateColumns: TemplateColumn[]): GridColDef[] {
   const columns: GridColDef[] = [];
 

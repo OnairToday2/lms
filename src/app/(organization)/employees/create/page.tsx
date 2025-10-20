@@ -16,7 +16,6 @@ const CreateEmployeePage = () => {
   const { mutate: createEmployee, isPending } = useCreateEmployeeMutation();
 
   const handleSubmit = async (data: EmployeeFormData) => {
-    // Map EmployeeFormData to CreateEmployeePayload
     const payload: CreateEmployeePayload = {
       email: data.email,
       full_name: data.full_name,

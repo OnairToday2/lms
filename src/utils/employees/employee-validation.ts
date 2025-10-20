@@ -1,15 +1,7 @@
-/**
- * Employee Validation Utilities
- * 
- * This module provides validation logic for employee import functionality,
- * including format validation and database validation.
- */
-
 import { createServiceRoleClient } from "@/services/supabase/service-role-client";
 import type { Database } from "@/types/supabase.types";
 import { EmployeeFormSchema } from "@/modules/employees/components/EmployeeForm/schema";
 
-// Re-export types that are used by validation functions
 export interface EmployeeImportData {
   employee_code: string;
   full_name: string;
@@ -17,10 +9,10 @@ export interface EmployeeImportData {
   phone_number?: string;
   gender: Database["public"]["Enums"]["gender"];
   birthday?: string;
-  department: string; // Department ID (mapped from name during validation)
-  department_name?: string; // Original department name from import file
-  branch?: string; // Branch ID (mapped from name during validation)
-  branch_name?: string; // Original branch name from import file
+  department: string;
+  department_name?: string;
+  branch?: string;
+  branch_name?: string;
   start_date?: string;
 }
 
@@ -37,11 +29,6 @@ export interface ValidationResult {
   }>;
 }
 
-/**
- * Create a partial schema for employee import validation
- * This schema reuses the EmployeeFormSchema but makes certain fields optional
- * since they may not be present in import files (e.g., manager_id, position_id)
- */
 const EmployeeImportSchema = EmployeeFormSchema.partial({
   manager_id: true,
   role: true,
@@ -58,14 +45,6 @@ const EmployeeImportSchema = EmployeeFormSchema.partial({
   department: true,
 });
 
-/**
- * Validate parsed employee data for format and required fields
- * This is the first step of validation (format validation)
- * Now leverages Zod schema for consistent validation with the employee form
- *
- * @param data - Array of employee records to validate
- * @returns Validation result with valid and invalid records
- */
 export function validateParsedData(data: any[]): ValidationResult {
   const validRecords: EmployeeImportData[] = [];
   const invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }> = [];
@@ -113,7 +92,7 @@ export function validateParsedData(data: any[]): ValidationResult {
       const zodErrors = validationResult.error.issues;
 
       zodErrors.forEach((error) => {
-        const field = error.path.join('.');
+        const field = error.path.join(".");
         const message = error.message;
 
         // Map field names to Vietnamese error messages if needed
@@ -133,7 +112,7 @@ export function validateParsedData(data: any[]): ValidationResult {
       if (employeeCodes.has(code)) {
         const errorMsg = `Mã nhân viên trùng lặp: ${code}`;
         errors.push(errorMsg);
-        fieldErrors['employee_code'] = errorMsg;
+        fieldErrors["employee_code"] = errorMsg;
       } else {
         employeeCodes.add(code);
       }
@@ -146,7 +125,6 @@ export function validateParsedData(data: any[]): ValidationResult {
         console.log(`Row ${rowNumber}: Field Errors:`, fieldErrors);
       }
     } else {
-      // Normalize the data - at this point we know it's valid
       const validRecord: EmployeeImportData = {
         employee_code: row.employee_code ? String(row.employee_code).trim() : "",
         full_name: String(row.full_name).trim(),
@@ -181,17 +159,11 @@ export function validateParsedData(data: any[]): ValidationResult {
   };
 }
 
-/**
- * Validate employee data against the database
- * Checks for existing employee codes, emails, and organization units
- * This is the second step of validation (database validation)
- *
- * @param validRecords - Records that passed format validation
- * @returns Validation result with database conflicts
- */
 export async function validateAgainstDatabase(
-  validRecords: EmployeeImportData[]
-): Promise<{ invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }> }> {
+  validRecords: EmployeeImportData[],
+): Promise<{
+  invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }>
+}> {
   const invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }> = [];
 
   if (validRecords.length === 0) {
@@ -214,7 +186,6 @@ export async function validateAgainstDatabase(
       branches: branches.length,
     });
 
-    // Query 1: Check for existing employee codes
     const { data: existingEmployees, error: employeesError } = await supabase
       .from("employees")
       .select("employee_code")
@@ -226,11 +197,10 @@ export async function validateAgainstDatabase(
     }
 
     const existingEmployeeCodes = new Set(
-      existingEmployees?.map(e => e.employee_code) || []
+      existingEmployees?.map(e => e.employee_code) || [],
     );
     console.log("Existing employee codes found:", existingEmployeeCodes.size);
 
-    // Query 2: Check for existing emails in profiles table
     const { data: existingProfiles, error: profilesError } = await supabase
       .from("profiles")
       .select("email")
@@ -242,11 +212,10 @@ export async function validateAgainstDatabase(
     }
 
     const existingEmails = new Set(
-      existingProfiles?.map(p => p.email) || []
+      existingProfiles?.map(p => p.email) || [],
     );
     console.log("Existing emails found:", existingEmails.size);
 
-    // Query 3: Check for existing organization units (departments and branches)
     const allOrgUnits = [...departments, ...branches];
     let existingOrgUnits = new Set<string>();
 
@@ -275,14 +244,14 @@ export async function validateAgainstDatabase(
       if (existingEmployeeCodes.has(record.employee_code)) {
         const errorMsg = `Mã nhân viên đã tồn tại trong hệ thống: ${record.employee_code}`;
         errors.push(errorMsg);
-        fieldErrors['employee_code'] = errorMsg;
+        fieldErrors["employee_code"] = errorMsg;
       }
 
       // Check email
       if (existingEmails.has(record.email)) {
         const errorMsg = `Email đã được sử dụng: ${record.email}`;
         errors.push(errorMsg);
-        fieldErrors['email'] = errorMsg;
+        fieldErrors["email"] = errorMsg;
       }
 
       // Check department (optional - only if we have org units data)
@@ -290,7 +259,7 @@ export async function validateAgainstDatabase(
         if (!existingOrgUnits.has(record.department)) {
           const errorMsg = `Phòng ban không tồn tại: ${record.department}`;
           errors.push(errorMsg);
-          fieldErrors['department'] = errorMsg;
+          fieldErrors["department"] = errorMsg;
         }
       }
 
@@ -299,7 +268,7 @@ export async function validateAgainstDatabase(
         if (!existingOrgUnits.has(record.branch)) {
           const errorMsg = `Chi nhánh không tồn tại: ${record.branch}`;
           errors.push(errorMsg);
-          fieldErrors['branch'] = errorMsg;
+          fieldErrors["branch"] = errorMsg;
         }
       }
 
@@ -320,24 +289,16 @@ export async function validateAgainstDatabase(
     return { invalidRecords };
   } catch (error) {
     console.error("Database validation error:", error);
-    // Don't fail the entire validation if database check fails
-    // Return empty invalid records and log the error
     console.warn("Skipping database validation due to error");
     return { invalidRecords: [] };
   }
 }
 
-/**
- * Merge format validation and database validation results
- * This is the final step that combines both validation results
- *
- * @param formatValidation - Results from format validation
- * @param databaseValidation - Results from database validation
- * @returns Combined validation result
- */
 export function mergeValidationResults(
   formatValidation: ValidationResult,
-  databaseValidation: { invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }> }
+  databaseValidation: {
+    invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }>
+  },
 ): ValidationResult {
   // Start with format validation results
   const allInvalidRecords = [...formatValidation.invalidRecords];
@@ -349,7 +310,7 @@ export function mergeValidationResults(
 
   // Remove records that failed database validation from valid records
   const dbInvalidRowNumbers = new Set(
-    databaseValidation.invalidRecords.map(r => r.row)
+    databaseValidation.invalidRecords.map(r => r.row),
   );
 
   const finalValidRecords = formatValidation.validRecords.filter((_, index) => {

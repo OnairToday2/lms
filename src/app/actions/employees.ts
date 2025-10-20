@@ -3,7 +3,6 @@
 import { createServiceRoleClient } from "@/services/supabase/service-role-client";
 import { revalidatePath } from "next/cache";
 
-// Import utilities
 import { parseCSVOnServer, parseXLSXOnServer } from "@/utils/employees/file-parser";
 import {
   validateParsedData,
@@ -13,14 +12,9 @@ import {
   type ValidationResult,
 } from "@/utils/employees/employee-validation";
 import { createSVClient } from "@/services";
+import { Database } from "@/types/supabase.types";
 
-// Re-export types for external use
 export type { EmployeeImportData, ValidationResult };
-
-export interface FieldError {
-  field: string;
-  message: string;
-}
 
 export interface ImportResult {
   successCount: number;
@@ -37,7 +31,7 @@ export interface CreateEmployeePayload {
   email: string;
   full_name: string;
   phone_number?: string;
-  gender: string;
+  gender: Database["public"]["Enums"]["gender"];
   birthday?: string | null;
 
   // Work Information
@@ -50,24 +44,8 @@ export interface CreateEmployeePayload {
   start_date: string;
 }
 
-/**
- * Server action to create a new employee
- * Uses dual-authentication pattern:
- * 1. Service role client for creating auth user (bypasses RLS, allows email_confirm: true)
- * 2. User's session client for data operations (respects RLS policies)
- *
- * This approach provides:
- * - Better performance (100-200ms faster than Edge Function)
- * - Simpler architecture (single deployment)
- * - Same security guarantees (RLS respected for data operations)
- * - Proper audit trail (created_by reflects actual user)
- *
- * @param payload - Employee data to create
- * @returns Success result with employee ID or throws an error
- */
 export async function createEmployeeAction(payload: CreateEmployeePayload) {
-  console.log("=== CREATE EMPLOYEE ACTION START ===");
-  console.log("Payload received:", {
+  console.log("Create payload received:", {
     email: payload.email,
     full_name: payload.full_name,
     department: payload.department,
@@ -80,12 +58,6 @@ export async function createEmployeeAction(payload: CreateEmployeePayload) {
   let profileId: string | null = null;
 
   try {
-    // ========================================
-    // STEP 1: Verify User is Authenticated
-    // ========================================
-    console.log("Step 1: Verifying user authentication...");
-
-    // Create user's session client (respects RLS)
     const userSupabase = await createSVClient();
 
     const { data: { session }, error: sessionError } = await userSupabase.auth.getSession();
@@ -96,20 +68,14 @@ export async function createEmployeeAction(payload: CreateEmployeePayload) {
 
     console.log("User authenticated:", session.user.email);
 
-    // Create service role client (bypasses RLS, for auth user creation only)
     const adminSupabase = createServiceRoleClient();
-
-    // ========================================
-    // STEP 2: Create Auth User (Service Role)
-    // ========================================
-    console.log("Step 2: Creating auth user with service role...");
 
     const temporaryPassword = "123123123aA"; // TODO: Generate secure random password
 
     const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
       email: payload.email,
       password: temporaryPassword,
-      email_confirm: true, // Auto-confirm email (requires service role)
+      email_confirm: true,
       user_metadata: {
         full_name: payload.full_name,
         phone_number: payload.phone_number || "",
@@ -131,11 +97,6 @@ export async function createEmployeeAction(payload: CreateEmployeePayload) {
     console.log(`Auth user created successfully: ${userId}`);
 
     try {
-      // ========================================
-      // STEP 3: Generate Employee Code (User Token)
-      // ========================================
-      console.log("Step 3: Generating employee code...");
-
       let employeeCode = payload.employee_code;
       let employeeOrder: number;
 
@@ -156,12 +117,7 @@ export async function createEmployeeAction(payload: CreateEmployeePayload) {
         const lastOrder = lastEmployee?.employee_order ?? 0;
         employeeOrder = lastOrder + 1;
         employeeCode = String(employeeOrder).padStart(5, "0");
-
-        console.log(`Generated employee code: ${employeeCode}, order: ${employeeOrder}`);
       } else {
-        console.log(`Using provided employee code: ${employeeCode}`);
-
-        // Still need to get the next order number
         const { data: lastEmployee, error: orderError } = await userSupabase
           .from("employees")
           .select("employee_order")
@@ -175,11 +131,6 @@ export async function createEmployeeAction(payload: CreateEmployeePayload) {
 
         employeeOrder = (lastEmployee?.employee_order ?? 0) + 1;
       }
-
-      // ========================================
-      // STEP 4: Create Employee Record (User Token)
-      // ========================================
-      console.log("Step 4: Creating employee record with user token...");
 
       const { data: employeeData, error: employeeError } = await userSupabase
         .from("employees")
@@ -202,11 +153,6 @@ export async function createEmployeeAction(payload: CreateEmployeePayload) {
       employeeId = employeeData.id;
       console.log(`Employee record created: ${employeeId}`);
 
-      // ========================================
-      // STEP 5: Create Profile Record (User Token)
-      // ========================================
-      console.log("Step 5: Creating profile record with user token...");
-
       const { data: profileData, error: profileError } = await userSupabase
         .from("profiles")
         .insert({
@@ -228,14 +174,8 @@ export async function createEmployeeAction(payload: CreateEmployeePayload) {
       profileId = profileData.id;
       console.log(`Profile record created: ${profileId}`);
 
-      // ========================================
-      // STEP 6: Create Employment Records (User Token)
-      // ========================================
-      console.log("Step 6: Creating employment records with user token...");
-
       const employmentsToCreate = [];
 
-      // Add department employment
       if (payload.department) {
         employmentsToCreate.push({
           employee_id: employeeId,
@@ -243,7 +183,6 @@ export async function createEmployeeAction(payload: CreateEmployeePayload) {
         });
       }
 
-      // Add branch employment (if different from department)
       if (payload.branch && payload.branch !== payload.department) {
         employmentsToCreate.push({
           employee_id: employeeId,
@@ -264,12 +203,7 @@ export async function createEmployeeAction(payload: CreateEmployeePayload) {
         console.log(`Created ${employmentsToCreate.length} employment record(s)`);
       }
 
-      // ========================================
-      // STEP 7: Create Manager Relationship (User Token)
-      // ========================================
       if (payload.manager_id) {
-        console.log("Step 7: Creating manager-employee relationship with user token...");
-
         const { error: managerError } = await userSupabase
           .from("managers_employees")
           .insert({
@@ -283,16 +217,8 @@ export async function createEmployeeAction(payload: CreateEmployeePayload) {
         }
 
         console.log("Manager relationship created");
-      } else {
-        console.log("Step 7: No manager specified, skipping");
       }
 
-      // ========================================
-      // SUCCESS
-      // ========================================
-      console.log("=== CREATE EMPLOYEE ACTION SUCCESS ===");
-
-      // Revalidate the employees page to refresh the list
       revalidatePath("/employees");
 
       return {
@@ -304,9 +230,6 @@ export async function createEmployeeAction(payload: CreateEmployeePayload) {
       };
 
     } catch (innerError) {
-      // ========================================
-      // ROLLBACK: Clean up created resources
-      // ========================================
       console.error("Error during employee creation, initiating rollback...");
       console.error("Inner error:", innerError);
 
@@ -339,7 +262,6 @@ export async function createEmployeeAction(payload: CreateEmployeePayload) {
       throw innerError;
     }
   } catch (error) {
-    console.error("=== CREATE EMPLOYEE ACTION ERROR ===");
     console.error("Error:", error);
 
     throw error instanceof Error
@@ -348,13 +270,6 @@ export async function createEmployeeAction(payload: CreateEmployeePayload) {
   }
 }
 
-/**
- * Server action to delete an employee and all related records
- * This uses the service role client to bypass RLS policies
- *
- * @param employeeId - The ID of the employee to delete
- * @returns Success message or throws an error
- */
 export async function deleteEmployeeAction(employeeId: string) {
   if (!employeeId || typeof employeeId !== "string") {
     throw new Error("Invalid employee ID");
@@ -363,7 +278,6 @@ export async function deleteEmployeeAction(employeeId: string) {
   const supabase = createServiceRoleClient();
 
   try {
-    // 1. First, get the employee record to retrieve the user_id
     const { data: employee, error: fetchError } = await supabase
       .from("employees")
       .select("user_id")
@@ -380,9 +294,6 @@ export async function deleteEmployeeAction(employeeId: string) {
 
     const userId = employee.user_id;
 
-    // 2. Delete related records in the correct order to avoid foreign key constraints
-
-    // Delete employments (references employees)
     const { error: employmentsError } = await supabase
       .from("employments")
       .delete()
@@ -392,7 +303,6 @@ export async function deleteEmployeeAction(employeeId: string) {
       throw new Error(`Failed to delete employments: ${employmentsError.message}`);
     }
 
-    // Delete profiles (references employees)
     const { error: profilesError } = await supabase
       .from("profiles")
       .delete()
@@ -402,7 +312,6 @@ export async function deleteEmployeeAction(employeeId: string) {
       throw new Error(`Failed to delete profile: ${profilesError.message}`);
     }
 
-    // Delete employee record
     const { error: employeeError } = await supabase
       .from("employees")
       .delete()
@@ -412,16 +321,10 @@ export async function deleteEmployeeAction(employeeId: string) {
       throw new Error(`Failed to delete employee: ${employeeError.message}`);
     }
 
-    // 3. Finally, delete the auth user
-    // This should be done last to ensure we can still access the employee data if needed
     const { error: authError } = await supabase.auth.admin.deleteUser(userId);
 
     if (authError) {
-      // Log the error but don't fail the entire operation
-      // The database records are already deleted
       console.error(`Warning: Failed to delete auth user: ${authError.message}`);
-      // You might want to handle this differently in production
-      // For now, we'll continue since the main records are deleted
     }
 
     // Revalidate the employees page to refresh the list
@@ -439,13 +342,6 @@ export async function deleteEmployeeAction(employeeId: string) {
   }
 }
 
-/**
- * Validate employee import file (server-side parsing and validation)
- * This server action accepts a raw file via FormData and handles all parsing on the server
- *
- * @param formData - FormData containing the file to validate
- * @returns Validation result with valid and invalid records
- */
 export async function validateEmployeeFile(
   formData: FormData,
 ): Promise<ValidationResult> {
@@ -503,7 +399,6 @@ export async function validateEmployeeFile(
 
     console.log("Total records to validate:", parsedData.length);
 
-    // Step 1: Format validation
     const formatValidation = validateParsedData(parsedData);
 
     console.log("Format validation result:", {
@@ -512,7 +407,6 @@ export async function validateEmployeeFile(
       invalidCount: formatValidation.invalidCount,
     });
 
-    // Step 2: Database validation (only for records that passed format validation)
     console.log("=== DATABASE VALIDATION START ===");
     const databaseValidation = await validateAgainstDatabase(formatValidation.validRecords);
     console.log("Database validation result:", {
@@ -520,7 +414,6 @@ export async function validateEmployeeFile(
     });
     console.log("=== DATABASE VALIDATION END ===");
 
-    // Step 3: Merge validation results
     const finalResult = mergeValidationResults(formatValidation, databaseValidation);
 
     console.log("Final validation result:", {
@@ -544,23 +437,12 @@ export async function validateEmployeeFile(
   }
 }
 
-/**
- * Import validated employee records into the database
- * Uses the service role client and relies on the handle_new_employee trigger
- * This server action accepts FormData containing the file and validates it before importing
- *
- * @param formData - FormData containing the file to import
- * @returns Import result with success/failure counts and errors
- */
 export async function importEmployeesFile(
   formData: FormData,
 ): Promise<ImportResult> {
   const supabase = createServiceRoleClient();
 
   try {
-    console.log("=== IMPORT EMPLOYEES FILE START ===");
-
-    // Step 1: Validate the file first to get valid records
     const validationResult = await validateEmployeeFile(formData);
 
     console.log("Validation result:", {
@@ -569,7 +451,6 @@ export async function importEmployeesFile(
       invalidCount: validationResult.invalidCount,
     });
 
-    // Step 2: Check if there are any valid records to import
     if (validationResult.validCount === 0) {
       console.log("No valid records to import");
       return {
@@ -579,14 +460,12 @@ export async function importEmployeesFile(
       };
     }
 
-    // Step 3: Check if there are any invalid records
     if (validationResult.invalidCount > 0) {
       throw new Error(
-        `File chứa ${validationResult.invalidCount} bản ghi không hợp lệ. Vui lòng sửa lỗi trước khi import.`
+        `File chứa ${validationResult.invalidCount} bản ghi không hợp lệ. Vui lòng sửa lỗi trước khi import.`,
       );
     }
 
-    // Step 4: Import the valid records
     const records = validationResult.validRecords;
     let successCount = 0;
     let failedCount = 0;
@@ -597,6 +476,11 @@ export async function importEmployeesFile(
     for (let i = 0; i < records.length; i++) {
       const record = records[i];
       const rowNumber = i + 2; // +2 because index is 0-based and row 1 is header
+
+      if (!record) {
+        console.log(`Skipping empty record at row ${rowNumber}`);
+        continue;
+      }
 
       try {
         // Create auth user - the database trigger will handle the rest
@@ -647,8 +531,6 @@ export async function importEmployeesFile(
 
     // Revalidate the employees page to refresh the list
     revalidatePath("/employees");
-
-    console.log("=== IMPORT EMPLOYEES FILE END ===");
 
     return {
       successCount,
