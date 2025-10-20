@@ -20,10 +20,9 @@ import ErrorIcon from "@mui/icons-material/Error";
 import DescriptionIcon from "@mui/icons-material/Description";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import type { ValidateEmployeeFileResultDto } from "@/types/dto/employee.dto";
-import { DEFAULT_TEMPLATE_STRUCTURE } from "@/utils/employees/template-parser";
 import { alpha } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
-import EmployeeValidationTable from "./EmployeeValidationTable";
+import EmployeeValidationTable, { DEFAULT_TEMPLATE_STRUCTURE } from "./EmployeeValidationTable";
 
 const EmployeeImport = () => {
   const router = useRouter();
@@ -35,11 +34,6 @@ const EmployeeImport = () => {
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [isImporting, setIsImporting] = React.useState(false);
   const [validationResult, setValidationResult] = React.useState<ValidateEmployeeFileResultDto | null>(null);
-  const [importResult, setImportResult] = React.useState<{
-    successCount: number;
-    failedCount: number;
-    errors: Array<{ row: number; employeeCode: string; error: string }>;
-  } | null>(null);
 
   const handleFileSelect = (selectedFile: File) => {
     const validTypes = [
@@ -75,7 +69,6 @@ const EmployeeImport = () => {
   const validateFile = async (file: File) => {
     setIsProcessing(true);
     setValidationResult(null);
-    setImportResult(null);
 
     try {
       const formData = new FormData();
@@ -139,7 +132,6 @@ const EmployeeImport = () => {
   const handleRemoveFile = () => {
     setFile(null);
     setValidationResult(null);
-    setImportResult(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -171,7 +163,6 @@ const EmployeeImport = () => {
     }
 
     setIsImporting(true);
-    setImportResult(null);
 
     try {
       const formData = new FormData();
@@ -188,7 +179,6 @@ const EmployeeImport = () => {
       }
 
       const result = await response.json();
-      setImportResult(result);
 
       if (result.failedCount === 0) {
         notifications.show(

@@ -4,7 +4,6 @@ import type {
   ValidateEmployeeFileResultDto,
   ImportEmployeesResultDto,
   EmployeeImportData,
-  InvalidEmployeeRecord,
 } from "@/types/dto/employee.dto";
 import { EmployeeFormSchema } from "@/modules/employees/components/EmployeeForm/schema";
 

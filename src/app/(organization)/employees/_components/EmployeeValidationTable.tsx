@@ -3,7 +3,86 @@ import * as React from "react";
 import { Box, Typography, Tooltip } from "@mui/material";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import type { ValidateEmployeeFileResultDto } from "@/types/dto/employee.dto";
-import type { TemplateColumn } from "@/utils/employees/template-parser";
+
+export interface TemplateColumn {
+  headerName: string;
+  fieldName: string;
+  fieldKey: string;
+  required: boolean;
+  width?: number;
+}
+
+export interface TemplateStructure {
+  columns: TemplateColumn[];
+}
+
+export const DEFAULT_TEMPLATE_STRUCTURE: TemplateStructure = {
+  columns: [
+    {
+      headerName: "Mã nhân viên",
+      fieldName: "Mã nhân viên",
+      fieldKey: "employee_code",
+      required: false,
+      width: 150,
+    },
+    {
+      headerName: "Họ và tên*",
+      fieldName: "Họ và tên",
+      fieldKey: "full_name",
+      required: true,
+      width: 200,
+    },
+    {
+      headerName: "Email*",
+      fieldName: "Email",
+      fieldKey: "email",
+      required: true,
+      width: 250,
+    },
+    {
+      headerName: "Số điện thoại",
+      fieldName: "Số điện thoại",
+      fieldKey: "phone_number",
+      required: false,
+      width: 150,
+    },
+    {
+      headerName: "Giới tính",
+      fieldName: "Giới tính",
+      fieldKey: "gender",
+      required: false,
+      width: 120,
+    },
+    {
+      headerName: "Ngày sinh",
+      fieldName: "Ngày sinh",
+      fieldKey: "birthday",
+      required: false,
+      width: 130,
+    },
+    {
+      headerName: "Phòng ban*",
+      fieldName: "Phòng ban",
+      fieldKey: "department",
+      required: true,
+      width: 180,
+    },
+    {
+      headerName: "Chi nhánh",
+      fieldName: "Chi nhánh",
+      fieldKey: "branch",
+      required: false,
+      width: 150,
+    },
+    {
+      headerName: "Ngày bắt đầu",
+      fieldName: "Ngày bắt đầu",
+      fieldKey: "start_date",
+      required: false,
+      width: 130,
+    },
+  ],
+};
 
 interface EmployeeValidationTableProps {
   validationResult: ValidateEmployeeFileResultDto;
@@ -135,11 +214,9 @@ const EmployeeValidationTable: React.FC<EmployeeValidationTableProps> = ({
   templateColumns,
 }) => {
   const rows = React.useMemo(() => {
-    // Combine valid and invalid records
     const allRows: any[] = [];
     let rowIndex = 0;
 
-    // Add invalid records
     validationResult.invalidRecords.forEach((record) => {
       const rowData: any = {
         id: rowIndex++,
@@ -148,7 +225,6 @@ const EmployeeValidationTable: React.FC<EmployeeValidationTableProps> = ({
         isValid: false,
       };
 
-      // Add all data fields to the row
       templateColumns.forEach((col) => {
         rowData[col.fieldKey] = record.data[col.fieldKey] || "";
       });
@@ -156,16 +232,14 @@ const EmployeeValidationTable: React.FC<EmployeeValidationTableProps> = ({
       allRows.push(rowData);
     });
 
-    // Add valid records
     validationResult.validRecords.forEach((record) => {
       const rowData: any = {
         id: rowIndex++,
-        rowNumber: rowIndex, // Valid records don't have row numbers, use index
+        rowNumber: rowIndex,
         fieldErrors: {},
         isValid: true,
       };
 
-      // Add all data fields to the row
       templateColumns.forEach((col) => {
         rowData[col.fieldKey] = (record as any)[col.fieldKey] || "";
       });
@@ -173,7 +247,6 @@ const EmployeeValidationTable: React.FC<EmployeeValidationTableProps> = ({
       allRows.push(rowData);
     });
 
-    // Sort by row number if available, otherwise by id
     return allRows.sort((a, b) => {
       if (a.rowNumber && b.rowNumber) {
         return a.rowNumber - b.rowNumber;
