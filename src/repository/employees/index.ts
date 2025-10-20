@@ -138,7 +138,7 @@ export async function createEmployee(data: {
   employee_order: number;
   start_date: string;
   position_id?: string | null;
-  status: string;
+  status: Database["public"]["Enums"]["employee_status"];
 }) {
   const supabase = await createSVClient();
 
@@ -206,6 +206,21 @@ export async function deleteEmployeeById(employeeId: string) {
   if (error) {
     throw new Error(`Failed to delete employee: ${error.message}`);
   }
+}
+
+export async function findEmployeesByEmployeeCodes(employeeCodes: string[]) {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("employees")
+    .select("employee_code")
+    .in("employee_code", employeeCodes);
+
+  if (error) {
+    throw new Error(`Failed to check employee codes: ${error.message}`);
+  }
+
+  return data || [];
 }
 
 export {

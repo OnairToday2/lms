@@ -66,3 +66,17 @@ export async function deleteProfileByEmployeeId(employeeId: string) {
   }
 }
 
+export async function findProfilesByEmails(emails: string[]) {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("email")
+    .in("email", emails);
+
+  if (error) {
+    throw new Error(`Failed to check emails: ${error.message}`);
+  }
+
+  return data || [];
+}

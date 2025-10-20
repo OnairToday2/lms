@@ -6,6 +6,9 @@ import type {
   EmployeeImportData,
 } from "@/types/dto/employee.dto";
 import { EmployeeFormSchema } from "@/modules/employees/components/EmployeeForm/schema";
+import * as employeeRepository from "@/repository/employees";
+import * as profileRepository from "@/repository/profiles";
+import * as organizationUnitRepository from "@/repository/organization-units";
 
 interface ValidationResult {
   totalCount: number;
@@ -286,8 +289,6 @@ async function validateAgainstDatabase(
     return { invalidRecords };
   }
 
-  const supabase = createServiceRoleClient();
-
   try {
     const employeeCodes = validRecords.map(r => r.employee_code);
     const emails = validRecords.map(r => r.email);
@@ -301,33 +302,15 @@ async function validateAgainstDatabase(
       branches: branches.length,
     });
 
-    const { data: existingEmployees, error: employeesError } = await supabase
-      .from("employees")
-      .select("employee_code")
-      .in("employee_code", employeeCodes);
-
-    if (employeesError) {
-      console.error("Error checking employee codes:", employeesError);
-      throw new Error(`Lỗi kiểm tra mã nhân viên: ${employeesError.message}`);
-    }
-
+    const existingEmployees = await employeeRepository.findEmployeesByEmployeeCodes(employeeCodes);
     const existingEmployeeCodes = new Set(
-      existingEmployees?.map(e => e.employee_code) || [],
+      existingEmployees.map(e => e.employee_code),
     );
     console.log("Existing employee codes found:", existingEmployeeCodes.size);
 
-    const { data: existingProfiles, error: profilesError } = await supabase
-      .from("profiles")
-      .select("email")
-      .in("email", emails);
-
-    if (profilesError) {
-      console.error("Error checking emails:", profilesError);
-      throw new Error(`Lỗi kiểm tra email: ${profilesError.message}`);
-    }
-
+    const existingProfiles = await profileRepository.findProfilesByEmails(emails);
     const existingEmails = new Set(
-      existingProfiles?.map(p => p.email) || [],
+      existingProfiles.map(p => p.email),
     );
     console.log("Existing emails found:", existingEmails.size);
 
@@ -335,16 +318,13 @@ async function validateAgainstDatabase(
     let existingOrgUnits = new Set<string>();
 
     if (allOrgUnits.length > 0) {
-      const { data: orgUnits, error: orgUnitsError } = await supabase
-        .from("organization_units")
-        .select("id, name, type");
-
-      if (orgUnitsError) {
-        console.error("Error checking organization units:", orgUnitsError);
-        console.warn("Skipping organization unit validation due to error");
-      } else {
-        existingOrgUnits = new Set(orgUnits?.map(u => u.id) || []);
+      try {
+        const orgUnits = await organizationUnitRepository.getAllOrganizationUnitsWithDetails();
+        existingOrgUnits = new Set(orgUnits.map(u => u.id));
         console.log("Existing organization units found:", existingOrgUnits.size);
+      } catch (error) {
+        console.error("Error checking organization units:", error);
+        console.warn("Skipping organization unit validation due to error");
       }
     }
 
