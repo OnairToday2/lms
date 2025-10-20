@@ -1,24 +1,61 @@
 import { useTMutation } from "@/lib/queryClient";
-import { employeesRepository } from "@/repository";
-import type { UpdateEmployeePayload } from "@/repository/employees";
-import { deleteEmployeeAction, createEmployeeAction, type CreateEmployeePayload } from "@/app/actions/employees";
+import type { CreateEmployeeDto, UpdateEmployeeDto } from "@/types/dto/employee.dto";
 
 export const useCreateEmployeeMutation = () => {
   return useTMutation({
-    mutationFn: (payload: CreateEmployeePayload) =>
-      createEmployeeAction(payload),
+    mutationFn: async (payload: CreateEmployeeDto) => {
+      const response = await fetch("/api/employees", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create employee");
+      }
+
+      return response.json();
+    },
   });
 };
 
 export const useUpdateEmployeeMutation = () => {
   return useTMutation({
-    mutationFn: (payload: UpdateEmployeePayload) =>
-      employeesRepository.updateEmployee(payload),
+    mutationFn: async (payload: UpdateEmployeeDto) => {
+      const response = await fetch(`/api/employees/${payload.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update employee");
+      }
+
+      return response.json();
+    },
   });
 };
 
 export const useDeleteEmployeeMutation = () => {
   return useTMutation({
-    mutationFn: (employeeId: string) => deleteEmployeeAction(employeeId),
+    mutationFn: async (employeeId: string) => {
+      const response = await fetch(`/api/employees/${employeeId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete employee");
+      }
+
+      return response.json();
+    },
   });
 };

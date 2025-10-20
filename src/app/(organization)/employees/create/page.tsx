@@ -7,7 +7,7 @@ import type { EmployeeFormData } from "@/modules/employees/components/EmployeeFo
 import { useCreateEmployeeMutation } from "@/modules/employees/operations/mutation";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { Box } from "@mui/material";
-import type { CreateEmployeePayload } from "@/app/actions/employees";
+import type { CreateEmployeeDto } from "@/types/dto/employee.dto";
 
 const CreateEmployeePage = () => {
   const pageTitle = "Tạo nhân viên";
@@ -16,7 +16,7 @@ const CreateEmployeePage = () => {
   const { mutate: createEmployee, isPending } = useCreateEmployeeMutation();
 
   const handleSubmit = async (data: EmployeeFormData) => {
-    const payload: CreateEmployeePayload = {
+    const payload: CreateEmployeeDto = {
       email: data.email,
       full_name: data.full_name,
       phone_number: data.phone_number,

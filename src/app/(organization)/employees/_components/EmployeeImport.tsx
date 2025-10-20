@@ -11,10 +11,7 @@ import {
   IconButton,
   LinearProgress,
   AlertTitle,
-  Chip,
-  Tooltip,
 } from "@mui/material";
-import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PeopleIcon from "@mui/icons-material/People";
@@ -22,135 +19,11 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import DescriptionIcon from "@mui/icons-material/Description";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
-import {
-  validateEmployeeFile,
-  importEmployeesFile,
-  type ValidationResult,
-  type ImportResult,
-} from "@/app/actions/employees";
-import { DEFAULT_TEMPLATE_STRUCTURE, type TemplateColumn } from "@/utils/employees/template-parser";
+import type { ValidateEmployeeFileResultDto } from "@/types/dto/employee.dto";
+import { DEFAULT_TEMPLATE_STRUCTURE } from "@/utils/employees/template-parser";
 import { alpha } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
-
-function createDynamicColumns(templateColumns: TemplateColumn[]): GridColDef[] {
-  const columns: GridColDef[] = [];
-
-  templateColumns.forEach((templateCol) => {
-    columns.push({
-      field: templateCol.fieldKey,
-      headerName: templateCol.fieldName + (templateCol.required ? " *" : ""),
-      width: templateCol.width || 150,
-      flex: templateCol.fieldKey === "email" ? 1 : undefined,
-      minWidth: templateCol.width || 150,
-      renderCell: (params: GridRenderCellParams) => {
-        const rowData = params.row;
-        const fieldValue = rowData[templateCol.fieldKey];
-        const fieldError = rowData.fieldErrors?.[templateCol.fieldKey];
-        const hasError = !!fieldError;
-
-        if (hasError) {
-          return (
-            <Tooltip title={fieldError} arrow>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.5,
-                  width: "100%",
-                  height: "100%",
-                  bgcolor: "error.50",
-                  borderRadius: 0.5,
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "error.main",
-                    fontWeight: "medium",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {fieldError}
-                </Typography>
-              </Box>
-            </Tooltip>
-          );
-        }
-
-        const displayValue = fieldValue || "--";
-        const isEmpty = !fieldValue || fieldValue === "";
-
-        return (
-          <Tooltip title={fieldError} arrow>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 0.5,
-                width: "100%",
-                height: "100%",
-                borderRadius: 0.5,
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{
-                  color: isEmpty ? "text.secondary" : "text.primary",
-                  fontStyle: isEmpty ? "italic" : "normal",
-                  fontWeight: "normal",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {displayValue}
-              </Typography>
-            </Box>
-          </Tooltip>
-        );
-      },
-    });
-  });
-
-  columns.push({
-    field: "status",
-    headerName: "Trạng thái",
-    width: 150,
-    headerAlign: "center",
-    align: "center",
-    renderCell: (params: GridRenderCellParams) => {
-      const isValid = params.row.isValid;
-
-      return (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 0.5,
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <Typography
-            variant="body2"
-            sx={{
-              color: isValid ? "success.main" : "error.main",
-              fontWeight: "normal",
-              overflow: "hidden",
-            }}
-          >
-            {isValid ? "Hợp lệ" : "Không hợp lệ"}
-          </Typography>
-        </Box>
-      );
-    },
-  });
-
-  return columns;
-}
+import EmployeeValidationTable from "./EmployeeValidationTable";
 
 const EmployeeImport = () => {
   const router = useRouter();
@@ -161,8 +34,12 @@ const EmployeeImport = () => {
   const [isDragging, setIsDragging] = React.useState(false);
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [isImporting, setIsImporting] = React.useState(false);
-  const [validationResult, setValidationResult] = React.useState<ValidationResult | null>(null);
-  const [importResult, setImportResult] = React.useState<ImportResult | null>(null);
+  const [validationResult, setValidationResult] = React.useState<ValidateEmployeeFileResultDto | null>(null);
+  const [importResult, setImportResult] = React.useState<{
+    successCount: number;
+    failedCount: number;
+    errors: Array<{ row: number; employeeCode: string; error: string }>;
+  } | null>(null);
 
   const handleFileSelect = (selectedFile: File) => {
     const validTypes = [
@@ -204,7 +81,17 @@ const EmployeeImport = () => {
       const formData = new FormData();
       formData.append("file", file);
 
-      const validation = await validateEmployeeFile(formData);
+      const response = await fetch("/api/employees/validate", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to validate file");
+      }
+
+      const validation: ValidateEmployeeFileResultDto = await response.json();
       setValidationResult(validation);
     } catch (error) {
       console.error("Error validating file:", error);
@@ -287,12 +174,20 @@ const EmployeeImport = () => {
     setImportResult(null);
 
     try {
-      // Create FormData and append the file
       const formData = new FormData();
       formData.append("file", file);
 
-      // Call the import server action with FormData
-      const result = await importEmployeesFile(formData);
+      const response = await fetch("/api/employees/import", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to import employees");
+      }
+
+      const result = await response.json();
       setImportResult(result);
 
       if (result.failedCount === 0) {
@@ -304,7 +199,6 @@ const EmployeeImport = () => {
           },
         );
 
-        // Redirect to employees list after successful import
         setTimeout(() => {
           router.push("/employees");
         }, 2000);
@@ -522,77 +416,10 @@ const EmployeeImport = () => {
                   </Typography>
                 </Box>
 
-                {/* DataGrid Table with Dynamic Columns - Shows all rows */}
-                <Box sx={{ height: 400, width: "100%" }}>
-                  <DataGrid
-                    rows={(() => {
-                      // Combine valid and invalid records
-                      const allRows: any[] = [];
-                      let rowIndex = 0;
-
-                      // Add invalid records
-                      validationResult.invalidRecords.forEach((record) => {
-                        const rowData: any = {
-                          id: rowIndex++,
-                          rowNumber: record.row,
-                          fieldErrors: record.fieldErrors || {},
-                          isValid: false,
-                        };
-
-                        // Add all data fields to the row
-                        DEFAULT_TEMPLATE_STRUCTURE.columns.forEach((col) => {
-                          rowData[col.fieldKey] = record.data[col.fieldKey] || "";
-                        });
-
-                        allRows.push(rowData);
-                      });
-
-                      // Add valid records
-                      validationResult.validRecords.forEach((record) => {
-                        const rowData: any = {
-                          id: rowIndex++,
-                          rowNumber: rowIndex, // Valid records don't have row numbers, use index
-                          fieldErrors: {},
-                          isValid: true,
-                        };
-
-                        // Add all data fields to the row
-                        DEFAULT_TEMPLATE_STRUCTURE.columns.forEach((col) => {
-                          rowData[col.fieldKey] = (record as any)[col.fieldKey] || "";
-                        });
-
-                        allRows.push(rowData);
-                      });
-
-                      // Sort by row number if available, otherwise by id
-                      return allRows.sort((a, b) => {
-                        if (a.rowNumber && b.rowNumber) {
-                          return a.rowNumber - b.rowNumber;
-                        }
-                        return a.id - b.id;
-                      });
-                    })()}
-                    columns={createDynamicColumns(DEFAULT_TEMPLATE_STRUCTURE.columns)}
-                    initialState={{
-                      pagination: {
-                        paginationModel: { page: 0, pageSize: 10 },
-                      },
-                    }}
-                    pageSizeOptions={[5, 10, 25, 50]}
-                    disableRowSelectionOnClick
-                    sx={{
-                      border: "1px solid",
-                      borderColor: "divider",
-                      "& .MuiDataGrid-cell": {
-                        borderColor: "divider",
-                      },
-                      "& .MuiDataGrid-columnHeaders": {
-                        bgcolor: "grey.100",
-                        borderColor: "divider",
-                      },
-                    }}
-                  />
-                </Box>
+                <EmployeeValidationTable
+                  validationResult={validationResult}
+                  templateColumns={DEFAULT_TEMPLATE_STRUCTURE.columns}
+                />
               </Box>
             )}
           </Card>
