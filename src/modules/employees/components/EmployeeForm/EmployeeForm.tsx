@@ -48,15 +48,12 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 }) => {
   const notifications = useNotifications();
 
-  // Fetch data for dropdowns
   const { data: organizationUnits, isLoading: isLoadingOrgUnits } = useGetOrganizationUnitsQuery();
   const { data: employees, isLoading: isLoadingEmployees } = useGetEmployeesQuery();
   const { data: positions, isLoading: isLoadingPositions, refetch: refetchPositions } = useGetPositionsQuery();
 
-  // Mutation for creating new positions
   const { mutateAsync: createPosition, isPending: isCreatingPosition } = useCreatePositionMutation();
 
-  // Filter organization units by type
   const branches = React.useMemo(
     () => organizationUnits?.filter((unit) => unit.type === Constants.public.Enums.organization_unit_type[0]),
     [organizationUnits]
@@ -88,10 +85,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
     },
     resolver: zodResolver(EmployeeFormSchema),
   });
-
-  // Auto-generate employee code (now handled by database trigger)
-  // Removed client-side auto-generation logic
-  // The database will auto-generate the code if left empty
 
   const submitForm: SubmitHandler<EmployeeFormData> = async (formData) => {
     await onSubmit?.(formData);
@@ -481,10 +474,8 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                           if (newValue === null) {
                             onChange("");
                           } else if (typeof newValue === "string") {
-                            // User typed a new position name - create it immediately
                             await handleCreatePosition(newValue);
                           } else {
-                            // User selected an existing position
                             onChange(newValue.id);
                           }
                         }}
@@ -498,24 +489,19 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                             helperText={error?.message}
                             onKeyDown={async (e) => {
                               if (e.key === "Enter") {
-                                // Prevent form submission
                                 e.preventDefault();
                                 e.stopPropagation();
 
-                                // Get the current input value
                                 const inputValue = (e.target as HTMLInputElement).value?.trim();
 
                                 if (inputValue) {
-                                  // Check if this is a new position (not in the existing list)
                                   const existingPosition = positions?.find(
                                     (p) => p.title.toLowerCase() === inputValue.toLowerCase()
                                   );
 
                                   if (!existingPosition) {
-                                    // Create new position
                                     await handleCreatePosition(inputValue);
                                   } else {
-                                    // Select existing position
                                     onChange(existingPosition.id);
                                   }
                                 }

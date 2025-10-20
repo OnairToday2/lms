@@ -35,7 +35,6 @@ import Grid from "@mui/material/Grid";
 function createDynamicColumns(templateColumns: TemplateColumn[]): GridColDef[] {
   const columns: GridColDef[] = [];
 
-  // Add columns from template
   templateColumns.forEach((templateCol) => {
     columns.push({
       field: templateCol.fieldKey,
@@ -49,7 +48,6 @@ function createDynamicColumns(templateColumns: TemplateColumn[]): GridColDef[] {
         const fieldError = rowData.fieldErrors?.[templateCol.fieldKey];
         const hasError = !!fieldError;
 
-        // If there's an error for this field, display the error
         if (hasError) {
           return (
             <Tooltip title={fieldError} arrow>
@@ -81,7 +79,6 @@ function createDynamicColumns(templateColumns: TemplateColumn[]): GridColDef[] {
           );
         }
 
-        // No error - display the value normally
         const displayValue = fieldValue || "--";
         const isEmpty = !fieldValue || fieldValue === "";
 
@@ -117,7 +114,6 @@ function createDynamicColumns(templateColumns: TemplateColumn[]): GridColDef[] {
     });
   });
 
-  // Add Status column as the last column
   columns.push({
     field: "status",
     headerName: "Trạng thái",
@@ -169,7 +165,6 @@ const EmployeeImport = () => {
   const [importResult, setImportResult] = React.useState<ImportResult | null>(null);
 
   const handleFileSelect = (selectedFile: File) => {
-    // Validate file type
     const validTypes = [
       "text/csv",
       "application/vnd.ms-excel",
@@ -206,11 +201,9 @@ const EmployeeImport = () => {
     setImportResult(null);
 
     try {
-      // Create FormData and append the file
       const formData = new FormData();
       formData.append("file", file);
 
-      // Send the raw file to server for parsing and validation
       const validation = await validateEmployeeFile(formData);
       setValidationResult(validation);
     } catch (error) {
@@ -220,7 +213,6 @@ const EmployeeImport = () => {
         severity: "error",
         autoHideDuration: 5000,
       });
-      // Clear file on error
       setFile(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";

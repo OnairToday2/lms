@@ -1,25 +1,7 @@
-/**
- * File Parser Utilities
- *
- * This module provides utilities for parsing CSV and Excel files
- * for employee import functionality.
- */
-
-/**
- * Normalize header name by removing asterisk and trimming
- * @param header - Raw header from CSV/Excel
- * @returns Normalized header name
- */
 export function normalizeHeader(header: string): string {
   return header.replace("*", "").trim();
 }
 
-/**
- * Map Vietnamese header names to internal field keys
- * All field keys use snake_case convention to match database schema
- * @param headerName - Normalized header name
- * @returns Internal field key in snake_case
- */
 export function mapHeaderToFieldKey(headerName: string): string {
   const mapping: Record<string, string> = {
     "Mã nhân viên": "employee_code",
@@ -40,16 +22,9 @@ export function mapHeaderToFieldKey(headerName: string): string {
   return mapping[headerName] || headerName.toLowerCase().replace(/\s+/g, "_");
 }
 
-/**
- * Check if a row is completely empty (all fields are empty or whitespace)
- * @param row - Row object to check
- * @returns True if all fields are empty or contain only whitespace
- */
 export function isRowEmpty(row: any): boolean {
-  // Get all values from the row object
   const values = Object.values(row);
 
-  // Check if all values are empty, null, undefined, or whitespace
   return values.every(value => {
     if (value === null || value === undefined) {
       return true;
@@ -59,21 +34,12 @@ export function isRowEmpty(row: any): boolean {
   });
 }
 
-/**
- * Parse CSV text on the server with header mapping
- * Automatically filters out completely empty rows
- *
- * @param text - CSV file content as text
- * @returns Array of parsed records with mapped field keys (empty rows excluded)
- * @throws Error if CSV is empty
- */
 export function parseCSVOnServer(text: string): any[] {
   const lines = text.split("\n").filter(line => line.trim());
   if (lines.length === 0) {
     throw new Error("File CSV rỗng");
   }
 
-  // Get headers and normalize them
   const rawHeaders = lines[0].split(",").map(h => h.trim());
   const normalizedHeaders = rawHeaders.map(normalizeHeader);
   const fieldKeys = normalizedHeaders.map(mapHeaderToFieldKey);
@@ -111,15 +77,6 @@ export function parseCSVOnServer(text: string): any[] {
   return data;
 }
 
-/**
- * Parse XLSX buffer on the server
- * Uses the xlsx package to read Excel files
- * Automatically filters out completely empty rows
- *
- * @param buffer - ArrayBuffer containing Excel file data
- * @returns Array of parsed records with mapped field keys (empty rows excluded)
- * @throws Error if Excel is empty or xlsx package is not installed
- */
 export async function parseXLSXOnServer(buffer: ArrayBuffer): Promise<any[]> {
   try {
     // Dynamic import of xlsx

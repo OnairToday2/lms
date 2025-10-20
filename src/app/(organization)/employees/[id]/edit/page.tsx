@@ -15,19 +15,15 @@ const EditEmployeePage = () => {
   const notifications = useNotifications();
   const employeeId = params.id as string;
 
-  // Fetch employee data
   const { data: employee, isLoading, error } = useGetEmployeeQuery(employeeId);
 
-  // Update mutation
   const { mutateAsync: updateEmployee, isPending } = useUpdateEmployeeMutation();
 
   const pageTitle = "Chỉnh sửa nhân viên";
 
-  // Convert employee data to form data
   const defaultValues = React.useMemo(() => {
     if (!employee) return undefined;
 
-    // Get department and branch from employments
     const departmentEmployment = employee.employments.find(
       (emp) => emp.organization_units?.type === "department"
     );
@@ -35,7 +31,6 @@ const EditEmployeePage = () => {
       (emp) => emp.organization_units?.type === "branch"
     );
 
-    // Get manager from managers_employees relationship
     const managerRelationship = employee.managers_employees?.[0];
 
     return {

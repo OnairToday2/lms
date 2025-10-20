@@ -7,22 +7,21 @@ const getPositions = async () => {
 };
 
 const getFirstOrganization = async () => {
-  // Try to get the first organization
   const { data: organizations, error: fetchError } = await supabase
     .from("organizations")
     .select("id")
     .limit(1);
 
   if (fetchError) {
-    throw new Error(`Failed to fetch organizations: ${fetchError.message}`);
+    throw new Error(fetchError.message);
   }
 
   // If no organization exists, throw an error
   if (!organizations || organizations.length === 0) {
-    throw new Error("Cannot create position: No organization found. Please create an organization first.");
+    throw new Error("Please create an organization first.");
   }
 
-  return organizations[0].id;
+  return organizations[0]!.id;
 };
 
 const createPosition = async (title: string) => {
@@ -39,7 +38,7 @@ const createPosition = async (title: string) => {
     .single();
 
   if (error) {
-    throw new Error(`Failed to create position: ${error.message}`);
+    throw new Error(error.message);
   }
 
   return data;

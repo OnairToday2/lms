@@ -3,7 +3,6 @@ import { Constants } from "@/types/supabase.types";
 
 const genderValues = Constants.public.Enums.gender;
 
-// Role options for the dropdown
 export const ROLE_OPTIONS = [
   "Nhân viên",
   "Trưởng nhóm",
