@@ -1,39 +1,15 @@
 import { supabase } from "@/services";
 import { createSVClient } from "@/services";
-import type { Database } from "@/types/supabase.types";
+import type { EmployeeDto, GetEmployeesParams } from "@/types/dto/employees";
+import type { PaginatedResult } from "@/types/dto/pagination.dto";
 
-export interface EmployeeListItem {
-  id: string;
-  employee_code: string;
-  start_date: string | null;
-  position_id: string | null;
-  user_id: string;
-  created_at: string;
-  profiles: {
-    id: string;
-    full_name: string;
-    email: string;
-    phone_number: string;
-    gender: Database["public"]["Enums"]["gender"];
-    birthday: string | null;
-    avatar: string | null;
-  } | null;
-  employments: Array<{
-    id: string;
-    organization_unit_id: string;
-    organization_units: {
-      id: string;
-      name: string;
-      type: Database["public"]["Enums"]["organization_unit_type"];
-    } | null;
-  }>;
-  managers_employees: Array<{
-    manager_id: string;
-  }>;
-}
+const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResult<EmployeeDto>> => {
+  const page = params?.page ?? 0;
+  const pageSize = params?.pageSize ?? 12;
+  const search = params?.search?.trim();
+  const departmentId = params?.departmentId;
 
-const getEmployees = async () => {
-  const { data, error } = await supabase
+  let query = supabase
     .from("employees")
     .select(`
       id,
@@ -63,14 +39,33 @@ const getEmployees = async () => {
       managers_employees!managers_employees_employee_id_fkey (
         manager_id
       )
-    `)
-    .order("created_at", { ascending: false });
+    `, { count: 'exact' });
+
+  if (search) {
+    query = query.or(`employee_code.ilike.%${search}%,profiles.full_name.ilike.%${search}%,profiles.email.ilike.%${search}%`);
+  }
+
+  if (departmentId && departmentId !== 'all') {
+    query = query.filter('employments.organization_unit_id', 'eq', departmentId);
+  }
+
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, error, count } = await query
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) {
     throw new Error(`Failed to fetch employees: ${error.message}`);
   }
 
-  return data as unknown as EmployeeListItem[];
+  return {
+    data: (data as unknown as EmployeeDto[]) || [],
+    total: count ?? 0,
+    page,
+    pageSize,
+  };
 };
 
 const getEmployeeById = async (id: string) => {
@@ -112,7 +107,7 @@ const getEmployeeById = async (id: string) => {
     throw new Error(`Failed to fetch employee: ${error.message}`);
   }
 
-  return data as unknown as EmployeeListItem;
+  return data as unknown as EmployeeDto;
 };
 
 export async function getLastEmployeeOrder() {

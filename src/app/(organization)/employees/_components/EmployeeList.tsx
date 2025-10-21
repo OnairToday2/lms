@@ -29,14 +29,13 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PageContainer from "@/shared/ui/PageContainer";
 import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
 import { useDeleteEmployeeMutation } from "@/modules/employees/operations/mutation";
-import type { EmployeeListItem } from "@/repository/employees";
+import type { EmployeeDto } from "@/types/dto/employees";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { useQueryClient } from "@tanstack/react-query";
@@ -47,86 +46,46 @@ export default function EmployeeList() {
   const notifications = useNotifications();
   const queryClient = useQueryClient();
 
-  // Fetch employees data
-  const { data: employees, isLoading, error } = useGetEmployeesQuery();
-
-  // Delete mutation
-  const { mutateAsync: deleteEmployee, isPending: isDeleting } = useDeleteEmployeeMutation();
-
-  // State for filters and pagination
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [roleFilter, setRoleFilter] = React.useState("all");
-  const [departmentFilter, setDepartmentFilter] = React.useState("all");
-  const [statusFilter, setStatusFilter] = React.useState("all");
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(12);
+  const [searchInput, setSearchInput] = React.useState("");
+  const [debouncedSearch, setDebouncedSearch] = React.useState("");
+  const [departmentFilter, setDepartmentFilter] = React.useState("all");
 
-  // State for dropdown menu
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+      setPage(0);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  React.useEffect(() => {
+    setPage(0);
+  }, [departmentFilter]);
+
+  const { data: employeesResult, isLoading, error } = useGetEmployeesQuery({
+    page,
+    pageSize: rowsPerPage,
+    search: debouncedSearch,
+    departmentId: departmentFilter,
+  });
+
+  const { mutateAsync: deleteEmployee, isPending: isDeleting } = useDeleteEmployeeMutation();
+
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedEmployeeId, setSelectedEmployeeId] = React.useState<string | null>(null);
   const menuOpen = Boolean(anchorEl);
 
-  // Filter employees based on search and filters
-  const filteredEmployees = React.useMemo(() => {
-    if (!employees) return [];
+  const employees = employeesResult?.data || [];
+  const totalCount = employeesResult?.total || 0;
 
-    return employees.filter((employee) => {
-      // Search filter
-      const searchLower = searchQuery.toLowerCase();
-      const matchesSearch =
-        !searchQuery ||
-        employee.employee_code.toLowerCase().includes(searchLower) ||
-        employee.profiles?.full_name.toLowerCase().includes(searchLower) ||
-        employee.profiles?.email.toLowerCase().includes(searchLower);
-
-      const matchesRole = roleFilter === "all";
-
-      // Department filter
-      const matchesDepartment =
-        departmentFilter === "all" ||
-        employee.employments.some(
-          (emp) => emp.organization_units?.id === departmentFilter
-        );
-
-      // Status filter (placeholder - you'll need to add status to your data)
-      const matchesStatus = statusFilter === "all";
-
-      return matchesSearch && matchesRole && matchesDepartment && matchesStatus;
-    });
-  }, [employees, searchQuery, roleFilter, departmentFilter, statusFilter]);
-
-  // Paginated employees
-  const paginatedEmployees = React.useMemo(() => {
-    const startIndex = page * rowsPerPage;
-    return filteredEmployees.slice(startIndex, startIndex + rowsPerPage);
-  }, [filteredEmployees, page, rowsPerPage]);
-
-  // Get unique departments for filter
-  const departments = React.useMemo(() => {
-    if (!employees) return [];
-    const deptSet = new Set<string>();
-    employees.forEach((emp) => {
-      emp.employments.forEach((employment) => {
-        if (employment.organization_units) {
-          deptSet.add(
-            JSON.stringify({
-              id: employment.organization_units.id,
-              name: employment.organization_units.name,
-            })
-          );
-        }
-      });
-    });
-    return Array.from(deptSet).map((str) => JSON.parse(str));
-  }, [employees]);
-
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -156,7 +115,6 @@ export default function EmployeeList() {
   const handleDelete = async () => {
     if (!selectedEmployeeId) return;
 
-    // Show confirmation dialog
     const confirmed = await dialogs.confirm(
       "Bạn có chắc chắn muốn xóa nhân viên này không? Hành động này không thể hoàn tác.",
       {
@@ -175,7 +133,6 @@ export default function EmployeeList() {
     try {
       await deleteEmployee(selectedEmployeeId);
 
-      // Invalidate and refetch the employees query
       await queryClient.invalidateQueries({ queryKey: ["employees"] });
 
       notifications.show("Xóa nhân viên thành công!", {
@@ -199,14 +156,14 @@ export default function EmployeeList() {
     }
   };
 
-  const getDepartmentName = (employee: EmployeeListItem) => {
+  const getDepartmentName = (employee: EmployeeDto) => {
     const dept = employee.employments.find(
       (emp) => emp.organization_units?.type === "department"
     );
     return dept?.organization_units?.name || "-";
   };
 
-  const getBranchName = (employee: EmployeeListItem) => {
+  const getBranchName = (employee: EmployeeDto) => {
     const branch = employee.employments.find(
       (emp) => emp.organization_units?.type === "branch"
     );
@@ -220,7 +177,6 @@ export default function EmployeeList() {
     >
       <Box sx={{ py: 3 }}>
         <Card sx={{ p: 3 }}>
-          {/* Header with filters and actions */}
           <Stack
             direction={{ xs: "column", sm: "row" }}
             spacing={2}
@@ -228,17 +184,16 @@ export default function EmployeeList() {
             alignItems={{ xs: "stretch", sm: "center" }}
             justifyContent="space-between"
           >
-            {/* Left side - Search and filters */}
             <Stack
               direction={{ xs: "column", sm: "row" }}
               spacing={2}
               sx={{ flex: 1 }}
             >
               <TextField
-                placeholder=""
+                placeholder="Tìm kiếm theo mã, tên, email..."
                 size="small"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -246,54 +201,19 @@ export default function EmployeeList() {
                     </InputAdornment>
                   ),
                 }}
-                sx={{ minWidth: 250 }}
+                sx={{ minWidth: 300 }}
               />
-
-              <Select
-                size="small"
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
-                displayEmpty
-                sx={{ minWidth: 150 }}
-              >
-                <MenuItem value="all">Vai trò</MenuItem>
-                <MenuItem value="employee">Nhân viên</MenuItem>
-                <MenuItem value="manager">Quản lý</MenuItem>
-              </Select>
-
-              <Select
-                size="small"
-                value={departmentFilter}
-                onChange={(e) => setDepartmentFilter(e.target.value)}
-                displayEmpty
-                sx={{ minWidth: 150 }}
-              >
-                <MenuItem value="all">Phòng ban</MenuItem>
-                {departments.map((dept) => (
-                  <MenuItem key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </MenuItem>
-                ))}
-              </Select>
             </Stack>
 
-            {/* Right side - Status and actions */}
-            <Stack direction="row" spacing={2} alignItems="center">
-              <Typography variant="body2" color="text.secondary">
-                Trạng thái: Tất cả
-              </Typography>
-
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleCreateEmployee}
-              >
-                Tạo nhân viên
-              </Button>
-            </Stack>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleCreateEmployee}
+            >
+              Tạo nhân viên
+            </Button>
           </Stack>
 
-          {/* Table */}
           {isLoading ? (
             <Box
               sx={{
@@ -327,47 +247,56 @@ export default function EmployeeList() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {paginatedEmployees.map((employee) => (
-                      <TableRow
-                        key={employee.id}
-                        hover
-                        sx={{ cursor: "pointer" }}
-                      >
-                        <TableCell>{employee.employee_code}</TableCell>
-                        <TableCell>
-                          {employee.profiles?.full_name || "-"}
-                        </TableCell>
-                        <TableCell>{employee.profiles?.email || "-"}</TableCell>
-                        <TableCell>-</TableCell>
-                        <TableCell>Nhân viên</TableCell>
-                        <TableCell>{getBranchName(employee)}</TableCell>
-                        <TableCell>{getDepartmentName(employee)}</TableCell>
-                        <TableCell>
-                          <Chip
-                            label="Hoạt động"
-                            color="success"
-                            size="small"
-                            sx={{ minWidth: 100 }}
-                          />
-                        </TableCell>
-                        <TableCell align="center">
-                          <IconButton
-                            size="small"
-                            onClick={(e) => handleMenuOpen(e, employee.id)}
-                          >
-                            <MoreVertIcon fontSize="small" />
-                          </IconButton>
+                    {employees.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={9} align="center" sx={{ py: 8 }}>
+                          <Typography variant="body2" color="text.secondary">
+                            Không tìm thấy nhân viên nào
+                          </Typography>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      employees.map((employee) => (
+                        <TableRow
+                          key={employee.id}
+                          hover
+                          sx={{ cursor: "pointer" }}
+                        >
+                          <TableCell>{employee.employee_code}</TableCell>
+                          <TableCell>
+                            {employee.profiles?.full_name || "-"}
+                          </TableCell>
+                          <TableCell>{employee.profiles?.email || "-"}</TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>Nhân viên</TableCell>
+                          <TableCell>{getBranchName(employee)}</TableCell>
+                          <TableCell>{getDepartmentName(employee)}</TableCell>
+                          <TableCell>
+                            <Chip
+                              label="Hoạt động"
+                              color="success"
+                              size="small"
+                              sx={{ minWidth: 100 }}
+                            />
+                          </TableCell>
+                          <TableCell align="center">
+                            <IconButton
+                              size="small"
+                              onClick={(e) => handleMenuOpen(e, employee.id)}
+                            >
+                              <MoreVertIcon fontSize="small" />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
 
-              {/* Pagination */}
               <TablePagination
                 component="div"
-                count={filteredEmployees.length}
+                count={totalCount}
                 page={page}
                 onPageChange={handleChangePage}
                 rowsPerPage={rowsPerPage}
@@ -381,7 +310,6 @@ export default function EmployeeList() {
             </>
           )}
 
-          {/* Actions Menu */}
           <Menu
             anchorEl={anchorEl}
             open={menuOpen}

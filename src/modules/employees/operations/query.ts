@@ -1,17 +1,18 @@
 import { useTQuery } from "@/lib/queryClient";
-import { employeesRepository } from "@/repository";
+import type { GetEmployeesParams } from "@/types/dto/employees";
+import * as employeeService from "@/services/employees/employee.service";
 
-export const useGetEmployeesQuery = () => {
+export const useGetEmployeesQuery = (params?: GetEmployeesParams) => {
   return useTQuery({
-    queryKey: ["employees"],
-    queryFn: employeesRepository.getEmployees,
+    queryKey: ["employees", params],
+    queryFn: () => employeeService.getEmployees(params),
   });
 };
 
 export const useGetEmployeeQuery = (id: string) => {
   return useTQuery({
     queryKey: ["employees", id],
-    queryFn: () => employeesRepository.getEmployeeById(id),
+    queryFn: () => employeeService.getEmployeeById(id),
     enabled: !!id,
   });
 };

@@ -49,8 +49,10 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
   const notifications = useNotifications();
 
   const { data: organizationUnits, isLoading: isLoadingOrgUnits } = useGetOrganizationUnitsQuery();
-  const { data: employees, isLoading: isLoadingEmployees } = useGetEmployeesQuery();
+  const { data: employeesResult, isLoading: isLoadingEmployees } = useGetEmployeesQuery();
   const { data: positions, isLoading: isLoadingPositions, refetch: refetchPositions } = useGetPositionsQuery();
+
+  const employees = employeesResult?.data || [];
 
   const { mutateAsync: createPosition, isPending: isCreatingPosition } = useCreatePositionMutation();
 

@@ -1,5 +1,5 @@
 import { useTMutation } from "@/lib/queryClient";
-import type { CreateEmployeeDto, UpdateEmployeeDto } from "@/types/dto/employee.dto";
+import type { CreateEmployeeDto, UpdateEmployeeDto } from "@/types/dto/employees";
 
 export const useCreateEmployeeMutation = () => {
   return useTMutation({

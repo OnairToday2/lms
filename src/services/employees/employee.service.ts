@@ -1,4 +1,10 @@
-import type { CreateEmployeeDto, UpdateEmployeeDto } from "@/types/dto/employee.dto";
+import type {
+  CreateEmployeeDto,
+  UpdateEmployeeDto,
+  GetEmployeesParams,
+  EmployeeDto,
+} from "@/types/dto/employees";
+import type { PaginatedResult } from "@/types/dto/pagination.dto";
 import {
   employeesRepository,
   profilesRepository,
@@ -214,8 +220,18 @@ async function deleteEmployeeWithRelations(
   }
 }
 
+async function getEmployees(params?: GetEmployeesParams): Promise<PaginatedResult<EmployeeDto>> {
+  return employeesRepository.getEmployees(params);
+}
+
+async function getEmployeeById(id: string): Promise<EmployeeDto> {
+  return employeesRepository.getEmployeeById(id);
+}
+
 export {
   createEmployeeWithRelations,
   updateEmployeeWithRelations,
   deleteEmployeeWithRelations,
+  getEmployees,
+  getEmployeeById,
 };

@@ -4,7 +4,7 @@ import type {
   ValidateEmployeeFileResultDto,
   ImportEmployeesResultDto,
   EmployeeImportData,
-} from "@/types/dto/employee.dto";
+} from "@/types/dto/employees";
 import { EmployeeFormSchema } from "@/modules/employees/components/EmployeeForm/schema";
 import {
   employeesRepository,
@@ -149,12 +149,6 @@ async function parseXLSXOnServer(buffer: ArrayBuffer): Promise<any[]> {
     return data;
   } catch (error) {
     console.error("Error parsing XLSX:", error);
-    if (error instanceof Error && error.message.includes("Cannot find module")) {
-      throw new Error(
-        "Không thể đọc file XLSX. Vui lòng cài đặt thư viện xlsx:\n" +
-        "npm install xlsx",
-      );
-    }
     throw error;
   }
 }
@@ -181,7 +175,6 @@ function validateParsedData(data: any[]): ValidationResult {
 
   const employeeCodes = new Set<string>();
 
-  console.log("=== VALIDATE PARSED DATA START ===");
   console.log("Total rows to validate:", data.length);
 
   data.forEach((row, index) => {
@@ -264,7 +257,6 @@ function validateParsedData(data: any[]): ValidationResult {
     }
   });
 
-  console.log("=== VALIDATE PARSED DATA END ===");
   console.log("Summary:", {
     total: data.length,
     valid: validRecords.length,

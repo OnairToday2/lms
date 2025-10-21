@@ -7,7 +7,7 @@ import type { EmployeeFormData } from "@/modules/employees/components/EmployeeFo
 import { useCreateEmployeeMutation } from "@/modules/employees/operations/mutation";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { Box } from "@mui/material";
-import type { CreateEmployeeDto } from "@/types/dto/employee.dto";
+import type { CreateEmployeeDto } from "@/types/dto/employees";
 
 const CreateEmployeePage = () => {
   const pageTitle = "Tạo nhân viên";

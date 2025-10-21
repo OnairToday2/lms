@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import type { CreateEmployeeDto } from "@/types/dto/employee.dto";
+import type { CreateEmployeeDto } from "@/types/dto/employees";
 import { employeeService } from "@/services";
 
 export async function POST(request: NextRequest) {

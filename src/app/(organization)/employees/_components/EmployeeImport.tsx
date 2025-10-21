@@ -19,7 +19,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import DescriptionIcon from "@mui/icons-material/Description";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
-import type { ValidateEmployeeFileResultDto } from "@/types/dto/employee.dto";
+import type { ValidateEmployeeFileResultDto } from "@/types/dto/employees";
 import { alpha } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import EmployeeValidationTable, { DEFAULT_TEMPLATE_STRUCTURE } from "./EmployeeValidationTable";

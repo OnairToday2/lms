@@ -2,7 +2,7 @@
 import * as React from "react";
 import { Box, Typography, Tooltip } from "@mui/material";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
-import type { ValidateEmployeeFileResultDto } from "@/types/dto/employee.dto";
+import type { ValidateEmployeeFileResultDto } from "@/types/dto/employees";
 
 export interface TemplateColumn {
   headerName: string;
