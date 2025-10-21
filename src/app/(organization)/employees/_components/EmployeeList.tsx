@@ -35,6 +35,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import PageContainer from "@/shared/ui/PageContainer";
 import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
 import { useDeleteEmployeeMutation } from "@/modules/employees/operations/mutation";
+import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
 import type { EmployeeDto } from "@/types/dto/employees";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
@@ -51,6 +52,7 @@ export default function EmployeeList() {
   const [searchInput, setSearchInput] = React.useState("");
   const [debouncedSearch, setDebouncedSearch] = React.useState("");
   const [departmentFilter, setDepartmentFilter] = React.useState("all");
+  const [branchFilter, setBranchFilter] = React.useState("all");
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -65,11 +67,28 @@ export default function EmployeeList() {
     setPage(0);
   }, [departmentFilter]);
 
+  React.useEffect(() => {
+    setPage(0);
+  }, [branchFilter]);
+
+  const { data: organizationUnits } = useGetOrganizationUnitsQuery();
+
+  const departments = React.useMemo(
+    () => organizationUnits?.filter((unit) => unit.type === "department") || [],
+    [organizationUnits]
+  );
+
+  const branches = React.useMemo(
+    () => organizationUnits?.filter((unit) => unit.type === "branch") || [],
+    [organizationUnits]
+  );
+
   const { data: employeesResult, isLoading, error } = useGetEmployeesQuery({
     page,
     limit: rowsPerPage,
     search: debouncedSearch,
     departmentId: departmentFilter,
+    branchId: branchFilter,
   });
 
   const { mutateAsync: deleteEmployee, isPending: isDeleting } = useDeleteEmployeeMutation();
@@ -203,6 +222,36 @@ export default function EmployeeList() {
                 }}
                 sx={{ minWidth: 300 }}
               />
+
+              <Select
+                size="small"
+                value={branchFilter}
+                onChange={(e) => setBranchFilter(e.target.value)}
+                displayEmpty
+                sx={{ minWidth: 200 }}
+              >
+                <MenuItem value="all">Tất cả chi nhánh</MenuItem>
+                {branches.map((branch) => (
+                  <MenuItem key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </MenuItem>
+                ))}
+              </Select>
+
+              <Select
+                size="small"
+                value={departmentFilter}
+                onChange={(e) => setDepartmentFilter(e.target.value)}
+                displayEmpty
+                sx={{ minWidth: 200 }}
+              >
+                <MenuItem value="all">Tất cả phòng ban</MenuItem>
+                {departments.map((dept) => (
+                  <MenuItem key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </MenuItem>
+                ))}
+              </Select>
             </Stack>
 
             <Button
