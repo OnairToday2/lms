@@ -243,13 +243,13 @@ export default function EmployeeList() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 InputProps={{
-                  startAdornment: (
+                  endAdornment: (
                     <InputAdornment position="start">
                       <SearchIcon fontSize="small" />
                     </InputAdornment>
                   ),
                 }}
-                sx={{ minWidth: 200 }}
+                sx={{ maxWidth: 200 }}
               />
 
               <Select
@@ -414,16 +414,10 @@ export default function EmployeeList() {
             }}
           >
             <MenuItem onClick={handleEdit}>
-              <ListItemIcon>
-                <EditIcon fontSize="small" />
-              </ListItemIcon>
               <ListItemText>Chỉnh sửa</ListItemText>
             </MenuItem>
             <MenuItem onClick={handleDelete} disabled={isDeleting}>
-              <ListItemIcon>
-                <DeleteIcon fontSize="small" color="error" />
-              </ListItemIcon>
-              <ListItemText>Xóa</ListItemText>
+              <ListItemText>Xóa tài khoản</ListItemText>
             </MenuItem>
           </Menu>
         </Card>
