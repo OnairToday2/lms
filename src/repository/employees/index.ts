@@ -10,6 +10,7 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
   const search = params?.search?.trim();
   const departmentId = params?.departmentId;
   const branchId = params?.branchId;
+  const status = params?.status;
 
   // Check if we have organization unit filters
   const hasDepartmentFilter = departmentId && departmentId !== 'all';
@@ -46,7 +47,7 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
 
     // Fetch full employee data for the filtered IDs
     // Use LEFT JOIN for employments to get ALL employment records
-    const { data: fullEmployeeData, error: dataError } = await supabase
+    let employeeQuery = supabase
       .from("employees")
       .select(`
         id,
@@ -55,6 +56,7 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
         position_id,
         user_id,
         created_at,
+        status,
         profiles!profiles_employee_id_fkey (
           id,
           full_name,
@@ -77,7 +79,13 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
           manager_id
         )
       `)
-      .in('id', employeeIds)
+      .in('id', employeeIds);
+
+    if (status) {
+      employeeQuery = employeeQuery.eq('status', status);
+    }
+
+    const { data: fullEmployeeData, error: dataError } = await employeeQuery
       .order("created_at", { ascending: false });
 
     if (dataError) {
@@ -93,7 +101,7 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
   }
 
   // No filters - use simple query with LEFT JOIN
-  const query = supabase
+  let query = supabase
     .from("employees")
     .select(`
       id,
@@ -102,6 +110,7 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
       position_id,
       user_id,
       created_at,
+      status,
       profiles!profiles_employee_id_fkey (
         id,
         full_name,
@@ -124,6 +133,11 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
         manager_id
       )
     `, { count: 'exact' });
+
+  // Apply status filter if present
+  if (status) {
+    query = query.eq('status', status);
+  }
 
   const from = page * limit;
   const to = from + limit - 1;

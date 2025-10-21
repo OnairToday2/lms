@@ -7,6 +7,7 @@ export class EmployeeDto {
   position_id!: string | null;
   user_id!: string;
   created_at!: string;
+  status!: Database["public"]["Enums"]["employee_status"];
   profiles!: {
     id: string;
     full_name: string;

@@ -40,6 +40,7 @@ import type { EmployeeDto } from "@/types/dto/employees";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { useQueryClient } from "@tanstack/react-query";
+import { Database } from "@/types/supabase.types";
 
 export default function EmployeeList() {
   const router = useRouter();
@@ -53,6 +54,7 @@ export default function EmployeeList() {
   const [debouncedSearch, setDebouncedSearch] = React.useState("");
   const [departmentFilter, setDepartmentFilter] = React.useState("all");
   const [branchFilter, setBranchFilter] = React.useState("all");
+  const [statusFilter, setStatusFilter] = React.useState("all");
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -71,16 +73,20 @@ export default function EmployeeList() {
     setPage(0);
   }, [branchFilter]);
 
+  React.useEffect(() => {
+    setPage(0);
+  }, [statusFilter]);
+
   const { data: organizationUnits } = useGetOrganizationUnitsQuery();
 
   const departments = React.useMemo(
     () => organizationUnits?.filter((unit) => unit.type === "department") || [],
-    [organizationUnits]
+    [organizationUnits],
   );
 
   const branches = React.useMemo(
     () => organizationUnits?.filter((unit) => unit.type === "branch") || [],
-    [organizationUnits]
+    [organizationUnits],
   );
 
   const { data: employeesResult, isLoading, error } = useGetEmployeesQuery({
@@ -89,6 +95,7 @@ export default function EmployeeList() {
     search: debouncedSearch,
     departmentId: departmentFilter,
     branchId: branchFilter,
+    status: statusFilter !== "all" ? statusFilter as Database["public"]["Enums"]["employee_status"] : undefined,
   });
 
   const { mutateAsync: deleteEmployee, isPending: isDeleting } = useDeleteEmployeeMutation();
@@ -141,7 +148,7 @@ export default function EmployeeList() {
         okText: "Xóa",
         cancelText: "Hủy",
         severity: "error",
-      }
+      },
     );
 
     if (!confirmed) {
@@ -169,7 +176,7 @@ export default function EmployeeList() {
         {
           severity: "error",
           autoHideDuration: 5000,
-        }
+        },
       );
       handleMenuClose();
     }
@@ -177,16 +184,38 @@ export default function EmployeeList() {
 
   const getDepartmentName = (employee: EmployeeDto) => {
     const dept = employee.employments.find(
-      (emp) => emp.organization_units?.type === "department"
+      (emp) => emp.organization_units?.type === "department",
     );
     return dept?.organization_units?.name || "-";
   };
 
   const getBranchName = (employee: EmployeeDto) => {
     const branch = employee.employments.find(
-      (emp) => emp.organization_units?.type === "branch"
+      (emp) => emp.organization_units?.type === "branch",
     );
     return branch?.organization_units?.name || "-";
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "active":
+        return "Hoạt động";
+      case "inactive":
+        return "Không hoạt động";
+      default:
+        return "Không xác định";
+    }
+  };
+
+  const getStatusColor = (status: string): "success" | "default" | "error" => {
+    switch (status) {
+      case "active":
+        return "success";
+      case "inactive":
+        return "default";
+      default:
+        return "error";
+    }
   };
 
   return (
@@ -209,7 +238,7 @@ export default function EmployeeList() {
               sx={{ flex: 1 }}
             >
               <TextField
-                placeholder="Tìm kiếm theo mã, tên, email..."
+                placeholder="Tìm kiếm..."
                 size="small"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
@@ -220,17 +249,32 @@ export default function EmployeeList() {
                     </InputAdornment>
                   ),
                 }}
-                sx={{ minWidth: 300 }}
+                sx={{ minWidth: 200 }}
               />
+
+              <Select
+                size="small"
+                value={departmentFilter}
+                onChange={(e) => setDepartmentFilter(e.target.value)}
+                displayEmpty
+                sx={{ minWidth: 150 }}
+              >
+                <MenuItem value="all">Phòng ban</MenuItem>
+                {departments.map((dept) => (
+                  <MenuItem key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </MenuItem>
+                ))}
+              </Select>
 
               <Select
                 size="small"
                 value={branchFilter}
                 onChange={(e) => setBranchFilter(e.target.value)}
                 displayEmpty
-                sx={{ minWidth: 200 }}
+                sx={{ minWidth: 150 }}
               >
-                <MenuItem value="all">Tất cả chi nhánh</MenuItem>
+                <MenuItem value="all">Chi nhánh</MenuItem>
                 {branches.map((branch) => (
                   <MenuItem key={branch.id} value={branch.id}>
                     {branch.name}
@@ -240,17 +284,14 @@ export default function EmployeeList() {
 
               <Select
                 size="small"
-                value={departmentFilter}
-                onChange={(e) => setDepartmentFilter(e.target.value)}
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
                 displayEmpty
-                sx={{ minWidth: 200 }}
+                sx={{ minWidth: 150 }}
               >
-                <MenuItem value="all">Tất cả phòng ban</MenuItem>
-                {departments.map((dept) => (
-                  <MenuItem key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </MenuItem>
-                ))}
+                <MenuItem value="all">Trạng thái</MenuItem>
+                <MenuItem value="active">Hoạt động</MenuItem>
+                <MenuItem value="inactive">Không hoạt động</MenuItem>
               </Select>
             </Stack>
 
@@ -322,8 +363,8 @@ export default function EmployeeList() {
                           <TableCell>{getDepartmentName(employee)}</TableCell>
                           <TableCell>
                             <Chip
-                              label="Hoạt động"
-                              color="success"
+                              label={getStatusLabel(employee.status)}
+                              color={getStatusColor(employee.status)}
                               size="small"
                               sx={{ minWidth: 100 }}
                             />
