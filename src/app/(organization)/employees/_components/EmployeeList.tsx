@@ -67,7 +67,7 @@ export default function EmployeeList() {
 
   const { data: employeesResult, isLoading, error } = useGetEmployeesQuery({
     page,
-    pageSize: rowsPerPage,
+    limit: rowsPerPage,
     search: debouncedSearch,
     departmentId: departmentFilter,
   });

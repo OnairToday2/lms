@@ -2,10 +2,11 @@ import { supabase } from "@/services";
 import { createSVClient } from "@/services";
 import type { EmployeeDto, GetEmployeesParams } from "@/types/dto/employees";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
+import { Database } from "@/types/supabase.types";
 
 const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResult<EmployeeDto>> => {
   const page = params?.page ?? 0;
-  const pageSize = params?.pageSize ?? 12;
+  const limit = params?.limit ?? 12;
   const search = params?.search?.trim();
   const departmentId = params?.departmentId;
 
@@ -49,8 +50,8 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
     query = query.filter('employments.organization_unit_id', 'eq', departmentId);
   }
 
-  const from = page * pageSize;
-  const to = from + pageSize - 1;
+  const from = page * limit;
+  const to = from + limit - 1;
 
   const { data, error, count } = await query
     .order("created_at", { ascending: false })
@@ -64,7 +65,7 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
     data: (data as unknown as EmployeeDto[]) || [],
     total: count ?? 0,
     page,
-    pageSize,
+    limit,
   };
 };
 

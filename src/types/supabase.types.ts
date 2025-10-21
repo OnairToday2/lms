@@ -15,6 +15,7 @@ export type Database = {
           employee_code: string
           employee_order: number | null
           id: string
+          organization_id: string | null
           position_id: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["employee_status"]
@@ -25,6 +26,7 @@ export type Database = {
           employee_code: string
           employee_order?: number | null
           id?: string
+          organization_id?: string | null
           position_id?: string | null
           start_date?: string | null
           status: Database["public"]["Enums"]["employee_status"]
@@ -35,12 +37,20 @@ export type Database = {
           employee_code?: string
           employee_order?: number | null
           id?: string
+          organization_id?: string | null
           position_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["employee_status"]
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "employees_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "employees_position_id_fkey"
             columns: ["position_id"]
@@ -161,15 +171,30 @@ export type Database = {
       organizations: {
         Row: {
           created_at: string
+          employee_limit: number | null
           id: string
+          is_active: boolean
+          logo: string
+          name: string
+          subdomain: string
         }
         Insert: {
           created_at?: string
+          employee_limit?: number | null
           id?: string
+          is_active?: boolean
+          logo: string
+          name: string
+          subdomain: string
         }
         Update: {
           created_at?: string
+          employee_limit?: number | null
           id?: string
+          is_active?: boolean
+          logo?: string
+          name?: string
+          subdomain?: string
         }
         Relationships: []
       }
