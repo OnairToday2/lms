@@ -14,101 +14,26 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
   // Check if we have organization unit filters
   const hasDepartmentFilter = departmentId && departmentId !== 'all';
   const hasBranchFilter = branchId && branchId !== 'all';
-  const hasOrgUnitFilter = hasDepartmentFilter || hasBranchFilter;
+  const hasAnyFilter = hasDepartmentFilter || hasBranchFilter || (search && search.length > 0);
 
-  // If we have organization unit filters, we need a two-step approach:
-  // 1. First, get employee IDs that match the filter criteria
-  // 2. Then, fetch full employee data (with ALL employments) for those IDs
-  // This ensures we filter employees correctly while still returning all their employment data
+  // Use RPC function for efficient server-side filtering
+  if (hasAnyFilter) {
+    // Call the PostgreSQL RPC function to get filtered employee IDs
+    const { data: rpcResult, error: rpcError } = await supabase.rpc('get_filtered_employees', {
+      p_page: page,
+      p_limit: limit,
+      p_search: search || undefined,
+      p_department_id: hasDepartmentFilter ? departmentId : undefined,
+      p_branch_id: hasBranchFilter ? branchId : undefined,
+    });
 
-  if (hasOrgUnitFilter) {
-    let employeeIds: string[] = [];
-    let totalCount = 0;
-
-    if (hasDepartmentFilter && hasBranchFilter) {
-      // Both filters: employee must have employments matching BOTH branch AND department
-      // We need to find employees that have BOTH employments
-      // Step 1a: Get all employees with the department employment
-      const { data: deptEmployees, error: deptError } = await supabase
-        .from("employees")
-        .select("id, employments!inner(organization_unit_id)")
-        .filter('employments.organization_unit_id', 'eq', departmentId);
-
-      if (deptError) {
-        throw new Error(`Failed to fetch department employees: ${deptError.message}`);
-      }
-
-      // Step 1b: Get all employees with the branch employment
-      const { data: branchEmployees, error: branchError } = await supabase
-        .from("employees")
-        .select("id, employments!inner(organization_unit_id)")
-        .filter('employments.organization_unit_id', 'eq', branchId);
-
-      if (branchError) {
-        throw new Error(`Failed to fetch branch employees: ${branchError.message}`);
-      }
-
-      // Step 1c: Find intersection - employees that appear in BOTH lists
-      const deptEmployeeIds = new Set(deptEmployees?.map(emp => emp.id) || []);
-      const branchEmployeeIds = new Set(branchEmployees?.map(emp => emp.id) || []);
-      const intersectionIds = Array.from(deptEmployeeIds).filter(id => branchEmployeeIds.has(id));
-
-      // Apply search filter if present
-      if (search && intersectionIds.length > 0) {
-        const { data: searchFiltered, error: searchError } = await supabase
-          .from("employees")
-          .select("id, profiles!profiles_employee_id_fkey(full_name, email)")
-          .in('id', intersectionIds)
-          .or(`employee_code.ilike.%${search}%,profiles.full_name.ilike.%${search}%,profiles.email.ilike.%${search}%`);
-
-        if (searchError) {
-          throw new Error(`Failed to apply search filter: ${searchError.message}`);
-        }
-
-        employeeIds = searchFiltered?.map(emp => emp.id) || [];
-      } else {
-        employeeIds = intersectionIds;
-      }
-
-      totalCount = employeeIds.length;
-
-      // Apply pagination
-      const from = page * limit;
-      const to = from + limit;
-      employeeIds = employeeIds.slice(from, to);
-
-    } else {
-      // Single filter: department only OR branch only
-      let filterQuery = supabase
-        .from("employees")
-        .select("id, employments!inner(organization_unit_id)", { count: 'exact' });
-
-      // Apply search filter if present
-      if (search) {
-        filterQuery = filterQuery.or(`employee_code.ilike.%${search}%,profiles.full_name.ilike.%${search}%,profiles.email.ilike.%${search}%`);
-      }
-
-      // Apply organization unit filter
-      if (hasDepartmentFilter) {
-        filterQuery = filterQuery.filter('employments.organization_unit_id', 'eq', departmentId);
-      } else if (hasBranchFilter) {
-        filterQuery = filterQuery.filter('employments.organization_unit_id', 'eq', branchId);
-      }
-
-      const from = page * limit;
-      const to = from + limit - 1;
-
-      const { data: filteredEmployees, error: filterError, count } = await filterQuery
-        .order("created_at", { ascending: false })
-        .range(from, to);
-
-      if (filterError) {
-        throw new Error(`Failed to fetch filtered employees: ${filterError.message}`);
-      }
-
-      employeeIds = filteredEmployees?.map(emp => emp.id) || [];
-      totalCount = count ?? 0;
+    if (rpcError) {
+      throw new Error(`Failed to filter employees: ${rpcError.message}`);
     }
+
+    // Extract employee IDs and total count from RPC result
+    const employeeIds = rpcResult?.map((row: any) => row.employee_id) || [];
+    const totalCount = rpcResult?.[0]?.total_count || 0;
 
     if (employeeIds.length === 0) {
       return {
@@ -119,9 +44,8 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
       };
     }
 
-    // Step 2: Fetch full employee data for the filtered IDs
+    // Fetch full employee data for the filtered IDs
     // Use LEFT JOIN for employments to get ALL employment records
-
     const { data: fullEmployeeData, error: dataError } = await supabase
       .from("employees")
       .select(`
@@ -168,8 +92,8 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
     };
   }
 
-  // No organization unit filters - use simple query with LEFT JOIN
-  let query = supabase
+  // No filters - use simple query with LEFT JOIN
+  const query = supabase
     .from("employees")
     .select(`
       id,
@@ -200,10 +124,6 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
         manager_id
       )
     `, { count: 'exact' });
-
-  if (search) {
-    query = query.or(`employee_code.ilike.%${search}%,profiles.full_name.ilike.%${search}%,profiles.email.ilike.%${search}%`);
-  }
 
   const from = page * limit;
   const to = from + limit - 1;

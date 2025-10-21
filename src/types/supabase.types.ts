@@ -276,7 +276,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_filtered_employees: {
+        Args: {
+          p_branch_id?: string
+          p_department_id?: string
+          p_limit?: number
+          p_page?: number
+          p_search?: string
+        }
+        Returns: {
+          employee_id: string
+          total_count: number
+        }[]
+      }
     }
     Enums: {
       employee_status: "active" | "inactive"
