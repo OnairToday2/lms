@@ -1,8 +1,10 @@
 import type { CreateEmployeeDto, UpdateEmployeeDto } from "@/types/dto/employee.dto";
-import * as employeeRepository from "@/repository/employees";
-import * as profileRepository from "@/repository/profiles";
-import * as employmentRepository from "@/repository/employments";
-import * as managerEmployeeRepository from "@/repository/managers-employees";
+import {
+  employeesRepository,
+  profilesRepository,
+  employmentsRepository,
+  managersEmployeesRepository,
+} from "@/repository";
 import { createServiceRoleClient } from "@/services/supabase/service-role-client";
 
 interface CreateEmployeeResult {
@@ -46,7 +48,7 @@ async function createEmployeeWithRelations(
     let employeeCode = payload.employee_code;
     let employeeOrder: number;
 
-    const lastOrder = await employeeRepository.getLastEmployeeOrder();
+    const lastOrder = await employeesRepository.getLastEmployeeOrder();
 
     if (!employeeCode || employeeCode.trim() === "") {
       employeeOrder = lastOrder + 1;
@@ -55,7 +57,7 @@ async function createEmployeeWithRelations(
       employeeOrder = lastOrder + 1;
     }
 
-    const employeeData = await employeeRepository.createEmployee({
+    const employeeData = await employeesRepository.createEmployee({
       user_id: userId,
       employee_code: employeeCode,
       employee_order: employeeOrder,
@@ -67,7 +69,7 @@ async function createEmployeeWithRelations(
     employeeId = employeeData.id;
     console.log(`Employee record created: ${employeeId}`);
 
-    const profileData = await profileRepository.createProfile({
+    const profileData = await profilesRepository.createProfile({
       employee_id: employeeId,
       email: payload.email,
       full_name: payload.full_name,
@@ -96,12 +98,12 @@ async function createEmployeeWithRelations(
     }
 
     if (employmentsToCreate.length > 0) {
-      await employmentRepository.createEmployments(employmentsToCreate);
+      await employmentsRepository.createEmployments(employmentsToCreate);
       console.log(`Created ${employmentsToCreate.length} employment record(s)`);
     }
 
     if (payload.manager_id) {
-      await managerEmployeeRepository.createManagerRelationship({
+      await managersEmployeesRepository.createManagerRelationship({
         employee_id: employeeId,
         manager_id: payload.manager_id,
       });
@@ -120,18 +122,18 @@ async function createEmployeeWithRelations(
 
     if (profileId && employeeId) {
       console.log(`Rolling back: Deleting profile ${profileId}`);
-      await profileRepository.deleteProfileByEmployeeId(employeeId);
+      await profilesRepository.deleteProfileByEmployeeId(employeeId);
     }
 
     if (employeeId) {
       console.log(`Rolling back: Deleting employments for employee ${employeeId}`);
-      await employmentRepository.deleteEmploymentsByEmployeeId(employeeId);
+      await employmentsRepository.deleteEmploymentsByEmployeeId(employeeId);
 
       console.log(`Rolling back: Deleting manager relationships for employee ${employeeId}`);
-      await managerEmployeeRepository.deleteManagerRelationshipsByEmployeeId(employeeId);
+      await managersEmployeesRepository.deleteManagerRelationshipsByEmployeeId(employeeId);
 
       console.log(`Rolling back: Deleting employee ${employeeId}`);
-      await employeeRepository.deleteEmployeeById(employeeId);
+      await employeesRepository.deleteEmployeeById(employeeId);
     }
 
     if (userId) {
@@ -149,13 +151,13 @@ async function createEmployeeWithRelations(
 async function updateEmployeeWithRelations(
   payload: UpdateEmployeeDto
 ): Promise<void> {
-  await employeeRepository.updateEmployeeById(payload.id, {
+  await employeesRepository.updateEmployeeById(payload.id, {
     employee_code: payload.employee_code,
     start_date: payload.start_date,
     position_id: payload.position_id || null,
   });
 
-  await profileRepository.updateProfileByEmployeeId(payload.id, {
+  await profilesRepository.updateProfileByEmployeeId(payload.id, {
     full_name: payload.full_name,
     email: payload.email,
     phone_number: payload.phone_number || "",
@@ -163,7 +165,7 @@ async function updateEmployeeWithRelations(
     birthday: payload.birthday || null,
   });
 
-  await employmentRepository.deleteEmploymentsByEmployeeId(payload.id);
+  await employmentsRepository.deleteEmploymentsByEmployeeId(payload.id);
 
   const employmentsToCreate = [];
 
@@ -182,13 +184,13 @@ async function updateEmployeeWithRelations(
   }
 
   if (employmentsToCreate.length > 0) {
-    await employmentRepository.createEmployments(employmentsToCreate);
+    await employmentsRepository.createEmployments(employmentsToCreate);
   }
 
-  await managerEmployeeRepository.deleteManagerRelationshipsByEmployeeId(payload.id);
+  await managersEmployeesRepository.deleteManagerRelationshipsByEmployeeId(payload.id);
 
   if (payload.manager_id) {
-    await managerEmployeeRepository.createManagerRelationship({
+    await managersEmployeesRepository.createManagerRelationship({
       employee_id: payload.id,
       manager_id: payload.manager_id,
     });
@@ -198,11 +200,11 @@ async function updateEmployeeWithRelations(
 async function deleteEmployeeWithRelations(
   employeeId: string
 ): Promise<void> {
-  const userId = await employeeRepository.getEmployeeUserId(employeeId);
+  const userId = await employeesRepository.getEmployeeUserId(employeeId);
 
-  await employmentRepository.deleteEmploymentsByEmployeeId(employeeId);
-  await profileRepository.deleteProfileByEmployeeId(employeeId);
-  await employeeRepository.deleteEmployeeById(employeeId);
+  await employmentsRepository.deleteEmploymentsByEmployeeId(employeeId);
+  await profilesRepository.deleteProfileByEmployeeId(employeeId);
+  await employeesRepository.deleteEmployeeById(employeeId);
 
   const adminSupabase = createServiceRoleClient();
   const { error: authError } = await adminSupabase.auth.admin.deleteUser(userId);

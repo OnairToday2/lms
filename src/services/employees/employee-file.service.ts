@@ -6,9 +6,11 @@ import type {
   EmployeeImportData,
 } from "@/types/dto/employee.dto";
 import { EmployeeFormSchema } from "@/modules/employees/components/EmployeeForm/schema";
-import * as employeeRepository from "@/repository/employees";
-import * as profileRepository from "@/repository/profiles";
-import * as organizationUnitRepository from "@/repository/organization-units";
+import {
+  employeesRepository,
+  profilesRepository,
+  organizationUnitsRepository,
+} from "@/repository";
 
 interface ValidationResult {
   totalCount: number;
@@ -302,13 +304,13 @@ async function validateAgainstDatabase(
       branches: branches.length,
     });
 
-    const existingEmployees = await employeeRepository.findEmployeesByEmployeeCodes(employeeCodes);
+    const existingEmployees = await employeesRepository.findEmployeesByEmployeeCodes(employeeCodes);
     const existingEmployeeCodes = new Set(
       existingEmployees.map(e => e.employee_code),
     );
     console.log("Existing employee codes found:", existingEmployeeCodes.size);
 
-    const existingProfiles = await profileRepository.findProfilesByEmails(emails);
+    const existingProfiles = await profilesRepository.findProfilesByEmails(emails);
     const existingEmails = new Set(
       existingProfiles.map(p => p.email),
     );
@@ -319,7 +321,7 @@ async function validateAgainstDatabase(
 
     if (allOrgUnits.length > 0) {
       try {
-        const orgUnits = await organizationUnitRepository.getAllOrganizationUnitsWithDetails();
+        const orgUnits = await organizationUnitsRepository.getAllOrganizationUnitsWithDetails();
         existingOrgUnits = new Set(orgUnits.map(u => u.id));
         console.log("Existing organization units found:", existingOrgUnits.size);
       } catch (error) {
