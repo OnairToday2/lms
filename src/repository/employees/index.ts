@@ -260,6 +260,26 @@ export async function updateEmployeeById(
   }
 }
 
+export async function getEmployeeByUserId(userId: string) {
+  const supabase = await createSVClient();
+
+  const { data: employee, error } = await supabase
+    .from("employees")
+    .select("id, organization_id")
+    .eq("user_id", userId)
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to fetch employee: ${error.message}`);
+  }
+
+  if (!employee) {
+    throw new Error("Employee not found");
+  }
+
+  return employee;
+}
+
 export async function getEmployeeUserId(employeeId: string) {
   const supabase = await createSVClient();
 

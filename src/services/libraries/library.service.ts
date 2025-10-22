@@ -1,6 +1,6 @@
 "use server";
 
-import { libraryRepository } from "@/repository";
+import { libraryRepository, employeesRepository } from "@/repository";
 import { Database } from "@/types/supabase.types";
 import { createSVClient } from "@/services";
 
@@ -16,15 +16,7 @@ export async function getCurrentUserLibrary(): Promise<Library | null> {
     throw new Error("User not authenticated");
   }
 
-  const { data: employee, error: employeeError } = await supabase
-    .from("employees")
-    .select("id")
-    .eq("user_id", user.id)
-    .single();
-
-  if (employeeError || !employee) {
-    throw new Error("Employee not found for current user");
-  }
+  const employee = await employeesRepository.getEmployeeByUserId(user.id);
 
   return libraryRepository.getLibraryByEmployeeId(employee.id);
 }
@@ -42,5 +34,37 @@ export async function getLibraryResourcesByFolder(
 
 export async function deleteResource(resourceId: string): Promise<void> {
   return libraryRepository.deleteResource(resourceId);
+}
+
+export async function createFolder(
+  name: string,
+  libraryId: string,
+  parentId: string | null
+): Promise<Resource> {
+  const supabase = await createSVClient();
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error("User not authenticated");
+  }
+
+  const employee = await employeesRepository.getEmployeeByUserId(user.id);
+
+  if (!employee.organization_id) {
+    throw new Error("Employee does not belong to an organization");
+  }
+
+  return libraryRepository.createFolder({
+    name,
+    library_id: libraryId,
+    parent_id: parentId,
+    organization_id: employee.organization_id,
+    created_by: employee.id,
+  });
+}
+
+export async function renameResource(resourceId: string, newName: string): Promise<void> {
+  return libraryRepository.renameResource(resourceId, newName);
 }
 

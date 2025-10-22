@@ -11,12 +11,27 @@ import {
   Typography,
   Grid,
   CircularProgress,
+  IconButton,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import { useLibraryStore } from "../store/libraryProvider";
 import { Resource } from "../types";
 import { LibraryBreadcrumbs } from "./LibraryBreadcrumbs";
 import { ResourceCard } from "./ResourceCard";
-import { getLibraryResources } from "@/services/libraries/library.service";
+import { CreateFolderDialog } from "./CreateFolderDialog";
+import { RenameResourceDialog } from "./RenameResourceDialog";
+import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
+import {
+  getLibraryResources,
+  createFolder,
+  renameResource,
+  deleteResource,
+} from "@/services/libraries/library.service";
 
 export function LibraryDialog() {
   const open = useLibraryStore((state) => state.open);
@@ -33,6 +48,13 @@ export function LibraryDialog() {
   ]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(null);
+  const [createFolderOpen, setCreateFolderOpen] = useState(false);
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedResourceForAction, setSelectedResourceForAction] = useState<Resource | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -124,22 +146,113 @@ export function LibraryDialog() {
     return selectedResources.some((r) => r.id === resourceId);
   };
 
+  const refreshResources = async () => {
+    if (!config?.libraryId) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const fetchedResources = await getLibraryResources(config.libraryId);
+      setResources(fetchedResources);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load resources");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleActionMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setActionMenuAnchor(event.currentTarget);
+  };
+
+  const handleActionMenuClose = () => {
+    setActionMenuAnchor(null);
+  };
+
+  const handleCreateFolderClick = () => {
+    handleActionMenuClose();
+    setCreateFolderOpen(true);
+  };
+
+  const handleCreateFolder = async (folderName: string) => {
+    if (!config?.libraryId) return;
+
+    setActionLoading(true);
+    try {
+      await createFolder(folderName, config.libraryId, currentFolderId);
+      setCreateFolderOpen(false);
+      await refreshResources();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create folder");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRenameClick = (resource: Resource) => {
+    setSelectedResourceForAction(resource);
+    setRenameDialogOpen(true);
+  };
+
+  const handleRename = async (resourceId: string, newName: string) => {
+    setActionLoading(true);
+    try {
+      await renameResource(resourceId, newName);
+      setRenameDialogOpen(false);
+      setSelectedResourceForAction(null);
+      await refreshResources();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to rename resource");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteClick = (resource: Resource) => {
+    setSelectedResourceForAction(resource);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedResourceForAction) return;
+
+    setActionLoading(true);
+    try {
+      await deleteResource(selectedResourceForAction.id);
+      setDeleteDialogOpen(false);
+      setSelectedResourceForAction(null);
+      await refreshResources();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete resource");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (!open || !config) return null;
 
   return (
-    <Dialog open={open} onClose={handleCancel} maxWidth="lg" fullWidth>
-      <DialogTitle>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography variant="h6">
-            Thư viện tài liệu
-          </Typography>
-        </Box>
-      </DialogTitle>
+    <>
+      <Dialog open={open} onClose={handleCancel} maxWidth="lg" fullWidth>
+        <DialogTitle>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Typography variant="h6">
+              Thư viện tài liệu
+            </Typography>
+            <IconButton
+              color="primary"
+              onClick={handleActionMenuOpen}
+              size="small"
+            >
+              <AddIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
 
-      <DialogContent>
-        <Box sx={{ mb: 2 }}>
-          <LibraryBreadcrumbs folderPath={folderPath} onNavigate={handleBreadcrumbClick} />
-        </Box>
+        <DialogContent>
+          <Box sx={{ mb: 2 }}>
+            <LibraryBreadcrumbs folderPath={folderPath} onNavigate={handleBreadcrumbClick} />
+          </Box>
 
         {loading ? (
           <Box sx={{ py: 8, textAlign: "center" }}>
@@ -177,6 +290,8 @@ export function LibraryDialog() {
                     selected={selected}
                     onClick={() => handleResourceClick(resource)}
                     onDoubleClick={() => handleFolderDoubleClick(resource)}
+                    onRename={handleRenameClick}
+                    onDelete={handleDeleteClick}
                   />
                 </Grid>
               );
@@ -185,17 +300,60 @@ export function LibraryDialog() {
         )}
       </DialogContent>
 
-      <DialogActions>
-        <Button variant="outlined" color="inherit" onClick={handleCancel}>Đóng</Button>
-        <Button
-          onClick={handleConfirm}
-          variant="contained"
-          disabled={selectedResources.length === 0}
-        >
-          Xác nhận ({selectedResources.length})
-        </Button>
-      </DialogActions>
-    </Dialog>
+        <DialogActions>
+          <Button variant="outlined" color="inherit" onClick={handleCancel}>Đóng</Button>
+          <Button
+            onClick={handleConfirm}
+            variant="contained"
+            disabled={selectedResources.length === 0}
+          >
+            Xác nhận ({selectedResources.length})
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Menu
+        anchorEl={actionMenuAnchor}
+        open={Boolean(actionMenuAnchor)}
+        onClose={handleActionMenuClose}
+      >
+        <MenuItem onClick={handleCreateFolderClick}>
+          <ListItemIcon>
+            <CreateNewFolderIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Tạo thư mục mới</ListItemText>
+        </MenuItem>
+      </Menu>
+
+      <CreateFolderDialog
+        open={createFolderOpen}
+        onClose={() => setCreateFolderOpen(false)}
+        onConfirm={handleCreateFolder}
+        loading={actionLoading}
+      />
+
+      <RenameResourceDialog
+        open={renameDialogOpen}
+        resource={selectedResourceForAction}
+        onClose={() => {
+          setRenameDialogOpen(false);
+          setSelectedResourceForAction(null);
+        }}
+        onConfirm={handleRename}
+        loading={actionLoading}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        resource={selectedResourceForAction}
+        onClose={() => {
+          setDeleteDialogOpen(false);
+          setSelectedResourceForAction(null);
+        }}
+        onConfirm={handleDelete}
+        loading={actionLoading}
+      />
+    </>
   );
 }
 

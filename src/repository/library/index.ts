@@ -80,3 +80,48 @@ export async function deleteResource(resourceId: string): Promise<void> {
   }
 }
 
+export async function createFolder(data: {
+  name: string;
+  library_id: string;
+  parent_id: string | null;
+  organization_id: string;
+  created_by: string;
+}): Promise<Resource> {
+  const supabase = await createSVClient();
+
+  const { data: folder, error } = await supabase
+    .from("resources")
+    .insert({
+      name: data.name,
+      kind: "folder",
+      library_id: data.library_id,
+      parent_id: data.parent_id,
+      organization_id: data.organization_id,
+      created_by: data.created_by,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to create folder: ${error.message}`);
+  }
+
+  return folder;
+}
+
+export async function renameResource(resourceId: string, newName: string): Promise<void> {
+  const supabase = await createSVClient();
+
+  const { error } = await supabase
+    .from("resources")
+    .update({
+      name: newName,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", resourceId);
+
+  if (error) {
+    throw new Error(`Failed to rename resource: ${error.message}`);
+  }
+}
+

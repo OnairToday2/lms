@@ -3,12 +3,15 @@
 import { Card, CardContent, Box, Typography } from "@mui/material";
 import { Resource } from "../types";
 import { ResourceThumbnail } from "./ResourceThumbnail";
+import { ResourceActionMenu } from "./ResourceActionMenu";
 
 interface ResourceCardProps {
   resource: Resource;
   selected: boolean;
   onClick: () => void;
   onDoubleClick: () => void;
+  onRename?: (resource: Resource) => void;
+  onDelete?: (resource: Resource) => void;
 }
 
 const formatFileSize = (bytes: number | null) => {
@@ -18,7 +21,14 @@ const formatFileSize = (bytes: number | null) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
-export function ResourceCard({ resource, selected, onClick, onDoubleClick }: ResourceCardProps) {
+export function ResourceCard({
+  resource,
+  selected,
+  onClick,
+  onDoubleClick,
+  onRename,
+  onDelete,
+}: ResourceCardProps) {
   const isFolder = resource.kind === "folder";
 
   return (
@@ -31,12 +41,20 @@ export function ResourceCard({ resource, selected, onClick, onDoubleClick }: Res
         height: 190,
         border: selected ? "3px solid #1976d2" : "1px solid #e0e0e0",
         backgroundColor: selected ? "#e3f2fd" : "white",
+        position: "relative",
         "&:hover": {
           boxShadow: 3,
           borderColor: isFolder ? "#5f6368" : selected ? "#1976d2" : "#bdbdbd",
         },
       }}
     >
+      {onRename && onDelete && (
+        <ResourceActionMenu
+          resource={resource}
+          onRename={onRename}
+          onDelete={onDelete}
+        />
+      )}
       <CardContent
         sx={{
           display: "flex",
