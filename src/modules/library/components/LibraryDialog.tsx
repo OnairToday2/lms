@@ -10,28 +10,58 @@ import {
   Box,
   Typography,
   Grid,
+  CircularProgress,
 } from "@mui/material";
 import { useLibraryStore } from "../store/libraryProvider";
 import { Resource } from "../types";
 import { LibraryBreadcrumbs } from "./LibraryBreadcrumbs";
 import { ResourceCard } from "./ResourceCard";
+import { getLibraryResources } from "@/services/libraries/library.service";
 
 export function LibraryDialog() {
   const open = useLibraryStore((state) => state.open);
   const config = useLibraryStore((state) => state.config);
   const closeLibrary = useLibraryStore((state) => state.closeLibrary);
   const cancelLibrary = useLibraryStore((state) => state.cancelLibrary);
-  const data = useLibraryStore((state) => state.data);
+  const resources = useLibraryStore((state) => state.resources);
+  const setResources = useLibraryStore((state) => state.setResources);
 
   const [selectedResources, setSelectedResources] = useState<Resource[]>([]);
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [folderPath, setFolderPath] = useState<Array<{ id: string | null; name: string }>>([
     { id: null, name: "Root" },
   ]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchResources = async () => {
+      if (open && config) {
+        if (!config.libraryId) {
+          setLoading(false);
+          return;
+        }
+
+        setLoading(true);
+        setError(null);
+        try {
+          const fetchedResources = await getLibraryResources(config.libraryId);
+
+          setResources(fetchedResources);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Failed to load resources");
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchResources();
+  }, [open, config?.libraryId, setResources]);
 
   useEffect(() => {
     if (open && config) {
-      const preSelected = data.filter((resource: Resource) =>
+      const preSelected = resources.filter((resource: Resource) =>
         config.selectedIds.includes(resource.id) && resource.kind === "file",
       );
       setSelectedResources(preSelected);
@@ -42,9 +72,9 @@ export function LibraryDialog() {
       setCurrentFolderId(null);
       setFolderPath([{ id: null, name: "Root" }]);
     }
-  }, [open, config, data]);
+  }, [open, config, resources]);
 
-  const displayedResources = data.filter(
+  const displayedResources = resources.filter(
     (resource: Resource) => resource.parent_id === currentFolderId,
   );
 
@@ -111,7 +141,20 @@ export function LibraryDialog() {
           <LibraryBreadcrumbs folderPath={folderPath} onNavigate={handleBreadcrumbClick} />
         </Box>
 
-        {displayedResources.length === 0 ? (
+        {loading ? (
+          <Box sx={{ py: 8, textAlign: "center" }}>
+            <CircularProgress />
+            <Typography color="text.secondary" sx={{ mt: 2 }}>
+              Loading resources...
+            </Typography>
+          </Box>
+        ) : error ? (
+          <Box sx={{ py: 8, textAlign: "center" }}>
+            <Typography color="error">
+              {error}
+            </Typography>
+          </Box>
+        ) : displayedResources.length === 0 ? (
           <Box sx={{ py: 8, textAlign: "center" }}>
             <Typography color="text.secondary">
               No resources in this folder

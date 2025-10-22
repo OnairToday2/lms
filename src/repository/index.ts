@@ -2,6 +2,7 @@ export * as authRepository from "./auth";
 export * as classRoomRepository from "./classRoom";
 export * as employeesRepository from "./employees";
 export * as employmentsRepository from "./employments";
+export * as libraryRepository from "./library";
 export * as managersEmployeesRepository from "./managers-employees";
 export * as organizationUnitsRepository from "./organization-units";
 export * as positionsRepository from "./positions";

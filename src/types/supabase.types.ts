@@ -96,6 +96,42 @@ export type Database = {
           },
         ]
       }
+      libraries: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          owner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "libraries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "libraries_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: true
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       managers_employees: {
         Row: {
           employee_id: string
@@ -279,6 +315,7 @@ export type Database = {
           extension: string | null
           id: string
           kind: Database["public"]["Enums"]["resource_kind"]
+          library_id: string
           mime_type: string | null
           name: string
           organization_id: string
@@ -295,6 +332,7 @@ export type Database = {
           extension?: string | null
           id?: string
           kind: Database["public"]["Enums"]["resource_kind"]
+          library_id: string
           mime_type?: string | null
           name: string
           organization_id: string
@@ -311,6 +349,7 @@ export type Database = {
           extension?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["resource_kind"]
+          library_id?: string
           mime_type?: string | null
           name?: string
           organization_id?: string
@@ -326,6 +365,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_library_id_fkey"
+            columns: ["library_id"]
+            isOneToOne: false
+            referencedRelation: "libraries"
             referencedColumns: ["id"]
           },
           {
