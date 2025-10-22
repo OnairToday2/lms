@@ -271,6 +271,79 @@ export type Database = {
           },
         ]
       }
+      resources: {
+        Row: {
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          extension: string | null
+          id: string
+          kind: Database["public"]["Enums"]["resource_kind"]
+          mime_type: string | null
+          name: string
+          organization_id: string
+          parent_id: string | null
+          path: string | null
+          size: number | null
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          extension?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["resource_kind"]
+          mime_type?: string | null
+          name: string
+          organization_id: string
+          parent_id?: string | null
+          path?: string | null
+          size?: number | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          extension?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["resource_kind"]
+          mime_type?: string | null
+          name?: string
+          organization_id?: string
+          parent_id?: string | null
+          path?: string | null
+          size?: number | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resources_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -294,6 +367,7 @@ export type Database = {
       employee_status: "active" | "inactive"
       gender: "male" | "female" | "other"
       organization_unit_type: "branch" | "department"
+      resource_kind: "folder" | "file"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -424,6 +498,7 @@ export const Constants = {
       employee_status: ["active", "inactive"],
       gender: ["male", "female", "other"],
       organization_unit_type: ["branch", "department"],
+      resource_kind: ["folder", "file"],
     },
   },
 } as const
