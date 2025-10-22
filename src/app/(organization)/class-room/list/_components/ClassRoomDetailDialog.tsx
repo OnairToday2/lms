@@ -11,9 +11,9 @@ import {
   Divider,
   Grid,
 } from "@mui/material";
-import { ClassRoom } from "../types/types";
+import { ClassRoomPriority } from "../types/types";
 import {
-  getClassRoomStatus,
+  getClassRoomStatusLabel,
   getColorClassRoomStatus
 } from "../utils/status";
 import { fDateTime } from "@/lib";
@@ -22,7 +22,7 @@ import { resolveSessionStatus } from "@/modules/class-room-management/utils/runt
 interface ClassRoomDetailDialogProps {
   open: boolean;
   onClose: () => void;
-  classRoom: ClassRoom;
+  classRoom: ClassRoomPriority;
 }
 
 
@@ -87,7 +87,7 @@ export default function ClassRoomDetailDialog({
                       </Typography>
                       <Chip
                         size="small"
-                        label={getClassRoomStatus(sessionStatus)}
+                        label={getClassRoomStatusLabel(sessionStatus)}
                         color={getColorClassRoomStatus(sessionStatus)}
                       />
                     </Stack>

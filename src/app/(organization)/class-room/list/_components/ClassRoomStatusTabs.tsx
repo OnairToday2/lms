@@ -1,7 +1,7 @@
 "use client";
 import { Tabs, Tab, Stack, Chip } from "@mui/material";
 import { ClassRoomRuntimeStatus } from "../types/types";
-import { COURSE_RUNTIME_STATUS_LABEL, STATUS_ORDER } from "../utils/status";
+import { CLASSROOM_RUNTIME_STATUS_LABEL, STATUS_ORDER } from "../utils/status";
 
 interface ClassRoomStatusTabsProps {
   value: ClassRoomRuntimeStatus;
@@ -44,7 +44,7 @@ export default function ClassRoomStatusTabs({
               value={status}
               label={
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <span>{COURSE_RUNTIME_STATUS_LABEL[status]}</span>
+                  <span>{CLASSROOM_RUNTIME_STATUS_LABEL[status]}</span>
                   <Chip
                     size="small"
                     color={count > 0 ? "primary" : "default"}

@@ -1,28 +1,27 @@
 import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import { supabase } from "@/services";
 import {
-  GetAssignedClassRoomsQueryInput,
   GetClassRoomStatusCountsInput,
   GetClassRoomsQueryInput,
   GetClassRoomsQueryResult,
 } from "@/modules/class-room-management/operations/query";
 import {
+  ClassRoomPriority,
   ClassRoomRuntimeStatus,
+  ClassRoomStatus,
 } from "@/app/(organization)/class-room/list/types/types";
 
 const PAGE = 1;
 const LIMIT = 9;
 
 type ClassRoomFilters = {
-  status?: ClassRoomRuntimeStatus;
+  runtimeStatus?: ClassRoomRuntimeStatus;
+  status?: ClassRoomStatus;
   from?: string | null;
   to?: string | null;
   q?: string;
 };
 
-type ClassRoomScope =
-  | { ownerId: string; classRoomIds?: never }
-  | { ownerId?: never; classRoomIds: string[] };
 
 const sanitizeSearchTerm = (value: string) =>
   value.replace(/%/g, "\\%").replace(/_/g, "\\_").replace(/,/g, " ");
@@ -33,11 +32,15 @@ const applyClassRoomFilters = <
   query: T,
   filters: ClassRoomFilters = {},
 ): T => {
-  const { status, from, to, q } = filters;
+  const { status, runtimeStatus, from, to, q } = filters;
   let builder = query;
 
-  if (status && status !== ClassRoomRuntimeStatus.All) {
-    builder = builder.eq("runtime_status", status);
+  if (status && status !== ClassRoomStatus.All) {
+    builder = builder.eq("status", status);
+  }
+
+  if (runtimeStatus && runtimeStatus !== ClassRoomRuntimeStatus.All) {
+    builder = builder.eq("runtime_status", runtimeStatus);
   }
 
   if (from) {
@@ -65,56 +68,19 @@ const applyClassRoomFilters = <
 };
 
 const createClassRoomsQuery = (
-  scope: ClassRoomScope,
+  org_id: string,
   select: string,
   options?: { count?: "exact" | "planned" | "estimated"; head?: boolean },
 ) => {
   let query = supabase
-    .from("class_rooms_priority_v2")
+    .from("class_rooms_priority")
     .select(select, options);
 
-  if ("ownerId" in scope) {
-    query = query.eq("user_id", scope.ownerId!);
-  } else {
-    query = query.in("id", scope.classRoomIds);
+  if (org_id) {
+    query = query.eq("organization_id", org_id!);
   }
 
   return query;
-};
-
-const fetchAssignedClassRoomIds = async (userId: string): Promise<string[]> => {
-  const { data: employeeRows, error: employeeError } = await supabase
-    .from("employees")
-    .select("id")
-    .eq("user_id", userId);
-
-  if (employeeError) {
-    throw employeeError;
-  }
-
-  const employeeIds =
-    employeeRows?.map((employee) => employee.id).filter((id): id is string => Boolean(id)) ?? [];
-
-  if (employeeIds.length === 0) {
-    return [];
-  }
-
-  const { data: assignmentRows, error: assignmentError } = await supabase
-    .from("class_room_employee")
-    .select("class_room_id")
-    .in("employee_id", employeeIds);
-
-  if (assignmentError) {
-    throw assignmentError;
-  }
-
-  return Array.from(
-    new Set(
-      assignmentRows
-        ?.map((assignment) => assignment.class_room_id)
-        .filter((classRoomId): classRoomId is string => Boolean(classRoomId)) ?? [],
-    ),
-  );
 };
 
 const getClassRooms = async (
@@ -123,11 +89,12 @@ const getClassRooms = async (
   const {
     page = PAGE,
     limit = LIMIT,
-    status: statusFilter,
+    runtimeStatus: statusFilter,
+    status,
     q,
     from,
     to,
-    ownerId,
+    org_id,
   } = input;
 
   const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
@@ -135,7 +102,7 @@ const getClassRooms = async (
   const rangeStart = (safePage - 1) * safeLimit;
   const rangeEnd = rangeStart + safeLimit - 1;
 
-  if (!ownerId) {
+  if (!org_id) {
     return {
       items: [],
       total: 0,
@@ -145,12 +112,12 @@ const getClassRooms = async (
   }
 
   let query = createClassRoomsQuery(
-    { ownerId },
+    org_id,
     "*, class_sessions(*)",
     { count: "exact" },
   );
 
-  query = applyClassRoomFilters(query, { status: statusFilter, q, from, to });
+  query = applyClassRoomFilters(query, { runtimeStatus: statusFilter, q, from, to, status });
 
   query = query
     .order("sort_rank_primary")
@@ -164,72 +131,7 @@ const getClassRooms = async (
   }
 
   return {
-    items: data ?? [],
-    total: count ?? 0,
-    page: safePage,
-    limit: safeLimit,
-  };
-};
-
-const getAssignedClassRooms = async (
-  input: GetAssignedClassRoomsQueryInput,
-): Promise<GetClassRoomsQueryResult> => {
-  const {
-    page = PAGE,
-    limit = LIMIT,
-    status: statusFilter,
-    q,
-    from,
-    to,
-    userId,
-  } = input;
-
-  const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
-  const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 12;
-  const rangeStart = (safePage - 1) * safeLimit;
-  const rangeEnd = rangeStart + safeLimit - 1;
-
-  if (!userId) {
-    return {
-      items: [],
-      total: 0,
-      page: safePage,
-      limit: safeLimit,
-    };
-  }
-
-  const classRoomIds = await fetchAssignedClassRoomIds(userId);
-
-  if (classRoomIds.length === 0) {
-    return {
-      items: [],
-      total: 0,
-      page: safePage,
-      limit: safeLimit,
-    };
-  }
-
-  let query = createClassRoomsQuery(
-    { classRoomIds },
-    "*, class_sessions(*)",
-    { count: "exact" },
-  );
-
-  query = applyClassRoomFilters(query, { status: statusFilter, q, from, to });
-
-  query = query
-    .order("sort_rank_primary")
-    .order("sort_rank_secondary")
-    .range(rangeStart, rangeEnd);
-
-  const { data, error, count } = await query;
-
-  if (error) {
-    throw error;
-  }
-
-  return {
-    items: data ?? [],
+    items: data as unknown as ClassRoomPriority[] ?? [],
     total: count ?? 0,
     page: safePage,
     limit: safeLimit,
@@ -261,7 +163,6 @@ const getClassHasTagList = async () => {
 
 export {
   getClassRooms,
-  getAssignedClassRooms,
   getClassRoomStatusCounts,
   getClassFieldList,
   getClassHasTagList,

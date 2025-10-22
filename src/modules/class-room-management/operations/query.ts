@@ -1,6 +1,7 @@
 import {
   ClassRoomPriority,
   ClassRoomRuntimeStatus,
+  ClassRoomStatus,
 } from "@/app/(organization)/class-room/list/types/types";
 import { useTQuery } from "@/lib/queryClient";
 import {
@@ -11,10 +12,11 @@ export interface GetClassRoomsQueryInput {
   q?: string;
   from?: string | null;
   to?: string | null;
-  status?: ClassRoomRuntimeStatus;
+  runtimeStatus?: ClassRoomRuntimeStatus;
+  status?: ClassRoomStatus;
   page?: number;
   limit?: number;
-  ownerId?: string;
+  org_id?: string;
 }
 
 export interface GetClassRoomsQueryResult {
@@ -43,20 +45,9 @@ export const useGetClassRoomsQuery = (
   return useTQuery<GetClassRoomsQueryResult>({
     queryKey: ["class-rooms", input],
     queryFn: () => classRoomRepository.getClassRooms(input),
-    enabled: Boolean(input.ownerId),
+    enabled: Boolean(input.org_id),
   });
 };
-
-export const useGetAssignedClassRoomsQuery = (
-  input: GetAssignedClassRoomsQueryInput,
-) => {
-  return useTQuery<GetClassRoomsQueryResult>({
-    queryKey: ["assigned-class-rooms", input],
-    queryFn: () => classRoomRepository.getAssignedClassRooms(input),
-    enabled: Boolean(input.userId),
-  });
-};
-
 
 export const useCountStatusClassRoomsQuery = (
   input: GetClassRoomStatusCountsInput,

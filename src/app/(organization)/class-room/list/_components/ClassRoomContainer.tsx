@@ -13,6 +13,7 @@ import PageContainer from "@/shared/ui/PageContainer";
 import {
   ClassRoomFilters,
   ClassRoomRuntimeStatus,
+  ClassRoomStatus,
 } from "../types/types";
 import CourseFiltersBar from "./ClassRoomCourseFilters";
 import CourseStatusTabs from "./ClassRoomStatusTabs";
@@ -22,23 +23,25 @@ import {
   useCountStatusClassRoomsQuery,
   useGetClassRoomsQuery,
 } from "@/modules/class-room-management/operations/query";
-import ClassRoomGrid from "./ClassRoomGrid";
 import { Pagination } from "@/shared/ui/Pagination";
 import { useAuthStore } from "@/modules/auth/store/AuthProvider";
+import ClassRoomListTable from "./list-view/ClassRoomListTable";
+import ClassRoomListFilters from "./ClassRoomCourseFilters";
 
 const initialFilters: ClassRoomFilters = {
   search: "",
-  status: ClassRoomRuntimeStatus.All,
+  runtimeStatus: ClassRoomRuntimeStatus.All,
   startDate: null,
   endDate: null,
+  status: ClassRoomStatus.All,
 };
 
-const PAGE_SIZE = 9;
+const PAGE_SIZE = 8;
 
 export default function ClassRoomContainer() {
   const [filters, setFilters] = useState<ClassRoomFilters>(initialFilters);
   const [page, setPage] = useState(1);
-  const ownerId = useAuthStore((state) => state.data?.id);
+  const org_id = "6f0e0c9c-94a5-43cd-9b4f-04b2d30f082e";
 
   const queryInput = useMemo<GetClassRoomsQueryInput>(() => {
     const trimmedSearch = filters.search.trim();
@@ -50,18 +53,19 @@ export default function ClassRoomContainer() {
       to: filters.endDate
         ? dayjs(filters.endDate).endOf("day").toISOString()
         : undefined,
+      runtimeStatus: filters.runtimeStatus,
       status: filters.status,
       page,
       limit: PAGE_SIZE,
-      ownerId,
+      org_id,
     };
   }, [
     filters.search,
     filters.startDate,
     filters.endDate,
+    filters.runtimeStatus,
     filters.status,
     page,
-    ownerId,
   ]);
 
   const { data: classRoomsResult, isLoading, isError, refetch } =
@@ -69,17 +73,15 @@ export default function ClassRoomContainer() {
 
   const classRooms = classRoomsResult?.items ?? [];
   const totalClassRooms = classRoomsResult?.total ?? 0;
-  const countQueryInput = useMemo<GetClassRoomStatusCountsInput>(
-    () => ({
-      ownerId,
-      q: queryInput.q,
-      from: queryInput.from,
-      to: queryInput.to,
-    }),
-    [ownerId, queryInput.q, queryInput.from, queryInput.to],
-  );
-  const { data: countStatus } = useCountStatusClassRoomsQuery(countQueryInput);
-  const isFetchingClassRooms = !ownerId || isLoading;
+  // const countQueryInput = useMemo<GetClassRoomStatusCountsInput>(
+  //   () => ({
+  //     q: queryInput.q,
+  //     from: queryInput.from,
+  //     to: queryInput.to,
+  //   }),
+  //   [queryInput.q, queryInput.from, queryInput.to],
+  // );
+  // const { data: countStatus } = useCountStatusClassRoomsQuery(countQueryInput);
 
 
   const handleSearchChange = (value: string) => {
@@ -111,39 +113,72 @@ export default function ClassRoomContainer() {
     }));
   };
 
-  const handleStatusChange = (status: ClassRoomRuntimeStatus) => {
+  const handleRuntimeStatusChange = (runtimeStatus: ClassRoomRuntimeStatus) => {
+    setPage(1);
+    setFilters((prev) => ({
+      ...prev,
+      runtimeStatus,
+    }));
+  }
+
+  const handleStausChange = (status: ClassRoomStatus) => {
     setPage(1);
     setFilters((prev) => ({
       ...prev,
       status,
     }));
-  };
+  }
+
+  // const handleStatusChange = (status: ClassRoomRuntimeStatus) => {
+  //   setPage(1);
+  //   setFilters((prev) => ({
+  //     ...prev,
+  //     status,
+  //   }));
+  // };
 
   const handlePaginationChange = (nextPage: number) => {
     setPage(nextPage);
   };
 
+  console.log("classRooms", classRooms);
+
+
 
   return (
-    <PageContainer
-      title="Danh sách Lớp học trực tuyến"
+    <Box
+      px={2}
+      py={2.5}
+      bgcolor={"#fff"}
+      borderRadius={2}
     >
       <Stack spacing={3}>
-        <CourseFiltersBar
+        <ClassRoomListFilters
           search={filters.search}
           startDate={filters.startDate}
           endDate={filters.endDate}
+          runtimeStatus={filters.runtimeStatus}
+          status={filters.status}
           onSearchChange={handleSearchChange}
           onDateChange={handleDateChange}
-          onResetFilters={handleResetFilters}
+          onRuntimeStatusChange={handleRuntimeStatusChange}
+          onStausChange={handleStausChange}
         />
-        <CourseStatusTabs
-          value={filters.status}
-          onChange={handleStatusChange}
-          counts={countStatus}
-        />
+        {/* <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={2}
+          alignItems={{ xs: "stretch", md: "center" }}
+        >
+          <Box flex={1} sx={{ minWidth: 0 }}>
+                <CourseStatusTabs
+                  value={filters.status}
+                  onChange={handleStatusChange}
+                  counts={countStatus}
+                />
+              </Box>
+        </Stack> */}
 
-        {isFetchingClassRooms ? (
+        {isLoading ? (
           <Stack
             alignItems="center"
             justifyContent="center"
@@ -157,7 +192,7 @@ export default function ClassRoomContainer() {
           </Stack>
         ) : null}
 
-        {isError && ownerId ? (
+        {isError ? (
           <Alert
             severity="error"
             action={
@@ -170,7 +205,7 @@ export default function ClassRoomContainer() {
           </Alert>
         ) : null}
 
-        {!isFetchingClassRooms && !isError ? (
+        {!isLoading && !isError ? (
           classRooms.length === 0 ? (
             <Box
               sx={{
@@ -191,7 +226,11 @@ export default function ClassRoomContainer() {
               </Typography>
             </Box>
           ) : (
-            <ClassRoomGrid classRooms={classRooms} />
+            <ClassRoomListTable
+              classRooms={classRooms}
+              page={queryInput.page ?? 1}
+              pageSize={queryInput.limit ?? PAGE_SIZE}
+            />
           )
         ) : null}
       </Stack>
@@ -206,6 +245,6 @@ export default function ClassRoomContainer() {
           />
         </Box>
       ) : null}
-    </PageContainer>
+    </Box>
   );
 }
