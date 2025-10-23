@@ -7,53 +7,58 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       employees: {
         Row: {
           created_at: string
+          employee_code: string
+          employee_order: number | null
           id: string
+          organization_id: string | null
+          position_id: string | null
           start_date: string | null
+          status: Database["public"]["Enums"]["employee_status"]
           user_id: string
         }
         Insert: {
           created_at?: string
+          employee_code: string
+          employee_order?: number | null
           id?: string
+          organization_id?: string | null
+          position_id?: string | null
           start_date?: string | null
+          status: Database["public"]["Enums"]["employee_status"]
           user_id: string
         }
         Update: {
           created_at?: string
+          employee_code?: string
+          employee_order?: number | null
           id?: string
+          organization_id?: string | null
+          position_id?: string | null
           start_date?: string | null
+          status?: Database["public"]["Enums"]["employee_status"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "employees_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       employments: {
         Row: {
@@ -87,6 +92,36 @@ export type Database = {
             columns: ["organization_unit_id"]
             isOneToOne: false
             referencedRelation: "organization_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      managers_employees: {
+        Row: {
+          employee_id: string
+          manager_id: string
+        }
+        Insert: {
+          employee_id: string
+          manager_id: string
+        }
+        Update: {
+          employee_id?: string
+          manager_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "managers_employees_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "managers_employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -135,41 +170,33 @@ export type Database = {
       }
       organizations: {
         Row: {
-          admin_id: string | null
           created_at: string
           employee_limit: number | null
           id: string
-          is_active: boolean | null
-          logo: string | null
-          name: string | null
+          is_active: boolean
+          logo: string
+          name: string
+          subdomain: string
         }
         Insert: {
-          admin_id?: string | null
           created_at?: string
           employee_limit?: number | null
           id?: string
-          is_active?: boolean | null
-          logo?: string | null
-          name?: string | null
+          is_active?: boolean
+          logo: string
+          name: string
+          subdomain: string
         }
         Update: {
-          admin_id?: string | null
           created_at?: string
           employee_limit?: number | null
           id?: string
-          is_active?: boolean | null
-          logo?: string | null
-          name?: string | null
+          is_active?: boolean
+          logo?: string
+          name?: string
+          subdomain?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "organizations_admin_id_fkey"
-            columns: ["admin_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       positions: {
         Row: {
@@ -205,7 +232,7 @@ export type Database = {
           avatar: string | null
           birthday: string | null
           created_at: string
-          email: string | null
+          email: string
           employee_id: string
           full_name: string
           gender: Database["public"]["Enums"]["gender"]
@@ -216,7 +243,7 @@ export type Database = {
           avatar?: string | null
           birthday?: string | null
           created_at?: string
-          email?: string | null
+          email: string
           employee_id: string
           full_name: string
           gender: Database["public"]["Enums"]["gender"]
@@ -227,7 +254,7 @@ export type Database = {
           avatar?: string | null
           birthday?: string | null
           created_at?: string
-          email?: string | null
+          email?: string
           employee_id?: string
           full_name?: string
           gender?: Database["public"]["Enums"]["gender"]
@@ -238,35 +265,33 @@ export type Database = {
           {
             foreignKeyName: "profiles_employee_id_fkey"
             columns: ["employee_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
-      }
-      test2: {
-        Row: {
-          created_at: string
-          id: number
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-        }
-        Update: {
-          created_at?: string
-          id?: number
-        }
-        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_filtered_employees: {
+        Args: {
+          p_branch_id?: string
+          p_department_id?: string
+          p_limit?: number
+          p_page?: number
+          p_search?: string
+        }
+        Returns: {
+          employee_id: string
+          total_count: number
+        }[]
+      }
     }
     Enums: {
+      employee_status: "active" | "inactive"
       gender: "male" | "female" | "other"
       organization_unit_type: "branch" | "department"
     }
@@ -394,11 +419,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
+      employee_status: ["active", "inactive"],
       gender: ["male", "female", "other"],
       organization_unit_type: ["branch", "department"],
     },
