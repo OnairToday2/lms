@@ -4,22 +4,16 @@ import { Card, CardContent, Box, Typography } from "@mui/material";
 import { Resource } from "../types";
 import { ResourceThumbnail } from "./ResourceThumbnail";
 import { ResourceActionMenu } from "./ResourceActionMenu";
+import { formatFileSize } from "@/utils";
 
 interface ResourceCardProps {
   resource: Resource;
   selected: boolean;
-  onClick: () => void;
-  onDoubleClick: () => void;
+  onClick?: () => void;
+  onDoubleClick?: () => void;
   onRename?: (resource: Resource) => void;
   onDelete?: (resource: Resource) => void;
 }
-
-const formatFileSize = (bytes: number | null) => {
-  if (!bytes) return "";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
 
 export function ResourceCard({
   resource,

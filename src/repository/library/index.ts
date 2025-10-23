@@ -163,3 +163,44 @@ export async function createFileResource(data: {
 
   return file;
 }
+
+export async function getResourceById(resourceId: string): Promise<Resource> {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("resources")
+    .select("*")
+    .eq("id", resourceId)
+    .is("deleted_at", null)
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to fetch resource: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error("Resource not found");
+  }
+
+  return data;
+}
+
+export async function getResourcesByIds(resourceIds: string[]): Promise<Resource[]> {
+  const supabase = await createSVClient();
+
+  if (resourceIds.length === 0) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("resources")
+    .select("*")
+    .in("id", resourceIds)
+    .is("deleted_at", null);
+
+  if (error) {
+    throw new Error(`Failed to fetch resources: ${error.message}`);
+  }
+
+  return data || [];
+}

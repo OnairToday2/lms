@@ -58,6 +58,7 @@ export function LibraryDialog() {
   const [selectedResourceForAction, setSelectedResourceForAction] = useState<Resource | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(false);
+  const [uploadProgressPercent, setUploadProgressPercent] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -243,6 +244,7 @@ export function LibraryDialog() {
     if (!file || !config?.libraryId) return;
 
     setUploadProgress(true);
+    setUploadProgressPercent(0);
     setError(null);
 
     try {
@@ -265,17 +267,36 @@ export function LibraryDialog() {
 
       const { presignedUrl, publicUrl, thumbnailUrl } = await presignedResponse.json();
 
-      const uploadResponse = await fetch(presignedUrl, {
-        method: "PUT",
-        headers: {
-          "Content-Type": file.type,
-        },
-        body: file,
-      });
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
 
-      if (!uploadResponse.ok) {
-        throw new Error("Failed to upload file to S3");
-      }
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            setUploadProgressPercent(percentComplete);
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error("Failed to upload file to S3"));
+          }
+        });
+
+        xhr.addEventListener("error", () => {
+          reject(new Error("Failed to upload file to S3"));
+        });
+
+        xhr.addEventListener("abort", () => {
+          reject(new Error("Upload aborted"));
+        });
+
+        xhr.open("PUT", presignedUrl);
+        xhr.setRequestHeader("Content-Type", file.type);
+        xhr.send(file);
+      });
 
       const fileExtension = file.name.split('.').pop() || '';
       const createResourceResponse = await fetch("/api/libraries/resources", {
@@ -305,6 +326,7 @@ export function LibraryDialog() {
       setError(err instanceof Error ? err.message : "Failed to upload file");
     } finally {
       setUploadProgress(false);
+      setUploadProgressPercent(0);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -338,9 +360,9 @@ export function LibraryDialog() {
 
           {uploadProgress && (
             <Box sx={{ mb: 2 }}>
-              <LinearProgress />
+              <LinearProgress variant="determinate" value={uploadProgressPercent} />
               <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-                Đang upload...
+                Đang upload... {uploadProgressPercent}%
               </Typography>
             </Box>
           )}
@@ -396,7 +418,6 @@ export function LibraryDialog() {
           <Button
             onClick={handleConfirm}
             variant="contained"
-            disabled={selectedResources.length === 0}
           >
             Xác nhận ({selectedResources.length})
           </Button>
