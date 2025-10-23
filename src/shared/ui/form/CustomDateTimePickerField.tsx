@@ -30,6 +30,11 @@ const CustomDateTimePickerField: React.FC<CustomDateTimePickerFieldProps> = ({
         </FormLabel>
       ) : null}
       <DateTimePicker
+        sx={{
+          ".MuiPickersInputBase-root": {
+            background: "white",
+          },
+        }}
         {...restProps}
         dayOfWeekFormatter={(day) => {
           const map: Record<string, string> = {

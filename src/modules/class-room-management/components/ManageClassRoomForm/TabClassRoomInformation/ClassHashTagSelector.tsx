@@ -7,15 +7,15 @@ interface ClassHashTagSelectorProps {
 }
 const ClassHashTagSelector: React.FC<ClassHashTagSelectorProps> = ({ control }) => {
   const { data: hashTagListData, isPending } = useGetClassHashTagQuery();
-
   const hashTags = hashTagListData?.data || [];
+
   return (
     <RHFSelectField
       label="Hash tags"
       control={control}
       name="hashTags"
       placeholder="Hash tags"
-      multiple={false}
+      multiple={true}
       optionField={{
         value: "id",
         label: "name",

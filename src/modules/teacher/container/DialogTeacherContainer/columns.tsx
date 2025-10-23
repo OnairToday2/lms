@@ -1,9 +1,8 @@
 "use client";
 import { alpha, Chip } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
-import { Teacher } from "@/model/teacher.model";
-
-export const columns: GridColDef<Teacher>[] = [
+import { EmployeeTeacherTypeItem } from "@/model/employee.model";
+export const columns: GridColDef<EmployeeTeacherTypeItem>[] = [
   {
     field: "id",
     headerName: "ID",
@@ -13,8 +12,11 @@ export const columns: GridColDef<Teacher>[] = [
     },
   },
   {
-    field: "name",
+    field: "fullName",
     headerName: "Họ và tên",
+    renderCell: ({ row }) => {
+      return row.profiles?.full_name;
+    },
     width: 220,
   },
   {
@@ -24,7 +26,7 @@ export const columns: GridColDef<Teacher>[] = [
     renderCell: ({ row }) => {
       return (
         <Chip
-          label={row.identity_code}
+          label={row.employee_code}
           color="primary"
           sx={(theme) => ({
             backgroundColor: alpha(theme.palette.primary["main"], 0.2),
@@ -39,7 +41,9 @@ export const columns: GridColDef<Teacher>[] = [
   {
     field: "email",
     headerName: "Email",
-    description: "This column has a value getter and is not sortable.",
+    renderCell: ({ row }) => {
+      return row.profiles?.email;
+    },
     sortable: false,
     width: 240,
   },

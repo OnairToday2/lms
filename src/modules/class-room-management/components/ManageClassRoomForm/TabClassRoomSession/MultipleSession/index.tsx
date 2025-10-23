@@ -1,16 +1,18 @@
 "use client";
 import { type ClassRoom } from "../../../classroom-form.schema";
-import { Button, Divider, FormLabel, Typography } from "@mui/material";
-import RHFRadioGroupField from "@/shared/ui/form/RHFRadioGroupField";
+import { Button, Divider, Typography } from "@mui/material";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
-import EmployeeQuantity from "../EmpoyeeQuantity";
-import { useFieldArray } from "react-hook-form";
-import { useFormContext } from "react-hook-form";
-import ClassRoomSessionFromToDate from "../ClassRoomSessionFromToDate";
-import SessionAccordion from "./SessionAccordion";
+import QuantityPersonField from "../class-room-session-fields/QuantityPersonField";
+import { useFieldArray, UseFormReturn } from "react-hook-form";
+import ClassRoomSessionFromToDate from "../class-room-session-fields/ClassRoomSessionFromToDate";
+import AccordionSessionItem, { AccordionSessionItemProps } from "./AccordionSessionItem";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
-import { useCallback } from "react";
+import { useState } from "react";
 import RHFRichEditor from "@/shared/ui/form/RHFRichEditor";
+import ClassRoomChannel from "../class-room-session-fields/RoomChannel";
+import TeacherSelector from "../class-room-session-fields/TeacherSelector";
+import AgendarFields from "../class-room-session-fields/AgendarFields";
+import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 
 export const getClassSessionInitData = (): ClassRoom["classRoomSessions"][number] => {
   return {
@@ -25,19 +27,30 @@ export const getClassSessionInitData = (): ClassRoom["classRoomSessions"][number
     agendas: [],
     limitPerson: 0,
     isUnlimited: false,
-    id: undefined,
     recourses: [],
   };
 };
 
-const MultipleSession = () => {
+interface MultipleSessionProps {
+  methods: UseFormReturn<ClassRoom>;
+}
+const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
+  /**
+   * Session init items to validate when click add more button.
+   */
+  const [sessionItemInit, setSessionItemInit] = useState<{ index: number; isInit: boolean }[]>([
+    {
+      index: 0,
+      isInit: true,
+    },
+  ]);
   const {
     control,
-    getValues,
-    watch,
     trigger,
+    setValue,
+    getValues,
     formState: { errors },
-  } = useFormContext<ClassRoom>();
+  } = useClassRoomFormContext();
 
   const {
     fields: classSessionsFields,
@@ -47,38 +60,50 @@ const MultipleSession = () => {
     control,
     name: "classRoomSessions",
     keyName: "_sessionId",
-    rules: {
-      minLength: 2,
-    },
   });
 
-  const watchTitleChange = useCallback((index: number) => {
-    return watch(`classRoomSessions.${index}.title`);
-  }, []);
-
-  const hasErrorSession = (index: number) => {
-    return !!errors.classRoomSessions?.[index];
+  const hasErrorSession = (index: number): AccordionSessionItemProps["status"] => {
+    if (sessionItemInit.find((it) => it.index === index)?.isInit) {
+      return "idle";
+    }
+    return !!errors.classRoomSessions?.[index] ? "invalid" : "valid";
   };
   const handleAddClassSession = async () => {
-    const isValid = await trigger("classRoomSessions");
-    console.log(isValid);
-    if (!isValid) return;
-    const initValue = getClassSessionInitData();
-    append({ ...initValue });
+    /**
+     * Mark all section isInited
+     */
+    setSessionItemInit((prev) => prev.map((it) => ({ ...it, isInit: false })));
+
+    await trigger("classRoomSessions")
+      .then((valid) => {
+        if (!valid) return;
+
+        const sessionItemCount = classSessionsFields.length;
+        const initSessionItem = getClassSessionInitData();
+        append(initSessionItem);
+        setSessionItemInit((prev) => [...prev, { index: sessionItemCount, isInit: true }]);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
-  const handleRemoveItem = () => {};
   return (
-    <div className="sesion-multiple">
+    <div className="class-multiple-session">
       <div className="inner bg-white rounded-xl p-6 mb-6">
         <div className="mb-6">
           <Typography component="h3" className="text-base font-semibold">
             Chi tiết chuỗi lớp học
           </Typography>
         </div>
-        <div className="session-list flex flex-col gap-6">
+        <div className="session-list flex flex-col gap-3">
           {classSessionsFields.map((sessionField, _index) => (
             <div key={sessionField._sessionId}>
-              <SessionAccordion index={_index} title={watchTitleChange(_index)}>
+              <AccordionSessionItem
+                index={_index}
+                title={sessionField.title}
+                onRemove={() => remove(_index)}
+                status={hasErrorSession(_index)}
+              >
                 <div className="pt-6">
                   <div className="flex flex-col gap-6">
                     <RHFTextField
@@ -90,6 +115,7 @@ const MultipleSession = () => {
                       helpText={<Typography className="text-xs text-gray-600 text-right">Tối đa 100 ký tự</Typography>}
                     />
                     <ClassRoomSessionFromToDate index={_index} control={control} />
+                    <QuantityPersonField control={control} fieldIndex={_index} />
                     <RHFRichEditor
                       control={control}
                       name={`classRoomSessions.${_index}.description`}
@@ -97,61 +123,26 @@ const MultipleSession = () => {
                       label="Nội dung"
                       required
                     />
-                    <div className="flex flex-col gap-4">
-                      <RHFRadioGroupField
-                        label="Nền tảng"
-                        name={`classRoomSessions.${_index}.channelProvider`}
-                        control={control}
-                        direction="horizontal"
-                        options={[
-                          { value: "zoom", label: "Zoom" },
-                          { value: "google_meet", label: "Google Meet" },
-                          { value: "microsoft_teams", label: "Microsoft Teams" },
-                        ]}
-                      />
-                      <RHFTextField
-                        name={`classRoomSessions.${_index}.channelInfo.url`}
-                        control={control}
-                        label="Link tham dự"
-                        placeholder="https://..."
-                      />
-                      <div className="flex items-center gap-4">
-                        <RHFTextField
-                          name={`classRoomSessions.${_index}.channelInfo.providerId`}
-                          control={control}
-                          label="Meeting ID"
-                          placeholder="123 456 888"
-                        />
-                        <RHFTextField
-                          name={`classRoomSessions.${_index}.channelInfo.password`}
-                          control={control}
-                          label="Mật khẩu"
-                          placeholder="Nhập mật khẩu"
-                        />
-                      </div>
-                      <EmployeeQuantity control={control} fieldIndex={_index} />
-                    </div>
+                    <ClassRoomChannel index={_index} control={control} />
                   </div>
                   <div className="h-6"></div>
-                  <div className="flex items-center">
-                    <div className="pr-6">
-                      <FormLabel component="div">Giảng viên phụ trách</FormLabel>
-                      <Typography className="text-xs text-gray-600">
-                        Chỉ định giảng viên phụ trách nội dung, quản lý lớp học và hỗ trợ người học trong buổi học.
-                      </Typography>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Button variant="fill">Chọn</Button>
-                    </div>
-                  </div>
+                  <TeacherSelector sessionIndex={_index} />
+                  <div className="h-6"></div>
+                  <AgendarFields sessionIndex={_index} />
                 </div>
-              </SessionAccordion>
+              </AccordionSessionItem>
             </div>
           ))}
         </div>
         <div className="h-6"></div>
         <Divider>
-          <Button variant="outlined" color="inherit" startIcon={<PlusIcon />} onClick={handleAddClassSession}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            startIcon={<PlusIcon />}
+            onClick={handleAddClassSession}
+            size="small"
+          >
             Thêm mới
           </Button>
         </Divider>

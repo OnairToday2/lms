@@ -47,11 +47,11 @@ const RHFDateTimePicker = <T extends FieldValues>({
           onChange={(value) => onChange(formatDateToIsoStr(value))}
           error={!!error}
           label={label}
-          onAccept={(value) => {
-            console.log(value);
-          }}
+          // onAccept={(value) => {
+          //   console.log(value);
+          // }}
           slotProps={{
-            actionBar: { actions: ["nextOrAccept"] }, // only show "OK"
+            actionBar: { actions: ["clear", "nextOrAccept"] }, // only show "OK"
           }}
           helperText={error?.message}
         />

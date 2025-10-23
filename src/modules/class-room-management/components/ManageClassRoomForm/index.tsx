@@ -1,14 +1,21 @@
+"use client";
 import { ClassRoomProvider } from "../../store/class-room-context";
-import ClassRoomContainer, { ClassRoomContainerProps } from "./ClassRoomContainer";
+import ClassRoomFormContainer, {
+  ClassRoomFormContainerProps,
+  ClassRoomFormContainerRef,
+} from "./ClassRoomFormContainer";
+import { forwardRef, memo } from "react";
 
-interface FormManageClassRoomProps {
-  onSubmit?: ClassRoomContainerProps["onSubmit"];
+export interface FormManageClassRoomRef extends ClassRoomFormContainerRef {}
+export interface FormManageClassRoomProps {
+  onSubmit?: ClassRoomFormContainerProps["onSubmit"];
+  value?: any;
 }
-const FormManageClassRoom: React.FC<FormManageClassRoomProps> = ({ onSubmit }) => {
+const FormManageClassRoom = forwardRef<FormManageClassRoomRef, FormManageClassRoomProps>(({ onSubmit, value }, ref) => {
   return (
     <ClassRoomProvider>
-      <ClassRoomContainer onSubmit={onSubmit} />
+      <ClassRoomFormContainer onSubmit={onSubmit} ref={ref} />
     </ClassRoomProvider>
   );
-};
-export default FormManageClassRoom;
+});
+export default memo(FormManageClassRoom);

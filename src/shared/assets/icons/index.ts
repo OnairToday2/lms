@@ -17,15 +17,24 @@ import ParagraphIcon from "./ParagraphIcon";
 import ImageIcon from "./ImageIcon";
 import InforCircleIcon from "./InforCircleIcon";
 import CalendarDateIcon from "./CalendarDateIcon";
+import CalendarDateIcon2 from "./CalendarDateIcon2";
+import CalendarIcon2 from "./CalendaIcon2";
 import UsersIcon2 from "./UsersIcon2";
 import ClipboardIcon from "./ClipboardIcon";
 import TrashIcon1 from "./TrashIcon1";
 import CloseIcon from "./CloseIcon";
-import CalendarIcon2 from "./CalendaIcon2";
 import ChevronRightDoubleIcon from "./ChevronRightDoubleIcon";
+import ChevronDownIcon from "./ChevronDownIcon";
+import ChevronUpIcon from "./ChevronUpIcon";
+import CheckCircleIcon from "./CheckCircleIcon";
 import ZaloIcon from "./ZaloIcon";
 import LinkIcon from "./LinkIcon";
 import SearchIcon from "./SearchIcon";
+import FileIcon from "./FileIcon";
+import FilterFunnelIcon from "./FilterFunnelIcon";
+import MarkerPinIcon from "./MarkerPinIcon";
+import CloudUploadIcon from "./CloudUploadIcon";
+import EmptyBoxIcon from "./EmptyBoxIcon";
 
 export {
   FacebookIcon,
@@ -56,4 +65,13 @@ export {
   ZaloIcon,
   LinkIcon,
   SearchIcon,
+  FileIcon,
+  MarkerPinIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  CloudUploadIcon,
+  CalendarDateIcon2,
+  CheckCircleIcon,
+  EmptyBoxIcon,
+  FilterFunnelIcon,
 };

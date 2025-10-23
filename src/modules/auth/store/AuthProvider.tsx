@@ -6,9 +6,7 @@ import { createAuthStore, AuthStoreState, AuthStore } from "./authStore";
 
 type AuthStoreContextApi = ReturnType<typeof createAuthStore>;
 
-export const AuthStoreContext = createContext<AuthStoreContextApi | undefined>(
-  undefined,
-);
+export const AuthStoreContext = createContext<AuthStoreContextApi | undefined>(undefined);
 
 export interface AuthProviderProps {
   children: ReactNode;
@@ -20,16 +18,9 @@ export const AuthProvider = ({ children, data }: AuthProviderProps) => {
   if (storeRef.current === null) {
     storeRef.current = createAuthStore({
       data: data,
-      isLoading: false,
-      error: undefined,
     });
   }
-
-  return (
-    <AuthStoreContext.Provider value={storeRef.current}>
-      {children}
-    </AuthStoreContext.Provider>
-  );
+  return <AuthStoreContext.Provider value={storeRef.current}>{children}</AuthStoreContext.Provider>;
 };
 
 export const useAuthStore = <T,>(selector: (store: AuthStore) => T): T => {

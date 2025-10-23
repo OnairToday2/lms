@@ -1,9 +1,9 @@
 import { alpha, Theme } from "@mui/material/styles";
-// import type { PickersProComponents } from "@mui/x-date-pickers-pro/themeAugmentation";
 import type { PickerComponents } from "@mui/x-date-pickers/themeAugmentation";
 import { menuItemClasses } from "@mui/material/MenuItem";
 import { pickersDayClasses, yearCalendarClasses } from "@mui/x-date-pickers";
 import { grey, primary } from "../../theme-color";
+import { CalendarDateIcon2 } from "@/shared/assets/icons";
 
 /* eslint-disable import/prefer-default-export */
 export const datePickersCustomizations: PickerComponents<Theme> = {
@@ -24,6 +24,25 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
           background: grey[900],
           boxShadow: "hsla(220, 30%, 5%, 0.7) 0px 4px 16px 0px, hsla(220, 25%, 10%, 0.8) 0px 8px 16px -5px",
         }),
+      }),
+    },
+  },
+  MuiDateTimePicker: {
+    defaultProps: {
+      ampm: false,
+      format: "HH:mm DD/MM/YYYY",
+      slots: {
+        openPickerIcon: CalendarDateIcon2,
+      },
+    },
+  },
+  MuiPickersOutlinedInput: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        "& .MuiButtonBase-root": {
+          backgroundColor: "transparent",
+          color: theme.palette.grey[500],
+        },
       }),
     },
   },
@@ -176,10 +195,29 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
         fontSize: "0.875rem",
         "& .MuiMultiSectionDigitalClockSection-root": {
           scrollbarWidth: "none",
+          // scrollbarGutter: "stable both-edges",
+          overflowY: "auto",
+          "&::-webkit-scrollbar": {
+            with: "2px",
+            backgroundColor: "red",
+          },
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: theme.palette.grey[400],
+            borderRadius: 6,
+            "&:hover": {
+              backgroundColor: theme.palette.grey[500],
+            },
+          },
         },
         "& .MuiMultiSectionDigitalClockSection-item": {
           fontSize: "0.875rem",
           width: "auto",
+          "&:last-of-type": {
+            marginBottom: "4px",
+          },
         },
       }),
     },

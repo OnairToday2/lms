@@ -140,13 +140,17 @@ const Uploader: React.FC<UploaderProps> = ({
         )}
 
         {multiple || (!multiple && !hideButtonWhenSingle) ? (
-          <div className={cn("uploader-box", "bg-gray-50 rounded-lg border border-dashed border-gray-300", {})}>
+          <div className={cn("uploader-box")}>
             <label htmlFor={`image-upload-${fieldId}`} style={{ cursor: "pointer" }}>
               {buttonUpload ?? (
                 <div
-                  className={cn("button-uploader flex items-center justify-center", {
-                    "w-32 h-32": variant === "square",
-                  })}
+                  className={cn(
+                    "button-uploader flex items-center justify-center",
+                    "bg-gray-50 rounded-lg border border-dashed border-gray-300",
+                    {
+                      "w-32 h-32": variant === "square",
+                    },
+                  )}
                 >
                   <div className="text-center">
                     <ImageIcon className="mb-2" />

@@ -116,7 +116,22 @@ export type Database = {
           employee_id?: string | null
           id?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "class_room_employee_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_room_employee_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       class_room_field: {
         Row: {
@@ -191,42 +206,66 @@ export type Database = {
           comunity_info: Json | null
           created_at: string
           description: string | null
+          employee_id: string | null
+          end_at: string | null
           id: string
+          organization_id: string | null
           resource_id: string | null
           room_type: Database["public"]["Enums"]["class_room_type"] | null
           slug: string | null
+          start_at: string | null
           status: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url: string | null
           title: string | null
-          user_id: string
         }
         Insert: {
           comunity_info?: Json | null
           created_at?: string
           description?: string | null
+          employee_id?: string | null
+          end_at?: string | null
           id?: string
+          organization_id?: string | null
           resource_id?: string | null
           room_type?: Database["public"]["Enums"]["class_room_type"] | null
           slug?: string | null
+          start_at?: string | null
           status?: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url?: string | null
           title?: string | null
-          user_id?: string
         }
         Update: {
           comunity_info?: Json | null
           created_at?: string
           description?: string | null
+          employee_id?: string | null
+          end_at?: string | null
           id?: string
+          organization_id?: string | null
           resource_id?: string | null
           room_type?: Database["public"]["Enums"]["class_room_type"] | null
           slug?: string | null
+          start_at?: string | null
           status?: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url?: string | null
           title?: string | null
-          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "class_rooms_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_rooms_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       class_session_metadata: {
         Row: {
@@ -288,7 +327,7 @@ export type Database = {
             foreignKeyName: "class_session_teacher_teacher_id_fkey"
             columns: ["teacher_id"]
             isOneToOne: false
-            referencedRelation: "teachers"
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -402,23 +441,92 @@ export type Database = {
       employees: {
         Row: {
           created_at: string
-          email: string | null
-          id: number
-          name: string | null
+          employee_code: string
+          employee_order: number | null
+          employee_type: Database["public"]["Enums"]["employee_type"] | null
+          id: string
+          organization_id: string | null
+          position_id: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["employee_status"]
+          user_id: string
         }
         Insert: {
           created_at?: string
-          email?: string | null
-          id?: number
-          name?: string | null
+          employee_code: string
+          employee_order?: number | null
+          employee_type?: Database["public"]["Enums"]["employee_type"] | null
+          id?: string
+          organization_id?: string | null
+          position_id?: string | null
+          start_date?: string | null
+          status: Database["public"]["Enums"]["employee_status"]
+          user_id: string
         }
         Update: {
           created_at?: string
-          email?: string | null
-          id?: number
-          name?: string | null
+          employee_code?: string
+          employee_order?: number | null
+          employee_type?: Database["public"]["Enums"]["employee_type"] | null
+          id?: string
+          organization_id?: string | null
+          position_id?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["employee_status"]
+          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "employees_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employments: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          organization_unit_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          organization_unit_id: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          organization_unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employments_organization_unit_id_fkey"
+            columns: ["organization_unit_id"]
+            isOneToOne: false
+            referencedRelation: "organization_units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       hash_tags: {
         Row: {
@@ -426,18 +534,21 @@ export type Database = {
           id: string
           name: string | null
           slug: string | null
+          type: Database["public"]["Enums"]["hashtag_type"] | null
         }
         Insert: {
           created_at?: string
           id?: string
           name?: string | null
           slug?: string | null
+          type?: Database["public"]["Enums"]["hashtag_type"] | null
         }
         Update: {
           created_at?: string
           id?: string
           name?: string | null
           slug?: string | null
+          type?: Database["public"]["Enums"]["hashtag_type"] | null
         }
         Relationships: []
       }
@@ -461,6 +572,181 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      managers_employees: {
+        Row: {
+          employee_id: string
+          manager_id: string
+        }
+        Insert: {
+          employee_id: string
+          manager_id: string
+        }
+        Update: {
+          employee_id?: string
+          manager_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "managers_employees_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "managers_employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_units: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          organization_id: string
+          parent_id: string | null
+          type: Database["public"]["Enums"]["organization_unit_type"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          organization_id: string
+          parent_id?: string | null
+          type: Database["public"]["Enums"]["organization_unit_type"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          parent_id?: string | null
+          type?: Database["public"]["Enums"]["organization_unit_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_units_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_units_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "organization_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          employee_limit: number | null
+          id: string
+          is_active: boolean
+          logo: string
+          name: string
+          subdomain: string
+        }
+        Insert: {
+          created_at?: string
+          employee_limit?: number | null
+          id?: string
+          is_active?: boolean
+          logo: string
+          name: string
+          subdomain: string
+        }
+        Update: {
+          created_at?: string
+          employee_limit?: number | null
+          id?: string
+          is_active?: boolean
+          logo?: string
+          name?: string
+          subdomain?: string
+        }
+        Relationships: []
+      }
+      positions: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "positions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar: string | null
+          birthday: string | null
+          created_at: string
+          email: string
+          employee_id: string
+          full_name: string
+          gender: Database["public"]["Enums"]["gender"]
+          id: string
+          phone_number: string
+        }
+        Insert: {
+          avatar?: string | null
+          birthday?: string | null
+          created_at?: string
+          email: string
+          employee_id: string
+          full_name: string
+          gender: Database["public"]["Enums"]["gender"]
+          id?: string
+          phone_number: string
+        }
+        Update: {
+          avatar?: string | null
+          birthday?: string | null
+          created_at?: string
+          email?: string
+          employee_id?: string
+          full_name?: string
+          gender?: Database["public"]["Enums"]["gender"]
+          id?: string
+          phone_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: true
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       resources: {
         Row: {
@@ -492,36 +778,6 @@ export type Database = {
         }
         Relationships: []
       }
-      teachers: {
-        Row: {
-          avatar_url: string | null
-          birth_of_date: string | null
-          created_at: string
-          email: string | null
-          id: string
-          identity_code: string | null
-          name: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          birth_of_date?: string | null
-          created_at?: string
-          email?: string | null
-          id?: string
-          identity_code?: string | null
-          name?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          birth_of_date?: string | null
-          created_at?: string
-          email?: string | null
-          id?: string
-          identity_code?: string | null
-          name?: string | null
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
@@ -540,6 +796,11 @@ export type Database = {
         | "draft"
       class_room_statuss: "draft" | "published" | "archived"
       class_room_type: "single" | "multiple"
+      employee_status: "active" | "inactive"
+      employee_type: "admin" | "student" | "teacher"
+      gender: "male" | "female" | "other"
+      hashtag_type: "class_room"
+      organization_unit_type: "branch" | "department"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -681,6 +942,11 @@ export const Constants = {
       ],
       class_room_statuss: ["draft", "published", "archived"],
       class_room_type: ["single", "multiple"],
+      employee_status: ["active", "inactive"],
+      employee_type: ["admin", "student", "teacher"],
+      gender: ["male", "female", "other"],
+      hashtag_type: ["class_room"],
+      organization_unit_type: ["branch", "department"],
     },
   },
 } as const

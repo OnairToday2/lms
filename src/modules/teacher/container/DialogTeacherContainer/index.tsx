@@ -1,83 +1,133 @@
 "use client";
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
-import { useGetTeacher } from "../../hooks/useGetTeacher";
-import { Alert, DialogContent, OutlinedInput } from "@mui/material";
+import { useGetTeachersQuery } from "../../hooks/useGetTeacher";
+import { Alert, DialogContent, FilledInput, FilledInputProps } from "@mui/material";
 import { SearchIcon } from "@/shared/assets/icons";
-import { DataGrid, DataGridProps, GridRowParams, GridRowSelectionModel } from "@mui/x-data-grid";
+import { DataGrid, DataGridProps, GridRowSelectionModel } from "@mui/x-data-grid";
+import useDebounce from "@/hooks/useDebounce";
 import { columns } from "./columns";
-import { Teacher } from "@/model/teacher.model";
-import TableData from "@/shared/ui/TableData";
+import { EmployeeTeacherTypeItem } from "@/model/employee.model";
 
 export interface DialogTeacherContainerProps {
   open?: boolean;
   onClose?: () => void;
-  onOk?: (data: Teacher[]) => void;
+  onOk?: (data: EmployeeTeacherTypeItem[]) => void;
   values?: string[];
 }
 const DialogTeacherContainer: React.FC<DialogTeacherContainerProps> = ({
   open = false,
   onClose,
   onOk,
-  values = [
-    "06297383-75f2-4a0e-bbc8-14f69f1a9af1",
-    "b68d4fb5-c7ea-487f-acf0-835941f54546",
-    "be66dd80-429a-46b9-9762-d8de8b0272a7",
-  ],
+  values = [],
 }) => {
-  const { data: teachersData, isPending } = useGetTeacher({ enabled: open });
-
-  const teacherList = useMemo(() => teachersData?.data || [], []);
-
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
+  const [searchTeacherName, setSearchTeacherName] = useState("");
+  const searchDebouce = useDebounce(searchTeacherName, 600);
+  const prevRowIdsSet = useRef<GridRowSelectionModel["ids"]>(null);
+  const [selectTeacherList, setSelectTeacherList] = useState<EmployeeTeacherTypeItem[]>([]);
   const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>({
     ids: new Set(values),
     type: "include",
   });
 
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher[]>(() => {
-    if (!teachersData?.data || !values.length) return [];
-    return teachersData.data.filter((item) => values.includes(item.id));
+  const { data: teachersData, isPending } = useGetTeachersQuery({
+    queryParams: {
+      page: paginationModel.page + 1,
+      pageSize: paginationModel.pageSize,
+      exclude: values, // exclude teacher selected
+      search: searchDebouce,
+    },
+    enabled: open,
   });
 
-  const handleRowSelectionModelChange: DataGridProps["onRowSelectionModelChange"] = (newSelect, detail) => {
-    // setSelectedTeacher((prevList) => {
-    //   const rowIds = [...newSelect.ids];
-    //   const newRowId = [...rowIds].pop();
-    //   // console.log(rowIds);
-    //   if (!newRowId) return prevList;
-    //   let newList = [...prevList];
-    //   const existsItem = newList.find((item) => item.id === newRowId);
-    //   const rowData = detail.api.getRow<Teacher>(newRowId);
-    //   return existsItem
-    //     ? newList.filter((item) => item.id !== newRowId)
-    //     : rowData
-    //     ? [...newList, rowData]
-    //     : [...newList];
-    // });
-  };
+  const teacherList = useMemo(() => teachersData?.data || [], [teachersData?.data]);
+  const rowCount = useMemo(() => teachersData?.count || 0, [teachersData?.count]);
 
   const handleClose = () => {
-    if (values.length) {
-      setRowSelectionModel((prev) => ({ ...prev, ids: new Set(values) }));
-    }
+    //Reset State after close
+    setPaginationModel((prev) => ({ ...prev, page: 0 }));
+    setRowSelectionModel((prev) => ({ ...prev, ids: new Set() }));
+    prevRowIdsSet.current = new Set();
+    setSelectTeacherList([]);
     onClose?.();
   };
+
   const handleClickOk = useCallback(() => {
-    const idsSet = rowSelectionModel.ids;
-
-    const teachers = teacherList.filter((item) => [...idsSet].includes(item.id));
-
-    teachers && onOk?.(teachers);
-    onClose?.();
+    selectTeacherList && onOk?.(selectTeacherList);
+    handleClose();
   }, [rowSelectionModel]);
 
+  const handlePaginationModelChange: Exclude<DataGridProps["onPaginationModelChange"], undefined> = useCallback(
+    (paginationModel) => {
+      setPaginationModel(paginationModel);
+    },
+    [],
+  );
+
+  const handleRowSelectModelChange: Exclude<DataGridProps["onRowSelectionModelChange"], undefined> = useCallback(
+    (newRowSelectModel, details) => {
+      /**
+       *  multipleRowsSelection occur when change pagination.
+       * return to prevent set Empty empty RowModel Selection
+       */
+      if (details.reason === "multipleRowsSelection") return;
+
+      const prevIdsSet = prevRowIdsSet.current || new Set();
+
+      const addedRow = newRowSelectModel.ids.difference(prevIdsSet);
+      const removeRow = prevIdsSet.difference(new Set(newRowSelectModel.ids));
+
+      setSelectTeacherList((prevTeachers) => {
+        /**
+         * Get Teachers in newIdsSet of current Row Model
+         */
+
+        let updateTeacherList = [...prevTeachers];
+
+        if (addedRow.size > 0) {
+          addedRow.forEach((rowId) => {
+            const teacher = teacherList.find((tc) => tc.id === rowId);
+            updateTeacherList = teacher ? [...updateTeacherList, teacher] : [...updateTeacherList];
+          });
+        }
+        if (removeRow.size > 0) {
+          removeRow.forEach((rowId) => {
+            updateTeacherList = [...updateTeacherList].filter((it) => it.id !== rowId);
+          });
+        }
+
+        return updateTeacherList;
+      });
+      const updateRowModel =
+        addedRow.size > 0 ? new Set([...prevIdsSet, ...newRowSelectModel.ids]) : newRowSelectModel.ids;
+
+      /**
+       * Store newIdsSet on every change
+       */
+      prevRowIdsSet.current = updateRowModel;
+
+      setRowSelectionModel((prevModel) => ({
+        ...prevModel,
+        ids: updateRowModel,
+      }));
+    },
+    [teacherList],
+  );
+
+  const isDisabledOkButton = Boolean(!selectTeacherList.length);
+
+  const handleSearchTeacherName: FilledInputProps["onChange"] = (evt) => {
+    setSearchTeacherName(evt.target.value);
+  };
+
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+    <Dialog open={open} fullWidth maxWidth="md">
       <Toolbar
         sx={(theme) => ({
           minHeight: 48,
@@ -103,38 +153,42 @@ const DialogTeacherContainer: React.FC<DialogTeacherContainerProps> = ({
         })}
       >
         <div className="header mb-6">
-          <OutlinedInput
-            size="small"
-            placeholder="TIm kiem"
+          <FilledInput
+            placeholder="Tìm kiếm..."
+            value={searchTeacherName}
+            onChange={handleSearchTeacherName}
             endAdornment={<SearchIcon />}
-            className="w-full max-w-[320px]"
+            size="small"
+            sx={{ minWidth: 280 }}
           />
         </div>
         <div>
-          {/* {error?.message} */}
-          {teachersData?.error?.message && (
-            <Alert severity="error" sx={{ mb: 1 }}>
-              {teachersData?.error?.message}
-            </Alert>
-          )}
           <DataGrid
             rows={teacherList}
             columns={columns}
+            rowCount={rowCount}
             loading={isPending}
             density="standard"
-            pageSizeOptions={[5, 10]}
+            pageSizeOptions={[10, 15, 20]}
             checkboxSelection
             disableColumnSelector
             disableColumnSorting
             disableColumnResize
             disableRowSelectionOnClick
             disableColumnMenu
-            onRowSelectionModelChange={(rowModel) => setRowSelectionModel(rowModel)}
+            paginationMode="server"
+            onRowSelectionModelChange={handleRowSelectModelChange}
             rowSelectionModel={rowSelectionModel}
-            // initialState={{ pagination: { paginationModel } }}
-            // onRowClick={handleClickRow}
-            // onRowSelectionModelChange={handleRowSelectionModelChange}
-            sx={{ border: 0 }}
+            paginationModel={paginationModel}
+            onPaginationModelChange={isPending ? undefined : handlePaginationModelChange}
+            sx={{
+              border: 0,
+              ".MuiDataGrid-columnHeaders": {
+                ".MuiDataGrid-columnHeaderCheckbox": {
+                  pointerEvents: "none",
+                },
+              },
+            }}
           />
         </div>
       </DialogContent>
@@ -154,7 +208,7 @@ const DialogTeacherContainer: React.FC<DialogTeacherContainerProps> = ({
           <Button autoFocus color="inherit" variant="outlined" onClick={handleClose} sx={{ minWidth: 96 }}>
             Huỷ
           </Button>
-          <Button autoFocus onClick={handleClickOk} sx={{ minWidth: 96 }}>
+          <Button autoFocus onClick={handleClickOk} sx={{ minWidth: 96 }} disabled={isDisabledOkButton}>
             Xác nhận
           </Button>
         </div>

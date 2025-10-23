@@ -1,15 +1,27 @@
 "use client";
-import { FormControlLabel, FormLabel, Radio, RadioGroup, Typography } from "@mui/material";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
+import { FormControlLabel, FormLabel, Radio, RadioGroup, styled, Typography } from "@mui/material";
+import RHFTextField, { RHFTextFieldProps } from "@/shared/ui/form/RHFTextField";
 import { Control, useWatch } from "react-hook-form";
-import { ClassRoom } from "../../classroom-form.schema";
+import { ClassRoom } from "../../../classroom-form.schema";
 import { Controller } from "react-hook-form";
-interface EmployeeQuantityProps {
+interface QuantityPersonFieldProps {
   control: Control<ClassRoom>;
   fieldIndex: number;
 }
-type QuantityType = "unlimit" | "limit";
-const EmployeeQuantity = ({ control, fieldIndex }: EmployeeQuantityProps) => {
+
+const CustomTextField = styled((props: RHFTextFieldProps<ClassRoom>) => <RHFTextField {...props} />)(({ theme }) => ({
+  maxWidth: "60px",
+  marginLeft: "-12px",
+  ".MuiInputBase-input": {
+    padding: "4px 8px",
+  },
+  ".MuiFormHelperText-root": {
+    marginInline: 0,
+    position: "absolute",
+    bottom: "-100%",
+  },
+}));
+const QuantityPersonField = ({ control, fieldIndex }: QuantityPersonFieldProps) => {
   const watchIsUnlimited = useWatch({ control, name: `classRoomSessions.${fieldIndex}.isUnlimited` });
   return (
     <div>
@@ -33,6 +45,7 @@ const EmployeeQuantity = ({ control, fieldIndex }: EmployeeQuantityProps) => {
             />
           )}
         />
+
         <div className="flex items-center whitespace-nowrap gap-1">
           <Controller
             control={control}
@@ -52,18 +65,17 @@ const EmployeeQuantity = ({ control, fieldIndex }: EmployeeQuantityProps) => {
               />
             )}
           />
-          <RHFTextField
+          <CustomTextField
             name={`classRoomSessions.${fieldIndex}.limitPerson`}
             control={control}
-            placeholder="Số lượng"
+            // placeholder="Số lượng"
             type="number"
             disabled={watchIsUnlimited}
-            className="max-w-30"
           />
-          <Typography>học viên</Typography>
+          <Typography sx={{ fontSize: "0.875rem", ml: 1 }}>học viên</Typography>
         </div>
       </RadioGroup>
     </div>
   );
 };
-export default EmployeeQuantity;
+export default QuantityPersonField;
