@@ -12,18 +12,22 @@ import {
   CircularProgress,
   Box,
 } from "@mui/material";
-import {
-  useCreateBranch,
-  useUpdateBranch,
-  useCheckBranchName,
-} from "../hooks/useBranches";
-import { Branch, BranchFormData } from "../types";
+import { useCreateBranchMutation, useUpdateBranchMutation } from "../operations/mutation";
+import { branchRepository } from "@/repository/branch";
+import type { BranchDto } from "@/types/dto/branches";
+import useNotifications from "@/hooks/useNotifications/useNotifications";
+
+interface BranchFormData {
+  name: string;
+  organization_id: string;
+}
 
 interface BranchDialogProps {
   open: boolean;
   onClose: () => void;
-  branch?: Branch | null;
+  branch?: BranchDto | null;
   organizationId: string;
+  onSuccess?: () => void;
 }
 
 export function BranchDialog({
@@ -31,8 +35,10 @@ export function BranchDialog({
   onClose,
   branch,
   organizationId,
+  onSuccess,
 }: BranchDialogProps) {
   const isEditMode = !!branch;
+  const notifications = useNotifications();
 
   const [formData, setFormData] = useState<BranchFormData>({
     name: "",
@@ -42,10 +48,10 @@ export function BranchDialog({
   const [errors, setErrors] = useState<
     Partial<Record<keyof BranchFormData, string>>
   >({});
+  const [isCheckingName, setIsCheckingName] = useState(false);
 
-  const createMutation = useCreateBranch();
-  const updateMutation = useUpdateBranch();
-  const checkNameMutation = useCheckBranchName();
+  const { mutateAsync: createBranch, isPending: isCreating } = useCreateBranchMutation();
+  const { mutateAsync: updateBranch, isPending: isUpdating } = useUpdateBranchMutation();
 
   useEffect(() => {
     if (open) {
@@ -78,16 +84,19 @@ export function BranchDialog({
       newErrors.name = "Tên chi nhánh không được vượt quá 100 ký tự";
     } else {
       try {
-        const nameExists = await checkNameMutation.mutateAsync({
-          name: formData.name,
-          organizationId: formData.organization_id,
-          excludeId: branch?.id,
-        });
+        setIsCheckingName(true);
+        const nameExists = await branchRepository.checkNameExists(
+          formData.name,
+          formData.organization_id,
+          branch?.id
+        );
         if (nameExists) {
           newErrors.name = "Tên chi nhánh đã tồn tại";
         }
       } catch (error) {
         console.error("Failed to check name:", error);
+      } finally {
+        setIsCheckingName(false);
       }
     }
 
@@ -101,32 +110,39 @@ export function BranchDialog({
 
     try {
       if (isEditMode && branch) {
-        await updateMutation.mutateAsync({
+        await updateBranch({
           id: branch.id,
-          data: {
-            name: formData.name,
-          },
+          name: formData.name,
+        });
+        notifications.show("Cập nhật chi nhánh thành công!", {
+          severity: "success",
+          autoHideDuration: 3000,
         });
       } else {
-        await createMutation.mutateAsync({
+        await createBranch({
           name: formData.name,
           organization_id: formData.organization_id,
         });
+        notifications.show("Tạo chi nhánh thành công!", {
+          severity: "success",
+          autoHideDuration: 3000,
+        });
       }
+      onSuccess?.();
       onClose();
     } catch (error: any) {
       console.error("Failed to save branch:", error);
-      setErrors({
-        name: error.message || "Có lỗi xảy ra khi lưu chi nhánh",
-      });
+      notifications.show(
+        error.message || "Có lỗi xảy ra khi lưu chi nhánh",
+        {
+          severity: "error",
+          autoHideDuration: 5000,
+        }
+      );
     }
   };
 
-  const isLoading =
-    createMutation.isPending ||
-    updateMutation.isPending ||
-    checkNameMutation.isPending;
-
+  const isLoading = isCreating || isUpdating || isCheckingName;
   const isFormValid = formData.name.trim();
 
   return (
@@ -147,14 +163,6 @@ export function BranchDialog({
             disabled={isLoading}
             inputProps={{ maxLength: 100 }}
           />
-
-          {(createMutation.isError || updateMutation.isError) && (
-            <Alert severity="error">
-              {createMutation.error?.message ||
-                updateMutation.error?.message ||
-                "Có lỗi xảy ra khi lưu chi nhánh"}
-            </Alert>
-          )}
         </Box>
       </DialogContent>
       <DialogActions>

@@ -17,18 +17,26 @@ import {
   MenuItem,
 } from "@mui/material";
 import {
-  useCreateDepartment,
-  useUpdateDepartment,
-  useCheckDepartmentName,
-  useBranches,
-} from "../hooks/useDepartments";
-import { Department, DepartmentFormData } from "../types";
+  useCreateDepartmentMutation,
+  useUpdateDepartmentMutation,
+} from "../operations/mutation";
+import { useGetBranchesForDepartmentQuery } from "../operations/query";
+import type { DepartmentDto } from "@/types/dto/departments";
+import { departmentRepository } from "@/repository";
+import useNotifications from "@/hooks/useNotifications/useNotifications";
+
+interface DepartmentFormData {
+  name: string;
+  organization_id: string;
+  parent_id: string | null;
+}
 
 interface DepartmentDialogProps {
   open: boolean;
   onClose: () => void;
-  department?: Department | null;
+  department?: DepartmentDto | null;
   organizationId: string;
+  onSuccess?: () => void;
 }
 
 export function DepartmentDialog({
@@ -36,8 +44,10 @@ export function DepartmentDialog({
   onClose,
   department,
   organizationId,
+  onSuccess,
 }: DepartmentDialogProps) {
   const isEditMode = !!department;
+  const notifications = useNotifications();
 
   const [formData, setFormData] = useState<DepartmentFormData>({
     name: "",
@@ -49,10 +59,14 @@ export function DepartmentDialog({
     Partial<Record<keyof DepartmentFormData, string>>
   >({});
 
-  const createMutation = useCreateDepartment();
-  const updateMutation = useUpdateDepartment();
-  const checkNameMutation = useCheckDepartmentName();
-  const { data: branches, isLoading: branchesLoading } = useBranches(organizationId);
+  const { mutateAsync: createDepartment, isPending: isCreating } =
+    useCreateDepartmentMutation();
+  const { mutateAsync: updateDepartment, isPending: isUpdating } =
+    useUpdateDepartmentMutation();
+  const { data: branchesData, isLoading: branchesLoading } =
+    useGetBranchesForDepartmentQuery(organizationId);
+
+  const branches = branchesData?.data || [];
 
   useEffect(() => {
     if (open) {
@@ -87,12 +101,12 @@ export function DepartmentDialog({
       newErrors.name = "Tên phòng ban không được vượt quá 100 ký tự";
     } else {
       try {
-        const nameExists = await checkNameMutation.mutateAsync({
-          name: formData.name,
-          organizationId: formData.organization_id,
-          branchId: formData.parent_id,
-          excludeId: department?.id,
-        });
+        const nameExists = await departmentRepository.checkNameExists(
+          formData.name,
+          formData.organization_id,
+          formData.parent_id,
+          department?.id
+        );
         if (nameExists) {
           newErrors.name = "Tên phòng ban đã tồn tại trong chi nhánh này";
         }
@@ -111,35 +125,39 @@ export function DepartmentDialog({
 
     try {
       if (isEditMode && department) {
-        await updateMutation.mutateAsync({
+        await updateDepartment({
           id: department.id,
-          data: {
-            name: formData.name,
-            parent_id: formData.parent_id,
-          },
+          name: formData.name,
+          parent_id: formData.parent_id || undefined,
+        });
+        notifications.show("Cập nhật phòng ban thành công!", {
+          severity: "success",
         });
       } else {
-        await createMutation.mutateAsync({
+        await createDepartment({
           name: formData.name,
           organization_id: formData.organization_id,
-          parent_id: formData.parent_id,
-          type: "department",
+          parent_id: formData.parent_id || undefined,
+        });
+        notifications.show("Tạo phòng ban thành công!", {
+          severity: "success",
         });
       }
+      onSuccess?.();
       onClose();
     } catch (error: any) {
       console.error("Failed to save department:", error);
+      notifications.show(
+        error.message || "Có lỗi xảy ra khi lưu phòng ban",
+        { severity: "error" }
+      );
       setErrors({
         name: error.message || "Có lỗi xảy ra khi lưu phòng ban",
       });
     }
   };
 
-  const isLoading =
-    createMutation.isPending ||
-    updateMutation.isPending ||
-    checkNameMutation.isPending ||
-    branchesLoading;
+  const isLoading = isCreating || isUpdating || branchesLoading;
 
   const isFormValid = formData.name.trim();
 
@@ -173,21 +191,13 @@ export function DepartmentDialog({
               <MenuItem value="">
                 <em>Không thuộc chi nhánh nào</em>
               </MenuItem>
-              {branches?.map((branch) => (
+              {branches.map((branch) => (
                 <MenuItem key={branch.id} value={branch.id}>
                   {branch.name}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-
-          {(createMutation.isError || updateMutation.isError) && (
-            <Alert severity="error">
-              {createMutation.error?.message ||
-                updateMutation.error?.message ||
-                "Có lỗi xảy ra khi lưu phòng ban"}
-            </Alert>
-          )}
         </Box>
       </DialogContent>
       <DialogActions>

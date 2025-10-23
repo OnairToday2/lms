@@ -1,29 +1,15 @@
 import { createClient } from "@/services/supabase/client";
-import { Tables, TablesInsert, TablesUpdate } from "@/types/supabase.types";
-
-type Branch = Tables<"organization_units">;
-type BranchInsert = TablesInsert<"organization_units">;
-type BranchUpdate = TablesUpdate<"organization_units">;
-
-export interface BranchFilters {
-  search?: string;
-  organizationId?: string;
-}
-
-export interface BranchListResult {
-  data: Branch[];
-  count: number;
-}
+import type { BranchDto, GetBranchesParams, CreateBranchDto, UpdateBranchDto } from "@/types/dto/branches";
+import type { PaginatedResult } from "@/types/dto/pagination.dto";
 
 export const branchRepository = {
   /**
    * Get list of branches with optional filters and pagination
    */
   async getList(
-    filters?: BranchFilters,
-    page = 1,
-    limit = 10
-  ): Promise<BranchListResult> {
+    params?: GetBranchesParams
+  ): Promise<PaginatedResult<BranchDto>> {
+    const { page = 0, limit = 10, search, organizationId } = params || {};
     const supabase = createClient();
     let query = supabase
       .from("organization_units")
@@ -32,34 +18,37 @@ export const branchRepository = {
       .order("created_at", { ascending: false });
 
     // Apply organization filter
-    if (filters?.organizationId) {
-      query = query.eq("organization_id", filters.organizationId);
+    if (organizationId) {
+      query = query.eq("organization_id", organizationId);
     }
 
     // Apply search filter (name, case-insensitive, accent-sensitive)
-    if (filters?.search) {
-      query = query.ilike("name", `%${filters.search}%`);
+    if (search) {
+      query = query.ilike("name", `%${search}%`);
     }
 
     // Apply pagination
-    const from = (page - 1) * limit;
+    const from = page * limit;
     const to = from + limit - 1;
     query = query.range(from, to);
 
     const { data, error, count } = await query;
 
-    if (error) throw error;
+    if (countError) throw countError;
 
+    // Return plain objects to avoid Next.js serialization issues
     return {
-      data: data || [],
-      count: count || 0,
+      data: (data || []).map(item => ({ ...item })) as BranchDto[],
+      total: count ?? 0,
+      page,
+      limit,
     };
   },
 
   /**
    * Get a single branch by ID
    */
-  async getById(id: string): Promise<Branch | null> {
+  async getById(id: string): Promise<BranchDto> {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("organization_units")
@@ -69,40 +58,43 @@ export const branchRepository = {
       .single();
 
     if (error) throw error;
-    return data;
+    // Return plain object to avoid Next.js serialization issues
+    return { ...data } as BranchDto;
   },
 
   /**
    * Create a new branch
    */
-  async create(branch: BranchInsert): Promise<Branch> {
+  async create(branch: CreateBranchDto): Promise<BranchDto> {
     const supabase = createClient();
 
     const { data, error } = await supabase
       .from("organization_units")
-      .insert({ ...branch, type: "branch", parent_id: null })
+      .insert({ ...branch, type: "branch" })
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    // Return plain object to avoid Next.js serialization issues
+    return { ...data } as BranchDto;
   },
 
   /**
    * Update an existing branch
    */
-  async update(id: string, branch: BranchUpdate): Promise<Branch> {
+  async update(payload: UpdateBranchDto): Promise<BranchDto> {
     const supabase = createClient();
+    const { id, ...updateData } = payload;
     const { data, error } = await supabase
       .from("organization_units")
-      .update(branch)
+      .update(updateData)
       .eq("id", id)
       .eq("type", "branch")
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return data as BranchDto;
   },
 
   /**
@@ -165,7 +157,7 @@ export const branchRepository = {
   /**
    * Bulk import branches
    */
-  async bulkImport(branches: BranchInsert[]): Promise<Branch[]> {
+  async bulkImport(branches: CreateBranchDto[]): Promise<BranchDto[]> {
     const supabase = createClient();
 
     // Set type and parent_id for all branches
@@ -181,6 +173,6 @@ export const branchRepository = {
       .select();
 
     if (error) throw error;
-    return data;
+    return data as BranchDto[];
   },
 };

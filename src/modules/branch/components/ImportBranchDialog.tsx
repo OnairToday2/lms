@@ -16,25 +16,30 @@ import {
   ListItemText,
 } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
-import { useImportBranches } from "../hooks/useBranches";
-import { ImportBranchRow, ImportResult } from "../types";
+import { useImportBranchesMutation } from "../operations/mutation";
+import type { BranchImportRow } from "@/types/dto/branches";
+import useNotifications from "@/hooks/useNotifications/useNotifications";
 
 interface ImportBranchDialogProps {
   open: boolean;
   onClose: () => void;
   organizationId: string;
+  onSuccess?: () => void;
 }
 
 export function ImportBranchDialog({
   open,
   onClose,
   organizationId,
+  onSuccess,
 }: ImportBranchDialogProps) {
+  const notifications = useNotifications();
   const [file, setFile] = useState<File | null>(null);
-  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importErrors, setImportErrors] = useState<string[]>([]);
+  const [importSuccess, setImportSuccess] = useState(false);
   const [error, setError] = useState<string>("");
 
-  const importMutation = useImportBranches();
+  const { mutateAsync: importBranches, isPending } = useImportBranchesMutation();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -57,10 +62,11 @@ export function ImportBranchDialog({
 
     setFile(selectedFile);
     setError("");
-    setImportResult(null);
+    setImportErrors([]);
+    setImportSuccess(false);
   };
 
-  const parseFile = async (file: File): Promise<ImportBranchRow[]> => {
+  const parseFile = async (file: File): Promise<BranchImportRow[]> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
 
@@ -90,7 +96,7 @@ export function ImportBranchDialog({
           }
 
           // Parse data rows
-          const rows: ImportBranchRow[] = [];
+          const rows: BranchImportRow[] = [];
           for (let i = 1; i < lines.length; i++) {
             const values = lines[i].split(",").map((v) => v.trim().replace(/"/g, ""));
             if (values[nameIndex]) {
@@ -121,7 +127,8 @@ export function ImportBranchDialog({
 
     try {
       setError("");
-      setImportResult(null);
+      setImportErrors([]);
+      setImportSuccess(false);
 
       // Parse file
       const rows = await parseFile(file);
@@ -132,29 +139,43 @@ export function ImportBranchDialog({
       }
 
       // Import branches
-      const result = await importMutation.mutateAsync({
-        rows,
+      const result = await importBranches({
+        branches: rows,
         organizationId,
       });
 
-      setImportResult(result);
-
-      // If successful, close dialog after a short delay
       if (result.success) {
+        setImportSuccess(true);
+        notifications.show(`Import thành công ${result.imported} chi nhánh!`, {
+          severity: "success",
+          autoHideDuration: 3000,
+        });
+        onSuccess?.();
         setTimeout(() => {
           onClose();
           handleReset();
         }, 2000);
+      } else {
+        setImportErrors(result.errors);
+        notifications.show("Import thất bại. Vui lòng kiểm tra lỗi.", {
+          severity: "error",
+          autoHideDuration: 5000,
+        });
       }
     } catch (error: any) {
       setError(error.message || "Có lỗi xảy ra khi import");
+      notifications.show(error.message || "Có lỗi xảy ra khi import", {
+        severity: "error",
+        autoHideDuration: 5000,
+      });
     }
   };
 
   const handleReset = () => {
     setFile(null);
     setError("");
-    setImportResult(null);
+    setImportErrors([]);
+    setImportSuccess(false);
   };
 
   const handleClose = () => {
@@ -223,46 +244,41 @@ export function ImportBranchDialog({
           {error && <Alert severity="error">{error}</Alert>}
 
           {/* Import result */}
-          {importResult && (
-            <>
-              {importResult.success ? (
-                <Alert severity="success">
-                  Đã import thành công {importResult.created} chi nhánh
-                </Alert>
-              ) : (
-                <Alert severity="error">
-                  <Typography variant="body2" gutterBottom>
-                    <strong>Import thất bại.</strong> Có {importResult.errors.length}{" "}
-                    lỗi:
-                  </Typography>
-                  <List dense>
-                    {importResult.errors.slice(0, 10).map((err, index) => (
-                      <ListItem key={index} sx={{ py: 0 }}>
-                        <ListItemText
-                          primary={`Dòng ${err.row}: ${err.message}`}
-                          primaryTypographyProps={{ variant: "body2" }}
-                        />
-                      </ListItem>
-                    ))}
-                    {importResult.errors.length > 10 && (
-                      <ListItem sx={{ py: 0 }}>
-                        <ListItemText
-                          primary={`... và ${importResult.errors.length - 10} lỗi khác`}
-                          primaryTypographyProps={{
-                            variant: "body2",
-                            color: "text.secondary",
-                          }}
-                        />
-                      </ListItem>
-                    )}
-                  </List>
-                </Alert>
-              )}
-            </>
+          {importSuccess && (
+            <Alert severity="success">Import thành công!</Alert>
+          )}
+
+          {importErrors.length > 0 && (
+            <Alert severity="error">
+              <Typography variant="body2" gutterBottom>
+                <strong>Import thất bại.</strong> Có {importErrors.length} lỗi:
+              </Typography>
+              <List dense>
+                {importErrors.slice(0, 10).map((err, index) => (
+                  <ListItem key={index} sx={{ py: 0 }}>
+                    <ListItemText
+                      primary={err}
+                      primaryTypographyProps={{ variant: "body2" }}
+                    />
+                  </ListItem>
+                ))}
+                {importErrors.length > 10 && (
+                  <ListItem sx={{ py: 0 }}>
+                    <ListItemText
+                      primary={`... và ${importErrors.length - 10} lỗi khác`}
+                      primaryTypographyProps={{
+                        variant: "body2",
+                        color: "text.secondary",
+                      }}
+                    />
+                  </ListItem>
+                )}
+              </List>
+            </Alert>
           )}
 
           {/* Loading indicator */}
-          {importMutation.isPending && (
+          {isPending && (
             <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
               <CircularProgress />
             </Box>
@@ -270,14 +286,14 @@ export function ImportBranchDialog({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} disabled={importMutation.isPending}>
-          {importResult?.success ? "Đóng" : "Huỷ"}
+        <Button onClick={handleClose} disabled={isPending}>
+          {importSuccess ? "Đóng" : "Huỷ"}
         </Button>
         <Button
           onClick={handleImport}
           variant="contained"
-          disabled={!file || importMutation.isPending || !!importResult?.success}
-          startIcon={importMutation.isPending && <CircularProgress size={20} />}
+          disabled={!file || isPending || importSuccess}
+          startIcon={isPending && <CircularProgress size={20} />}
         >
           Import
         </Button>

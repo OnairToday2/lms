@@ -1,30 +1,16 @@
 import { createClient } from "@/services/supabase/client";
-import { Tables, TablesInsert, TablesUpdate } from "@/types/supabase.types";
-
-type Department = Tables<"organization_units">;
-type DepartmentInsert = TablesInsert<"organization_units">;
-type DepartmentUpdate = TablesUpdate<"organization_units">;
-
-export interface DepartmentFilters {
-  search?: string;
-  organizationId?: string;
-  branchId?: string;
-}
-
-export interface DepartmentListResult {
-  data: Department[];
-  count: number;
-}
+import type { DepartmentDto, GetDepartmentsParams, CreateDepartmentDto, UpdateDepartmentDto } from "@/types/dto/departments";
+import type { BranchDto } from "@/types/dto/branches";
+import type { PaginatedResult } from "@/types/dto/pagination.dto";
 
 export const departmentRepository = {
   /**
    * Get list of departments with optional filters and pagination
    */
   async getList(
-    filters?: DepartmentFilters,
-    page = 1,
-    limit = 10
-  ): Promise<DepartmentListResult> {
+    params?: GetDepartmentsParams
+  ): Promise<PaginatedResult<DepartmentDto>> {
+    const { page = 0, limit = 10, search, organizationId, branchId } = params || {};
     const supabase = createClient();
     let query = supabase
       .from("organization_units")
@@ -33,39 +19,42 @@ export const departmentRepository = {
       .order("created_at", { ascending: false });
 
     // Apply organization filter
-    if (filters?.organizationId) {
-      query = query.eq("organization_id", filters.organizationId);
+    if (organizationId) {
+      query = query.eq("organization_id", organizationId);
     }
 
     // Apply branch filter (parent_id)
-    if (filters?.branchId) {
-      query = query.eq("parent_id", filters.branchId);
+    if (branchId) {
+      query = query.eq("parent_id", branchId);
     }
 
     // Apply search filter (name, case-insensitive)
-    if (filters?.search) {
-      query = query.ilike("name", `%${filters.search}%`);
+    if (search) {
+      query = query.ilike("name", `%${search}%`);
     }
 
     // Apply pagination
-    const from = (page - 1) * limit;
+    const from = page * limit;
     const to = from + limit - 1;
     query = query.range(from, to);
 
     const { data, error, count } = await query;
 
-    if (error) throw error;
+    if (countError) throw countError;
 
+    // Return plain objects to avoid Next.js serialization issues
     return {
-      data: data || [],
-      count: count || 0,
+      data: (data || []).map(item => ({ ...item })) as DepartmentDto[],
+      total: count ?? 0,
+      page,
+      limit,
     };
   },
 
   /**
    * Get a single department by ID
    */
-  async getById(id: string): Promise<Department | null> {
+  async getById(id: string): Promise<DepartmentDto> {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("organization_units")
@@ -75,13 +64,14 @@ export const departmentRepository = {
       .single();
 
     if (error) throw error;
-    return data;
+    // Return plain object to avoid Next.js serialization issues
+    return { ...data } as DepartmentDto;
   },
 
   /**
    * Create a new department
    */
-  async create(department: DepartmentInsert): Promise<Department> {
+  async create(department: CreateDepartmentDto): Promise<DepartmentDto> {
     const supabase = createClient();
 
     const { data, error } = await supabase
@@ -91,24 +81,26 @@ export const departmentRepository = {
       .single();
 
     if (error) throw error;
-    return data;
+    // Return plain object to avoid Next.js serialization issues
+    return { ...data } as DepartmentDto;
   },
 
   /**
    * Update an existing department
    */
-  async update(id: string, department: DepartmentUpdate): Promise<Department> {
+  async update(payload: UpdateDepartmentDto): Promise<DepartmentDto> {
     const supabase = createClient();
+    const { id, ...updateData } = payload;
     const { data, error } = await supabase
       .from("organization_units")
-      .update(department)
+      .update(updateData)
       .eq("id", id)
       .eq("type", "department")
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return data as DepartmentDto;
   },
 
   /**
@@ -175,9 +167,9 @@ export const departmentRepository = {
   },
 
   /**
-   * Get all branches for selection
+   * Get branches for department dropdown
    */
-  async getBranches(organizationId: string): Promise<Department[]> {
+  async getBranches(organizationId: string): Promise<BranchDto[]> {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("organization_units")
@@ -187,13 +179,14 @@ export const departmentRepository = {
       .order("name", { ascending: true });
 
     if (error) throw error;
-    return data || [];
+    // Return plain objects to avoid Next.js serialization issues
+    return (data || []).map(item => ({ ...item })) as BranchDto[];
   },
 
   /**
    * Bulk import departments
    */
-  async bulkImport(departments: DepartmentInsert[]): Promise<Department[]> {
+  async bulkImport(departments: CreateDepartmentDto[]): Promise<DepartmentDto[]> {
     const supabase = createClient();
 
     // Set type to department for all
@@ -208,6 +201,6 @@ export const departmentRepository = {
       .select();
 
     if (error) throw error;
-    return data;
+    return data as DepartmentDto[];
   },
 };
