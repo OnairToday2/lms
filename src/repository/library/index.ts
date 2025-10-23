@@ -125,3 +125,41 @@ export async function renameResource(resourceId: string, newName: string): Promi
   }
 }
 
+export async function createFileResource(data: {
+  name: string;
+  library_id: string;
+  parent_id: string | null;
+  organization_id: string;
+  created_by: string;
+  path: string;
+  size: number;
+  mime_type: string;
+  extension: string;
+  thumbnail_url: string | null;
+}): Promise<Resource> {
+  const supabase = await createSVClient();
+
+  const { data: file, error } = await supabase
+    .from("resources")
+    .insert({
+      name: data.name,
+      kind: "file",
+      library_id: data.library_id,
+      parent_id: data.parent_id,
+      organization_id: data.organization_id,
+      created_by: data.created_by,
+      path: data.path,
+      size: data.size,
+      mime_type: data.mime_type,
+      extension: data.extension,
+      thumbnail_url: data.thumbnail_url,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to create file resource: ${error.message}`);
+  }
+
+  return file;
+}

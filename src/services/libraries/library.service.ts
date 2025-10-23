@@ -68,3 +68,40 @@ export async function renameResource(resourceId: string, newName: string): Promi
   return libraryRepository.renameResource(resourceId, newName);
 }
 
+export async function createFileResource(
+  name: string,
+  libraryId: string,
+  parentId: string | null,
+  path: string,
+  size: number,
+  mimeType: string,
+  extension: string,
+  thumbnailUrl: string | null
+): Promise<Resource> {
+  const supabase = await createSVClient();
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error("User not authenticated");
+  }
+
+  const employee = await employeesRepository.getEmployeeByUserId(user.id);
+
+  if (!employee.organization_id) {
+    throw new Error("Employee does not belong to an organization");
+  }
+
+  return libraryRepository.createFileResource({
+    name,
+    library_id: libraryId,
+    parent_id: parentId,
+    organization_id: employee.organization_id,
+    created_by: employee.id,
+    path,
+    size,
+    mime_type: mimeType,
+    extension,
+    thumbnail_url: thumbnailUrl,
+  });
+}

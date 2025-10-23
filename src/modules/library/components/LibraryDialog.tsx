@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -16,9 +16,11 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  LinearProgress,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { useLibraryStore } from "../store/libraryProvider";
 import { Resource } from "../types";
 import { LibraryBreadcrumbs } from "./LibraryBreadcrumbs";
@@ -55,6 +57,8 @@ export function LibraryDialog() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedResourceForAction, setSelectedResourceForAction] = useState<Resource | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -229,6 +233,84 @@ export function LibraryDialog() {
     }
   };
 
+  const handleUploadClick = () => {
+    handleActionMenuClose();
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !config?.libraryId) return;
+
+    setUploadProgress(true);
+    setError(null);
+
+    try {
+      const presignedResponse = await fetch("/api/libraries/upload/presigned-url", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+        }),
+      });
+
+      if (!presignedResponse.ok) {
+        const errorData = await presignedResponse.json();
+        throw new Error(errorData.error || "Failed to get presigned URL");
+      }
+
+      const { presignedUrl, publicUrl, thumbnailUrl } = await presignedResponse.json();
+
+      const uploadResponse = await fetch(presignedUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type,
+        },
+        body: file,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload file to S3");
+      }
+
+      const fileExtension = file.name.split('.').pop() || '';
+      const createResourceResponse = await fetch("/api/libraries/resources", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: file.name,
+          libraryId: config.libraryId,
+          parentId: currentFolderId,
+          path: publicUrl,
+          size: file.size,
+          mimeType: file.type,
+          extension: fileExtension,
+          thumbnailUrl: thumbnailUrl,
+        }),
+      });
+
+      if (!createResourceResponse.ok) {
+        const errorData = await createResourceResponse.json();
+        throw new Error(errorData.error || "Failed to create resource record");
+      }
+
+      await refreshResources();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload file");
+    } finally {
+      setUploadProgress(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   if (!open || !config) return null;
 
   return (
@@ -253,6 +335,15 @@ export function LibraryDialog() {
           <Box sx={{ mb: 2 }}>
             <LibraryBreadcrumbs folderPath={folderPath} onNavigate={handleBreadcrumbClick} />
           </Box>
+
+          {uploadProgress && (
+            <Box sx={{ mb: 2 }}>
+              <LinearProgress />
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                Đang upload...
+              </Typography>
+            </Box>
+          )}
 
         {loading ? (
           <Box sx={{ py: 8, textAlign: "center" }}>
@@ -323,7 +414,20 @@ export function LibraryDialog() {
           </ListItemIcon>
           <ListItemText>Tạo thư mục mới</ListItemText>
         </MenuItem>
+        <MenuItem onClick={handleUploadClick}>
+          <ListItemIcon>
+            <UploadFileIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Tải lên từ máy tính</ListItemText>
+        </MenuItem>
       </Menu>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        style={{ display: "none" }}
+        onChange={handleFileSelect}
+      />
 
       <CreateFolderDialog
         open={createFolderOpen}

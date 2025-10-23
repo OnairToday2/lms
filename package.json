@@ -11,6 +11,8 @@
     "gen:types:local": "supabase gen types typescript --db-url postgresql://postgres:postgres@localhost:54322/postgres > src/types/supabase.types.ts --debug"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.914.0",
+    "@aws-sdk/s3-request-presigner": "^3.914.0",
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
