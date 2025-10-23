@@ -22,9 +22,6 @@ const FAQsFields: React.FC<FAQsFieldsProps> = ({ className }) => {
     control,
     name: "faqs",
     keyName: "_faqId",
-    rules: {
-      minLength: 1,
-    },
   });
 
   const handleAddFaqItem = useCallback(async () => {
@@ -36,13 +33,6 @@ const FAQsFields: React.FC<FAQsFieldsProps> = ({ className }) => {
     }
     append({ answer: "", question: "" });
   }, [faqFields]);
-
-  useLayoutEffect(() => {
-    append({ answer: "", question: "" });
-    return () => {
-      setValue("faqs", []);
-    };
-  }, []);
 
   return (
     <div className={className}>
@@ -59,7 +49,12 @@ const FAQsFields: React.FC<FAQsFieldsProps> = ({ className }) => {
             <div className="faq-field" key={field._faqId}>
               <div className="flex justify-between items-center mb-2">
                 <Typography className="font-bold">Câu {_index + 1}</Typography>
-                <IconButton size="small" className="p-0 bg-transparent" onClick={() => remove(_index)}>
+                <IconButton
+                  size="small"
+                  className="p-0 bg-transparent"
+                  disabled={_index === 0}
+                  {...(_index !== 0 ? { onClick: () => remove(_index) } : undefined)}
+                >
                   <TrashIcon1 className="w-4 h-4" />
                 </IconButton>
               </div>

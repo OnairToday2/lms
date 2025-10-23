@@ -8,7 +8,7 @@ import { useCRUDClassRoom } from "@/modules/class-room-management/hooks/useCRUDC
 import { useRef } from "react";
 import { useToast } from "@/shared/store/toast-snackbar/toast-snackbar-context";
 
-const CreateClassRoomPage = () => {
+const EditClassRoomPage = () => {
   const showMessage = useToast((state) => state.showSnackbar);
   const formClassRoomRef = useRef<FormManageClassRoomRef>(null);
   const { onCreate, isLoading } = useCRUDClassRoom();
@@ -39,9 +39,9 @@ const CreateClassRoomPage = () => {
       ]}
     >
       <div className="max-w-[1200px]">
-        <FormManageClassRoom onSubmit={handleCreateClassRoom} ref={formClassRoomRef} isLoading={isLoading} />
+        <FormManageClassRoom onSubmit={handleCreateClassRoom} ref={formClassRoomRef} />
       </div>
     </PageContainer>
   );
 };
-export default CreateClassRoomPage;
+export default EditClassRoomPage;

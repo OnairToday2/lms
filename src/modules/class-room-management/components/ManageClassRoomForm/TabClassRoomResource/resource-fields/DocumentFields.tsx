@@ -38,9 +38,15 @@ const DocumentFields: React.FC<DocumentFieldsProps> = ({ className }) => {
             <div className="faq-field" key={field._docs}>
               <div className="flex justify-between items-center mb-2">
                 <Typography className="font-bold">Câu {_index + 1}</Typography>
-                <IconButton size="small" className="p-0 bg-transparent" onClick={() => remove(_index)}>
-                  <TrashIcon1 className="w-4 h-4" />
-                </IconButton>
+                {_index !== 0 ? (
+                  <IconButton
+                    size="small"
+                    className="p-0 bg-transparent"
+                    {...(_index !== 0 ? { onClick: () => remove(_index) } : undefined)}
+                  >
+                    <TrashIcon1 className="w-4 h-4" />
+                  </IconButton>
+                ) : null}
               </div>
             </div>
           ))}

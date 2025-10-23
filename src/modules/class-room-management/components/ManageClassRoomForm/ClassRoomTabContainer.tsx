@@ -10,6 +10,7 @@ import { tabClasses } from "@mui/material";
 import { cn } from "@/utils";
 import { CheckCircleIcon } from "@/shared/assets/icons";
 import { TAB_KEYS_CLASS_ROOM } from "./ClassRoomFormContainer";
+import { useTransition } from "react";
 type ClassRoomTabStatus = "idle" | "invalid" | "valid";
 type TabKeyType = keyof typeof TAB_KEYS_CLASS_ROOM;
 type ClassRoomTabItem = {
@@ -34,24 +35,30 @@ const ClassRoomTabContainer: React.FC<ClassRoomTabContainerProps> = ({
   checkStatusTab,
 }) => {
   const [currentTab, setCurrentTab] = React.useState<TabKeyType | undefined>(() => items?.[0]?.tabKey);
-
+  const [isGotoNextTab, startGotoNextTab] = useTransition();
   const handleChange = React.useCallback((event: React.SyntheticEvent, newValue: TabKeyType) => {
     setCurrentTab(newValue);
   }, []);
 
-  const goNextOrBackStep = async (action: "next" | "back") => {
-    const isCurrentTabValid = await checkStatusTab("clsTab-information");
+  const goNextOrBackStep = (action: "next" | "back") => () => {
+    if (!currentTab) {
+      console.error("Current tab is undefined");
+      return;
+    }
+    startGotoNextTab(async () => {
+      const isCurrentTabValid = await checkStatusTab(currentTab);
 
-    if (!isCurrentTabValid) return;
-    if (currentTab === "clsTab-information") {
-      setCurrentTab(action === "next" ? "clsTab-session" : "clsTab-information");
-    }
-    if (currentTab === "clsTab-session") {
-      setCurrentTab(action === "next" ? "clsTab-resource" : "clsTab-information");
-    }
-    if (currentTab === "clsTab-resource") {
-      setCurrentTab(action === "next" ? "clsTab-setting" : "clsTab-session");
-    }
+      if (!isCurrentTabValid) return;
+      if (currentTab === "clsTab-information") {
+        setCurrentTab(action === "next" ? "clsTab-session" : "clsTab-information");
+      }
+      if (currentTab === "clsTab-session") {
+        setCurrentTab(action === "next" ? "clsTab-resource" : "clsTab-information");
+      }
+      if (currentTab === "clsTab-resource") {
+        setCurrentTab(action === "next" ? "clsTab-setting" : "clsTab-session");
+      }
+    });
   };
 
   return (
@@ -79,8 +86,8 @@ const ClassRoomTabContainer: React.FC<ClassRoomTabContainerProps> = ({
           <div className="tab-actions">{actions}</div>
         </div>
         <div
-          className={cn("grid grid-cols-2 gap-6", {
-            "grid-cols-2": currentTab !== "clsTab-setting",
+          className={cn("grid gap-6", {
+            "lg:grid-cols-2 grid-cols-1": currentTab !== "clsTab-setting",
             "grid-cols-1": currentTab === "clsTab-setting",
           })}
         >
@@ -92,10 +99,10 @@ const ClassRoomTabContainer: React.FC<ClassRoomTabContainerProps> = ({
             ))}
             <div className={cn({ hidden: currentTab === "clsTab-setting" })}>
               <div className={cn("py-6 flex justify-between")}>
-                <Button variant="outlined" color="inherit" onClick={() => goNextOrBackStep("back")}>
+                <Button variant="outlined" color="inherit" onClick={goNextOrBackStep("back")} disabled={isGotoNextTab}>
                   Quay lại
                 </Button>
-                <Button variant="fill" onClick={() => goNextOrBackStep("next")}>
+                <Button variant="fill" onClick={goNextOrBackStep("next")} disabled={isGotoNextTab}>
                   Tiếp tục
                 </Button>
               </div>

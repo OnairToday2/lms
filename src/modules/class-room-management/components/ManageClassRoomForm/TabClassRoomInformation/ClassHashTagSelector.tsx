@@ -1,4 +1,4 @@
-import { useGetClassHashTagQuery } from "@/modules/class-room-management/hooks/useGetClassField";
+import { useGetClassHashTagQuery } from "@/modules/class-room-management/operation/query";
 import { Control } from "react-hook-form";
 import { ClassRoom } from "../../classroom-form.schema";
 import RHFSelectField from "@/shared/ui/form/RHFSelectField";

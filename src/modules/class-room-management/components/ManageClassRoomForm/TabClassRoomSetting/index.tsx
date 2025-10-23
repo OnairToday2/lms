@@ -19,7 +19,7 @@ const TabClassRoomSetting = () => {
           Thêm học viên <span className="text-red-600">*</span>
         </Typography>
       </div>
-      <StudentsContainer onChange={handleSelect} />
+      <StudentsContainer seletedItems={stulist} onChange={handleSelect} />
     </div>
   );
 };

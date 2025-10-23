@@ -37,12 +37,18 @@ export interface ClassRoomFormContainerProps {
       [sessionIndex: number | string]: EmployeeTeacherTypeItem[];
     },
   ) => void;
+  isLoading?: boolean;
+  action?: "create" | "edit";
+  value?: any;
 }
 
 const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, ClassRoomFormContainerProps>(
-  ({ onSubmit }, ref) => {
+  ({ onSubmit, isLoading, action, value }, ref) => {
     const formSubmitStateRef = React.useRef<boolean>(false);
     const resetStore = useClassRoomStore(({ actions }) => actions.reset);
+    const students = useClassRoomStore(({ state }) => state.studentList);
+    const teachers = useClassRoomStore(({ state }) => state.teacherList);
+
     const methods = useForm<ClassRoom>({
       resolver: zodResolver(classRoomSchema),
       defaultValues: {
@@ -67,8 +73,6 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
         classRoomSessions: [getClassSessionInitData()],
       },
     });
-    const students = useClassRoomStore(({ state }) => state.studentList);
-    const teachers = useClassRoomStore(({ state }) => state.teacherList);
 
     const {
       getValues,
@@ -185,16 +189,32 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
             ]}
             actions={
               <div className="flex items-center gap-2">
-                <IconButton className="border rounded-lg border-gray-400 bg-white" onClick={cancelCreateClassRoom}>
+                <IconButton
+                  className="border rounded-lg border-gray-400 bg-white"
+                  onClick={cancelCreateClassRoom}
+                  disabled={isLoading}
+                >
                   <CloseIcon />
                 </IconButton>
-                <IconButton className="border rounded-lg border-gray-400 bg-white">
+                <IconButton className="border rounded-lg border-gray-400 bg-white" disabled={isLoading}>
                   <EyeIcon />
                 </IconButton>
-                <Button size="large" color="inherit" variant="outlined" className="border-gray-400">
+                <Button
+                  size="large"
+                  color="inherit"
+                  variant="outlined"
+                  className="border-gray-400"
+                  disabled={isLoading}
+                  onClick={triggerForm(handleSubmit(submitForm))}
+                >
                   Lưu nháp
                 </Button>
-                <Button size="large" onClick={triggerForm(handleSubmit(submitForm))}>
+                <Button
+                  size="large"
+                  onClick={triggerForm(handleSubmit(submitForm))}
+                  disabled={isLoading}
+                  loading={isLoading}
+                >
                   Đăng tải
                 </Button>
               </div>

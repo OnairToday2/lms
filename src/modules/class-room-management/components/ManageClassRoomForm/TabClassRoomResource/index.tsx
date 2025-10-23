@@ -8,8 +8,8 @@ import WhiesFields from "./resource-fields/WhiesFields";
 import { FileIcon, HelpIcon, MarkerPinIcon, UsersIcon2 } from "@/shared/assets/icons";
 import React, { useState } from "react";
 import AccordionResourceItem from "./AccordionResourceItem";
-import { useFormContext } from "react-hook-form";
 import BoxIcon from "./BoxIcon";
+import { useClassRoomFormContext } from "../ClassRoomFormContainer";
 
 type ClassResourceKey = keyof Pick<ClassRoom, "faqs" | "forWhom" | "docs" | "whies">;
 type ResourceTypeItem = {
@@ -40,11 +40,44 @@ const RESOURCE_ITEMS: ResourceTypeItem[] = [
     icon: React.createElement(MarkerPinIcon),
   },
 ];
-interface TabClassRoomResourceProps {}
-const TabClassRoomResource: React.FC<TabClassRoomResourceProps> = () => {
-  const [resourceAddingItems, setResourceAddingItems] = useState<ResourceTypeItem[]>([]);
+interface TabClassRoomResourceProps {
+  className?: string;
+}
+const TabClassRoomResource: React.FC<TabClassRoomResourceProps> = ({ className }) => {
+  const { getValues, setValue } = useClassRoomFormContext();
+
+  const [resourceAddingItems, setResourceAddingItems] = useState<ResourceTypeItem[]>(() => {
+    let items: ResourceTypeItem[] = [];
+
+    const recourseSelectedItems = {
+      faqs: getValues("faqs"),
+      forWhom: getValues("forWhom"),
+      docs: getValues("docs"),
+      whies: getValues("whies"),
+    };
+
+    Object.keys(recourseSelectedItems).forEach((key) => {
+      if (recourseSelectedItems[key as keyof typeof recourseSelectedItems].length) {
+        const item = RESOURCE_ITEMS.find((item) => item.key === key);
+        if (item) {
+          items = [...items, item];
+        }
+      }
+    });
+
+    return items;
+  });
   const handleAddSelectingResource = (type: ResourceTypeItem) => {
     setResourceAddingItems((prevResource) => [...prevResource, type]);
+    /**
+     * init First resource field when add
+     */
+    if (type.key === "faqs") {
+      setValue(type.key, [{ answer: "", question: "" }]);
+    }
+    if (type.key === "forWhom" || type.key === "whies") {
+      setValue(type.key, [{ description: "" }]);
+    }
   };
 
   const filterSelectedResource = (rcs: ResourceTypeItem[]) => {
@@ -52,6 +85,10 @@ const TabClassRoomResource: React.FC<TabClassRoomResourceProps> = () => {
   };
   const handleRemoveSelectingResource = (key: ClassResourceKey) => {
     setResourceAddingItems((prevResource) => prevResource.filter((rs) => rs.key !== key));
+    /**
+     * Delete all resource item when remove
+     */
+    setValue(key, []);
   };
   const isFullyResourceTypeSelected = resourceAddingItems.length === RESOURCE_ITEMS.length;
   return (

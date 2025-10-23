@@ -5,10 +5,11 @@ export type EmployeeQueryParams = {
   pageSize?: number;
   excludes?: string[];
   search?: string;
+  organizationUnitIds?: string[];
 };
 
 const getStudents = async (queryParams?: EmployeeQueryParams) => {
-  const { page = 1, pageSize = 20, excludes, search } = queryParams || {};
+  const { page = 1, pageSize = 20, excludes, search, organizationUnitIds } = queryParams || {};
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -25,11 +26,11 @@ const getStudents = async (queryParams?: EmployeeQueryParams) => {
         full_name, 
         gender, 
         avatar, 
-        email,
-        avatar
+        email
       ),
-      employments(
-        organization_units(
+      employments!inner(
+      organization_unit_id,
+        organization_units!inner(
           id,
           name, 
           type
@@ -42,10 +43,12 @@ const getStudents = async (queryParams?: EmployeeQueryParams) => {
     )
     .eq("employee_type", "student");
 
-  const excludeStr = excludes ? excludes.join(",") : "";
+  if (organizationUnitIds?.length) {
+    studentQuery.in("employments.organization_units.id", organizationUnitIds);
+  }
 
-  if (excludeStr) {
-    studentQuery = studentQuery.not("id", "in", `(${excludeStr})`);
+  if (excludes?.length) {
+    studentQuery = studentQuery.not("id", "in", `(${excludes.join(",")})`);
   }
   if (search) {
     studentQuery = studentQuery.ilike("profiles.full_name", `%${search}%`);

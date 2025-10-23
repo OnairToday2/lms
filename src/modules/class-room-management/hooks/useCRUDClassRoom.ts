@@ -1,19 +1,25 @@
 "use client";
 import {
   createAgendasWithSession,
-  CreateAgendasWithSessionPayload,
   createClassRoom,
-  CreateClassRoomSessionsPayload,
   createClassSession,
   createPivotClassRoomAndEmployee,
-  CreatePivotClassRoomAndEmployeePayload,
   createPivotClassRoomAndField,
-  CreatePivotClassRoomAndFieldPayload,
   createPivotClassRoomAndHashTag,
-  CreatePivotClassRoomAndHashTagPayload,
+  createClassRoomMeta,
   createPivotClassSessionAndTeacher,
-  CreatePivotClassSessionAndTeacherPayload,
 } from "@/repository/classRoom";
+
+import type {
+  CreatePivotClassRoomAndEmployeePayload,
+  CreatePivotClassRoomAndFieldPayload,
+  CreatePivotClassRoomAndHashTagPayload,
+  CreatePivotClassSessionAndTeacherPayload,
+  CreateAgendasWithSessionPayload,
+  CreateClassRoomSessionsPayload,
+  CreateClassRoomMetaPayload,
+} from "@/repository/classRoom";
+
 import { ClassRoom } from "../components/classroom-form.schema";
 import { EmployeeStudentWithProfileItem, EmployeeTeacherTypeItem } from "@/model/employee.model";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
@@ -43,7 +49,12 @@ const useCRUDClassRoom = () => {
         slug,
         status,
         title,
+        faqs,
+        forWhom,
+        docs,
+        whies,
       } = formData;
+
       const { startDate, endDate } = getStartDateAndEndDateFromClassSession(classRoomSessions, roomType);
       /**
        * Create ClassRoom first
@@ -62,9 +73,37 @@ const useCRUDClassRoom = () => {
         organization_id: userInfo.organization.id,
         resource_id: null,
       });
+
       if (error) {
-        throw new Error(error.message);
+        console.log("Create Classroom Failed", error);
+        return;
       }
+
+      const metaFaqsPayload = faqs.map<CreateClassRoomMetaPayload>((faq) => ({
+        class_room_id: classRoomData.id,
+        key: "faqs",
+        value: {
+          answer: faq.answer,
+          question: faq.question,
+        },
+      }));
+
+      const metaWhiesPayload = whies.map<CreateClassRoomMetaPayload>((why) => ({
+        class_room_id: classRoomData.id,
+        key: "forWhom",
+        value: why.description,
+      }));
+
+      const metaForwhomPayload = forWhom.map<CreateClassRoomMetaPayload>((forWhom) => ({
+        class_room_id: classRoomData.id,
+        key: "why",
+        value: forWhom.description,
+      }));
+
+      const { data: faqData, error: faqError } = await createClassRoomMeta(metaFaqsPayload);
+      const { data: whyData, error: whyError } = await createClassRoomMeta(metaWhiesPayload);
+      const { data: forWhomData, error: forWhomError } = await createClassRoomMeta(metaForwhomPayload);
+
       const createPivoteClassRoomAndFieldPayload = classRoomField.map<CreatePivotClassRoomAndFieldPayload>(
         (fieldId) => ({
           class_field_id: fieldId,
@@ -88,12 +127,13 @@ const useCRUDClassRoom = () => {
        * Create Sessions of classRooms
        */
       const classRoomSessionPayload = getClassRoomSessionPayload(classRoomSessions, roomType, title, description);
-      const { data: sessionsData } = await createClassSession({
+      const { data: sessionsData, error: sessionDataError } = await createClassSession({
         classRoomId: classRoomData.id,
         sessions: classRoomSessionPayload,
       });
       if (!sessionsData) {
-        throw new Error("Create Session failed");
+        console.log("Create Session failed", sessionDataError);
+        return;
       }
       const createAgendasWithPayload = classRoomSessions?.reduce<CreateAgendasWithSessionPayload[]>(
         (acc, session, _sIndex) => {

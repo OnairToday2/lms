@@ -25,10 +25,6 @@ interface UseUploadReturn {
 const useUpload = () => {
   const userId = useAuthStore((state) => state.data?.id);
 
-  if (!userId) {
-    throw new Error("Invalid User Id");
-  }
-
   const onUploadMultiple: UseUploadReturn["onUploadMultiple"] = async (files, options) => {
     const { onSuccess } = options || {};
     const uploadFilePromises = files.reduce<

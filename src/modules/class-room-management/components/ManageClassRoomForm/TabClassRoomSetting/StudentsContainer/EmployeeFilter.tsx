@@ -1,24 +1,49 @@
-import useDebounce from "@/hooks/useDebounce";
 import { FilterFunnelIcon, SearchIcon } from "@/shared/assets/icons";
-import {
-  Button,
-  ButtonProps,
-  Checkbox,
-  FilledInput,
-  FormControlLabel,
-  List,
-  MenuItem,
-  Popover,
-  Typography,
-} from "@mui/material";
+import { Box, Button, ButtonProps, FilledInput, List, MenuItem, Popover, Typography } from "@mui/material";
 import { memo, useRef, useState } from "react";
 import { useId } from "react";
+import DepartmentSelector, { DepartmentSelectorProps } from "./DepartmentSelector";
+import BranchSelector, { BranchSelectorProps } from "./BranchSelector";
+import EmptyData from "@/shared/ui/EmptyData";
 
 export interface EmployeeFilterProps {
   className?: string;
   onSearch?: (value: string) => void;
+  onSelectDepartment?: DepartmentSelectorProps["onSelect"];
+  departmentValues?: DepartmentSelectorProps["values"];
+  branchValues?: BranchSelectorProps["values"];
+  onSelectBranch?: BranchSelectorProps["onSelect"];
 }
-const EmployeeFilter: React.FC<EmployeeFilterProps> = ({ className, onSearch }) => {
+const TAB_KEY = {
+  branch: "branch",
+  department: "department",
+  role: "role",
+} as const;
+
+const TAB_MENU_LIST = [
+  {
+    label: "Chi nhánh",
+    key: TAB_KEY.branch,
+  },
+  {
+    label: "Phòng ban",
+    key: TAB_KEY.department,
+  },
+  {
+    label: "Vai trò",
+    key: TAB_KEY.role,
+  },
+];
+const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
+  className,
+
+  departmentValues,
+  branchValues,
+  onSelectBranch,
+  onSearch,
+  onSelectDepartment,
+}) => {
+  const [currentTabMenu, setCurrentTabMenu] = useState<keyof typeof TAB_KEY>(TAB_KEY.department);
   const id = useId();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement>();
 
@@ -73,19 +98,45 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({ className, onSearch }) 
             horizontal: "left",
           }}
         >
-          <div className="flex gap-2 min-w-[450px]">
+          <div className="flex gap-2 min-w-[450px] max-h-[400px]">
             <div className="w-36">
               <List>
-                <MenuItem>Chi nhánh</MenuItem>
-                <MenuItem>Phòng ban</MenuItem>
-                <MenuItem>Vai trò</MenuItem>
+                {TAB_MENU_LIST.map((item) => (
+                  <MenuItem
+                    key={item.key}
+                    onClick={() => setCurrentTabMenu(item.key)}
+                    sx={(theme) => ({
+                      backgroundColor: item.key === currentTabMenu ? theme.palette.grey[200] : undefined,
+                    })}
+                  >
+                    {item.label}
+                  </MenuItem>
+                ))}
               </List>
             </div>
-            <div className="flex-1 flex flex-col gap-1">
-              <FormControlLabel control={<Checkbox size="small" />} label="ICT" />
-              <FormControlLabel control={<Checkbox size="small" />} label="ICT" />
-              <FormControlLabel control={<Checkbox size="small" />} label="ICT" />
-            </div>
+            <Box
+              sx={(theme) => ({
+                scrollbarWidth: "thin",
+                flex: 1,
+                flexDirection: "column",
+                overflowY: "auto",
+                p: 2,
+                borderLeft: "1px solid",
+                borderColor: theme.palette.grey[200],
+              })}
+            >
+              <div>
+                {currentTabMenu === "branch" ? (
+                  <BranchSelector values={branchValues} onSelect={onSelectBranch} />
+                ) : currentTabMenu === "department" ? (
+                  <DepartmentSelector onSelect={onSelectDepartment} values={departmentValues} />
+                ) : currentTabMenu === "role" ? (
+                  <div className="flex items-center justify-center p-4">
+                    <EmptyData iconSize="small" description="Hiện chưa có vai trò nào." />
+                  </div>
+                ) : null}
+              </div>
+            </Box>
           </div>
         </Popover>
       </div>

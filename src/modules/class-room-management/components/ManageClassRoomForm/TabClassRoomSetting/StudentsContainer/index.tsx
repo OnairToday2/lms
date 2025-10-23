@@ -19,10 +19,10 @@ import {
 import { EmployeeStudentWithProfileItem } from "@/model/employee.model";
 import EmployeeFilter, { EmployeeFilterProps } from "./EmployeeFilter";
 import EmptyData from "@/shared/ui/EmptyData";
-import useGetEmployeeQuery from "@/modules/class-room-management/hooks/useGetEmployee";
 import { cn } from "@/utils";
 import { CloseIcon } from "@/shared/assets/icons";
 import useDebounce from "@/hooks/useDebounce";
+import useGetEmployeeQuery from "@/modules/class-room-management/operation/query";
 
 const BoxWraper = styled("div")(({ theme }) => ({
   border: "1px solid",
@@ -52,20 +52,22 @@ const BoxContent = styled(Box)(() => ({
   scrollbarWidth: "thin",
 }));
 export interface StudentsContainerProps {
-  values?: string[];
+  seletedItems?: EmployeeStudentWithProfileItem[];
   onChange: (data: EmployeeStudentWithProfileItem[]) => void;
 }
-const StudentsContainer: React.FC<StudentsContainerProps> = ({ values, onChange }) => {
-  const [selectedList, setSelectedList] = React.useState<EmployeeStudentWithProfileItem[]>([]);
+const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = [], onChange }) => {
+  const [selectedList, setSelectedList] = React.useState<EmployeeStudentWithProfileItem[]>(seletedItems);
   const [queryParams, setQueryParams] = React.useState({ page: 1, pageSize: 20, search: "" });
-
-  const searchTextDebounce = useDebounce(queryParams.search, 600);
+  const [departmentIds, setDepartmentIds] = React.useState<string[]>([]);
+  const [branchIds, setBranchIds] = React.useState<string[]>([]);
+  const searchEmployeeNameDebounce = useDebounce(queryParams.search, 600);
   const { data: employeeData, isPending } = useGetEmployeeQuery({
     enabled: true,
     queryParams: {
       ...queryParams,
-      search: searchTextDebounce,
-      excludes: values,
+      search: searchEmployeeNameDebounce,
+      organizationUnitIds: [...departmentIds, ...branchIds],
+      // excludes: values,
     },
   });
 
@@ -157,6 +159,21 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ values, onChange 
   const handleSearch: EmployeeFilterProps["onSearch"] = (searchText) => {
     setQueryParams((prev) => ({ ...prev, search: searchText }));
   };
+
+  const handleFilterDepartment: EmployeeFilterProps["onSelectDepartment"] = (departmentId) => {
+    setDepartmentIds((prev) => {
+      let newList = [...prev];
+      const isExist = newList.includes(departmentId);
+      return isExist ? newList.filter((it) => it !== departmentId) : [...newList, departmentId];
+    });
+  };
+  const handleFilterBranch: EmployeeFilterProps["onSelectDepartment"] = (branchId) => {
+    setBranchIds((prev) => {
+      let newList = [...prev];
+      const isExist = newList.includes(branchId);
+      return isExist ? newList.filter((it) => it !== branchId) : [...newList, branchId];
+    });
+  };
   React.useEffect(() => {
     onChange(selectedList);
   }, [selectedList]);
@@ -170,6 +187,11 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ values, onChange 
     if (isPending) return;
     prevEmployeeList.current = employeeData?.data || [];
   }, [isPending, employeeData]);
+
+  React.useEffect(() => {
+    if (!seletedItems.length) return;
+    setSelectedList(seletedItems);
+  }, [seletedItems]);
 
   return (
     <div className="employee-data-transfer relative">
@@ -188,7 +210,13 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ values, onChange 
                 className="mr-4"
               />
 
-              <EmployeeFilter onSearch={handleSearch} />
+              <EmployeeFilter
+                onSearch={handleSearch}
+                departmentValues={departmentIds}
+                onSelectDepartment={handleFilterDepartment}
+                branchValues={branchIds}
+                onSelectBranch={handleFilterBranch}
+              />
             </BoxToolbar>
             <Divider />
             <BoxContent
@@ -205,6 +233,11 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ values, onChange 
                     isSelected={hasSelected(emp.id, selectedList)}
                   />
                 ))}
+                {!isPending && !employeeList.length && (
+                  <div className="flex items-center justify-center p-6">
+                    <EmptyData iconSize="small" description="Danh sách đang trống." />
+                  </div>
+                )}
               </div>
             </BoxContent>
             <Divider />
@@ -282,7 +315,7 @@ interface StudentItemProps {
 const StudentItem: React.FC<StudentItemProps> = React.memo(
   ({ data, onClick, isSelected, viewOnly = false, onRemove, hideCheckbox = false }) => {
     const { id, employee_code, profiles, employments } = data;
-    const departmentName = React.useMemo(() => employments[0]?.organization_units.name, [employments]);
+    const departmentName = React.useMemo(() => employments[0]?.organization_units?.name, [employments]);
     return (
       <ListItemButton
         role="listitem"
