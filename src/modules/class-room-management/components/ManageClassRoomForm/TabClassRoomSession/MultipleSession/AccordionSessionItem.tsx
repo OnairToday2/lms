@@ -1,0 +1,118 @@
+import * as React from "react";
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import { alpha, styled, Typography, TypographyProps } from "@mui/material";
+import { TrashIcon1 } from "@/shared/assets/icons";
+import { cn } from "@/utils";
+
+export interface AccordionSessionItemProps extends React.PropsWithChildren {
+  summary?: React.ReactNode;
+  detail?: React.ReactNode;
+  index: number;
+  title?: string;
+  status?: "idle" | "valid" | "invalid";
+  onRemove: () => void;
+}
+const BoxNumberCount = styled((props: TypographyProps) => <Typography {...props} component="span" />)(() => ({
+  width: "1.25rem",
+  height: "1.25rem",
+  background: "#7B61FF",
+  display: "inline-flex",
+  alignContent: "center",
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: "5px",
+  fontWeight: "bold",
+  color: "white",
+  fontSize: "0.75rem",
+}));
+
+const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
+  summary,
+  detail,
+  index = 0,
+  children,
+  title,
+  onRemove,
+  status = "idle",
+}) => {
+  const [openDialog, setOpenDialog] = React.useState(false);
+  const [isExpanded, setIsExpanded] = React.useState<boolean>(true);
+  const toggleExpand = () => setIsExpanded((prev) => !prev);
+  const handleOpenDialog = () => setOpenDialog(true);
+  const handleCloseDialog = () => setOpenDialog(false);
+
+  const handleConfirm = () => {
+    setOpenDialog(false);
+    onRemove?.();
+  };
+  return (
+    <>
+      <Accordion
+        expanded={isExpanded}
+        className={cn({
+          invalid: status === "invalid",
+          valid: status === "valid",
+        })}
+        sx={(theme) => ({
+          "&.invalid": {
+            borderColor: theme.palette.error["main"],
+            backgroundColor: alpha(theme.palette.error["lighter"], 0.1),
+          },
+          "&.valid": {
+            borderColor: theme.palette.primary["main"],
+          },
+        })}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon onClick={toggleExpand} />}
+          className="felx items-center justify-between"
+          sx={(theme) => ({
+            "& .MuiAccordionSummary-content": {
+              marginBlock: "6px",
+            },
+          })}
+        >
+          <div className="flex items-center gap-3 flex-1" onClick={toggleExpand}>
+            <BoxNumberCount>{index + 1}</BoxNumberCount>
+            <Typography component="p" sx={{ fontWeight: 600 }} className="flex-1 line-clamp-1 break-all">
+              {title ? title : `Lớp học ${index + 1}`}
+            </Typography>
+          </div>
+          <span className="cursor-pointer w-8 h-8 inline-flex items-center justify-center" onClick={handleOpenDialog}>
+            <TrashIcon1 className="w-4 h-4" />
+          </span>
+        </AccordionSummary>
+        <AccordionDetails>{children}</AccordionDetails>
+      </Accordion>
+      <Dialog
+        open={openDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle id="alert-dialog-title" className="break-all">{`Xoá`}</DialogTitle>
+        <DialogContent>
+          <DialogContentText
+            id="alert-dialog-description"
+            className="break-all"
+            sx={{ fontSize: "0.875rem" }}
+          >{`Bạn có chắc chắn muốn xoá "${title}"`}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} variant="outlined" color="inherit">
+            Tiếp tục chỉnh sửa
+          </Button>
+          <Button onClick={handleConfirm} color="error">
+            Xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+};
+export default React.memo(AccordionSessionItem);

@@ -1,23 +1,12 @@
 import { alpha, Theme, Components } from "@mui/material/styles";
 import { svgIconClasses } from "@mui/material/SvgIcon";
 
-import {
-  primary,
-  grey,
-  secondary,
-  success,
-  warning,
-  error,
-  info,
-} from "../../theme-color";
+import { primary, grey, secondary, success, warning, error, info } from "../../theme-color";
 
 /* eslint-disable import/prefer-default-export */
 
 const getBoxShadowShapeButton = (color: string) => {
-  return `0px 6px 9px -6px ${alpha(color, 0.4)}, 0px 6px 12px -4px ${alpha(
-    color,
-    0.3,
-  )}`;
+  return `0px 6px 9px -6px ${alpha(color, 0.4)}, 0px 6px 12px -4px ${alpha(color, 0.3)}`;
 };
 export const buttonsCustomizations: Components<Theme> = {
   MuiButtonBase: {
@@ -431,9 +420,9 @@ export const buttonsCustomizations: Components<Theme> = {
             style: {
               color: grey[900],
               border: "1px solid",
-              borderColor: grey[900],
+              borderColor: grey[400],
               "&:hover": {
-                backgroundColor: alpha(grey[900], 0.1),
+                backgroundColor: alpha(grey[600], 0.1),
                 boxShadow: `0px 0px 0px 0.75px ${grey[900]}`,
               },
               "&:active": {

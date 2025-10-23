@@ -1,30 +1,27 @@
-import type { ClassRoom } from "@/model/class-room.model";
 import attachActions from "./class-room-actions";
 import { createStore } from "zustand/vanilla";
 import { ClassRoomActions } from "./class-room-actions";
-import { Dayjs } from "dayjs";
-import { ClassSessionChannelProvider } from "@/model/class-session.model";
-
-import {
-  ClassRoomInformation,
-  ClassRoomSessionTeacher,
-  ClassRoomSession,
-} from "../validation";
+import { EmployeeStudentWithProfileItem, EmployeeTeacherTypeItem } from "@/model/employee.model";
 
 type ClassRoomState = {
-  formData?: {
-    clsInformation: ClassRoomInformation;
-    clsSession: ClassRoomSession[];
-    clsTeacher: ClassRoomSessionTeacher[];
+  formData?: {};
+  teacherList: {
+    [sessionIndex: number | string]: EmployeeTeacherTypeItem[];
   };
+  studentList: EmployeeStudentWithProfileItem[];
 };
 
-type ClassRoomStore = ClassRoomState & ClassRoomActions;
+type ClassRoomStore = {
+  state: ClassRoomState;
+  actions: ClassRoomActions;
+};
 
 const createClassRoomStore = (initState: ClassRoomState) => {
-  return createStore<ClassRoomStore>()((set, get) => ({
-    ...initState,
-    ...attachActions(initState)(set, get),
+  return createStore<ClassRoomStore>()((set, get, store) => ({
+    state: { ...initState },
+    actions: {
+      ...attachActions(initState)(set, get, store),
+    },
   }));
 };
 export { createClassRoomStore };

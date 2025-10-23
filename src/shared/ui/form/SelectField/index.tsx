@@ -1,5 +1,5 @@
 "use client";
-import React, { memo, useId } from "react";
+import React, { memo, useCallback, useId } from "react";
 import {
   alpha,
   Box,
@@ -7,25 +7,18 @@ import {
   FormControl,
   FormHelperText,
   FormLabel,
-  Input,
-  inputBaseClasses,
   MenuItem,
-  OutlinedInput,
   Select,
-  SelectChangeEvent,
   styled,
   Typography,
 } from "@mui/material";
 import type { SelectProps } from "@mui/material";
-import { CustomBaseInput } from "./CustomInputBase";
-import { isArray } from "lodash";
+import { isArray, isNull, isUndefined } from "lodash";
 
-type OptionType = { id: string | number; label?: string };
+type OptionType = { id: string | number; label?: string; [key: string]: any };
+type ValueType = number | string | string[] | number[];
 
-export type SelectFieldProps<Value extends number | string | string[] | number[] = string> = Omit<
-  SelectProps<Value>,
-  "onChange"
-> & {
+export type SelectFieldProps = SelectProps<ValueType> & {
   options: OptionType[];
   helperText?: string;
   optionField?: {
@@ -33,11 +26,10 @@ export type SelectFieldProps<Value extends number | string | string[] | number[]
     label: string;
   };
   placeholder?: string;
-  onChange: (value: Value) => void;
   required?: boolean;
-  onSearch?: () => void;
 };
-const SelectField = <Value extends number | string | string[] | number[]>({
+
+const SelectField = ({
   options,
   value: selectdValue,
   label,
@@ -51,87 +43,79 @@ const SelectField = <Value extends number | string | string[] | number[]>({
   name,
   onChange,
   required,
-}: SelectFieldProps<Value>) => {
+}: SelectFieldProps) => {
   const fieldId = useId();
 
-  const handleChange = (event: SelectChangeEvent<typeof selectdValue>) => {
-    const {
-      target: { value },
-    } = event;
-    onChange(value as Value);
-  };
+  const getOptionLabelWithOptionField = useCallback(
+    (option: OptionType) => {
+      if (!optionField) return option?.label;
 
-  const getOptionLabelWithOptionField = (option: OptionType) => {
-    let optionName;
+      const optionName = option[optionField.label];
 
-    if (optionField) {
-      if (
-        typeof option[optionField.label as keyof OptionType] === "string" ||
-        typeof option[optionField.label as keyof OptionType] === "number"
-      ) {
-        optionName = option[optionField.label as keyof OptionType]?.toString();
+      return typeof optionName === "string" || typeof optionName === "number" ? optionName : option?.label;
+    },
+    [optionField],
+  );
+
+  const getOptionValueWithOptionField = useCallback(
+    (option: OptionType) => {
+      if (!optionField) return option.id;
+
+      const optionValue = option[optionField.value];
+      return typeof optionValue === "string" || typeof optionValue === "number" ? optionValue : option.id;
+    },
+    [optionField],
+  );
+
+  const getOptionLabel = useCallback(
+    (value: string | number | undefined) => {
+      if (optionField) {
+        const exists = options.find((o) => o[optionField.value] === value);
+        return exists?.[optionField.label];
       }
-    }
-    return optionField ? optionName : option?.label;
-  };
+      const exists = options.find((option) => option["id"] === value);
+      return exists?.label;
+    },
+    [optionField, options],
+  );
 
-  const getOptionValueWithOptionField = (option: OptionType) => {
-    let optionValue;
-
-    if (optionField) {
-      if (
-        typeof option[optionField.value as keyof OptionType] === "string" ||
-        typeof option[optionField.value as keyof OptionType] === "number"
-      ) {
-        optionValue = option[optionField.value as keyof OptionType]?.toString();
-      }
-    }
-    return optionField ? optionValue : option.id;
-  };
-
-  const getOptionLabel = (value: string | number) => {
-    let selectedOptionItem;
-    if (optionField) {
-      selectedOptionItem = options.find((option) => option[optionField.value as keyof OptionType] === value);
-
-      return selectedOptionItem?.[optionField.label as keyof OptionType]?.toString();
-    }
-
-    selectedOptionItem = options.find((option) => option["id"] === value);
-
-    return selectedOptionItem?.label?.toString();
-  };
-
-  const renderSelectedValues = (selected: Value) => {
-    if (
-      (!selected && typeof selected === "string") ||
-      (!selected && typeof selected === "number") ||
-      (isArray(selected) && !selected.length)
-    ) {
+  const renderSelectedValues = (valueSelected: ValueType) => {
+    if (isUndefined(valueSelected) || isNull(valueSelected) || (isArray(valueSelected) && !valueSelected.length)) {
       return placeholder ? <Typography sx={{ fontSize: "0.875rem", opacity: 0.6 }}>{placeholder}</Typography> : null;
     }
 
     if (multiple) {
-      if (isArray(selected)) {
-        return (
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-            {selected.map((item) => (
-              <StyledChip key={item} label={getOptionLabel(item)} />
-            ))}
-          </Box>
-        );
-      } else {
-        return <StyledChip label={getOptionLabel(selected)} />;
-      }
+      const valueList = (isArray(valueSelected) ? valueSelected : []) as string[] | number[];
+      return (
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+          {valueList.map((item) => (
+            <CustomChip key={item} label={getOptionLabel(item)} />
+          ))}
+        </Box>
+      );
+    }
+
+    const optionItem = isArray(valueSelected) ? valueSelected[0] : valueSelected;
+
+    return typeof optionItem === "string" || typeof optionItem === "number" ? (
+      <CustomChip label={getOptionLabel(optionItem)} />
+    ) : null;
+  };
+
+  const handleChange: SelectProps<ValueType>["onChange"] = (event) => {
+    const {
+      target: { value },
+    } = event;
+
+    if (multiple) {
+      const arrValues = value && isArray(value) ? value : [];
+      onChange?.(event, arrValues);
     } else {
-      const optionItem = isArray(selected) ? selected[0] : selected;
-      if (optionItem && !isArray(optionItem)) {
-        return <StyledChip label={getOptionLabel(optionItem)} sx={{}} />;
-      }
+      const singleValue = (value && typeof value === "string") || typeof value === "number" ? value : "";
+      onChange?.(event, singleValue);
     }
   };
 
-  const handleSearchChange = () => {};
   const selectId = `select-multiple-chip-${name}`;
 
   return (
@@ -148,13 +132,14 @@ const SelectField = <Value extends number | string | string[] | number[]>({
         value={selectdValue}
         displayEmpty
         onChange={handleChange}
-        input={<CustomBaseInput />}
         renderValue={renderSelectedValues}
         MenuProps={{
           PaperProps: {
             sx: (theme) => ({
               maxHeight: 250,
               width: 250,
+              scrollbarWidth: "thin", // Firefox
+              "&::-webkit-scrollbar": { width: 6 },
               "& .MuiMenuItem-root": {
                 "&:hover": {
                   background: theme.palette.grey[200],
@@ -168,15 +153,6 @@ const SelectField = <Value extends number | string | string[] | number[]>({
           },
         }}
       >
-        <Box>
-          <OutlinedInput
-            onChange={handleSearchChange}
-            size="small"
-            sx={{
-              width: "100%",
-            }}
-          />
-        </Box>
         {placeholder ? (
           <MenuItem
             disabled
@@ -202,7 +178,7 @@ const SelectField = <Value extends number | string | string[] | number[]>({
 };
 export default memo(SelectField);
 
-const StyledChip = styled(Chip)(({ theme }) => ({
+const CustomChip = styled(Chip)(({ theme }) => ({
   borderRadius: "4px",
   maxHeight: "inherit",
   background: alpha(theme.palette.grey[300], 0.1),

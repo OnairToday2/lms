@@ -45,6 +45,9 @@ export const dataGridCustomizations: Components<Theme> = {
       }),
       cell: ({ theme }) => ({
         borderTopColor: (theme.vars || theme).palette.divider,
+        "&:focus": {
+          outline: "none",
+        },
       }),
       menu: ({ theme }) => ({
         borderRadius: theme.shape.borderRadius,

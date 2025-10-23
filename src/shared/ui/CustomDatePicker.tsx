@@ -7,33 +7,23 @@ import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { viVN } from "@mui/x-date-pickers/locales";
-import {
-  DatePicker,
-  DatePickerFieldProps,
-} from "@mui/x-date-pickers/DatePicker";
-import {
-  useParsedFormat,
-  usePickerContext,
-  useSplitFieldProps,
-} from "@mui/x-date-pickers";
+import { DatePicker, DatePickerFieldProps } from "@mui/x-date-pickers/DatePicker";
+import { useParsedFormat, usePickerContext, useSplitFieldProps } from "@mui/x-date-pickers";
 
 interface ButtonFieldProps extends DatePickerFieldProps {
   className?: string;
 }
 
 function ButtonField(props: ButtonFieldProps) {
-  // const { forwardedProps } = useSplitFieldProps(props, "date");
+  const { forwardedProps } = useSplitFieldProps(props, "date");
   const pickerContext = usePickerContext();
   const handleRef = useForkRef(pickerContext.triggerRef, pickerContext.rootRef);
   const parsedFormat = useParsedFormat();
-  const valueStr =
-    pickerContext.value == null
-      ? parsedFormat
-      : pickerContext.value.format(pickerContext.fieldFormat);
+  const valueStr = pickerContext.value == null ? parsedFormat : pickerContext.value.format(pickerContext.fieldFormat);
 
   return (
     <Button
-      // {...forwardedProps}
+      {...forwardedProps}
       variant="outlined"
       ref={handleRef}
       size="small"
@@ -52,9 +42,7 @@ export default function CustomDatePicker() {
   return (
     <LocalizationProvider
       dateAdapter={AdapterDayjs}
-      localeText={
-        viVN.components.MuiLocalizationProvider.defaultProps.localeText
-      }
+      localeText={viVN.components.MuiLocalizationProvider.defaultProps.localeText}
     >
       <DatePicker
         value={value}

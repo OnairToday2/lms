@@ -19,7 +19,7 @@ export default function ColorCheckboxes() {
 
   const handleChange2 = (event: React.ChangeEvent<HTMLInputElement>) => {
     //@ts-ignore
-    setChecked([event.target.checked, checked[1]]);
+    setChecked([event.target.checked, checked?.[1]]);
   };
 
   const handleChange3 = (event: React.ChangeEvent<HTMLInputElement>) => {

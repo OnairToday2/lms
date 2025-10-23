@@ -3,9 +3,7 @@ import { LocalizationProvider as XDateLocationProvider } from "@mui/x-date-picke
 import { viVN } from "@mui/x-date-pickers/locales";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
-const MUILocalizationProvider = ({
-  children,
-}: Readonly<{ children: React.ReactNode }>) => {
+const MUILocalizationProvider = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   return (
     <XDateLocationProvider
       dateAdapter={AdapterDayjs}

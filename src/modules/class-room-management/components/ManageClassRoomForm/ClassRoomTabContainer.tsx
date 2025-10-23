@@ -4,15 +4,17 @@ import Tab, { TabProps } from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabPanel from "@mui/lab/TabPanel";
 import TabList, { TabListProps } from "@mui/lab/TabList";
-import { styled, SxProps, Theme } from "@mui/material";
+import { Button, styled, SxProps, Theme } from "@mui/material";
 import { useTheme } from "@mui/material";
 import { tabClasses } from "@mui/material";
 import { cn } from "@/utils";
-
+import { CheckCircleIcon } from "@/shared/assets/icons";
+import { TAB_KEYS_CLASS_ROOM } from "./ClassRoomFormContainer";
 type ClassRoomTabStatus = "idle" | "invalid" | "valid";
+type TabKeyType = keyof typeof TAB_KEYS_CLASS_ROOM;
 type ClassRoomTabItem = {
   tabName: React.ReactNode;
-  tabKey: string;
+  tabKey: TabKeyType;
   content?: React.ReactNode;
   status?: ClassRoomTabStatus;
   icon?: React.ReactNode;
@@ -22,49 +24,90 @@ export interface ClassRoomTabContainerProps {
   previewUI?: React.ReactNode;
   actions: React.ReactNode;
   className?: string;
+  checkStatusTab: (tabKey: TabKeyType) => Promise<boolean>;
 }
-const ClassRoomTabContainer: React.FC<ClassRoomTabContainerProps> = ({ items, className, previewUI, actions }) => {
-  const [currentTab, setCurrentTab] = React.useState(() => items?.[0]?.tabKey || "");
+const ClassRoomTabContainer: React.FC<ClassRoomTabContainerProps> = ({
+  items,
+  className,
+  previewUI,
+  actions,
+  checkStatusTab,
+}) => {
+  const [currentTab, setCurrentTab] = React.useState<TabKeyType | undefined>(() => items?.[0]?.tabKey);
 
-  const handleChange = React.useCallback((event: React.SyntheticEvent, newValue: string) => {
+  const handleChange = React.useCallback((event: React.SyntheticEvent, newValue: TabKeyType) => {
     setCurrentTab(newValue);
   }, []);
 
+  const goNextOrBackStep = async (action: "next" | "back") => {
+    const isCurrentTabValid = await checkStatusTab("clsTab-information");
+
+    if (!isCurrentTabValid) return;
+    if (currentTab === "clsTab-information") {
+      setCurrentTab(action === "next" ? "clsTab-session" : "clsTab-information");
+    }
+    if (currentTab === "clsTab-session") {
+      setCurrentTab(action === "next" ? "clsTab-resource" : "clsTab-information");
+    }
+    if (currentTab === "clsTab-resource") {
+      setCurrentTab(action === "next" ? "clsTab-setting" : "clsTab-session");
+    }
+  };
+
   return (
-    <div className={cn("custom-tab", className)}>
-      <TabContext value={currentTab}>
+    <div className={cn("class-room-tabs", className)}>
+      <TabContext value={currentTab ?? ""}>
         <div className="bg-white rounded-xl flex items-center justify-between mb-6 px-6 py-4">
-          <div className="tab-items">
-            <ClassRoomTabList onChange={handleChange}>
-              {items.map(({ tabKey, tabName, status = "idle", icon }) => (
-                <Tab
-                  key={tabKey}
-                  value={tabKey}
-                  label={
-                    <div className="flex items-center gap-1">
-                      {icon ? icon : null}
-                      {tabName}
-                    </div>
-                  }
-                  className={cn("px-0", {
-                    "is-invalid": status === "invalid",
-                    "is-valid": status === "valid",
-                  })}
-                />
-              ))}
-            </ClassRoomTabList>
-          </div>
-          <div>{actions}</div>
+          <ClassRoomTabList onChange={handleChange}>
+            {items.map(({ tabKey, tabName, status = "idle", icon }) => (
+              <Tab
+                key={tabKey}
+                value={tabKey}
+                label={
+                  <div className="flex items-center gap-1">
+                    {status === "valid" ? <CheckCircleIcon /> : icon ? icon : null}
+                    {tabName}
+                  </div>
+                }
+                className={cn("px-0", {
+                  "is-invalid": status === "invalid",
+                  "is-valid": status === "valid",
+                })}
+              />
+            ))}
+          </ClassRoomTabList>
+          <div className="tab-actions">{actions}</div>
         </div>
-        <div className="grid grid-cols-2 gap-6 items-start">
-          <div className="panel">
+        <div
+          className={cn("grid grid-cols-2 gap-6", {
+            "grid-cols-2": currentTab !== "clsTab-setting",
+            "grid-cols-1": currentTab === "clsTab-setting",
+          })}
+        >
+          <div className="panels-wraper">
             {items.map((item) => (
               <TabPanel key={item.tabKey} value={item.tabKey} className="p-0">
                 {item?.content}
               </TabPanel>
             ))}
+            <div className={cn({ hidden: currentTab === "clsTab-setting" })}>
+              <div className={cn("py-6 flex justify-between")}>
+                <Button variant="outlined" color="inherit" onClick={() => goNextOrBackStep("back")}>
+                  Quay lại
+                </Button>
+                <Button variant="fill" onClick={() => goNextOrBackStep("next")}>
+                  Tiếp tục
+                </Button>
+              </div>
+            </div>
           </div>
-          <div className="preview-ui">{previewUI}</div>
+          <div
+            className={cn("preview-ui", {
+              hidden: currentTab === "clsTab-setting",
+            })}
+          >
+            {previewUI}
+          </div>
         </div>
       </TabContext>
     </div>

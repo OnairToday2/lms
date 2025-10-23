@@ -47,7 +47,7 @@ const MAIN_MENU_LIST: MenuItemType[] = [
     path: PATHS.EMPLOYEE.ROOT,
     children: [
       {
-        title: "Tạo nhân vien",
+        title: "Tạo nhân viên",
         icon: React.createElement(UsersIcon),
         key: 'employees/create',
         path: PATHS.EMPLOYEE.CREATE_EMPLOYEE,

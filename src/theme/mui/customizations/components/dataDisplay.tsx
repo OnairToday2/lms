@@ -104,6 +104,7 @@ export const dataDisplayCustomizations: Components<Theme> = {
   MuiChip: {
     defaultProps: {
       size: "small",
+      variant: "filled",
     },
     styleOverrides: {
       root: ({ theme }) => ({
@@ -141,6 +142,7 @@ export const dataDisplayCustomizations: Components<Theme> = {
           {
             props: {
               color: "success",
+              variant: "filled",
             },
             style: {
               borderColor: success["main"],
@@ -224,6 +226,45 @@ export const dataDisplayCustomizations: Components<Theme> = {
           height: 36,
         },
       },
+    },
+  },
+  MuiPagination: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        color: "inherit",
+        ".MuiPaginationItem-sizeSmall": {
+          fontSize: "0.75rem",
+          minWidth: "30px",
+          height: "30px",
+        },
+
+        ".MuiPaginationItem-sizeMedium": {
+          fontSize: "0.875rem",
+          minWidth: "36px",
+          height: "36px",
+        },
+      }),
+    },
+  },
+  MuiPaginationItem: {
+    defaultProps: {
+      color: "standard",
+    },
+    styleOverrides: {
+      root: ({ theme }) => ({
+        color: "inherit",
+        "&:hover": {
+          backgroundColor: (theme.vars || theme).palette.grey[300],
+        },
+        "&.Mui-selected": {
+          color: "white",
+          backgroundColor: (theme.vars || theme).palette.grey[900],
+          "&:hover": {
+            backgroundColor: (theme.vars || theme).palette.grey[800],
+          },
+        },
+      }),
+      colorPrimary: ({ theme }) => theme.palette.primary["main"],
     },
   },
   MuiPaper: {

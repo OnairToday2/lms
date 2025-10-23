@@ -1,4 +1,6 @@
-export const queryKeys = {
+export const QUERY_KEYS = {
   GET_CLASS_HASH_TAGS: "GET_HASH_TAGS",
   GET_CLASS_FIELDS: "GET_CLASS_FIELDS",
+  GET_TEACHERS: "GET_TEACHERS",
+  GET_STUDENTS: "GET_STUDENTS",
 } as const;

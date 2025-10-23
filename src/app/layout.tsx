@@ -3,11 +3,12 @@ import ReactQueryClientProvider from "@/shared/providers/ReactQueryClientProvide
 import MUIThemeProvider from "@/shared/providers/MUIThemeProvider";
 import NotificationsProvider from "@/hooks/useNotifications/NotificationsProvider";
 import MUILocalizationProvider from "@/shared/providers/MUILocationProvider";
-
 import DialogsProvider from "@/hooks/useDialogs/DialogsProvider";
 import { Inter } from "next/font/google";
 import "../theme/palette.css";
 import "../theme/globals.css";
+import ToastSnackbar from "@/shared/store/toast-snackbar/ToastSnackbar";
+import { ToastSnackbarProvider } from "@/shared/store/toast-snackbar/toast-snackbar-context";
 
 const inter = Inter({
   weight: ["300", "400", "500", "600", "700", "800", "900"],
@@ -34,7 +35,12 @@ export default function RootLayout({
           <MUIThemeProvider>
             <MUILocalizationProvider>
               <NotificationsProvider>
-                <DialogsProvider>{children}</DialogsProvider>
+                <DialogsProvider>
+                  <ToastSnackbarProvider>
+                    {children}
+                    <ToastSnackbar />
+                  </ToastSnackbarProvider>
+                </DialogsProvider>
               </NotificationsProvider>
             </MUILocalizationProvider>
           </MUIThemeProvider>
