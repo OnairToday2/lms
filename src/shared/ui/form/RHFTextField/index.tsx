@@ -1,14 +1,15 @@
 "use client";
-import React, { memo, useId } from "react";
+import React, { useId } from "react";
 
-import { FormControl, FormHelperText, FormLabel, OutlinedInput, TextField, Typography } from "@mui/material";
+import { FormControl, FormHelperText, FormLabel, OutlinedInput } from "@mui/material";
 import type { Control, FieldValues, Path } from "react-hook-form";
 import { Controller } from "react-hook-form";
+import InputNumber from "../InputNumber";
 
 export interface RHFTextFieldProps<T extends FieldValues> {
   className?: string;
   label?: React.ReactNode;
-  placeholder?: React.ReactNode | string;
+  placeholder?: string;
   control: Control<T>;
   name: Path<T>;
   required?: boolean;
@@ -46,11 +47,16 @@ const RHFTextField = <T extends FieldValues>({
           ) : null}
           <OutlinedInput
             {...field}
-            {...(typeof placeholder === "string" ? { placeholder } : undefined)}
+            value={type === "number" ? Number.parseInt(field.value) : field.value}
+            onChange={(evt) => field.onChange(type === "number" ? Number.parseInt(evt.target.value) : evt.target.value)}
+            placeholder={placeholder}
             disabled={disabled}
             size="small"
             id={fieldId}
             type={type}
+            sx={{
+              background: "white",
+            }}
             startAdornment={startAdornment}
             endAdornment={endAdornment}
           />

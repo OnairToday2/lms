@@ -8,10 +8,12 @@ interface Props {
 }
 const Authorized: React.FC<Props> = async ({ children }) => {
   const currentUser = await getCurrentUser();
-  let userInfo: AuthData | undefined;
+
   if (!currentUser) {
     redirect("/auth/signin", RedirectType.replace);
   }
+
+  let userInfo: AuthData | undefined;
 
   if (currentUser.app_metadata.provider === "email") {
     userInfo = {
@@ -32,6 +34,9 @@ const Authorized: React.FC<Props> = async ({ children }) => {
     };
   }
 
+  if (!userInfo) {
+    redirect("/auth/signin", RedirectType.replace);
+  }
   return <AuthProvider data={userInfo}>{children}</AuthProvider>;
 };
 export default Authorized;

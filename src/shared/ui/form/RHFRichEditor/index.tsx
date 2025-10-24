@@ -1,13 +1,7 @@
 "use client";
 import { FormControl, FormHelperText, FormLabel } from "@mui/material";
 import { Editor } from "../Editor";
-import {
-  Control,
-  Controller,
-  Path,
-  PathValue,
-  FieldValues,
-} from "react-hook-form";
+import { Control, Controller, Path, PathValue, FieldValues } from "react-hook-form";
 import { useId } from "react";
 
 interface RHFRichEditorProps<T extends FieldValues> {
@@ -40,7 +34,7 @@ const RHFRichEditor = <T extends FieldValues>({
           {label ? (
             <FormLabel htmlFor={fieldId}>
               {label}
-              {required ? <span className="ml-1">*</span> : null}
+              {required ? <span className="ml-1 text-red-600">*</span> : null}
             </FormLabel>
           ) : null}
           <Editor {...field} error={!!error} helperText={error?.message} />

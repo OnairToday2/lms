@@ -1,5 +1,6 @@
 import MainLayout from "@/shared/ui/layouts/MainLayout";
 import Authorized from "@/modules/authWrapper/Authorized";
+import UserOrganizationWraper from "@/modules/organization/container/UserOrganizationWraper";
 
 export default async function RootLayout({
   children,
@@ -8,7 +9,9 @@ export default async function RootLayout({
 }>) {
   return (
     <Authorized>
-      <MainLayout>{children}</MainLayout>
+      <UserOrganizationWraper>
+        <MainLayout>{children}</MainLayout>
+      </UserOrganizationWraper>
     </Authorized>
   );
 }

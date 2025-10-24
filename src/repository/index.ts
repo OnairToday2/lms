@@ -6,3 +6,5 @@ export * as managersEmployeesRepository from "./managers-employees";
 export * as organizationUnitsRepository from "./organization-units";
 export * as positionsRepository from "./positions";
 export * as profilesRepository from "./profiles";
+export * as teacherRepository from "./teacher";
+export * as employeeRepository from "./employee";
