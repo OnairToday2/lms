@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  output: "standalone", // Enable standalone output for Docker
   // typedRoutes: true,
   // compiler: {
   //   styledComponents: true, // Enable SWC transform for styled-components
