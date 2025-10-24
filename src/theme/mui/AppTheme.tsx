@@ -22,6 +22,7 @@ import {
   buttonsCustomizations,
   toggleButtonsCustomizations,
   checkboxCustomizations,
+  popoverCustomizations,
   tabsCustomization,
 } from "./customizations";
 
@@ -56,6 +57,7 @@ const theme = createTheme(
       ...toggleButtonsCustomizations,
       ...tabsCustomization,
       ...checkboxCustomizations,
+      ...popoverCustomizations,
     },
   },
   dateViVN,

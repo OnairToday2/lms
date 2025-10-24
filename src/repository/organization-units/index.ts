@@ -10,9 +10,7 @@ const getOrganizationUnits = async () => {
 export async function getAllOrganizationUnitsWithDetails() {
   const supabase = await createSVClient();
 
-  const { data, error } = await supabase
-    .from("organization_units")
-    .select("id, name, type");
+  const { data, error } = await supabase.from("organization_units").select("id, name, type");
 
   if (error) {
     throw new Error(`Failed to fetch organization units: ${error.message}`);
@@ -21,6 +19,22 @@ export async function getAllOrganizationUnitsWithDetails() {
   return data || [];
 }
 
-export {
-  getOrganizationUnits,
+export const getOrganizationDepartmentOrBranch = async (type?: "department" | "branch") => {
+  try {
+    let organizationQuery = supabase.from("organization_units").select(
+      `
+        id,
+        name,
+        parent_id,
+        type
+      `,
+    );
+    if (type) {
+      organizationQuery = organizationQuery.eq("type", type);
+    }
+    return await organizationQuery;
+  } catch (err) {
+    throw new Error("Get department Error");
+  }
 };
+export { getOrganizationUnits };

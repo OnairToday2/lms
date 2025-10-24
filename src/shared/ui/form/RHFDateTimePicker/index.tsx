@@ -2,9 +2,8 @@ import React, { memo, useCallback } from "react";
 import type { Control, PathValue, FieldValues, Path } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import dayjs, { Dayjs } from "dayjs";
-import CustomDateTimePickerField, {
-  CustomDateTimePickerFieldProps,
-} from "../CustomDateTimePickerField";
+import CustomDateTimePickerField, { CustomDateTimePickerFieldProps } from "../CustomDateTimePickerField";
+import { PickerValue } from "@mui/x-date-pickers/internals";
 
 export const DATE_TIME_PICKER_FORMAT = {
   "HH:mm DD/MM/YYYY": "HH:mm DD/MM/YYYY",
@@ -12,8 +11,7 @@ export const DATE_TIME_PICKER_FORMAT = {
 
 export type DateTimePickerFormat = keyof typeof DATE_TIME_PICKER_FORMAT;
 
-interface RHFDateTimePickerProps<T extends FieldValues>
-  extends CustomDateTimePickerFieldProps {
+interface RHFDateTimePickerProps<T extends FieldValues> extends CustomDateTimePickerFieldProps {
   className?: string;
   label?: React.ReactNode;
   control: Control<T>;
@@ -29,9 +27,12 @@ const RHFDateTimePicker = <T extends FieldValues>({
   ...restProps
 }: RHFDateTimePickerProps<T>) => {
   const getValueDatePicker = useCallback((value: PathValue<T, Path<T>>) => {
-    if (value && typeof value === "string") {
-      return dayjs(value).isValid() ? dayjs(value) : null;
-    }
+    if (!value) return null;
+    return dayjs(value).isValid() ? dayjs(value) : null;
+  }, []);
+  const formatDateToIsoStr = useCallback((value: PickerValue) => {
+    if (!value) return null;
+    return dayjs(value).isValid() ? dayjs(value).toISOString() : null;
   }, []);
   return (
     <Controller
@@ -42,10 +43,16 @@ const RHFDateTimePicker = <T extends FieldValues>({
           {...restProps}
           value={getValueDatePicker(value)}
           ampm={false}
-          format="HH:mm DD/MM/YYYY"
-          onChange={onChange}
+          format={format}
+          onChange={(value) => onChange(formatDateToIsoStr(value))}
           error={!!error}
           label={label}
+          // onAccept={(value) => {
+          //   console.log(value);
+          // }}
+          slotProps={{
+            actionBar: { actions: ["clear", "nextOrAccept"] }, // only show "OK"
+          }}
           helperText={error?.message}
         />
       )}

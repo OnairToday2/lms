@@ -1,9 +1,6 @@
 import SvgIcon from "@mui/material/SvgIcon";
 
-const BellIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({
-  className,
-  ...rest
-}) => {
+const BellIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
   return (
     <SvgIcon>
       <svg
