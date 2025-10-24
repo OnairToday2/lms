@@ -1,7 +1,6 @@
 import { ClassRoom } from "../../classroom-form.schema";
 import { Control, useController, useWatch } from "react-hook-form";
-import { TextField, Typography } from "@mui/material";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
+import { Typography } from "@mui/material";
 import { slugify } from "@/utils/slugify";
 import { useEffect } from "react";
 

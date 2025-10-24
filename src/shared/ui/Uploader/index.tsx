@@ -1,7 +1,8 @@
 import { EyeIcon, ImageIcon, TrashIcon1 } from "@/shared/assets/icons";
 import { cn } from "@/utils";
 import { IconButton, Typography } from "@mui/material";
-import { ChangeEvent, memo, useCallback, useMemo, useState } from "react";
+import { isArray } from "lodash";
+import { ChangeEvent, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useId } from "react";
 
 const ALL_FILE_TYPE = {
@@ -33,10 +34,12 @@ export interface UploaderProps {
   className?: string;
   variant?: "square" | "16/9";
   accept?: Partial<Record<AcceptKeyOfFileTypes, Partial<FileTypesAccept[AcceptKeyOfFileTypes]>>>;
-  onChange?: (files?: File[]) => void;
+  onChange?: (files: File[] | File) => void;
   disabled?: boolean;
   multiple?: boolean;
   maxCount?: number;
+  hideButtonWhenSingle?: boolean;
+  buttonUpload?: React.ReactNode;
 }
 const Uploader: React.FC<UploaderProps> = ({
   className,
@@ -44,24 +47,43 @@ const Uploader: React.FC<UploaderProps> = ({
   variant = "square",
   disabled,
   onChange,
-  maxCount = -1,
+  maxCount = -1, // Unlimited
   accept = ALL_FILE_TYPE,
+  hideButtonWhenSingle = false,
+  buttonUpload,
 }) => {
+  const mounted = useRef(false);
   const fieldId = useId();
-  const [fileList, setFileList] = useState<File[]>([]);
+  const [fileList, setFileList] = useState<File[] | File>();
 
   const onInputFileChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       const newFileList = event.target.files;
+
       if (!newFileList || !newFileList.length) return;
 
-      const allFileList = [...fileList, ...newFileList];
-      if (maxCount > 0) {
-      }
-      //  const newFileLimitByCount = newFileList.slice(fileList.length, maxCount)
+      setFileList((prevFiles) => {
+        if (!multiple) {
+          const oneFile = newFileList[0];
+          oneFile && onChange?.(oneFile);
+          return oneFile;
+        }
 
-      setFileList((prev) => [...prev, ...newFileList]);
-      onChange?.([...newFileList]);
+        if (maxCount < 0) {
+          onChange?.([...newFileList]);
+          return !!prevFiles && Array.isArray(prevFiles) ? [...prevFiles, ...newFileList] : [...newFileList];
+        }
+
+        const currentFileCount = prevFiles && Array.isArray(prevFiles) ? prevFiles.length : 0;
+        const remaintCount = maxCount - currentFileCount;
+        const newFileListByRemainCount = remaintCount > 0 ? [...newFileList].splice(0, remaintCount) : [];
+
+        onChange?.(newFileListByRemainCount);
+        return !!prevFiles && Array.isArray(prevFiles)
+          ? [...prevFiles, ...newFileListByRemainCount]
+          : [...newFileListByRemainCount];
+      });
+
       setTimeout(() => {
         event.target.value = ""; // Make the smame file can be select at the second times.
       }, 0);
@@ -70,10 +92,15 @@ const Uploader: React.FC<UploaderProps> = ({
   );
 
   const onRemoveFileItem = useCallback((index: number) => {
-    setFileList((prev) => {
-      const updateFileList = [...(prev || [])];
-      updateFileList.splice(index, 1);
-      return updateFileList;
+    setFileList((prevFile) => {
+      if (prevFile && !isArray(prevFile)) {
+        return undefined;
+      }
+      if (prevFile && isArray(prevFile)) {
+        const updateFileList = [...prevFile];
+        updateFileList.splice(index, 1);
+        return updateFileList;
+      }
     });
   }, []);
 
@@ -86,39 +113,60 @@ const Uploader: React.FC<UploaderProps> = ({
       return acc;
     }, "");
   }, [accept]);
+
+  useEffect(() => {
+    if (!mounted.current) return;
+    mounted.current = true;
+    setFileList((prevFile) => {
+      if (Array.isArray(prevFile)) {
+        const newFiles = [...prevFile].splice(0, maxCount);
+        return newFiles;
+      }
+      return prevFile;
+    });
+    return () => {
+      mounted.current = false;
+    };
+  }, [maxCount]);
   return (
     <div className={cn("thumbnail-uploader-container", className)}>
-      <div className="flex items-center gap-2">
-        {fileList?.length ? (
-          <div className="flex gap-2">
-            {fileList?.map((file, _index) => (
-              <FileItem file={file} index={_index} key={_index} onRemove={onRemoveFileItem} />
-            ))}
-          </div>
-        ) : null}
-        {multiple || (!multiple && !fileList.length) ? (
-          <div
-            className={cn("uploader-box", "bg-gray-50 rounded-lg border border-dashed border-gray-300", {
-              "w-32 h-32": variant === "square",
-            })}
-          >
-            <label
-              htmlFor={`image-upload-${fieldId}`}
-              style={{ cursor: "pointer", width: "100%", height: "100%" }}
-              className="flex items-center justify-center"
-            >
-              <div className="icon-image-empty text-center">
-                <ImageIcon className="mb-2" />
-                <Typography className="text-xs">Chọn ảnh</Typography>
-                <input
-                  type="file"
-                  id={`image-upload-${fieldId}`}
-                  onChange={onInputFileChange}
-                  multiple={multiple}
-                  style={{ display: "none", textIndent: "9999px", opacity: 0 }}
-                  accept={acceptFileString}
-                />
-              </div>
+      <div className="flex items-center flex-wrap gap-2">
+        {Array.isArray(fileList) ? (
+          fileList?.map((file, _index) => (
+            <FileItem file={file} index={_index} key={_index} onRemove={onRemoveFileItem} />
+          ))
+        ) : (
+          <>{fileList ? <FileItem file={fileList} index={0} onRemove={onRemoveFileItem} /> : null}</>
+        )}
+
+        {multiple || (!multiple && !hideButtonWhenSingle) ? (
+          <div className={cn("uploader-box")}>
+            <label htmlFor={`image-upload-${fieldId}`} style={{ cursor: "pointer" }}>
+              {buttonUpload ?? (
+                <div
+                  className={cn(
+                    "button-uploader flex items-center justify-center",
+                    "bg-gray-50 rounded-lg border border-dashed border-gray-300",
+                    {
+                      "w-32 h-32": variant === "square",
+                    },
+                  )}
+                >
+                  <div className="text-center">
+                    <ImageIcon className="mb-2" />
+                    <Typography className="text-xs">Chọn ảnh</Typography>
+                  </div>
+                </div>
+              )}
+              <input
+                type="file"
+                disabled={disabled}
+                id={`image-upload-${fieldId}`}
+                onChange={onInputFileChange}
+                multiple={multiple}
+                style={{ display: "none", textIndent: "9999px", opacity: 0 }}
+                accept={acceptFileString}
+              />
             </label>
           </div>
         ) : null}
@@ -143,14 +191,17 @@ const FileItem: React.FC<FileItemProps> = ({ file, index, onRemove }) => {
     }
   };
   return (
-    <div className="file-item aspect-square w-32 bg-gray-100 rounded-lg overflow-hidden relative flex items-center justify-center">
-      <div className="file-item__thumbnail">
-        <img src={url} />
+    <div
+      className={cn("file-item", "relative flex items-center rounded-lg overflow-hidden justify-center", "group/item")}
+    >
+      <div className="file-item__thumbnail aspect-square w-32 bg-gray-100">
+        <img src={url} className="w-full h-full object-contain" />
       </div>
       <div
         className={cn(
           "file-item__content px-2 absolute left-0 top-0 w-full h-full",
           "flex items-center gap-1 justify-center bg-gray-900/30",
+          "invisible group-hover/item:visible",
         )}
       >
         <IconButton className="w-6 h-6 bg-transparent hover:bg-gray-900/60">
