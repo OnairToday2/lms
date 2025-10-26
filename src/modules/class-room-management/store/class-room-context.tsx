@@ -15,7 +15,7 @@ export const ClassRoomProvider = ({ children }: ClassRoomProviderProps) => {
   const storeRef = useRef<ClassRoomStoreContextAPI | null>(null);
 
   if (!storeRef.current) {
-    storeRef.current = createClassRoomStore({ formData: undefined, teacherList: {}, studentList: [] });
+    storeRef.current = createClassRoomStore({ selectedTeachers: {}, selectedStudents: [] });
   }
 
   return <ClassRoomStoreContext.Provider value={storeRef.current}>{children}</ClassRoomStoreContext.Provider>;

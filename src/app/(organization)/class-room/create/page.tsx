@@ -1,25 +1,24 @@
 "use client";
 import PageContainer from "@/shared/ui/PageContainer";
 import FormManageClassRoom, {
-  FormManageClassRoomProps,
-  FormManageClassRoomRef,
+  ManageClassRoomFormProps,
+  ManageClassRoomFormRef,
 } from "@/modules/class-room-management/components/ManageClassRoomForm";
 import { useCRUDClassRoom } from "@/modules/class-room-management/hooks/useCRUDClassRoom";
 import { useRef } from "react";
-import { useToast } from "@/shared/store/toast-snackbar/toast-snackbar-context";
-
+import { useSnackbar } from "notistack";
 const CreateClassRoomPage = () => {
-  const showMessage = useToast((state) => state.showSnackbar);
-  const formClassRoomRef = useRef<FormManageClassRoomRef>(null);
+  const { enqueueSnackbar } = useSnackbar();
+  const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
   const { onCreate, isLoading } = useCRUDClassRoom();
 
-  const handleCreateClassRoom: FormManageClassRoomProps["onSubmit"] = (formData, students, teachers) => {
+  const handleCreateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students, teachers) => {
     onCreate(
-      { formData, employees: students, teachers: teachers },
+      { formData, students, teachers },
       {
         onSuccess(data, variables, onMutateResult, context) {
-          showMessage("Tạo lớp học thành công.", "success");
-          formClassRoomRef.current?.resetForm();
+          enqueueSnackbar("Tạo lớp học thành công", { variant: "success" });
+          // formClassRoomRef.current?.resetForm();
         },
       },
     );

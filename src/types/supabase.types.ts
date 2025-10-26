@@ -211,8 +211,8 @@ export type Database = {
           id: string
           organization_id: string | null
           resource_id: string | null
-          room_type: Database["public"]["Enums"]["class_room_type"] | null
-          slug: string | null
+          room_type: Database["public"]["Enums"]["class_room_type"]
+          slug: string
           start_at: string | null
           status: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url: string | null
@@ -227,8 +227,8 @@ export type Database = {
           id?: string
           organization_id?: string | null
           resource_id?: string | null
-          room_type?: Database["public"]["Enums"]["class_room_type"] | null
-          slug?: string | null
+          room_type?: Database["public"]["Enums"]["class_room_type"]
+          slug: string
           start_at?: string | null
           status?: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url?: string | null
@@ -243,8 +243,8 @@ export type Database = {
           id?: string
           organization_id?: string | null
           resource_id?: string | null
-          room_type?: Database["public"]["Enums"]["class_room_type"] | null
-          slug?: string | null
+          room_type?: Database["public"]["Enums"]["class_room_type"]
+          slug?: string
           start_at?: string | null
           status?: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url?: string | null

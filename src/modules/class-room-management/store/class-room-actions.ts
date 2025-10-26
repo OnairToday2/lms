@@ -1,13 +1,12 @@
 import { StoreApi } from "zustand";
-import { ClassRoomStore } from "./class-room-store";
-import { EmployeeStudentWithProfileItem, EmployeeTeacherTypeItem } from "@/model/employee.model";
+import { ClassRoomStore, StudentSelectedItem, TeacherSelectedItem } from "./class-room-store";
 
 export type ClassRoomActions = {
   reset: () => void;
-  setSelectTeacher: (sessionIndex: number, teachers: EmployeeTeacherTypeItem[]) => void;
-  getTeachers: (sessionIndex: number) => EmployeeTeacherTypeItem[] | undefined;
+  setSelectedTeachers: (sessionIndex: number, teachers: TeacherSelectedItem[]) => void;
+  getTeachersByIndexSession: (sessionIndex: number) => TeacherSelectedItem[] | undefined;
   removeTeacher: (id: string, sessionIndex: number) => void;
-  setStudents: (students: EmployeeStudentWithProfileItem[]) => void;
+  setSelectedStudents: (students: StudentSelectedItem[]) => void;
 };
 
 const attachActions =
@@ -17,50 +16,49 @@ const attachActions =
     get: StoreApi<ClassRoomStore>["getState"],
     store: StoreApi<ClassRoomStore>,
   ): ClassRoomActions => ({
-    setSelectTeacher: (sessionIndex, teachers) =>
+    setSelectedTeachers: (sessionIndex, teachers) =>
       set((prev) => ({
         ...prev,
         state: {
           ...prev.state,
-          teacherList: {
-            ...prev.state.teacherList,
-            [sessionIndex]: [...(prev.state.teacherList[sessionIndex] || []), ...teachers],
+          selectedTeachers: {
+            ...prev.state.selectedTeachers,
+            [sessionIndex]: [...(prev.state.selectedTeachers[sessionIndex] || []), ...teachers],
           },
         },
       })),
     removeTeacher: (id, sessionIndex) => {
       const {
-        state: { teacherList },
+        state: { selectedTeachers },
       } = get();
 
       set((prev) => {
-        const currentTeacherList = teacherList[sessionIndex];
+        const currentTeacherList = selectedTeachers[sessionIndex];
         const newListTeacher = currentTeacherList?.filter((tc) => tc.id !== id);
         return {
           ...prev,
           state: {
             ...prev.state,
-            teacherList: {
-              ...prev.state.teacherList,
+            selectedTeachers: {
+              ...prev.state.selectedTeachers,
               [sessionIndex]: newListTeacher ? [...newListTeacher] : [],
             },
           },
         };
       });
     },
-    getTeachers: (sessionIndex: number) => {
+    getTeachersByIndexSession: (sessionIndex: number) => {
       const {
-        state: { teacherList },
+        state: { selectedTeachers },
       } = get();
-
-      return teacherList[sessionIndex];
+      return selectedTeachers[sessionIndex];
     },
-    setStudents: (employees) => {
+    setSelectedStudents: (students) => {
       set((prevState) => ({
         ...prevState,
         state: {
           ...prevState.state,
-          studentList: employees,
+          selectedStudents: students,
         },
       }));
     },

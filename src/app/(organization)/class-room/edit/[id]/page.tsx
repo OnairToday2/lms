@@ -1,29 +1,23 @@
-"use client";
 import PageContainer from "@/shared/ui/PageContainer";
-import FormManageClassRoom, {
-  FormManageClassRoomProps,
-  FormManageClassRoomRef,
-} from "@/modules/class-room-management/components/ManageClassRoomForm";
-import { useCRUDClassRoom } from "@/modules/class-room-management/hooks/useCRUDClassRoom";
-import { useRef } from "react";
-import { useToast } from "@/shared/store/toast-snackbar/toast-snackbar-context";
+import UpdateClassRoom from "./_components/UpdateClassRoom";
+import { getClassRoomById } from "@/repository/class-room";
+import { notFound } from "next/navigation";
 
-const EditClassRoomPage = () => {
-  const showMessage = useToast((state) => state.showSnackbar);
-  const formClassRoomRef = useRef<FormManageClassRoomRef>(null);
-  const { onCreate, isLoading } = useCRUDClassRoom();
+interface EditClassRoomPageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+export type GetClassRoomByIdData = Awaited<ReturnType<typeof getClassRoomById>>["data"];
+const EditClassRoomPage = async ({ params }: EditClassRoomPageProps) => {
+  const { id: classRoomId } = await params;
+  const { data, error } = await getClassRoomById(classRoomId);
 
-  const handleCreateClassRoom: FormManageClassRoomProps["onSubmit"] = (formData, students, teachers) => {
-    onCreate(
-      { formData, employees: students, teachers: teachers },
-      {
-        onSuccess(data, variables, onMutateResult, context) {
-          showMessage("Tạo lớp học thành công.", "success");
-          formClassRoomRef.current?.resetForm();
-        },
-      },
-    );
-  };
+  console.log(data, error);
+
+  if (!data || error) {
+    return notFound();
+  }
 
   return (
     <PageContainer
@@ -39,7 +33,7 @@ const EditClassRoomPage = () => {
       ]}
     >
       <div className="max-w-[1200px]">
-        <FormManageClassRoom onSubmit={handleCreateClassRoom} ref={formClassRoomRef} />
+        <UpdateClassRoom data={data} />
       </div>
     </PageContainer>
   );

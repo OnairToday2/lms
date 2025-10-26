@@ -14,7 +14,7 @@ import TeacherSelector from "../class-room-session-fields/TeacherSelector";
 import AgendarFields from "../class-room-session-fields/AgendarFields";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 
-export const getClassSessionInitData = (): ClassRoom["classRoomSessions"][number] => {
+export const initClassSessionFormData = (): ClassRoom["classRoomSessions"][number] => {
   return {
     title: "",
     description: "",
@@ -27,7 +27,7 @@ export const getClassSessionInitData = (): ClassRoom["classRoomSessions"][number
     agendas: [],
     limitPerson: 0,
     isUnlimited: false,
-    recourses: [],
+    resources: [],
   };
 };
 
@@ -79,7 +79,7 @@ const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
         if (!valid) return;
 
         const sessionItemCount = classSessionsFields.length;
-        const initSessionItem = getClassSessionInitData();
+        const initSessionItem = initClassSessionFormData();
         append(initSessionItem);
         setSessionItemInit((prev) => [...prev, { index: sessionItemCount, isInit: true }]);
       })

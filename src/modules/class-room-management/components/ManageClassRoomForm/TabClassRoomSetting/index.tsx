@@ -2,16 +2,25 @@
 import { Typography } from "@mui/material";
 import StudentsContainer, { StudentsContainerProps } from "./StudentsContainer";
 import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
+import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 
 const TabClassRoomSetting = () => {
-  const setStudents = useClassRoomStore((state) => state.actions.setStudents);
+  const setStudents = useClassRoomStore((state) => state.actions.setSelectedStudents);
 
-  const stulist = useClassRoomStore((state) => state.state.studentList);
-
-  console.log(stulist);
+  const selectedStudents = useClassRoomStore((state) => state.state.selectedStudents);
+  console.log(selectedStudents);
   const handleSelect: StudentsContainerProps["onChange"] = (employees) => {
-    setStudents(employees);
+    const students = employees.map<StudentSelectedItem>((item) => ({
+      id: item.id,
+      avatar: item.profiles.avatar,
+      email: item.profiles.email,
+      empoyeeType: item.employee_type,
+      employeeCode: item.employee_code,
+      fullName: item.profiles.full_name,
+    }));
+    setStudents(students);
   };
+
   return (
     <div className="bg-white p-6 rounded-lg">
       <div className="flex items-center justify-between mb-6">
@@ -19,7 +28,11 @@ const TabClassRoomSetting = () => {
           Thêm học viên <span className="text-red-600">*</span>
         </Typography>
       </div>
-      <StudentsContainer seletedItems={stulist} onChange={handleSelect} />
+      <StudentsContainer
+        seletedItems={[]}
+        selectedStudentIds={selectedStudents.map((it) => it.id)}
+        onChange={handleSelect}
+      />
     </div>
   );
 };

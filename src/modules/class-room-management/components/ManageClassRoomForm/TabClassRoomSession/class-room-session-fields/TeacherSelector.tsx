@@ -9,6 +9,7 @@ import { useClassRoomStore } from "@/modules/class-room-management/store/class-r
 import { CloseIcon } from "@/shared/assets/icons";
 import { cn } from "@/utils";
 import Avatar from "@/shared/ui/Avatar";
+import { TeacherSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 
 interface TeacherSelectorProps {
   sessionIndex: number;
@@ -17,15 +18,21 @@ interface TeacherSelectorProps {
 
 const TeacherSelector: React.FC<TeacherSelectorProps> = ({ sessionIndex, className }) => {
   const [open, setOpen] = useState(false);
-  const setTeachers = useClassRoomStore(({ actions }) => actions.setSelectTeacher);
+  const setSelectedTeachers = useClassRoomStore(({ actions }) => actions.setSelectedTeachers);
   const removeTeacher = useClassRoomStore(({ actions }) => actions.removeTeacher);
-  const selectedTeachers = useClassRoomStore(({ state }) => state.teacherList);
+  const selectedTeachers = useClassRoomStore(({ actions }) => actions.getTeachersByIndexSession(sessionIndex));
 
-  const currentSelectedList = selectedTeachers[sessionIndex];
-
-  const handleConformSelect: DialogTeacherContainerProps["onOk"] = (teacherList) => {
+  const handleConformSelect: DialogTeacherContainerProps["onOk"] = (teachers) => {
     //Teacher must alway new List
-    setTeachers(sessionIndex, teacherList);
+    const teacherList = teachers.map<TeacherSelectedItem>((item) => ({
+      avatar: item.profiles.avatar,
+      id: item.id,
+      fullName: item.profiles.full_name,
+      empoyeeType: item.employee_type,
+      employeeCode: item.employee_code,
+      email: item.profiles.email,
+    }));
+    setSelectedTeachers(sessionIndex, teacherList);
   };
 
   const handleRemove: Exclude<TeacherItemProps["onRemove"], undefined> = useCallback((id) => {
@@ -49,15 +56,15 @@ const TeacherSelector: React.FC<TeacherSelectorProps> = ({ sessionIndex, classNa
           </div>
         </div>
 
-        {currentSelectedList?.length ? (
+        {selectedTeachers?.length ? (
           <div className="selected-teacher flex flex-col gap-3">
             <div className="h-6"></div>
-            {currentSelectedList.map((tc) => (
+            {selectedTeachers.map((tc) => (
               <TeacherItem
                 id={tc.id}
-                name={tc.profiles?.full_name || ""}
-                avatarUrl={tc.profiles?.avatar}
-                code={tc.employee_code}
+                name={tc.fullName}
+                avatarUrl={tc.avatar}
+                code={tc.employeeCode}
                 key={tc.id}
                 onRemove={handleRemove}
               />
@@ -66,7 +73,7 @@ const TeacherSelector: React.FC<TeacherSelectorProps> = ({ sessionIndex, classNa
         ) : null}
       </div>
       <DialogTeacherContainer
-        values={currentSelectedList?.map((tc) => tc.id)}
+        values={selectedTeachers?.map((tc) => tc.id)}
         open={open}
         onClose={() => setOpen(false)}
         onOk={handleConformSelect}

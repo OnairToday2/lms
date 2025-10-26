@@ -8,7 +8,7 @@ import {
   createPivotClassRoomAndHashTag,
   createClassRoomMeta,
   createPivotClassSessionAndTeacher,
-} from "@/repository/classRoom";
+} from "@/repository/class-room";
 
 import type {
   CreatePivotClassRoomAndEmployeePayload,
@@ -18,12 +18,12 @@ import type {
   CreateAgendasWithSessionPayload,
   CreateClassRoomSessionsPayload,
   CreateClassRoomMetaPayload,
-} from "@/repository/classRoom";
+} from "@/repository/class-room";
 
 import { ClassRoom } from "../components/classroom-form.schema";
-import { EmployeeStudentWithProfileItem, EmployeeTeacherTypeItem } from "@/model/employee.model";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { useTMutation } from "@/lib";
+import { ClassRoomStore } from "../store/class-room-store";
 
 const useCRUDClassRoom = () => {
   const userInfo = useUserOrganization((state) => state.data);
@@ -32,17 +32,16 @@ const useCRUDClassRoom = () => {
     mutationKey: ["CREATE_CLASS_ROOM"],
     mutationFn: async (payload: {
       formData: ClassRoom;
-      teachers: {
-        [sessionIndex: number]: EmployeeTeacherTypeItem[];
-      };
-      employees: EmployeeStudentWithProfileItem[];
+      teachers: ClassRoomStore["state"]["selectedTeachers"];
+      students: ClassRoomStore["state"]["selectedStudents"];
     }) => {
-      const { formData, teachers, employees } = payload;
+      const { formData, teachers, students } = payload;
       const {
         classRoomField,
         hashTags,
         classRoomSessions,
         communityInfo,
+        galleries,
         description,
         thumbnailUrl,
         roomType,
@@ -55,6 +54,7 @@ const useCRUDClassRoom = () => {
         whies,
       } = formData;
 
+      console.log({ payload });
       const { startDate, endDate } = getStartDateAndEndDateFromClassSession(classRoomSessions, roomType);
       /**
        * Create ClassRoom first
@@ -79,30 +79,36 @@ const useCRUDClassRoom = () => {
         return;
       }
 
-      const metaFaqsPayload = faqs.map<CreateClassRoomMetaPayload>((faq) => ({
-        class_room_id: classRoomData.id,
-        key: "faqs",
-        value: {
-          answer: faq.answer,
-          question: faq.question,
-        },
-      }));
+      if (faqs.length) {
+        const { data: faqsData, error: faqsDataError } = await createClassRoomMeta({
+          class_room_id: classRoomData.id,
+          key: "faqs",
+          value: faqs.map((faq) => ({ answer: faq.answer, question: faq.question })),
+        });
+      }
 
-      const metaWhiesPayload = whies.map<CreateClassRoomMetaPayload>((why) => ({
-        class_room_id: classRoomData.id,
-        key: "forWhom",
-        value: why.description,
-      }));
+      if (whies.length) {
+        const { data: whyData, error: whyError } = await createClassRoomMeta({
+          class_room_id: classRoomData.id,
+          key: "why",
+          value: whies.map((item) => item.description),
+        });
+      }
 
-      const metaForwhomPayload = forWhom.map<CreateClassRoomMetaPayload>((forWhom) => ({
-        class_room_id: classRoomData.id,
-        key: "why",
-        value: forWhom.description,
-      }));
-
-      const { data: faqData, error: faqError } = await createClassRoomMeta(metaFaqsPayload);
-      const { data: whyData, error: whyError } = await createClassRoomMeta(metaWhiesPayload);
-      const { data: forWhomData, error: forWhomError } = await createClassRoomMeta(metaForwhomPayload);
+      if (forWhom.length) {
+        const { data: forWhomData, error: forWhomError } = await createClassRoomMeta({
+          class_room_id: classRoomData.id,
+          key: "forWhom",
+          value: forWhom.map((item) => item.description),
+        });
+      }
+      if (galleries.length) {
+        const { data: galleriesData, error: galleriesDataError } = await createClassRoomMeta({
+          class_room_id: classRoomData.id,
+          key: "galleries",
+          value: galleries,
+        });
+      }
 
       const createPivoteClassRoomAndFieldPayload = classRoomField.map<CreatePivotClassRoomAndFieldPayload>(
         (fieldId) => ({
@@ -116,7 +122,7 @@ const useCRUDClassRoom = () => {
           class_room_id: classRoomData.id,
         }),
       );
-      const classRoomAndEmployeePlayload = employees.map<CreatePivotClassRoomAndEmployeePayload>((tc) => ({
+      const classRoomAndEmployeePlayload = students.map<CreatePivotClassRoomAndEmployeePayload>((tc) => ({
         class_room_id: classRoomData.id,
         employee_id: tc.id,
       }));

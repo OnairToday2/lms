@@ -6,14 +6,14 @@ import ClassRoomFormContainer, {
 } from "./ClassRoomFormContainer";
 import { forwardRef, memo } from "react";
 
-export interface FormManageClassRoomRef extends ClassRoomFormContainerRef {}
-export interface FormManageClassRoomProps {
+export interface ManageClassRoomFormRef extends ClassRoomFormContainerRef {}
+export interface ManageClassRoomFormProps {
   onSubmit?: ClassRoomFormContainerProps["onSubmit"];
   isLoading?: boolean;
   action?: "create" | "edit";
-  value?: any;
+  value?: ClassRoomFormContainerProps["value"];
 }
-const FormManageClassRoom = forwardRef<FormManageClassRoomRef, FormManageClassRoomProps>(
+const ManageClassRoomForm = forwardRef<ManageClassRoomFormRef, ManageClassRoomFormProps>(
   ({ onSubmit, value, action = "create", isLoading = false }, ref) => {
     return (
       <ClassRoomProvider>
@@ -22,4 +22,4 @@ const FormManageClassRoom = forwardRef<FormManageClassRoomRef, FormManageClassRo
     );
   },
 );
-export default memo(FormManageClassRoom);
+export default memo(ManageClassRoomForm);

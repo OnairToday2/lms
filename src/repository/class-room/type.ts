@@ -1,7 +1,7 @@
 import { ClassRoom } from "@/model/class-room.model";
 import { ClassSession } from "@/model/class-session.model";
 import { ClassSessionAgenda } from "@/model/class-session-agenda.model";
-import { ClassRoomMetaKey } from "@/constants/class-room-meta.constant";
+import { ClassRoomMetaKey, ClassRoomMetaValue } from "@/constants/class-room-meta.constant";
 
 export type CreateClassRoomPayload = Pick<
   ClassRoom,
@@ -58,13 +58,13 @@ export type CreatePivotClassRoomAndEmployeePayload = {
   employee_id: string;
 };
 
-export type GetClassRoomMetaQueryParams = {
+export type GetClassRoomMetaQueryParams<K> = {
   class_room_id: string;
-  key?: ClassRoomMetaKey;
+  key?: K;
 };
 
-export type CreateClassRoomMetaPayload = {
+export type CreateClassRoomMetaPayload<K extends ClassRoomMetaKey> = {
   class_room_id: string;
-  key: ClassRoomMetaKey;
-  value: any;
+  key: K;
+  value: ClassRoomMetaValue<K>;
 };

@@ -1,3 +1,4 @@
+import { ClassRoomStatus } from "@/model/class-room.model";
 import dayjs from "dayjs";
 import * as zod from "zod";
 
@@ -17,7 +18,7 @@ const classRoomSessionSchema = zod
     thumbnailUrl: zod.string(),
     startDate: zod.iso.datetime({ error: "Ngày bắt đầu không hợp lệ." }),
     endDate: zod.iso.datetime({ error: "Ngày kết thúc không hợp lệ." }),
-    recourses: zod.array(
+    resources: zod.array(
       zod.object({
         id: zod.string(),
       }),
@@ -97,7 +98,7 @@ const classRoomSchema = zod
       .max(3, "Chọn tối thiểu 1 lĩnh vực và tối đa 3 lĩnh vực."),
     hashTags: zod.array(zod.string()),
     classRoomId: zod.string(),
-    status: zod.enum(["publish", "draft"]),
+    status: zod.enum(["publish", "draft", "pending", "deleted", "active", "deactive"]),
     roomType: zod.enum(["single", "multiple"]),
     classRoomSessions: zod.array(classRoomSessionSchema),
     communityInfo: zod.object({

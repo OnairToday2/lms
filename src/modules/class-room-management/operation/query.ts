@@ -1,5 +1,5 @@
 import { useTQuery } from "@/lib";
-import { getClassFieldList, getClassHasTagList } from "@/repository/classRoom";
+import { getClassFieldList, getClassHasTagList } from "@/repository/class-room";
 import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { employeeRepository } from "@/repository";
 import { EmployeeQueryParams } from "@/repository/employee";

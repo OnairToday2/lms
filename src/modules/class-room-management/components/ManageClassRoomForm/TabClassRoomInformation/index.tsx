@@ -1,16 +1,16 @@
 "use client";
+import { memo } from "react";
 import TextEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { FormLabel, Typography } from "@mui/material";
 import { type ClassRoom } from "../../classroom-form.schema";
 interface TabClassRoomInformationProps {}
 import { useFormContext } from "react-hook-form";
-import { memo } from "react";
-import ThumbnailUploader, { ThumbnailUploaderProps } from "./ThumbailUploader";
+import ThumbnailUploader from "./ThumbailUploader";
 import ClassRoomSlugField from "./ClassRoomSlugField";
 import ClassFieldSelector from "./ClassFieldSelector";
 import ClassHashTagSelector from "./ClassHashTagSelector";
-import GalleriesUploader, { GalleriesUploaderProps } from "./GalleriesUploader";
+import GalleriesUploader from "./GalleriesUploader";
 
 const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = () => {
   const {
@@ -18,18 +18,6 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = () => {
     setValue,
     formState: { errors },
   } = useFormContext<ClassRoom>();
-
-  const handleChangeThumbnail: ThumbnailUploaderProps["onChange"] = (path) => {
-    const fullPath = process.env.NEXT_PUBLIC_STORAGE_URL ? `${process.env.NEXT_PUBLIC_STORAGE_URL}/${path}` : path;
-    setValue("thumbnailUrl", fullPath);
-  };
-
-  const handleChangeGalleries: GalleriesUploaderProps["onChange"] = (paths) => {
-    const currectPath = paths.map((path) =>
-      process.env.NEXT_PUBLIC_STORAGE_URL ? `${process.env.NEXT_PUBLIC_STORAGE_URL}/${path}` : path,
-    );
-    setValue("galleries", currectPath);
-  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -50,6 +38,7 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = () => {
         <ThumbnailUploader
           label="Ảnh bìa đại diện"
           subTitle="Hình ảnh đại diện cho lớp học của bạn"
+          control={control}
           description={
             <div className="flex flex-wrap gap-2 items-center mb-2">
               <Typography className="text-xs">
@@ -59,10 +48,6 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = () => {
               <Typography className="text-xs">File đuôi jpg, png</Typography>
             </div>
           }
-          required
-          onChange={handleChangeThumbnail}
-          error={!!errors.thumbnailUrl}
-          helperText={errors?.thumbnailUrl?.message}
         />
 
         <TextEditor label="Nội dung khóa học" control={control} name="description" required />
@@ -71,6 +56,7 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = () => {
         <ClassHashTagSelector control={control} />
 
         <GalleriesUploader
+          control={control}
           label="Thư viện ảnh"
           description={
             <div className="flex flex-wrap gap-2 items-center">
@@ -81,9 +67,6 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = () => {
               <Typography className="text-xs">File đuôi jpg, png</Typography>
             </div>
           }
-          onChange={handleChangeGalleries}
-          error={!!errors.galleries}
-          helperText={errors?.galleries?.message}
         />
       </div>
 
