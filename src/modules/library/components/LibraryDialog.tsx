@@ -111,7 +111,14 @@ export function LibraryDialog() {
     }
 
     if (config?.mode === "single") {
-      setSelectedResources([resource]);
+      setSelectedResources((prev) => {
+        const isSelected = prev.some((r) => r.id === resource.id);
+        if (isSelected) {
+          return [];
+        } else {
+          return [resource];
+        }
+      });
     } else {
       setSelectedResources((prev) => {
         const isSelected = prev.some((r) => r.id === resource.id);

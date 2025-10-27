@@ -57,10 +57,13 @@ const attachActions =
       },
 
       cancelLibrary: () => {
-        const { reject } = get();
+        const { resolve, config, resources } = get();
 
-        if (reject) {
-          reject(new Error("Library selection cancelled"));
+        if (resolve && config) {
+          const previouslySelected = resources.filter((resource: Resource) =>
+            config.selectedIds.includes(resource.id) && resource.kind === "file",
+          );
+          resolve(previouslySelected);
         }
 
         set({

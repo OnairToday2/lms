@@ -28,11 +28,11 @@ export default function LibraryExample() {
     try {
       const resources = await openLibrary({
         mode: "single",
-        selectedIds: [],
+        selectedIds: selectedSingleResource ? [selectedSingleResource.id] : [],
       });
       setSelectedSingleResource(resources[0] || null);
     } catch (error) {
-      setSelectedSingleResource(null);
+      console.error("Failed to open library:", error);
     } finally {
       setLoadingSingle(false);
     }
@@ -47,6 +47,7 @@ export default function LibraryExample() {
       });
       setSelectedMultipleResources(resources);
     } catch (error) {
+      console.error("Failed to open library:", error);
     } finally {
       setLoadingMultiple(false);
     }

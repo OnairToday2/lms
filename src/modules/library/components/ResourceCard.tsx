@@ -33,7 +33,7 @@ export function ResourceCard({
         cursor: "pointer",
         width: "100%",
         height: 190,
-        border: selected ? "3px solid #1976d2" : "1px solid #e0e0e0",
+        border: selected ? "1px solid #1976d2" : "1px solid #e0e0e0",
         backgroundColor: selected ? "#e3f2fd" : "white",
         position: "relative",
         "&:hover": {
