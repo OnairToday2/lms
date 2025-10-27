@@ -42,10 +42,6 @@ export type CreatePivotClassRoomAndFieldPayload = {
   class_room_id: string;
   class_field_id: string;
 };
-export type CreateAgendasWithSessionPayload = Pick<
-  ClassSessionAgenda,
-  "title" | "description" | "end_at" | "start_at" | "thumbnail_url" | "class_session_id"
->;
 
 export type CreatePivotClassRoomAndEmployeePayload = {
   class_room_id: string;
