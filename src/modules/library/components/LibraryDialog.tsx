@@ -60,6 +60,8 @@ export function LibraryDialog() {
   const [uploadProgress, setUploadProgress] = useState(false);
   const [uploadProgressPercent, setUploadProgressPercent] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const prevOpenRef = useRef<boolean>(false);
+  const hasRestoredSelectionRef = useRef<boolean>(false);
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -87,17 +89,29 @@ export function LibraryDialog() {
   }, [open, config?.libraryId, setResources]);
 
   useEffect(() => {
-    if (open && config) {
+    const isDialogOpening = open && !prevOpenRef.current;
+
+    if (isDialogOpening) {
+      setCurrentFolderId(null);
+      setFolderPath([{ id: null, name: "Root" }]);
+      hasRestoredSelectionRef.current = false;
+    } else if (!open) {
+      setSelectedResources([]);
+      setCurrentFolderId(null);
+      setFolderPath([{ id: null, name: "Root" }]);
+      hasRestoredSelectionRef.current = false;
+    }
+
+    prevOpenRef.current = open;
+  }, [open]);
+
+  useEffect(() => {
+    if (open && config && resources.length > 0 && !hasRestoredSelectionRef.current) {
       const preSelected = resources.filter((resource: Resource) =>
         config.selectedIds.includes(resource.id) && resource.kind === "file",
       );
       setSelectedResources(preSelected);
-      setCurrentFolderId(null);
-      setFolderPath([{ id: null, name: "Root" }]);
-    } else {
-      setSelectedResources([]);
-      setCurrentFolderId(null);
-      setFolderPath([{ id: null, name: "Root" }]);
+      hasRestoredSelectionRef.current = true;
     }
   }, [open, config, resources]);
 
