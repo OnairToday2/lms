@@ -1,7 +1,5 @@
 import { ClassRoom } from "@/model/class-room.model";
-import { ClassSession } from "@/model/class-session.model";
 import { ClassSessionAgenda } from "@/model/class-session-agenda.model";
-import { ClassRoomMetaKey, ClassRoomMetaValue } from "@/constants/class-room-meta.constant";
 
 export type CreateClassRoomPayload = Pick<
   ClassRoom,
@@ -49,48 +47,7 @@ export type CreateAgendasWithSessionPayload = Pick<
   "title" | "description" | "end_at" | "start_at" | "thumbnail_url" | "class_session_id"
 >;
 
-export type CreateClassRoomSessionsPayload = {
-  classRoomId: string;
-  sessions: Pick<
-    ClassSession,
-    | "title"
-    | "start_at"
-    | "end_at"
-    | "description"
-    | "limit_person"
-    | "is_online"
-    | "resource_ids"
-    | "channel_info"
-    | "channel_provider"
-  >[];
-};
-
-export type CreatePivotClassSessionAndTeacherPayload = {
-  class_session_id: string;
-  teacher_id: string;
-};
-
 export type CreatePivotClassRoomAndEmployeePayload = {
   class_room_id: string;
   employee_id: string;
 };
-
-export type GetClassRoomMetaQueryParams<K> = {
-  class_room_id: string;
-  key?: K;
-};
-
-export type CreateClassRoomMetaPayload<K extends ClassRoomMetaKey> = {
-  class_room_id: string;
-  key: K;
-  value: ClassRoomMetaValue<K>;
-};
-export type UpdateClassRoomMetaPayload<K extends ClassRoomMetaKey> = {
-  id: string;
-  class_room_id: string;
-  key: K;
-  value: ClassRoomMetaValue<K>;
-};
-export type UpSertClassRoomMetaPayload<T extends ClassRoomMetaKey> =
-  | CreateClassRoomMetaPayload<T>
-  | UpdateClassRoomMetaPayload<T>;

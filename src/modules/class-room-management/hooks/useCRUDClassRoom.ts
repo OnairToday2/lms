@@ -1,19 +1,20 @@
 "use client";
-import { classRoomRepository, classRoomSessionRepository } from "@/repository";
+import { classRoomRepository, classRoomSessionRepository, classRoomMetaRepository } from "@/repository";
 import type {
   CreatePivotClassRoomAndEmployeePayload,
   CreatePivotClassRoomAndFieldPayload,
   CreatePivotClassRoomAndHashTagPayload,
-  CreatePivotClassSessionAndTeacherPayload,
   CreateAgendasWithSessionPayload,
-  CreateClassRoomSessionsPayload,
 } from "@/repository/class-room";
+import {
+  CreateClassRoomSessionsPayload,
+  CreatePivotClassRoomSessionAndTeacherPayload,
+} from "@/repository/class-room-session";
 
 import { ClassRoom } from "../components/classroom-form.schema";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { useTMutation } from "@/lib";
 import { ClassRoomStore } from "../store/class-room-store";
-import { getClassRoomMetaValue } from "../utils";
 import { isUndefined } from "lodash";
 
 const useCRUDClassRoom = () => {
@@ -71,7 +72,7 @@ const useCRUDClassRoom = () => {
       }
 
       if (faqs.length) {
-        const { data: faqsData, error: faqsDataError } = await classRoomRepository.createClassRoomMeta({
+        const { data: faqsData, error: faqsDataError } = await classRoomMetaRepository.createClassRoomMeta({
           class_room_id: classRoomData.id,
           key: "faqs",
           value: faqs.map((faq) => ({ answer: faq.answer, question: faq.question })),
@@ -79,7 +80,7 @@ const useCRUDClassRoom = () => {
       }
 
       if (whies.length) {
-        const { data: whyData, error: whyError } = await classRoomRepository.createClassRoomMeta({
+        const { data: whyData, error: whyError } = await classRoomMetaRepository.createClassRoomMeta({
           class_room_id: classRoomData.id,
           key: "why",
           value: whies.map((item) => item.description),
@@ -87,14 +88,14 @@ const useCRUDClassRoom = () => {
       }
 
       if (forWhom.length) {
-        const { data: forWhomData, error: forWhomError } = await classRoomRepository.createClassRoomMeta({
+        const { data: forWhomData, error: forWhomError } = await classRoomMetaRepository.createClassRoomMeta({
           class_room_id: classRoomData.id,
           key: "forWhom",
           value: forWhom.map((item) => item.description),
         });
       }
       if (galleries.length) {
-        const { data: galleriesData, error: galleriesDataError } = await classRoomRepository.createClassRoomMeta({
+        const { data: galleriesData, error: galleriesDataError } = await classRoomMetaRepository.createClassRoomMeta({
           class_room_id: classRoomData.id,
           key: "galleries",
           value: galleries,
@@ -154,11 +155,11 @@ const useCRUDClassRoom = () => {
       );
       await classRoomSessionRepository.createAgendasWithSession(createAgendasWithPayload);
       const createPivotClassSessionAndTeacherPayload = Object.entries(teachers).reduce<
-        CreatePivotClassSessionAndTeacherPayload[]
+        CreatePivotClassRoomSessionAndTeacherPayload[]
       >((acc, [_, teachers], _index) => {
         const sessionId = sessionsData[_index]?.id;
         if (sessionId) {
-          const teacherListWithSessionId = teachers.map<CreatePivotClassSessionAndTeacherPayload>((tc) => ({
+          const teacherListWithSessionId = teachers.map<CreatePivotClassRoomSessionAndTeacherPayload>((tc) => ({
             class_session_id: sessionId,
             teacher_id: tc.id,
           }));
@@ -233,7 +234,7 @@ const useCRUDClassRoom = () => {
         throw new Error("Cập nhật lớp học thất bại.");
       }
       const faqMetadata = classRoomDetail.class_room_metadata.find((item) => item.key === "faqs");
-      const { data: faqsData, error: faqsDataError } = await classRoomRepository.upsertClassRoomMeta({
+      const { data: faqsData, error: faqsDataError } = await classRoomMetaRepository.upsertClassRoomMeta({
         id: faqMetadata?.id,
         class_room_id: classRoomData.id,
         key: "faqs",
@@ -243,7 +244,7 @@ const useCRUDClassRoom = () => {
         console.log("Cập nhật Metadata FAQS thất bại", faqsDataError);
       }
       const whyMetadata = classRoomDetail.class_room_metadata.find((item) => item.key === "why");
-      const { data: whyData, error: whyError } = await classRoomRepository.upsertClassRoomMeta({
+      const { data: whyData, error: whyError } = await classRoomMetaRepository.upsertClassRoomMeta({
         id: whyMetadata?.id,
         class_room_id: classRoomData.id,
         key: "why",
@@ -256,7 +257,7 @@ const useCRUDClassRoom = () => {
 
       const forWhomMetadata = classRoomDetail.class_room_metadata.find((item) => item.key === "forWhom");
 
-      const { data: forWhomData, error: forWhomError } = await classRoomRepository.upsertClassRoomMeta({
+      const { data: forWhomData, error: forWhomError } = await classRoomMetaRepository.upsertClassRoomMeta({
         id: forWhomMetadata?.id,
         class_room_id: classRoomData.id,
         key: "forWhom",
@@ -267,7 +268,7 @@ const useCRUDClassRoom = () => {
         console.log("Cập nhật Metadata forWhom thất bại", forWhomError);
       }
 
-      const { data: galleriesData, error: galleriesDataError } = await classRoomRepository.createClassRoomMeta({
+      const { data: galleriesData, error: galleriesDataError } = await classRoomMetaRepository.createClassRoomMeta({
         class_room_id: classRoomData.id,
         key: "galleries",
         value: galleries,
@@ -382,11 +383,11 @@ const useCRUDClassRoom = () => {
       await classRoomSessionRepository.createAgendasWithSession(createAgendasWithPayload);
 
       const createPivotClassSessionAndTeacherPayload = Object.entries(teachers).reduce<
-        CreatePivotClassSessionAndTeacherPayload[]
+        CreatePivotClassRoomSessionAndTeacherPayload[]
       >((acc, [_, teachers], _index) => {
         const sessionId = sessionsData[_index]?.id;
         if (sessionId) {
-          const teacherListWithSessionId = teachers.map<CreatePivotClassSessionAndTeacherPayload>((tc) => ({
+          const teacherListWithSessionId = teachers.map<CreatePivotClassRoomSessionAndTeacherPayload>((tc) => ({
             class_session_id: sessionId,
             teacher_id: tc.id,
           }));
