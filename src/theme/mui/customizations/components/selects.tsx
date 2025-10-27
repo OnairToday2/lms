@@ -6,16 +6,18 @@ import { grey } from "../../theme-color";
 export const selectsCustomizations: Components<Theme> = {
   MuiSelect: {
     defaultProps: {
-      IconComponent: React.forwardRef<SVGSVGElement, SvgIconProps>(
-        (props, ref) => (
-          <KeyboardArrowDownIcon fontSize="small" {...props} ref={ref} />
-        ),
-      ),
+      IconComponent: React.forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => (
+        <KeyboardArrowDownIcon fontSize="small" {...props} ref={ref} />
+      )),
     },
     styleOverrides: {
       root: ({ theme }) => ({
         [`& .${inputBaseClasses.root}`]: {
           borderBottom: "1px solid",
+        },
+
+        "&.MuiFilledInput-root": {
+          backgroundColor: theme.palette.grey[200],
         },
         // borderRadius: (theme.vars || theme).shape.borderRadius,
         // // border: "1px solid",

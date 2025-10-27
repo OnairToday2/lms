@@ -1,8 +1,9 @@
-import { Box, Button, Typography } from "@mui/material";
-import Image from "next/image";
-import { ClassRoomType } from "@/model/class-room.model";
+"use client";
 import { memo, useState } from "react";
+import Image from "next/image";
 import { cn } from "@/utils";
+import { Box, Button, Typography } from "@mui/material";
+import { ClassRoomType } from "@/model/class-room.model";
 import { ChevronRightDoubleIcon } from "@/shared/assets/icons";
 export interface ClassRoomTypeSelectorProps {
   className?: string;
@@ -16,6 +17,8 @@ const ClassRoomTypeSelector: React.FC<ClassRoomTypeSelectorProps> = ({ className
     if (!roomType) return;
     onSelect?.(roomType);
   };
+
+  const handleSelectRoomType = (type: ClassRoomType) => () => type && setRoomType(type);
   return (
     <div className="flex flex-col gap-6 justify-center items-center">
       <div className="class-room-type-selector grid grid-cols-2 gap-6">
@@ -26,7 +29,7 @@ const ClassRoomTypeSelector: React.FC<ClassRoomTypeSelectorProps> = ({ className
           title="Lớp học trực tuyến đơn"
           description="Diễn ra trong một buổi duy nhất với thời gian cố định."
           isActive={roomType === "single"}
-          onClick={() => setRoomType("single")}
+          onClick={handleSelectRoomType("single")}
         />
 
         <SelectItem
@@ -36,7 +39,7 @@ const ClassRoomTypeSelector: React.FC<ClassRoomTypeSelectorProps> = ({ className
           title="Lớp học trực tuyến chuỗi"
           description="Gồm nhiều lớp học trong một chương trình, diễn ra vào các khung giờ khác nhau."
           isActive={roomType === "multiple"}
-          onClick={() => setRoomType("multiple")}
+          onClick={handleSelectRoomType("multiple")}
         />
       </div>
       <Button onClick={confirmSelectType} disabled={!roomType} endIcon={<ChevronRightDoubleIcon />} size="large">
@@ -64,7 +67,7 @@ const SelectItem: React.FC<SelectItemProps> = ({ isActive, title, description, o
       onClick={onClick}
     >
       {thumbnail}
-      <div>
+      <div className="select-item-content">
         {title ? (
           <Typography component="h4" className="font-bold mb-2">
             {title}

@@ -61,6 +61,7 @@ const RHFTextAreaField = <T extends FieldValues>({
             startAdornment={startAdornment}
             endAdornment={endAdornment}
             sx={{
+              background: "white",
               "&.MuiInputBase-multiline": {
                 padding: 0,
               },

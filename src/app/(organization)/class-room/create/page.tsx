@@ -1,9 +1,28 @@
 "use client";
 import PageContainer from "@/shared/ui/PageContainer";
-import { Button } from "@mui/material";
-import FormManageClassRoom from "@/modules/class-room-management/components/ManageClassRoomForm";
+import FormManageClassRoom, {
+  ManageClassRoomFormProps,
+  ManageClassRoomFormRef,
+} from "@/modules/class-room-management/components/ManageClassRoomForm";
+import { useCRUDClassRoom } from "@/modules/class-room-management/hooks/useCRUDClassRoom";
+import { useRef } from "react";
+import { useSnackbar } from "notistack";
 const CreateClassRoomPage = () => {
-  const handleCreateClassRoom = () => {};
+  const { enqueueSnackbar } = useSnackbar();
+  const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
+  const { onCreate, isLoading } = useCRUDClassRoom();
+
+  const handleCreateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students, teachers) => {
+    onCreate(
+      { formData, students, teachers },
+      {
+        onSuccess(data, variables, onMutateResult, context) {
+          enqueueSnackbar("Tạo lớp học thành công", { variant: "success" });
+          // formClassRoomRef.current?.resetForm();
+        },
+      },
+    );
+  };
 
   return (
     <PageContainer
@@ -19,7 +38,7 @@ const CreateClassRoomPage = () => {
       ]}
     >
       <div className="max-w-[1200px]">
-        <FormManageClassRoom />
+        <FormManageClassRoom onSubmit={handleCreateClassRoom} ref={formClassRoomRef} isLoading={isLoading} />
       </div>
     </PageContainer>
   );

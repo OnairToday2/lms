@@ -1,11 +1,7 @@
 import { alpha, Theme, Components } from "@mui/material/styles";
 import { outlinedInputClasses } from "@mui/material/OutlinedInput";
 import { grey, primary, error } from "../../theme-color";
-import {
-  filledInputClasses,
-  formLabelClasses,
-  inputBaseClasses,
-} from "@mui/material";
+import { filledInputClasses, formLabelClasses, inputBaseClasses } from "@mui/material";
 
 /* eslint-disable import/prefer-default-export */
 export const inputsCustomizations: Components<Theme> = {
@@ -13,12 +9,12 @@ export const inputsCustomizations: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         "&::placeholder": {
-          opacity: 0.7,
+          opacity: 0.8,
           color: grey[600],
         },
       }),
       input: ({ theme }) => ({
-        padding: "0.5rem 0.875rem",
+        padding: "0.625rem 0.875rem",
       }),
     },
   },
@@ -45,28 +41,28 @@ export const inputsCustomizations: Components<Theme> = {
       // },
       root: ({ theme }) => ({
         color: (theme.vars || theme).palette.text.primary,
-        borderColor: theme.palette.grey[400],
-        // backgroundColor: (theme.vars || theme).palette.background.default,
-        // transition: "border 120ms ease-in",
-        // "&:hover": {
-        //   borderColor: grey[400],
-        // },
         fontSize: theme.typography.fontSize,
+        // backgroundColor: alpha(theme.palette.grey[100], 0.3),
+        ".MuiOutlinedInput-notchedOutline": {
+          borderColor: theme.palette.grey[300],
+        },
+        "&:hover .MuiOutlinedInput-notchedOutline": {
+          borderColor: theme.palette.grey[500],
+        },
         [`&.${outlinedInputClasses.focused}`]: {
-          // outline: `0px solid ${alpha(primary["main"], 0.5)}`,
-          borderColor: primary["main"],
+          // borderColor: theme.palette.primary["main"],
+          ".MuiOutlinedInput-notchedOutline": {
+            borderColor: theme.palette.primary["main"],
+          },
         },
         [`&.${outlinedInputClasses.error}`]: {
-          borderColor: error["main"],
+          borderColor: theme.palette.error["main"],
         },
         ...theme.applyStyles("dark", {
           "&:hover": {
-            borderColor: primary["main"],
+            borderColor: theme.palette.primary["main"],
           },
         }),
-      }),
-      notchedOutline: ({ theme }) => ({
-        borderColor: theme.palette.grey[400],
       }),
       input: {
         // height: "1.4375rem",
@@ -110,6 +106,26 @@ export const inputsCustomizations: Components<Theme> = {
         //   padding: "0.5rem 0.875rem",
         //   backgroundColor: "transparent",
         // },
+        "& .MuiFormLabel-root": {
+          "&.MuiInputLabel-sizeSmall": {
+            transform: "translate(12px, 11px) scale(1)",
+            "&.Mui-focused, &.MuiFormLabel-filled": {
+              transform: "translate(12px, 3px) scale(0.75)",
+            },
+          },
+          "&:not(.MuiInputLabel-root) ~ .MuiFilledInput-root": {
+            ".MuiFilledInput-input.MuiInputBase-inputSizeSmall": {
+              paddingBottom: "10px",
+              paddingTop: "10px",
+            },
+          },
+          "&.MuiInputLabel-root ~ .MuiFilledInput-root": {
+            ".MuiFilledInput-input.MuiInputBase-inputSizeSmall": {
+              paddingBottom: "4px",
+              paddingTop: "16px",
+            },
+          },
+        },
       },
     },
   },
@@ -131,6 +147,14 @@ export const inputsCustomizations: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         borderRadius: theme.shape.borderRadius,
+        background: theme.palette.grey[200],
+        fontSize: theme.typography.fontSize,
+        "&.Mui-focused": {
+          background: alpha(theme.palette.grey[300], 0.6),
+        },
+        "&:hover, &:focus": {
+          background: alpha(theme.palette.grey[300], 0.6),
+        },
         ["&::after"]: {
           border: "none",
         },
@@ -138,6 +162,19 @@ export const inputsCustomizations: Components<Theme> = {
           border: "none",
           content: "none",
         },
+        variants: [
+          {
+            props: {
+              size: "small",
+            },
+            style: (theme) => ({
+              "& .MuiInputBase-input": {
+                paddingTop: "10px",
+                paddingBottom: "10px",
+              },
+            }),
+          },
+        ],
       }),
     },
   },

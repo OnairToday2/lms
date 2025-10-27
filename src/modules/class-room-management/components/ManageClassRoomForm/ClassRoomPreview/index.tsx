@@ -1,12 +1,16 @@
 import { Control, useFormContext, UseFormReturn, useWatch } from "react-hook-form";
 import { ClassRoom } from "../../classroom-form.schema";
 import { memo } from "react";
+import WallpaperPreview from "./WallpaperPreview";
+import ClassTitle from "./ClassTitle";
 
 interface ClassRoomPreviewProps {
   control: Control<ClassRoom>;
 }
 const ClassRoomPreview: React.FC<ClassRoomPreviewProps> = ({ control }) => {
-  const data = useWatch({ control: control });
+  // const data = useWatch({ control: control });
+  console.log("data");
+
   return (
     <div className="pewview-ui p-6 bg-white rounded-xl overflow-hidden">
       <div className="pewview-ui__header">
@@ -33,10 +37,10 @@ const ClassRoomPreview: React.FC<ClassRoomPreviewProps> = ({ control }) => {
         </div>
       </div>
       <div className="pewview-ui__body w-full bg-white rounded-lg pt-6">
-        <div className="pewview-ui__thumbnail">
-          <div className="thumbnail aspect-video w-full bg-blue-600/10 rounded-xl"></div>
+        <WallpaperPreview control={control} />
+        <div className="pt-6">
+          <ClassTitle control={control} />
         </div>
-        <div></div>
       </div>
     </div>
   );
