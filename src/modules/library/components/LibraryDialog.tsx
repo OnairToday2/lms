@@ -383,7 +383,7 @@ export function LibraryDialog() {
         ) : displayedResources.length === 0 ? (
           <Box sx={{ py: 8, textAlign: "center" }}>
             <Typography color="text.secondary">
-              No resources in this folder
+              Không có tài liệu
             </Typography>
           </Box>
         ) : (

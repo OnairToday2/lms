@@ -10,6 +10,7 @@ import {
   profilesRepository,
   employmentsRepository,
   managersEmployeesRepository,
+  organizationsRepository,
 } from "@/repository";
 import { createServiceRoleClient } from "@/services/supabase/service-role-client";
 
@@ -21,7 +22,7 @@ interface CreateEmployeeResult {
 }
 
 async function createEmployeeWithRelations(
-  payload: CreateEmployeeDto
+  payload: CreateEmployeeDto,
 ): Promise<CreateEmployeeResult> {
   let userId: string | null = null;
   let employeeId: string | null = null;
@@ -36,12 +37,6 @@ async function createEmployeeWithRelations(
       email: payload.email,
       password: temporaryPassword,
       email_confirm: true,
-      user_metadata: {
-        full_name: payload.full_name,
-        phone_number: payload.phone_number || "",
-        gender: payload.gender,
-        birthday: payload.birthday || null,
-      },
     });
 
     if (authError || !authData.user) {
@@ -63,6 +58,8 @@ async function createEmployeeWithRelations(
       employeeOrder = lastOrder + 1;
     }
 
+    const organzation = await organizationsRepository.getFirstOrganization();
+
     const employeeData = await employeesRepository.createEmployee({
       user_id: userId,
       employee_code: employeeCode,
@@ -70,6 +67,7 @@ async function createEmployeeWithRelations(
       start_date: payload.start_date,
       position_id: payload.position_id || null,
       status: "active",
+      organization_id: organzation.id,
     });
 
     employeeId = employeeData.id;
@@ -155,7 +153,7 @@ async function createEmployeeWithRelations(
 }
 
 async function updateEmployeeWithRelations(
-  payload: UpdateEmployeeDto
+  payload: UpdateEmployeeDto,
 ): Promise<void> {
   await employeesRepository.updateEmployeeById(payload.id, {
     employee_code: payload.employee_code,
@@ -204,7 +202,7 @@ async function updateEmployeeWithRelations(
 }
 
 async function deleteEmployeeWithRelations(
-  employeeId: string
+  employeeId: string,
 ): Promise<void> {
   const userId = await employeesRepository.getEmployeeUserId(employeeId);
 

@@ -224,6 +224,7 @@ export async function createEmployee(data: {
   start_date: string;
   position_id?: string | null;
   status: Database["public"]["Enums"]["employee_status"];
+  organization_id: string;
 }) {
   const supabase = await createSVClient();
 

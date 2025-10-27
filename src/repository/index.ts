@@ -5,5 +5,6 @@ export * as employmentsRepository from "./employments";
 export * as libraryRepository from "./library";
 export * as managersEmployeesRepository from "./managers-employees";
 export * as organizationUnitsRepository from "./organization-units";
+export * as organizationsRepository from "./organizations";
 export * as positionsRepository from "./positions";
 export * as profilesRepository from "./profiles";
