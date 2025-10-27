@@ -9,7 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      class_fields: {
+      assignments: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
         Row: {
           created_at: string
           description: string | null
@@ -132,7 +167,7 @@ export type Database = {
             foreignKeyName: "class_room_field_class_field_id_fkey"
             columns: ["class_field_id"]
             isOneToOne: false
-            referencedRelation: "class_fields"
+            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
           {
@@ -738,6 +773,51 @@ export type Database = {
           },
         ]
       }
+      questions: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          created_by: string
+          id: string
+          label: string
+          type: Database["public"]["Enums"]["question_type"]
+          updated_at: string
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          label: string
+          type: Database["public"]["Enums"]["question_type"]
+          updated_at?: string
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          label?: string
+          type?: Database["public"]["Enums"]["question_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resources: {
         Row: {
           created_at: string
@@ -856,6 +936,7 @@ export type Database = {
       gender: "male" | "female" | "other"
       hashtag_type: "class_room"
       organization_unit_type: "branch" | "department"
+      question_type: "file" | "text"
       resource_kind: "folder" | "file"
     }
     CompositeTypes: {
@@ -1000,6 +1081,7 @@ export const Constants = {
       gender: ["male", "female", "other"],
       hashtag_type: ["class_room"],
       organization_unit_type: ["branch", "department"],
+      question_type: ["file", "text"],
       resource_kind: ["folder", "file"],
     },
   },

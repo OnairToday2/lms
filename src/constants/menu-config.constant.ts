@@ -1,4 +1,4 @@
-import { ClassIcon, GitIcon, HelpIcon, SquareFourIcon, UsersIcon } from "@/shared/assets/icons";
+import { ClassIcon, ClipboardIcon, GitIcon, HelpIcon, SquareFourIcon, UsersIcon } from "@/shared/assets/icons";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
 import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
@@ -31,6 +31,20 @@ const MAIN_MENU_LIST: MenuItemType[] = [
         icon: React.createElement(ClassIcon),
         key: "class-room/create",
         path: PATHS.CLASSROOMS.CREATE_CLASSROOM,
+      },
+    ],
+  },
+  {
+    title: "Quản lý bài kiểm tra",
+    icon: React.createElement(ClipboardIcon),
+    key: "assignments",
+    path: PATHS.ASSIGNMENTS.ROOT,
+    children: [
+      {
+        title: "Tạo bài kiểm tra",
+        icon: React.createElement(ClipboardIcon),
+        key: "assignments/create",
+        path: PATHS.ASSIGNMENTS.CREATE_ASSIGNMENT,
       },
     ],
   },
