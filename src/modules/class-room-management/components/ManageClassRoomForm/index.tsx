@@ -16,7 +16,7 @@ export interface ManageClassRoomFormProps {
 const ManageClassRoomForm = forwardRef<ManageClassRoomFormRef, ManageClassRoomFormProps>(
   ({ onSubmit, value, action = "create", isLoading = false }, ref) => {
     return (
-      <ClassRoomProvider>
+      <ClassRoomProvider selectedStudents={value?.selectedStudents} selectedTeachers={value?.selectedTeachers}>
         <ClassRoomFormContainer onSubmit={onSubmit} ref={ref} isLoading={isLoading} action={action} value={value} />
       </ClassRoomProvider>
     );

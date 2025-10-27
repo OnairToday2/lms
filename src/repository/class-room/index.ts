@@ -9,6 +9,8 @@ import {
   CreatePivotClassSessionAndTeacherPayload,
   GetClassRoomMetaQueryParams,
   CreatePivotClassRoomAndEmployeePayload,
+  UpSertClassRoomPayload,
+  UpSertClassRoomMetaPayload,
 } from "./type";
 import { ClassRoomMetaKey, ClassRoomMetaValue } from "@/constants/class-room-meta.constant";
 export * from "./type";
@@ -143,14 +145,6 @@ const getClassRoomById = async (classRoomId: string) => {
 };
 export type GetClassRoomByIdResponse = Awaited<ReturnType<typeof getClassRoomById>>;
 
-const getClassFieldList = async () => {
-  return await supabase.from("class_fields").select("*");
-};
-
-const getClassHasTagList = async () => {
-  return await supabase.from("hash_tags").select("*");
-};
-
 const createClassRoom = async (payload: CreateClassRoomPayload) => {
   try {
     return await supabase.from("class_rooms").insert(payload).select().single();
@@ -160,8 +154,31 @@ const createClassRoom = async (payload: CreateClassRoomPayload) => {
   }
 };
 
+const upsertClassRoom = async (payload: UpSertClassRoomPayload) => {
+  try {
+    return await supabase.from("class_rooms").upsert(payload).select().single();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err?.message ?? "Unknown error craete Class Room");
+  }
+};
+
 const createPivotClassRoomAndHashTag = async (payload: CreatePivotClassRoomAndHashTagPayload[]) => {
-  return await supabase.from("class_hash_tag").insert(payload).select("*");
+  try {
+    return await supabase.from("class_hash_tag").insert(payload).select("*");
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err?.message ?? "Unknown error craete hash tag");
+  }
+};
+
+const deletePivotClassRoomAndHashTag = async (ids: string[]) => {
+  try {
+    return await supabase.from("class_hash_tag").delete().in("id", ids);
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err?.message ?? "Unknown error craete hash tag");
+  }
 };
 
 const createPivotClassRoomAndField = async (payload: CreatePivotClassRoomAndFieldPayload[]) => {
@@ -173,40 +190,72 @@ const createPivotClassRoomAndField = async (payload: CreatePivotClassRoomAndFiel
   }
 };
 
-const createClassSession = async (payload: CreateClassRoomSessionsPayload) => {
+const deletePivotClassRoomAndField = async (ids: string[]) => {
   try {
-    const sessionInsertPayload = payload.sessions.map((session) => ({
-      ...session,
-      class_room_id: payload.classRoomId,
-    }));
-    return await supabase.from("class_sessions").insert(sessionInsertPayload).select();
+    return await supabase.from("class_room_field").delete().in("id", ids);
   } catch (err: any) {
     console.error("Unexpected error:", err);
-    throw new Error(err.message ?? "Unknown error craete Sessions");
+    throw new Error(err?.message ?? "Unknown error craete Class Room");
   }
 };
 
-const createAgendasWithSession = async (payload: CreateAgendasWithSessionPayload[]) => {
-  try {
-    return await supabase.from("class_sessions_agendas").insert(payload).select();
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err.message ?? "Unknown error create Agendas");
-  }
-};
+// /**
+//  *
+//  * CLASS ROOM SESSION
+//  *
+//  */
+// const createClassSession = async (payload: CreateClassRoomSessionsPayload) => {
+//   try {
+//     const sessionInsertPayload = payload.sessions.map((session) => ({
+//       ...session,
+//       class_room_id: payload.classRoomId,
+//     }));
+//     return await supabase.from("class_sessions").insert(sessionInsertPayload).select();
+//   } catch (err: any) {
+//     console.error("Unexpected error:", err);
+//     throw new Error(err.message ?? "Unknown error craete Sessions");
+//   }
+// };
 
-const createPivotClassSessionAndTeacher = async (payload: CreatePivotClassSessionAndTeacherPayload[]) => {
-  try {
-    return await supabase.from("class_session_teacher").insert(payload).select();
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err.message ?? "Unknown error create Pivot Session and Teacher");
-  }
-};
+// const deleteClassSession = async (ids: string[]) => {
+//   try {
+//     return await supabase.from("class_sessions").delete().in("id", ids);
+//   } catch (err: any) {
+//     console.error("Unexpected error:", err);
+//     throw new Error(err.message ?? "Unknown error Delete Sessions");
+//   }
+// };
+
+// const createAgendasWithSession = async (payload: CreateAgendasWithSessionPayload[]) => {
+//   try {
+//     return await supabase.from("class_sessions_agendas").insert(payload).select();
+//   } catch (err: any) {
+//     console.error("Unexpected error:", err);
+//     throw new Error(err.message ?? "Unknown error create Agendas");
+//   }
+// };
+
+// const createPivotClassSessionAndTeacher = async (payload: CreatePivotClassSessionAndTeacherPayload[]) => {
+//   try {
+//     return await supabase.from("class_session_teacher").insert(payload).select();
+//   } catch (err: any) {
+//     console.error("Unexpected error:", err);
+//     throw new Error(err.message ?? "Unknown error create Pivot Session and Teacher");
+//   }
+// };
 
 const createPivotClassRoomAndEmployee = async (payload: CreatePivotClassRoomAndEmployeePayload[]) => {
   try {
     return await supabase.from("class_room_employee").insert(payload).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error create Class Room and Employee");
+  }
+};
+
+const deletePivotClassRoomAndEmployee = async (ids: number[]) => {
+  try {
+    return await supabase.from("class_room_employee").delete().in("id", ids);
   } catch (err: any) {
     console.error("Unexpected error:", err);
     throw new Error(err.message ?? "Unknown error create Class Room and Employee");
@@ -221,6 +270,20 @@ const createClassRoomMeta = async <K extends ClassRoomMetaKey>(payload: CreateCl
     return await supabase
       .from("class_room_metadata")
       .insert({ class_room_id: payload.class_room_id, value: payload.value, key: payload.key })
+      .select("*")
+      .single()
+      .overrideTypes<{ key: Exclude<K, undefined> }>();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err?.message ?? "Unknown error craete Class Meta");
+  }
+};
+
+const upsertClassRoomMeta = async <K extends ClassRoomMetaKey>(payload: UpSertClassRoomMetaPayload<K>) => {
+  try {
+    return await supabase
+      .from("class_room_metadata")
+      .upsert(payload)
       .select("*")
       .single()
       .overrideTypes<{ key: Exclude<K, undefined> }>();
@@ -260,16 +323,20 @@ const getClassRoomMeta = async <K extends ClassRoomMetaKey>(params: GetClassRoom
 };
 
 export {
-  getClassFieldList,
-  getClassHasTagList,
   createClassRoom,
-  createClassSession,
-  createPivotClassSessionAndTeacher,
+  // createClassSession,
+  // deleteClassSession,
+  // createPivotClassSessionAndTeacher,
   createPivotClassRoomAndHashTag,
   createPivotClassRoomAndField,
-  createAgendasWithSession,
+  deletePivotClassRoomAndField,
+  // createAgendasWithSession,
   createPivotClassRoomAndEmployee,
   createClassRoomMeta,
+  upsertClassRoom,
+  upsertClassRoomMeta,
+  deletePivotClassRoomAndHashTag,
   getClassRoomMeta,
   getClassRoomById,
+  deletePivotClassRoomAndEmployee,
 };

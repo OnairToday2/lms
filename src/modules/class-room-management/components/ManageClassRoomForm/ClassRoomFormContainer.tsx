@@ -75,9 +75,10 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
     const selectedStudents = useClassRoomStore(({ state }) => state.selectedStudents);
     const selectedTeachers = useClassRoomStore(({ state }) => state.selectedTeachers);
 
+    const defaultValues = value?.formData ?? initClassRoomFormData();
     const methods = useForm<ClassRoom>({
       resolver: zodResolver(classRoomSchema),
-      defaultValues: value?.formData ?? initClassRoomFormData(),
+      defaultValues: defaultValues,
     });
 
     const {

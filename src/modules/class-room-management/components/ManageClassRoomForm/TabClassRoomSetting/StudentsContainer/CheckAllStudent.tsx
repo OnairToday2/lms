@@ -1,49 +1,17 @@
 import { Checkbox } from "@mui/material";
 import React from "react";
 import { EmployeeStudentWithProfileItem } from "@/model/employee.model";
+import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 interface CheckAllStudentsProps {
-  selectedStudents?: EmployeeStudentWithProfileItem[];
+  selectedStudents?: StudentSelectedItem[];
   students?: EmployeeStudentWithProfileItem[];
-  // setSelectedStudents: React.Dispatch<React.SetStateAction<EmployeeStudentWithProfileItem[]>>;
   onCheckAll: (checked: boolean) => void;
 }
-const CheckAllStudents: React.FC<CheckAllStudentsProps> = ({
-  students = [],
-  selectedStudents = [],
-  // setSelectedStudents,
-  onCheckAll,
-}) => {
+const CheckAllStudents: React.FC<CheckAllStudentsProps> = ({ students = [], selectedStudents = [], onCheckAll }) => {
   const isCheckedAllItem = React.useMemo(() => {
     if (!students.length) return false;
     return students.every((selectedItem) => selectedStudents.some((item) => item.id === selectedItem.id));
   }, [selectedStudents, students]);
-
-  // const toggleCheckAllStudents = (checked?: boolean) => {
-  //   if (!students?.length) return;
-
-  //   setSelectedStudents((prevSelectedStudents) => {
-  //     let newSelectedList: EmployeeStudentWithProfileItem[] = [];
-
-  //     if (checked) {
-  //       const listMap = new Map<string, EmployeeStudentWithProfileItem>();
-
-  //       [...students, ...prevSelectedStudents].forEach((item) => {
-  //         listMap.set(item.id, item);
-  //       });
-
-  //       for (const [key, value] of listMap.entries()) {
-  //         newSelectedList.push(value);
-  //       }
-  //     } else {
-  //       prevSelectedStudents.forEach((sltItem) => {
-  //         if (students.every((it) => it.id !== sltItem.id)) {
-  //           newSelectedList.push(sltItem);
-  //         }
-  //       });
-  //     }
-  //     return newSelectedList;
-  //   });
-  // };
 
   const isIndeterminate = React.useMemo(() => {
     if (!students?.length) return false;

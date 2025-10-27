@@ -63,9 +63,9 @@ const GalleriesUploader: React.FC<GalleriesUploaderProps> = ({ control, label, s
       {subTitle ? <Typography className="text-xs mb-4">{subTitle}</Typography> : null}
       {description ? <div className="description mb-2">{description}</div> : null}
       {images.length ? (
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap mb-2">
           {images.map((imageSrc, _index) => (
-            <div key={_index} className="aspect-square w-24 relative overflow-hidden rounded-lg bg-gray-100">
+            <div key={_index} className="aspect-square w-28 relative overflow-hidden rounded-lg bg-gray-100">
               <Image src={imageSrc} alt="thumbnail" fill className="object-contain" />
               <IconButton
                 sx={{ width: "1.5rem", height: "1.5rem", position: "absolute", top: "0.5rem", right: "0.5rem" }}

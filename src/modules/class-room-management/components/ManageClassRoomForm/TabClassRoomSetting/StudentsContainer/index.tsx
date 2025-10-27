@@ -16,7 +16,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import { EmployeeStudentWithProfileItem } from "@/model/employee.model";
+
 import EmployeeFilter from "./EmployeeFilter";
 import EmptyData from "@/shared/ui/EmptyData";
 import { cn } from "@/utils";
@@ -24,6 +24,8 @@ import { CloseIcon } from "@/shared/assets/icons";
 import useDebounce from "@/hooks/useDebounce";
 import useGetEmployeeQuery from "@/modules/class-room-management/operation/query";
 import CheckAllStudents from "./CheckAllStudent";
+import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
+import { EmployeeStudentWithProfileItem } from "@/model/employee.model";
 
 const BoxWraper = styled("div")(({ theme }) => ({
   border: "1px solid",
@@ -53,13 +55,13 @@ const BoxContent = styled(Box)(() => ({
   scrollbarWidth: "thin",
 }));
 export interface StudentsContainerProps {
-  seletedItems?: EmployeeStudentWithProfileItem[];
+  seletedItems?: StudentSelectedItem[];
   selectedStudentIds?: string[];
-  onChange: (data: EmployeeStudentWithProfileItem[]) => void;
+  onChange: (data: StudentSelectedItem[]) => void;
 }
 const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = [], onChange }) => {
   const [queryParams, setQueryParams] = React.useState({ page: 1, pageSize: 20, search: "" });
-  const [selectedStudents, setSelectedStudents] = React.useState<EmployeeStudentWithProfileItem[]>(seletedItems);
+  const [selectedStudents, setSelectedStudents] = React.useState<StudentSelectedItem[]>(seletedItems);
   const [selectedDepartmentIds, setSelectedDepartmentIds] = React.useState<string[]>([]);
   const [selectedBranchIds, setSelectedBranchIds] = React.useState<string[]>([]);
   const searchEmployeeNameDebounce = useDebounce(queryParams.search, 600);
@@ -103,10 +105,22 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
     setQueryParams((prev) => ({ ...prev, page: newPage }));
   };
 
-  const handleAddEmployee = (epl: EmployeeStudentWithProfileItem) => {
+  const handleAddEmployee = (emp: EmployeeStudentWithProfileItem) => {
     setSelectedStudents((prevSelectedStudents) => {
-      const existItem = prevSelectedStudents.find((it) => it.id === epl.id);
-      const newSelectedStudents = existItem ? prevSelectedStudents : [...prevSelectedStudents, epl];
+      const existItem = prevSelectedStudents.find((it) => it.id === emp.id);
+      const newSelectedStudents = existItem
+        ? prevSelectedStudents
+        : [
+            ...prevSelectedStudents,
+            {
+              id: emp.id,
+              email: emp.profiles.email,
+              fullName: emp.profiles.full_name,
+              employeeCode: emp.employee_code,
+              avatar: emp.profiles.avatar,
+              empoyeeType: emp.employee_type,
+            },
+          ];
       onChange(newSelectedStudents);
       return newSelectedStudents;
     });
@@ -125,12 +139,21 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
     if (!students?.length) return;
 
     setSelectedStudents((prevSelectedStudents) => {
-      let newSelectedStudents: EmployeeStudentWithProfileItem[] = [];
+      let newSelectedStudents: StudentSelectedItem[] = [];
+
+      const studentsFormated = students.map<StudentSelectedItem>((item) => ({
+        id: item.id,
+        fullName: item.profiles.full_name,
+        email: item.profiles.email || "",
+        employeeCode: item.employee_code,
+        empoyeeType: item.employee_type,
+        avatar: item.profiles.avatar || "",
+      }));
 
       if (checked) {
-        const studentsMap = new Map<string, EmployeeStudentWithProfileItem>();
+        const studentsMap = new Map<string, StudentSelectedItem>();
 
-        [...students, ...prevSelectedStudents].forEach((item) => {
+        [...studentsFormated, ...prevSelectedStudents].forEach((item) => {
           studentsMap.set(item.id, item);
         });
 
@@ -139,7 +162,7 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
         }
       } else {
         prevSelectedStudents.forEach((sltItem) => {
-          if (students.every((it) => it.id !== sltItem.id)) {
+          if (studentsFormated.every((it) => it.id !== sltItem.id)) {
             newSelectedStudents.push(sltItem);
           }
         });
@@ -204,8 +227,15 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
                 {(isPending && prevEmployeeList.current.length ? prevEmployeeList.current : employeeList).map((emp) => (
                   <StudentItem
                     key={emp.id}
-                    data={emp}
-                    onClick={handleAddEmployee}
+                    data={{
+                      id: emp.id,
+                      avatar: emp.profiles.avatar ?? undefined,
+                      email: emp.profiles.email,
+                      employeeCode: emp.employee_code,
+                      fullName: emp.profiles.full_name,
+                      departmentName: emp.employments[0]?.organization_units?.name,
+                    }}
+                    onClick={() => handleAddEmployee(emp)}
                     isSelected={hasSelected(emp.id, selectedStudents)}
                   />
                 ))}
@@ -267,7 +297,18 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
               )}
               <div className="flex flex-col">
                 {selectedStudents.map((emp) => (
-                  <StudentItem key={emp.id} hideCheckbox data={emp} onRemove={handleRemoveItem} />
+                  <StudentItem
+                    key={emp.id}
+                    hideCheckbox
+                    data={{
+                      id: emp.id,
+                      avatar: emp.avatar ?? undefined,
+                      email: emp.email,
+                      employeeCode: emp.employeeCode,
+                      fullName: emp.fullName,
+                    }}
+                    onRemove={handleRemoveItem}
+                  />
                 ))}
               </div>
             </BoxContent>
@@ -281,8 +322,15 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
 export default StudentsContainer;
 
 interface StudentItemProps {
-  data: EmployeeStudentWithProfileItem;
-  onClick?: (data: EmployeeStudentWithProfileItem) => void;
+  data: {
+    id: string;
+    employeeCode?: string;
+    fullName?: string;
+    email?: string;
+    departmentName?: string;
+    avatar?: string;
+  };
+  onClick?: () => void;
   isSelected?: boolean;
   hideCheckbox?: boolean;
   viewOnly?: boolean;
@@ -290,12 +338,11 @@ interface StudentItemProps {
 }
 const StudentItem: React.FC<StudentItemProps> = React.memo(
   ({ data, onClick, isSelected, viewOnly = false, onRemove, hideCheckbox = false }) => {
-    const { id, employee_code, profiles, employments } = data;
-    const departmentName = React.useMemo(() => employments[0]?.organization_units?.name, [employments]);
+    const { id, employeeCode, fullName, email, departmentName } = data;
     return (
       <ListItemButton
         role="listitem"
-        {...(!viewOnly ? { onClick: () => onClick?.(data) } : { disableRipple: true, disableTouchRipple: true })}
+        {...(!viewOnly ? { onClick } : { disableRipple: true, disableTouchRipple: true })}
         sx={(theme) => ({
           paddingInline: 2,
           paddingBlock: 1.5,
@@ -313,7 +360,7 @@ const StudentItem: React.FC<StudentItemProps> = React.memo(
           <div className="flex flex-col gap-1">
             <div className="flex gap-2">
               <Chip
-                label={employee_code}
+                label={employeeCode}
                 color="primary"
                 variant="filled"
                 sx={(theme) => ({
@@ -324,11 +371,11 @@ const StudentItem: React.FC<StudentItemProps> = React.memo(
                   fontSize: "0.75rem",
                 })}
               />
-              <Typography sx={{ fontWeight: 600, fontSize: "0.875rem" }}>{profiles?.full_name}</Typography>
+              <Typography sx={{ fontWeight: 600, fontSize: "0.875rem" }}>{fullName}</Typography>
             </div>
             <div className="flex gap-2">
               <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{departmentName}</Typography>
-              <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{profiles?.email}</Typography>
+              <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{email}</Typography>
             </div>
           </div>
           {onRemove ? (
@@ -339,7 +386,7 @@ const StudentItem: React.FC<StudentItemProps> = React.memo(
                 borderColor: theme.palette.grey[300],
                 backgroundColor: "white",
               })}
-              onClick={() => onRemove(data.id)}
+              onClick={() => onRemove(id)}
               size="small"
               className="ml-auto"
             >
@@ -352,6 +399,6 @@ const StudentItem: React.FC<StudentItemProps> = React.memo(
   },
 );
 
-const hasSelected = (itemId: string, items: EmployeeStudentWithProfileItem[]) => {
+const hasSelected = (itemId: string, items: StudentSelectedItem[]) => {
   return items.some((it) => it.id === itemId);
 };

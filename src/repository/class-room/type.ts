@@ -18,6 +18,23 @@ export type CreateClassRoomPayload = Pick<
   | "resource_id"
   | "employee_id"
 >;
+export type UpdateClassRoomPayload = Pick<
+  ClassRoom,
+  | "description"
+  | "comunity_info"
+  | "room_type"
+  | "slug"
+  | "start_at"
+  | "end_at"
+  | "status"
+  | "thumbnail_url"
+  | "title"
+  | "organization_id"
+  | "resource_id"
+  | "employee_id"
+  | "id"
+>;
+export type UpSertClassRoomPayload = CreateClassRoomPayload | UpdateClassRoomPayload;
 
 export type CreatePivotClassRoomAndHashTagPayload = {
   class_room_id: string;
@@ -68,3 +85,12 @@ export type CreateClassRoomMetaPayload<K extends ClassRoomMetaKey> = {
   key: K;
   value: ClassRoomMetaValue<K>;
 };
+export type UpdateClassRoomMetaPayload<K extends ClassRoomMetaKey> = {
+  id: string;
+  class_room_id: string;
+  key: K;
+  value: ClassRoomMetaValue<K>;
+};
+export type UpSertClassRoomMetaPayload<T extends ClassRoomMetaKey> =
+  | CreateClassRoomMetaPayload<T>
+  | UpdateClassRoomMetaPayload<T>;
