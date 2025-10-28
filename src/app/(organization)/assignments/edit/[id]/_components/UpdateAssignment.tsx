@@ -3,9 +3,11 @@ import ManageAssignmentForm, {
   ManageAssignmentFormProps,
   ManageAssignmentFormRef,
 } from "@/modules/assignment-management/components/ManageAssignmentForm";
-import { useCRUDAssignment } from "@/modules/assignment-management/hooks/useCRUDAssignment";
+import { useUpdateAssignmentMutation } from "@/modules/assignment-management/operations/mutation";
+import { useGetAssignmentQuery } from "@/modules/assignment-management/operations/query";
 import { useRef } from "react";
 import { useSnackbar } from "notistack";
+import { useRouter } from "next/navigation";
 
 interface UpdateAssignmentProps {
   assignmentId: string;
@@ -13,38 +15,62 @@ interface UpdateAssignmentProps {
 
 const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => {
   const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
   const formAssignmentRef = useRef<ManageAssignmentFormRef>(null);
-  const { onUpdate, isLoading } = useCRUDAssignment();
-
-  const mockAssignmentData = {
-    name: "Bài kiểm tra mẫu",
-    description: "<p>Đây là mô tả bài kiểm tra mẫu</p>",
-    assignmentCategories: [],
-    questions: [
-      { type: "file" as const, label: "Câu hỏi mẫu 1" },
-      { type: "file" as const, label: "Câu hỏi mẫu 2" },
-    ],
-    assignedEmployees: [],
-  };
+  const { mutate: updateAssignment, isPending: isUpdating } = useUpdateAssignmentMutation();
+  const { data: assignmentData, isPending: isLoading } = useGetAssignmentQuery(assignmentId);
 
   const handleUpdateAssignment: ManageAssignmentFormProps["onSubmit"] = (formData) => {
-    onUpdate(
-      { formData },
-      {
-        onSuccess(data, variables, context) {
-          enqueueSnackbar("Cập nhật bài kiểm tra thành công", { variant: "success" });
-        },
+    // Extract employee IDs from the full employee objects
+    const payload = {
+      ...formData,
+      id: assignmentId,
+      assignedEmployees: formData.assignedEmployees.map((emp) => emp.id),
+    };
+
+    updateAssignment(payload, {
+      onSuccess: (data) => {
+        enqueueSnackbar("Cập nhật bài kiểm tra thành công", { variant: "success" });
+        router.push("/assignments");
       },
-    );
+      onError: (error) => {
+        enqueueSnackbar(error.message || "Có lỗi xảy ra khi cập nhật bài kiểm tra", { variant: "error" });
+      },
+    });
   };
+
+  // Convert AssignmentDto to form data format
+  const defaultValues = assignmentData
+    ? {
+        name: assignmentData.name,
+        description: assignmentData.description,
+        assignmentCategories: assignmentData.assignment_categories.map((ac) => ac.category_id),
+        questions: assignmentData.questions.map((q) => ({
+          type: q.type,
+          label: q.label,
+        })),
+        assignedEmployees: assignmentData.assignment_employees.map((ae) => ({
+          id: ae.employee_id,
+          fullName: ae.employees?.profiles?.full_name || "",
+          email: ae.employees?.profiles?.email || "",
+          employeeCode: ae.employees?.employee_code || "",
+          avatar: ae.employees?.profiles?.avatar || null,
+          empoyeeType: "student" as const,
+        })),
+      }
+    : undefined;
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <ManageAssignmentForm
       onSubmit={handleUpdateAssignment}
       ref={formAssignmentRef}
-      isLoading={isLoading}
+      isLoading={isUpdating}
       action="edit"
-      value={mockAssignmentData}
+      value={defaultValues}
     />
   );
 };

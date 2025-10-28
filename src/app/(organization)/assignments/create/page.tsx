@@ -4,24 +4,33 @@ import ManageAssignmentForm, {
   ManageAssignmentFormProps,
   ManageAssignmentFormRef,
 } from "@/modules/assignment-management/components/ManageAssignmentForm";
-import { useCRUDAssignment } from "@/modules/assignment-management/hooks/useCRUDAssignment";
+import { useCreateAssignmentMutation } from "@/modules/assignment-management/operations/mutation";
 import { useRef } from "react";
 import { useSnackbar } from "notistack";
+import { useRouter } from "next/navigation";
 
 export default function CreateAssignmentPage() {
   const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
   const formAssignmentRef = useRef<ManageAssignmentFormRef>(null);
-  const { onCreate, isLoading } = useCRUDAssignment();
+  const { mutate: createAssignment, isPending: isLoading } = useCreateAssignmentMutation();
 
   const handleCreateAssignment: ManageAssignmentFormProps["onSubmit"] = (formData) => {
-    onCreate(
-      { formData },
-      {
-        onSuccess(data, variables, context) {
-          enqueueSnackbar("Tạo bài kiểm tra thành công", { variant: "success" });
-        },
+    // Extract employee IDs from the full employee objects
+    const payload = {
+      ...formData,
+      assignedEmployees: formData.assignedEmployees.map((emp) => emp.id),
+    };
+
+    createAssignment(payload, {
+      onSuccess: (data) => {
+        enqueueSnackbar("Tạo bài kiểm tra thành công", { variant: "success" });
+        router.push("/assignments");
       },
-    );
+      onError: (error) => {
+        enqueueSnackbar(error.message || "Có lỗi xảy ra khi tạo bài kiểm tra", { variant: "error" });
+      },
+    });
   };
 
   return (

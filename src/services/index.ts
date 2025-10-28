@@ -6,3 +6,4 @@ export * as employeeService from "./employees/employee.service";
 export * as employeeFileService from "./employees/employee-file.service";
 export * as classRoomService from "./class-room/class-room.service";
 export * as libraryService from "./libraries/library.service";
+export * as assignmentService from "./assignments/assignment.service";
