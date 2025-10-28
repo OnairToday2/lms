@@ -1,10 +1,15 @@
-import { ClassRoomStatus } from "@/model/class-room.model";
 import dayjs from "dayjs";
 import * as zod from "zod";
+import { CLASS_ROOM_PLATFORM } from "@/constants/class-room.constant";
+
+const dateIsoSchema = zod.object({
+  startDate: zod.string().optional(),
+  endDate: zod.string().optional(),
+});
 
 const classRoomSessionAgendaSchema = zod.object({
   id: zod.string().optional(),
-  title: zod.string().min(1, { message: "Tiêu đề không bỏ trống." }).max(100, "Tiêu đề tối đa 200 ký tự."),
+  title: zod.string().min(1, { message: "Tiêu đề không bỏ trống." }).max(100, "Tiêu đề tối đa 100 ký tự."),
   description: zod.string().min(1, { message: "Nội dung không bỏ trống." }),
   startDate: zod.iso.datetime({ error: "Ngày bắt đầu không hợp lệ." }),
   endDate: zod.iso.datetime({ error: "Ngày bắt đầu không hợp lệ." }),
@@ -43,8 +48,13 @@ const classRoomSessionSchema = zod
     limitPerson: zod.number(),
     isUnlimited: zod.boolean(),
     agendas: zod.array(classRoomSessionAgendaSchema),
+    isLimitTimeScanQrCode: zod.boolean(),
+    qrCode: zod.object({
+      startDate: zod.string(),
+      endDate: zod.string(),
+    }),
   })
-  .superRefine(({ limitPerson, isUnlimited, startDate, endDate }, ctx) => {
+  .superRefine(({ limitPerson, isUnlimited, startDate, endDate, isLimitTimeScanQrCode, qrCode }, ctx) => {
     if (!isUnlimited) {
       if (limitPerson <= 0) {
         ctx.addIssue({
@@ -67,6 +77,47 @@ const classRoomSessionSchema = zod
         message: "Ngày bắt đầu phải nhỏ hơn ngày kết thúc.",
         path: ["startDate"],
       });
+    }
+    if (isLimitTimeScanQrCode) {
+      if (!qrCode.startDate) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Thời gian bắt đầu không bỏ trống",
+          path: ["qrCode", "startDate"],
+        });
+      } else {
+        if (!dayjs(qrCode.startDate).isValid()) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Thời gian bắt đầu không hợp lệ.",
+            path: ["qrCode", "startDate"],
+          });
+        }
+      }
+
+      if (!qrCode.endDate) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Thời gian kết thúc không bỏ trống",
+          path: ["qrCode", "endDate"],
+        });
+      } else {
+        if (!dayjs(qrCode.endDate).isValid()) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Thời gian kết thúc không hợp lệ.",
+            path: ["qrCode", "endDate"],
+          });
+        }
+      }
+
+      if (qrCode.startDate && qrCode.endDate && dayjs(qrCode.startDate).isAfter(dayjs(qrCode.endDate))) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Thời gian bắt đầu phải nhỏ hơn hoặc bằng thời gian kết thúc.",
+          path: ["qrCode", "startDate"],
+        });
+      }
     }
   });
 
@@ -202,7 +253,7 @@ const classRoomSchema = zod
           }
         });
     }),
-    platform: zod.enum(["online", "offline", "mix"]),
+    platform: zod.enum([CLASS_ROOM_PLATFORM.HYBRID, CLASS_ROOM_PLATFORM.ONLINE, CLASS_ROOM_PLATFORM.OFFLINE]),
   })
   .superRefine(({ roomType, classRoomSessions }, ctx) => {
     if (roomType === "multiple") {

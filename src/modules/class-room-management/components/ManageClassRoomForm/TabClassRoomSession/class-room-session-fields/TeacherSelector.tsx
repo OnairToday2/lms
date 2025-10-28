@@ -3,7 +3,7 @@ import DialogTeacherContainer, {
   DialogTeacherContainerProps,
 } from "@/modules/teacher/container/DialogTeacherContainer";
 import { Button, Chip, FormLabel, IconButton, Typography } from "@mui/material";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useState, forwardRef, useImperativeHandle } from "react";
 
 import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
 import { CloseIcon } from "@/shared/assets/icons";
@@ -11,16 +11,20 @@ import { cn } from "@/utils";
 import Avatar from "@/shared/ui/Avatar";
 import { TeacherSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 
+export interface TeacherSelectorRef {
+  removeTeachersBySessionIndex: (index: number) => void;
+}
 interface TeacherSelectorProps {
   sessionIndex: number;
   className?: string;
 }
 
-const TeacherSelector: React.FC<TeacherSelectorProps> = ({ sessionIndex, className }) => {
+const TeacherSelector = forwardRef<TeacherSelectorRef, TeacherSelectorProps>(({ sessionIndex, className }, ref) => {
   const [open, setOpen] = useState(false);
   const setSelectedTeachers = useClassRoomStore(({ actions }) => actions.setSelectedTeachers);
   const removeTeacher = useClassRoomStore(({ actions }) => actions.removeTeacher);
   const selectedTeachers = useClassRoomStore(({ actions }) => actions.getTeachersByIndexSession(sessionIndex));
+  const removeSessionTeacher = useClassRoomStore(({ actions }) => actions.removeTeachers);
 
   const handleConformSelect: DialogTeacherContainerProps["onOk"] = (teachers) => {
     //Teacher must alway new List
@@ -39,6 +43,11 @@ const TeacherSelector: React.FC<TeacherSelectorProps> = ({ sessionIndex, classNa
     removeTeacher(id, sessionIndex);
   }, []);
 
+  useImperativeHandle(ref, () => ({
+    removeTeachersBySessionIndex(index) {
+      removeSessionTeacher(index);
+    },
+  }));
   return (
     <>
       <div className={cn(className)}>
@@ -80,7 +89,7 @@ const TeacherSelector: React.FC<TeacherSelectorProps> = ({ sessionIndex, classNa
       />
     </>
   );
-};
+});
 export default TeacherSelector;
 
 interface TeacherItemProps {

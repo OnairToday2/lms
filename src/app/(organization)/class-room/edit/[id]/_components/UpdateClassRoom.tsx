@@ -73,6 +73,11 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
           limitPerson: session.limit_person || -1,
           isUnlimited: session.limit_person === -1 ? true : false,
           agendas: agendas,
+          isLimitTimeScanQrCode: true,
+          qrCode: {
+            startDate: "",
+            endDate: "",
+          },
         },
       ];
     }, []);

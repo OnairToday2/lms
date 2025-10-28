@@ -24,7 +24,6 @@ const ClassHashTagSelector: React.FC<ClassHashTagSelectorProps> = ({ control }) 
       slug: `${slugify(value)}-${new Date().getTime()}`,
     });
   };
-  console.log(hasTagsList);
   const handleRemoveItem = (value: string) => {
     const newHashTags = [...hasTagsList].filter((val) => val !== value);
     onChange(newHashTags);

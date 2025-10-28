@@ -1,4 +1,5 @@
 "use client";
+import { useState, useRef, useTransition, useCallback, useEffect, useLayoutEffect } from "react";
 import { type ClassRoom } from "../../../classroom-form.schema";
 import { Button, Divider, Typography } from "@mui/material";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
@@ -7,50 +8,22 @@ import { useFieldArray, UseFormReturn } from "react-hook-form";
 import ClassRoomSessionFromToDate from "../class-room-session-fields/ClassRoomSessionFromToDate";
 import AccordionSessionItem, { AccordionSessionItemProps } from "./AccordionSessionItem";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
-import { useState } from "react";
 import RHFRichEditor from "@/shared/ui/form/RHFRichEditor";
 import ClassRoomChannel from "../class-room-session-fields/RoomChannel";
-import TeacherSelector from "../class-room-session-fields/TeacherSelector";
+import TeacherSelector, { TeacherSelectorRef } from "../class-room-session-fields/TeacherSelector";
 import AgendarFields from "../class-room-session-fields/AgendarFields";
-import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
-
-export const initClassSessionFormData = (): ClassRoom["classRoomSessions"][number] => {
-  return {
-    title: "",
-    description: "",
-    startDate: "",
-    endDate: "",
-    channelInfo: { url: "", password: "", providerId: "" },
-    channelProvider: "zoom",
-    thumbnailUrl: "",
-    isOnline: true,
-    agendas: [],
-    limitPerson: 0,
-    isUnlimited: false,
-    resources: [],
-  };
-};
+import { initClassSessionFormData } from "..";
 
 interface MultipleSessionProps {
   methods: UseFormReturn<ClassRoom>;
 }
 const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
-  /**
-   * Session init items to validate when click add more button.
-   */
-  const [sessionItemInit, setSessionItemInit] = useState<{ index: number; isInit: boolean }[]>([
-    {
-      index: 0,
-      isInit: true,
-    },
-  ]);
   const {
     control,
-    trigger,
-    setValue,
     getValues,
+    trigger,
     formState: { errors },
-  } = useClassRoomFormContext();
+  } = methods;
 
   const {
     fields: classSessionsFields,
@@ -61,32 +34,74 @@ const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
     name: "classRoomSessions",
     keyName: "_sessionId",
   });
+  const teacherSelectorRefs = useRef(new Map<number, TeacherSelectorRef>());
+  const [isTransition, startTransition] = useTransition();
+  /**
+   * Session init items to validate when click add more button.
+   */
+  const [sessionsState, setSessionsState] = useState<{ index: number; isInit: boolean }[]>(() => {
+    return classSessionsFields.map((session, _index) => ({
+      index: _index,
+      isInit: true,
+    }));
+  });
 
   const hasErrorSession = (index: number): AccordionSessionItemProps["status"] => {
-    if (sessionItemInit.find((it) => it.index === index)?.isInit) {
+    if (sessionsState.find((it) => it.index === index)?.isInit) {
       return "idle";
     }
-    return !!errors.classRoomSessions?.[index] ? "invalid" : "valid";
+    const sessionError = errors.classRoomSessions?.[index];
+
+    if (!sessionError) return "valid";
+
+    /**
+     * qrcode check in tab setting
+     */
+    const { qrCode, ...restSessionError } = sessionError;
+
+    if (!Object.keys(restSessionError).length) return "valid";
+
+    return "invalid";
   };
+
   const handleAddClassSession = async () => {
     /**
      * Mark all section isInited
      */
-    setSessionItemInit((prev) => prev.map((it) => ({ ...it, isInit: false })));
+    setSessionsState((prev) => prev.map((it) => ({ ...it, isInit: false })));
 
-    await trigger("classRoomSessions")
-      .then((valid) => {
-        if (!valid) return;
+    try {
+      const isAllSessionValid = await trigger("classRoomSessions");
 
-        const sessionItemCount = classSessionsFields.length;
-        const initSessionItem = initClassSessionFormData();
-        append(initSessionItem);
-        setSessionItemInit((prev) => [...prev, { index: sessionItemCount, isInit: true }]);
-      })
-      .catch((err) => {
-        console.log(err);
+      if (!isAllSessionValid) return;
+
+      startTransition(() => {
+        const nextSessionIndex = classSessionsFields.length;
+        const platform = getValues("platform");
+        append(initClassSessionFormData({ isOnline: platform === "online" }));
+        setSessionsState((prev) => [...prev, { index: nextSessionIndex, isInit: true }]);
       });
+    } catch (err) {
+      console.log(err);
+    }
   };
+
+  const handleRemoveSession = useCallback((sessionIndex: number) => {
+    const teacherRef = teacherSelectorRefs.current.get(sessionIndex);
+    teacherRef?.removeTeachersBySessionIndex(sessionIndex);
+    setTimeout(() => {
+      remove(sessionIndex);
+    }, 0);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (classSessionsFields.length) return;
+    /** init at least 2 session for class room multiple */
+    const platform = getValues("platform");
+    append(initClassSessionFormData({ isOnline: platform === "online" }));
+    append(initClassSessionFormData({ isOnline: platform === "online" }));
+  }, [classSessionsFields]);
+
   return (
     <div className="class-multiple-session">
       <div className="inner bg-white rounded-xl p-6 mb-6">
@@ -101,7 +116,7 @@ const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
               <AccordionSessionItem
                 index={_index}
                 title={sessionField.title}
-                onRemove={() => remove(_index)}
+                onRemove={classSessionsFields.length > 2 ? handleRemoveSession : undefined}
                 status={hasErrorSession(_index)}
               >
                 <div className="pt-6">
@@ -126,7 +141,12 @@ const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
                     <ClassRoomChannel index={_index} control={control} />
                   </div>
                   <div className="h-6"></div>
-                  <TeacherSelector sessionIndex={_index} />
+                  <TeacherSelector
+                    ref={(tRef) => {
+                      tRef && teacherSelectorRefs.current.set(_index, tRef);
+                    }}
+                    sessionIndex={_index}
+                  />
                   <div className="h-6"></div>
                   <AgendarFields sessionIndex={_index} />
                 </div>
@@ -142,6 +162,7 @@ const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
             startIcon={<PlusIcon />}
             onClick={handleAddClassSession}
             size="small"
+            loading={isTransition}
           >
             Thêm mới
           </Button>
