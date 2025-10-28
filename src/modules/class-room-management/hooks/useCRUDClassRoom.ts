@@ -8,7 +8,7 @@ import type {
 import type {
   CreateClassRoomSessionsPayload,
   CreatePivotClassRoomSessionAndTeacherPayload,
-  CreateAgendasWithSessionPayload,
+  CreateSessionAgendasPayload,
 } from "@/repository/class-room-session";
 import { enqueueSnackbar } from "notistack";
 
@@ -166,11 +166,11 @@ const useCRUDClassRoom = () => {
        * Step 7: Create Agenda Session
        */
 
-      const createAgendasWithSessionPayload = mapAgendaWithSessions(
+      const createSessionAgendasPayload = mapAgendaWithSessions(
         classRoomSessions,
         sessionsData.map((s) => ({ id: s.id })),
       );
-      await classRoomSessionRepository.createAgendasWithSession(createAgendasWithSessionPayload);
+      await classRoomSessionRepository.createSessionAgendas(createSessionAgendasPayload);
 
       /**
        * Step 8: Sync Session with Teachers
@@ -390,14 +390,28 @@ const useCRUDClassRoom = () => {
 
       const deleteSessionIds = classRoomDetail.sessions.map((sesion) => sesion.id);
 
-      const deleteTeacherIds = classRoomDetail.sessions.reduce<string[]>((acc, session) => {
+      const pivotSessionWithTeacherIds = classRoomDetail.sessions.reduce<string[]>((acc, session) => {
         const pivotIds = session.teachers.map((tc) => tc.id);
-        acc = [...acc, ...pivotIds];
-        return acc;
+        return [...acc, ...pivotIds];
       }, []);
 
-      const { data: deletPivotSessionWTeacherData, error: deletePivotSessionWTeacherError } =
-        await classRoomSessionRepository.deletePivotClassSessionAndTeacher(deleteTeacherIds);
+      const sessionAgendasIds = classRoomDetail.sessions.reduce<string[]>((acc, session) => {
+        const agendaIds = session.agendas.map((ag) => ag.id);
+        return [...acc, ...agendaIds];
+      }, []);
+
+      const { data: deletePivotSessionWTeacherData, error: deletePivotSessionWTeacherError } =
+        await classRoomSessionRepository.deletePivotClassSessionAndTeacher(pivotSessionWithTeacherIds);
+      if (deletePivotSessionWTeacherError) {
+        throw new Error(deletePivotSessionWTeacherError.message);
+      }
+
+      const { data: deleteSessionAgendsData, error: deleteSessionAgendsError } =
+        await classRoomSessionRepository.deleteSessionAgendas(sessionAgendasIds);
+
+      if (deleteSessionAgendsError) {
+        throw new Error(deleteSessionAgendsError.message);
+      }
 
       const { data: deleteSessionData, error: deleteSessionError } =
         await classRoomSessionRepository.deleteClassSession(deleteSessionIds);
@@ -422,12 +436,12 @@ const useCRUDClassRoom = () => {
        * Step 7: Sync Agenda Session.
        */
 
-      const agendaWithSessionPayload = mapAgendaWithSessions(
+      const sessionAgendasPayload = mapAgendaWithSessions(
         classRoomSessions,
         sessionsData.map((s) => ({ id: s.id })),
       );
 
-      await classRoomSessionRepository.createAgendasWithSession(agendaWithSessionPayload);
+      await classRoomSessionRepository.createSessionAgendas(sessionAgendasPayload);
 
       /**
        * Step 8: Sync Teacher with Session.
@@ -520,11 +534,11 @@ const useCRUDClassRoom = () => {
   const mapAgendaWithSessions = (
     classRoomSessions: ClassRoom["classRoomSessions"],
     sessionsData: { id: string }[],
-  ): CreateAgendasWithSessionPayload[] => {
-    return classRoomSessions?.reduce<CreateAgendasWithSessionPayload[]>((acc, session, _sIndex) => {
+  ): CreateSessionAgendasPayload[] => {
+    return classRoomSessions?.reduce<CreateSessionAgendasPayload[]>((acc, session, _sIndex) => {
       const sessionId = sessionsData[_sIndex]?.id;
       if (sessionId) {
-        const agendas = session.agendas.map<CreateAgendasWithSessionPayload>((agenda) => ({
+        const agendas = session.agendas.map<CreateSessionAgendasPayload>((agenda) => ({
           class_session_id: sessionId,
           title: agenda.title,
           description: agenda.description,

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useTransition } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -7,7 +7,6 @@ import { Button, Dialog, DialogActions, DialogContent, DialogContentText, Dialog
 import { alpha, styled, Typography, TypographyProps } from "@mui/material";
 import { TrashIcon1 } from "@/shared/assets/icons";
 import { cn } from "@/utils";
-
 export interface AccordionSessionItemProps extends React.PropsWithChildren {
   summary?: React.ReactNode;
   detail?: React.ReactNode;
@@ -39,6 +38,7 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
   onRemove,
   status = "idle",
 }) => {
+  const [isTransition, startTransition] = useTransition();
   const [openDialog, setOpenDialog] = React.useState(false);
   const [isExpanded, setIsExpanded] = React.useState<boolean>(true);
   const toggleExpand = () => setIsExpanded((prev) => !prev);
@@ -46,8 +46,10 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
   const handleCloseDialog = () => setOpenDialog(false);
 
   const handleConfirm = () => {
-    setOpenDialog(false);
-    onRemove?.();
+    startTransition(() => {
+      setOpenDialog(false);
+      onRemove?.();
+    });
   };
   return (
     <>
@@ -104,10 +106,10 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
           >{`Bạn có chắc chắn muốn xoá "${title}"`}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} variant="outlined" color="inherit">
+          <Button onClick={handleCloseDialog} variant="outlined" color="inherit" disabled={isTransition}>
             Tiếp tục chỉnh sửa
           </Button>
-          <Button onClick={handleConfirm} color="error">
+          <Button onClick={handleConfirm} color="error" loading={isTransition}>
             Xóa
           </Button>
         </DialogActions>
