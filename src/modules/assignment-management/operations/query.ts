@@ -1,5 +1,5 @@
 import { useTQuery } from "@/lib/queryClient";
-import type { GetAssignmentsParams, AssignmentStudentDto } from "@/types/dto/assignments";
+import type { GetAssignmentsParams, AssignmentStudentDto, AssignmentQuestionDto } from "@/types/dto/assignments";
 import * as assignmentService from "@/services/assignments/assignment.service";
 
 export const useGetAssignmentsQuery = (params?: GetAssignmentsParams) => {
@@ -31,3 +31,16 @@ export const useGetAssignmentStudentsQuery = (assignmentId: string, enabled: boo
   });
 };
 
+export const useGetAssignmentQuestionsQuery = (assignmentId: string) => {
+  return useTQuery<AssignmentQuestionDto[]>({
+    queryKey: ["assignments", assignmentId, "questions"],
+    queryFn: async () => {
+      const response = await fetch(`/api/assignments/${assignmentId}/questions`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch assignment questions");
+      }
+      return response.json();
+    },
+    enabled: !!assignmentId,
+  });
+};

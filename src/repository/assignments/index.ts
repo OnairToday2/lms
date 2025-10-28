@@ -320,5 +320,21 @@ const getAssignmentStudents = async (assignmentId: string) => {
   return students;
 };
 
-export { getAssignments, getAssignmentById, getAssignmentStudents };
+const getAssignmentQuestions = async (assignmentId: string) => {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("questions")
+    .select("*")
+    .eq("assignment_id", assignmentId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    throw new Error(`Failed to fetch assignment questions: ${error.message}`);
+  }
+
+  return data;
+};
+
+export { getAssignments, getAssignmentById, getAssignmentStudents, getAssignmentQuestions };
 

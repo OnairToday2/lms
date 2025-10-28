@@ -3,10 +3,10 @@ import { getAssignmentStudents } from "@/services/assignments/assignment.service
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const assignmentId = params.id;
+    const { id: assignmentId } = await params;
 
     const students = await getAssignmentStudents(assignmentId);
 

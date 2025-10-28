@@ -155,6 +155,10 @@ async function getAssignmentStudents(assignmentId: string) {
   return assignmentsRepository.getAssignmentStudents(assignmentId);
 }
 
+async function getAssignmentQuestions(assignmentId: string) {
+  return assignmentsRepository.getAssignmentQuestions(assignmentId);
+}
+
 export {
   createAssignmentWithRelations,
   updateAssignmentWithRelations,
@@ -162,5 +166,6 @@ export {
   getAssignments,
   getAssignmentById,
   getAssignmentStudents,
+  getAssignmentQuestions,
 };
 

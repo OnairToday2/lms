@@ -20,6 +20,7 @@ import {
   Stack,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import PageContainer from "@/shared/ui/PageContainer";
 import { useGetAssignmentStudentsQuery } from "@/modules/assignment-management/operations/query";
 import { useGetAssignmentQuery } from "@/modules/assignment-management/operations/query";
@@ -48,6 +49,10 @@ export default function AssignmentStudentList() {
 
   const handleBack = () => {
     router.push("/assignments");
+  };
+
+  const handleSubmitAssignment = (employeeId: string) => {
+    router.push(`/assignments/${assignmentId}/submit/${employeeId}`);
   };
 
   const formatDate = (dateString: string | null) => {
@@ -137,6 +142,7 @@ export default function AssignmentStudentList() {
                       <TableCell>Trạng thái</TableCell>
                       <TableCell>Ngày nộp</TableCell>
                       <TableCell align="center">Điểm</TableCell>
+                      <TableCell align="center">Thao tác</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -168,6 +174,16 @@ export default function AssignmentStudentList() {
                           ) : (
                             "-"
                           )}
+                        </TableCell>
+                        <TableCell align="center">
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<AssignmentTurnedInIcon />}
+                            onClick={() => handleSubmitAssignment(student.employee_id)}
+                          >
+                            Nộp bài
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
