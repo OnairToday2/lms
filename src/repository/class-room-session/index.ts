@@ -46,4 +46,19 @@ const createPivotClassSessionAndTeacher = async (payload: CreatePivotClassRoomSe
   }
 };
 
-export { createClassSession, deleteClassSession, createPivotClassSessionAndTeacher, createAgendasWithSession };
+const deletePivotClassSessionAndTeacher = async (ids: string[]) => {
+  try {
+    return await supabase.from("class_session_teacher").delete().in("id", ids).select("id, name, employee_code");
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error create Agendas");
+  }
+};
+
+export {
+  createClassSession,
+  deleteClassSession,
+  createPivotClassSessionAndTeacher,
+  createAgendasWithSession,
+  deletePivotClassSessionAndTeacher,
+};

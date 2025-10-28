@@ -21,14 +21,18 @@ const EditClassRoomPage = async ({ params }: EditClassRoomPageProps) => {
 
   return (
     <PageContainer
-      title="Tạo lớp học"
+      title={data.title || "Cập nhật lớp học"}
       breadcrumbs={[
         {
           title: "LMS",
           path: "/dashboard",
         },
         {
-          title: "Tạo lớp học trực tuyến",
+          title: "Cập nhật",
+          path: "/dashboard",
+        },
+        {
+          title: data?.title || "Cập nhật lớp học",
         },
       ]}
     >

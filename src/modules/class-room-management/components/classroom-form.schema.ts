@@ -202,6 +202,7 @@ const classRoomSchema = zod
           }
         });
     }),
+    platform: zod.enum(["online", "offline", "mix"]),
   })
   .superRefine(({ roomType, classRoomSessions }, ctx) => {
     if (roomType === "multiple") {

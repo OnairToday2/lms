@@ -10,6 +10,7 @@ import type {
   CreatePivotClassRoomSessionAndTeacherPayload,
   CreateAgendasWithSessionPayload,
 } from "@/repository/class-room-session";
+import { enqueueSnackbar } from "notistack";
 
 import { ClassRoom } from "../components/classroom-form.schema";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
@@ -193,6 +194,9 @@ const useCRUDClassRoom = () => {
 
       console.log("Create Classroom", classRoomData, sessionsData, employeeWithClassRoom, sessionTeacher);
       return classRoomData;
+    },
+    onError: (error) => {
+      enqueueSnackbar({ message: error.message, variant: "error" });
     },
   });
 
@@ -383,8 +387,26 @@ const useCRUDClassRoom = () => {
        */
 
       const classRoomSessionPayload = mapSessionWithClassRoom(classRoomSessions, roomType, title, description);
-      const sessionIds = classRoomDetail.sessions.map((sesion) => sesion.id);
-      await classRoomSessionRepository.deleteClassSession(sessionIds);
+
+      const deleteSessionIds = classRoomDetail.sessions.map((sesion) => sesion.id);
+
+      const deleteTeacherIds = classRoomDetail.sessions.reduce<string[]>((acc, session) => {
+        const pivotIds = session.teachers.map((tc) => tc.id);
+        acc = [...acc, ...pivotIds];
+        return acc;
+      }, []);
+
+      const { data: deletPivotSessionWTeacherData, error: deletePivotSessionWTeacherError } =
+        await classRoomSessionRepository.deletePivotClassSessionAndTeacher(deleteTeacherIds);
+
+      const { data: deleteSessionData, error: deleteSessionError } =
+        await classRoomSessionRepository.deleteClassSession(deleteSessionIds);
+
+      if (deleteSessionError) {
+        throw new Error(deleteSessionError.message);
+      }
+
+      console.log({ newSessionPayload: classRoomSessionPayload, deleteSessionIds });
 
       const { data: sessionsData, error: sessionDataError } = await classRoomSessionRepository.createClassSession({
         classRoomId: classRoomData.id,
@@ -430,6 +452,9 @@ const useCRUDClassRoom = () => {
 
       console.log("Update Susscess", classRoomData, sessionsData, employeeWithClassRoom, sessionTeacher);
       return classRoomData;
+    },
+    onError: (error) => {
+      enqueueSnackbar({ message: error.message, variant: "error" });
     },
   });
 

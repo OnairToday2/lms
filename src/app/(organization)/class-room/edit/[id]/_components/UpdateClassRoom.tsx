@@ -8,15 +8,17 @@ import { useMemo, useRef } from "react";
 import { GetClassRoomByIdData } from "../page";
 import { getClassRoomMetaValue } from "@/modules/class-room-management/utils";
 import { useSnackbar } from "notistack";
-import { StudentSelectedItem, TeacherSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 interface UpdateClassRoomProps {
   data: Exclude<GetClassRoomByIdData, null>;
 }
-type UpdateFormValue = Exclude<ManageClassRoomFormProps["value"], undefined>;
-type ClassRoomSession = UpdateFormValue["formData"]["classRoomSessions"][number];
-type SessionAgenda = UpdateFormValue["formData"]["classRoomSessions"][number]["agendas"][number];
+type UpdateClassRoomFormValue = Exclude<ManageClassRoomFormProps["initFormValue"], undefined>;
+type ClassRoomSession = UpdateClassRoomFormValue["classRoomSessions"][number];
+type SessionAgenda = UpdateClassRoomFormValue["classRoomSessions"][number]["agendas"][number];
+
+type TeacherType = Exclude<ManageClassRoomFormProps["teachers"], undefined>;
+type StudentType = Exclude<ManageClassRoomFormProps["students"], undefined>;
 
 const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
   const router = useRouter();
@@ -25,7 +27,7 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
   const { isLoading, onUpdate } = useCRUDClassRoom();
 
-  const updateClassRoomFormData = useMemo(() => {
+  const updateClassRoomFormData = useMemo<UpdateClassRoomFormValue>(() => {
     const hastTags = data?.class_hash_tag.reduce<string[]>((acc, ht) => {
       const hastTagId = ht.hash_tags?.id;
       return hastTagId ? [...acc, hastTagId] : acc;
@@ -36,7 +38,7 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       return fieldId ? [...acc, fieldId] : acc;
     }, []);
 
-    const communityInfo: UpdateFormValue["formData"]["communityInfo"] = {
+    const communityInfo: UpdateClassRoomFormValue["communityInfo"] = {
       name: data.comunity_info?.name || "",
       url: data.comunity_info?.url || "",
     };
@@ -97,14 +99,15 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       status: data.status,
       roomType: data.room_type,
       classRoomId: data.id,
+      platform: "online",
     };
   }, [data]);
 
-  const selectedTeachers = useMemo<UpdateFormValue["selectedTeachers"]>(() => {
-    return sessions.reduce<UpdateFormValue["selectedTeachers"]>((acc, session, _index) => {
+  const teacherList = useMemo(() => {
+    return sessions.reduce<TeacherType>((acc, session, _index) => {
       return {
         ...acc,
-        [_index]: session.teachers.reduce<TeacherSelectedItem[]>((teacherSumary, tc) => {
+        [_index]: session.teachers.reduce<TeacherType[0]>((teacherSumary, tc) => {
           if (tc.employee && tc.employee.employee_type === "teacher") {
             teacherSumary = [
               ...teacherSumary,
@@ -123,8 +126,9 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       };
     }, {});
   }, [sessions]);
-  const selectedStudents = useMemo<UpdateFormValue["selectedStudents"]>(() => {
-    return employees.reduce<StudentSelectedItem[]>((acc, emp) => {
+
+  const studentList = useMemo(() => {
+    return employees.reduce<StudentType>((acc, emp) => {
       if (emp.employee && emp.employee.employee_type === "student") {
         acc = [
           ...acc,
@@ -156,11 +160,10 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
 
   return (
     <ManageClassRoomForm
-      value={{
-        formData: updateClassRoomFormData,
-        selectedStudents: selectedStudents,
-        selectedTeachers: selectedTeachers,
-      }}
+      initFormValue={updateClassRoomFormData}
+      action="edit"
+      students={studentList}
+      teachers={teacherList}
       isLoading={isLoading}
       onSubmit={handleUpdateClassRoom}
       ref={formClassRoomRef}
