@@ -34,7 +34,7 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
     }, []);
 
     const classRoomFields = data?.class_room_field.reduce<string[]>((acc, item) => {
-      const fieldId = item.class_fields?.id;
+      const fieldId = item.categories?.id;
       return fieldId ? [...acc, fieldId] : acc;
     }, []);
 

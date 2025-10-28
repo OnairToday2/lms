@@ -333,13 +333,13 @@ const useCRUDClassRoom = () => {
        */
       const currentClassRoomFields = [...classRoomDetail.class_room_field];
       const currentClassFieldIds = currentClassRoomFields
-        .map((item) => item.class_fields?.id)
+        .map((item) => item.categories?.id)
         .filter((item) => !isUndefined(item));
 
       const classRoomFieldListAddition = classRoomField.filter((id) => !currentClassFieldIds.includes(id));
 
       const classRoomFieldListDeletation = currentClassRoomFields.filter((it) =>
-        classRoomField.every((id) => id !== it.class_fields?.id),
+        classRoomField.every((id) => id !== it.categories?.id),
       );
 
       if (classRoomFieldListAddition.length) {
