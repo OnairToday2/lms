@@ -1,13 +1,8 @@
-import PageContainer from "@/shared/ui/PageContainer";
+import AssignmentList from "@/app/(organization)/assignments/_components/AssignmentList";
 
-export default function AssignmentsPage() {
-  return (
-    <PageContainer
-      title="Danh sách bài kiểm tra"
-      breadcrumbs={[{ title: "Danh sách bài kiểm tra" }]}
-    >
-      <div>List page</div>
-    </PageContainer>
-  );
-}
+const AssignmentsPage = async () => {
+  return <AssignmentList />;
+};
+
+export default AssignmentsPage;
 

@@ -1,10 +1,10 @@
-import { createSVClient } from "@/services";
+import { createClient, createSVClient } from "@/services";
 import type { Database } from "@/types/supabase.types";
 import type { AssignmentDto, GetAssignmentsParams } from "@/types/dto/assignments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 
 const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedResult<AssignmentDto>> => {
-  const supabase = await createSVClient();
+  const supabase = createClient();
   const { page = 0, limit = 20, search, createdBy } = params || {};
 
   let query = supabase
@@ -74,7 +74,7 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
 };
 
 const getAssignmentById = async (id: string): Promise<AssignmentDto> => {
-  const supabase = await createSVClient();
+  const supabase = createClient();
 
   const { data, error } = await supabase
     .from("assignments")

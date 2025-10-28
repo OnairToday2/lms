@@ -37,10 +37,7 @@ export default function CreateAssignmentPage() {
     <PageContainer
       title="Tạo bài kiểm tra"
       breadcrumbs={[
-        {
-          title: "LMS",
-          path: "/dashboard",
-        },
+        { title: "Bài kiểm tra", path: "/assignments" },
         {
           title: "Tạo bài kiểm tra",
         },

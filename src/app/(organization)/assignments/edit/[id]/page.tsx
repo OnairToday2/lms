@@ -14,10 +14,7 @@ export default async function EditAssignmentPage({ params }: EditAssignmentPageP
     <PageContainer
       title="Chỉnh sửa bài kiểm tra"
       breadcrumbs={[
-        {
-          title: "LMS",
-          path: "/dashboard",
-        },
+        { title: "Bài kiểm tra", path: "/assignments" },
         {
           title: "Chỉnh sửa bài kiểm tra",
         },
