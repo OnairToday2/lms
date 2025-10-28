@@ -9,6 +9,118 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      assignment_categories: {
+        Row: {
+          assignment_id: string
+          category_id: string
+          created_at: string
+        }
+        Insert: {
+          assignment_id: string
+          category_id: string
+          created_at?: string
+        }
+        Update: {
+          assignment_id?: string
+          category_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_categories_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignment_employees: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          employee_id: string
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          employee_id: string
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          employee_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_employees_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_employees_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignment_results: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          employee_id: string
+          grade: number
+          id: string
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          employee_id: string
+          grade: number
+          id?: string
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          employee_id?: string
+          grade?: number
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_results_assignment_id_employee_id_fkey"
+            columns: ["assignment_id", "employee_id"]
+            isOneToOne: true
+            referencedRelation: "assignment_results"
+            referencedColumns: ["assignment_id", "employee_id"]
+          },
+          {
+            foreignKeyName: "assignment_results_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_results_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignments: {
         Row: {
           created_at: string
