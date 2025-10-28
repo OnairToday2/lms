@@ -247,5 +247,78 @@ export async function deleteAssignmentEmployeesByAssignmentId(assignmentId: stri
   }
 }
 
-export { getAssignments, getAssignmentById };
+const getAssignmentStudents = async (assignmentId: string) => {
+  const supabase = createClient();
+
+  // Get all assigned employees with their submission status
+  const { data, error } = await supabase
+    .from("assignment_employees")
+    .select(
+      `
+      employee_id,
+      employees (
+        id,
+        employee_code,
+        profiles (
+          id,
+          full_name,
+          email,
+          avatar
+        )
+      )
+    `
+    )
+    .eq("assignment_id", assignmentId);
+
+  if (error) {
+    throw new Error(`Failed to fetch assignment students: ${error.message}`);
+  }
+
+  if (!data) {
+    return [];
+  }
+
+  // Get all submission results for this assignment
+  const { data: results, error: resultsError } = await supabase
+    .from("assignment_results")
+    .select("employee_id, created_at, grade")
+    .eq("assignment_id", assignmentId);
+
+  if (resultsError) {
+    throw new Error(`Failed to fetch assignment results: ${resultsError.message}`);
+  }
+
+  // Create a map of employee_id to submission data
+  const submissionMap = new Map(
+    (results || []).map((result) => [
+      result.employee_id,
+      {
+        submitted_at: result.created_at,
+        grade: result.grade,
+      },
+    ])
+  );
+
+  // Combine the data
+  const students = data.map((item) => {
+    const employee = item.employees;
+    const profile = employee?.profiles;
+    const submission = submissionMap.get(item.employee_id);
+
+    return {
+      employee_id: item.employee_id,
+      employee_code: employee?.employee_code || "",
+      full_name: profile?.full_name || "",
+      email: profile?.email || "",
+      avatar: profile?.avatar || null,
+      has_submitted: !!submission,
+      submitted_at: submission?.submitted_at || null,
+      grade: submission?.grade || null,
+    };
+  });
+
+  return students;
+};
+
+export { getAssignments, getAssignmentById, getAssignmentStudents };
 

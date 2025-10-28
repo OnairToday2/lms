@@ -94,6 +94,13 @@ export default function AssignmentList() {
     setSelectedAssignmentId(null);
   };
 
+  const handleViewStudents = () => {
+    if (selectedAssignmentId) {
+      router.push(`/assignments/${selectedAssignmentId}/students`);
+    }
+    handleMenuClose();
+  };
+
   const handleEdit = () => {
     if (selectedAssignmentId) {
       router.push(`/assignments/edit/${selectedAssignmentId}`);
@@ -294,6 +301,9 @@ export default function AssignmentList() {
               horizontal: "right",
             }}
           >
+            <MenuItem onClick={handleViewStudents}>
+              <ListItemText>Danh sách học viên</ListItemText>
+            </MenuItem>
             <MenuItem onClick={handleEdit}>
               <ListItemText>Chỉnh sửa</ListItemText>
             </MenuItem>
