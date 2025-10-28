@@ -13,7 +13,7 @@ export const getKeyFieldByTab = (tabKey: keyof typeof TAB_KEYS_ASSIGNMENT) => {
       break;
     }
     case "assignTab-content": {
-      keyListByTab = [];
+      keyListByTab = ["questions"];
       break;
     }
     case "assignTab-settings": {

@@ -33,6 +33,7 @@ export const initAssignmentFormData = (): Partial<Assignment> => {
     name: "",
     description: "",
     assignmentCategories: [],
+    questions: [{ type: "file", label: "" }],
   };
 };
 

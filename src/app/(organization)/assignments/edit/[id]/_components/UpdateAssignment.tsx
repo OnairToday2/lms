@@ -20,6 +20,10 @@ const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => 
     name: "Bài kiểm tra mẫu",
     description: "<p>Đây là mô tả bài kiểm tra mẫu</p>",
     assignmentCategories: [],
+    questions: [
+      { type: "file" as const, label: "Câu hỏi mẫu 1" },
+      { type: "file" as const, label: "Câu hỏi mẫu 2" },
+    ],
   };
 
   const handleUpdateAssignment: ManageAssignmentFormProps["onSubmit"] = (formData) => {
