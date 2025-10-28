@@ -19,6 +19,7 @@ const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => 
   const mockAssignmentData = {
     name: "Bài kiểm tra mẫu",
     description: "<p>Đây là mô tả bài kiểm tra mẫu</p>",
+    assignmentCategories: [],
   };
 
   const handleUpdateAssignment: ManageAssignmentFormProps["onSubmit"] = (formData) => {

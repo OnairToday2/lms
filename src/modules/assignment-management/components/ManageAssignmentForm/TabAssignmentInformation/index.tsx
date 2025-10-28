@@ -5,6 +5,7 @@ import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { Typography } from "@mui/material";
 import { type Assignment } from "../../assignment-form.schema";
 import { useFormContext } from "react-hook-form";
+import AssignmentCategorySelector from "./AssignmentCategorySelector";
 
 interface TabAssignmentInformationProps {}
 
@@ -29,6 +30,8 @@ const TabAssignmentInformation: React.FC<TabAssignmentInformationProps> = () => 
         </div>
 
         <TextEditor label="Mô tả bài kiểm tra" control={control} name="description" required />
+
+        <AssignmentCategorySelector control={control} />
       </div>
     </div>
   );

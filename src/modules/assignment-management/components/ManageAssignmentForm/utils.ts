@@ -9,7 +9,7 @@ export const getKeyFieldByTab = (tabKey: keyof typeof TAB_KEYS_ASSIGNMENT) => {
 
   switch (tabKey) {
     case "assignTab-information": {
-      keyListByTab = ["name", "description"];
+      keyListByTab = ["name", "description", "assignmentCategories"];
       break;
     }
     case "assignTab-content": {
