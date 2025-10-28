@@ -1,4 +1,5 @@
 import PageContainer from "@/shared/ui/PageContainer";
+import UpdateAssignment from "./_components/UpdateAssignment";
 
 interface EditAssignmentPageProps {
   params: Promise<{
@@ -22,7 +23,9 @@ export default async function EditAssignmentPage({ params }: EditAssignmentPageP
         },
       ]}
     >
-      <div>Edit page</div>
+      <div className="max-w-[1200px]">
+        <UpdateAssignment assignmentId={id} />
+      </div>
     </PageContainer>
   );
 }

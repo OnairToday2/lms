@@ -1,0 +1,39 @@
+import { FieldErrors } from "react-hook-form";
+import { Assignment } from "../assignment-form.schema";
+
+type AssignmentTabTypes = "idle" | "invalid" | "valid";
+import { TAB_KEYS_ASSIGNMENT } from "./AssignmentFormContainer";
+
+export const getKeyFieldByTab = (tabKey: keyof typeof TAB_KEYS_ASSIGNMENT) => {
+  let keyListByTab: (keyof Assignment)[] = [];
+
+  switch (tabKey) {
+    case "assignTab-information": {
+      keyListByTab = ["name", "description"];
+      break;
+    }
+    case "assignTab-content": {
+      keyListByTab = [];
+      break;
+    }
+    case "assignTab-settings": {
+      keyListByTab = [];
+      break;
+    }
+  }
+  return keyListByTab;
+};
+
+export const getStatusTabAssignment = (
+  error: FieldErrors<Assignment>,
+  tabKey: keyof typeof TAB_KEYS_ASSIGNMENT,
+): AssignmentTabTypes => {
+  let tabStatus: AssignmentTabTypes = "idle";
+
+  const keyListByTab = getKeyFieldByTab(tabKey);
+
+  const isValid = keyListByTab.every((key) => !error[key]);
+
+  return isValid ? "valid" : "invalid";
+};
+
