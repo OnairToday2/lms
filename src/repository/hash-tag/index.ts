@@ -2,7 +2,12 @@ import { supabase } from "@/services";
 import { CreateClassRoomHashTagPayload } from "./type";
 
 const getHashTags = async () => {
-  return await supabase.from("hash_tags").select("*", { count: "exact" });
+  try {
+    return await supabase.from("hash_tags").select("*", { count: "exact" }).order("created_at", { ascending: false });
+  } catch (err) {
+    console.log(err);
+    throw new Error("Get hashtag Failed");
+  }
 };
 
 const createClassRoomHashTag = async (payload: CreateClassRoomHashTagPayload) => {

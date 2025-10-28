@@ -7,22 +7,27 @@ import { useCRUDClassRoom } from "@/modules/class-room-management/hooks/useCRUDC
 import { useMemo, useRef } from "react";
 import { GetClassRoomByIdData } from "../page";
 import { getClassRoomMetaValue } from "@/modules/class-room-management/utils";
-import { Button } from "@mui/material";
 import { useSnackbar } from "notistack";
+import dayjs from "dayjs";
+import { useRouter } from "next/navigation";
 interface UpdateClassRoomProps {
   data: Exclude<GetClassRoomByIdData, null>;
 }
-type UpdateFormValue = Exclude<ManageClassRoomFormProps["value"], undefined>;
-type ClassRoomSession = UpdateFormValue["formData"]["classRoomSessions"][number];
-type SessionAgenda = UpdateFormValue["formData"]["classRoomSessions"][number]["agendas"][number];
+type UpdateClassRoomFormValue = Exclude<ManageClassRoomFormProps["initFormValue"], undefined>;
+type ClassRoomSession = UpdateClassRoomFormValue["classRoomSessions"][number];
+type SessionAgenda = UpdateClassRoomFormValue["classRoomSessions"][number]["agendas"][number];
+
+type TeacherType = Exclude<ManageClassRoomFormProps["teachers"], undefined>;
+type StudentType = Exclude<ManageClassRoomFormProps["students"], undefined>;
 
 const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
-  const { sessions, thumbnail_url, title, description, class_room_metadata } = data;
+  const router = useRouter();
+  const { sessions, class_room_metadata, employees } = data;
   const { enqueueSnackbar } = useSnackbar();
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
-  const { onCreate, isLoading } = useCRUDClassRoom();
+  const { isLoading, onUpdate } = useCRUDClassRoom();
 
-  const updateClassRoomFormData = useMemo<UpdateFormValue["formData"]>(() => {
+  const updateClassRoomFormData = useMemo<UpdateClassRoomFormValue>(() => {
     const hastTags = data?.class_hash_tag.reduce<string[]>((acc, ht) => {
       const hastTagId = ht.hash_tags?.id;
       return hastTagId ? [...acc, hastTagId] : acc;
@@ -33,7 +38,7 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       return fieldId ? [...acc, fieldId] : acc;
     }, []);
 
-    const communityInfo: UpdateFormValue["formData"]["communityInfo"] = {
+    const communityInfo: UpdateClassRoomFormValue["communityInfo"] = {
       name: data.comunity_info?.name || "",
       url: data.comunity_info?.url || "",
     };
@@ -45,8 +50,8 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       };
 
       const agendas = session.agendas.map<SessionAgenda>((agenda) => ({
-        endDate: agenda.end_at || "",
-        startDate: agenda.start_at || "",
+        endDate: agenda.end_at ? dayjs(session.end_at).toISOString() : "",
+        startDate: agenda.start_at ? dayjs(session.start_at).toISOString() : "",
         title: agenda.title || "",
         description: agenda.description || "",
       }));
@@ -54,12 +59,12 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       return [
         ...acc,
         {
-          id: "",
+          id: data.id,
           title: session.title || "",
           description: session.description || "",
           thumbnailUrl: "",
-          endDate: session.end_at || "",
-          startDate: session.start_at || "",
+          endDate: session.end_at ? dayjs(session.end_at).toISOString() : "",
+          startDate: session.start_at ? dayjs(session.start_at).toISOString() : "",
           isOnline: session.is_online || false,
           channelProvider: session.channel_provider || "zoom",
           channelInfo: channelInfo,
@@ -94,28 +99,72 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       status: data.status,
       roomType: data.room_type,
       classRoomId: data.id,
+      platform: "online",
     };
   }, [data]);
 
+  const teacherList = useMemo(() => {
+    return sessions.reduce<TeacherType>((acc, session, _index) => {
+      return {
+        ...acc,
+        [_index]: session.teachers.reduce<TeacherType[0]>((teacherSumary, tc) => {
+          if (tc.employee && tc.employee.employee_type === "teacher") {
+            teacherSumary = [
+              ...teacherSumary,
+              {
+                avatar: tc.employee?.profile?.avatar || "",
+                email: tc.employee?.profile?.email || "",
+                id: tc.employee?.id,
+                fullName: tc.employee?.profile?.full_name || "",
+                employeeCode: tc.employee.employee_code || "",
+                empoyeeType: tc.employee.employee_type,
+              },
+            ];
+          }
+          return teacherSumary;
+        }, []),
+      };
+    }, {});
+  }, [sessions]);
+
+  const studentList = useMemo(() => {
+    return employees.reduce<StudentType>((acc, emp) => {
+      if (emp.employee && emp.employee.employee_type === "student") {
+        acc = [
+          ...acc,
+          {
+            id: emp.employee.id,
+            avatar: emp.employee.profile?.avatar || "",
+            email: emp.employee.profile?.email || "",
+            employeeCode: emp.employee.employee_code,
+            empoyeeType: emp.employee.employee_type,
+            fullName: emp.employee.profile?.full_name || "",
+          },
+        ];
+      }
+      return acc;
+    }, []);
+  }, [employees]);
   const handleUpdateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students, teachers) => {
-    //  onCreate(
-    //    { formData, employees: students },
-    //    {
-    //      onSuccess(data, variables, onMutateResult, context) {
-    //        enqueueSnackbar("Cap nhat lớp học thành công.", {variant: "success"});
-    //        formClassRoomRef.current?.resetForm();
-    //      },
-    //    },
-    //  );
+    onUpdate(
+      { classRoomId: data.id, formData, students, teachers },
+      {
+        onSuccess(data, variables, onMutateResult, context) {
+          enqueueSnackbar("Cập nhật lớp học thành công..", { variant: "success" });
+          formClassRoomRef.current?.resetForm();
+          router.refresh();
+        },
+      },
+    );
   };
 
   return (
     <ManageClassRoomForm
-      value={{
-        formData: updateClassRoomFormData,
-        selectedStudents: [],
-        selectedTeachers: {},
-      }}
+      initFormValue={updateClassRoomFormData}
+      action="edit"
+      students={studentList}
+      teachers={teacherList}
+      isLoading={isLoading}
       onSubmit={handleUpdateClassRoom}
       ref={formClassRoomRef}
     />

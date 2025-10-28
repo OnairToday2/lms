@@ -35,11 +35,7 @@ export interface ClassRoomFormContainerProps {
     selectedStudents: ClassRoomStore["state"]["selectedStudents"],
     selectedTeachers: ClassRoomStore["state"]["selectedTeachers"],
   ) => void;
-  value?: {
-    formData: ClassRoom;
-    selectedStudents: ClassRoomStore["state"]["selectedStudents"];
-    selectedTeachers: ClassRoomStore["state"]["selectedTeachers"];
-  };
+  value?: ClassRoom;
   isLoading?: boolean;
   action?: "create" | "edit";
 }
@@ -64,12 +60,13 @@ export const initClassRoomFormData = (): Partial<ClassRoom> => {
     whies: [],
     galleries: [],
     docs: [],
+    platform: undefined,
     classRoomSessions: [initClassSessionFormData()],
   };
 };
 
 const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, ClassRoomFormContainerProps>(
-  ({ onSubmit, isLoading, action, value }, ref) => {
+  ({ onSubmit, isLoading, action, value: initFormValue }, ref) => {
     const formSubmitStateRef = React.useRef<boolean>(false);
     const resetStore = useClassRoomStore(({ actions }) => actions.reset);
     const selectedStudents = useClassRoomStore(({ state }) => state.selectedStudents);
@@ -77,7 +74,7 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
 
     const methods = useForm<ClassRoom>({
       resolver: zodResolver(classRoomSchema),
-      defaultValues: value?.formData ?? initClassRoomFormData(),
+      defaultValues: initFormValue ?? initClassRoomFormData(),
     });
 
     const {
@@ -150,6 +147,17 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
         reset(); //Reset Form
       },
     }));
+
+    /**
+     * Init form value
+     */
+    React.useEffect(() => {
+      if (!initFormValue) return;
+      Object.entries(initFormValue).forEach(([key, value]) => {
+        setValue(key as keyof ClassRoom, value);
+      });
+    }, [initFormValue]);
+
     return (
       <FormProvider {...methods}>
         {!watchRoomType ? (
@@ -227,7 +235,7 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
                   disabled={isLoading}
                   loading={isLoading}
                 >
-                  Đăng tải
+                  {action === "create" ? "Đăng tải" : "Cập nhật"}
                 </Button>
               </div>
             }

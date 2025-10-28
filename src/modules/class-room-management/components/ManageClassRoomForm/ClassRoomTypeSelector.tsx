@@ -5,6 +5,8 @@ import { cn } from "@/utils";
 import { Box, Button, Typography } from "@mui/material";
 import { ClassRoomType } from "@/model/class-room.model";
 import { ChevronRightDoubleIcon } from "@/shared/assets/icons";
+import { Control, useController } from "react-hook-form";
+import { ClassRoom } from "../classroom-form.schema";
 export interface ClassRoomTypeSelectorProps {
   className?: string;
   onSelect: (type: Exclude<ClassRoomType, null>) => void;
@@ -12,6 +14,7 @@ export interface ClassRoomTypeSelectorProps {
 }
 const ClassRoomTypeSelector: React.FC<ClassRoomTypeSelectorProps> = ({ className, onSelect, value }) => {
   const [roomType, setRoomType] = useState<Exclude<ClassRoomType, null> | undefined>(value);
+  const [isOnline, setIsOnline] = useState<boolean>(false);
 
   const confirmSelectType = () => {
     if (!roomType) return;
@@ -19,6 +22,7 @@ const ClassRoomTypeSelector: React.FC<ClassRoomTypeSelectorProps> = ({ className
   };
 
   const handleSelectRoomType = (type: ClassRoomType) => () => type && setRoomType(type);
+
   return (
     <div className="flex flex-col gap-6 justify-center items-center">
       <div className="class-room-type-selector grid grid-cols-2 gap-6">
@@ -37,6 +41,27 @@ const ClassRoomTypeSelector: React.FC<ClassRoomTypeSelectorProps> = ({ className
             <Image src="/assets/icons/calendar-2.svg" alt="icon calendar" width={56} height={56} className="mb-4" />
           }
           title="Lớp học trực tuyến chuỗi"
+          description="Gồm nhiều lớp học trong một chương trình, diễn ra vào các khung giờ khác nhau."
+          isActive={roomType === "multiple"}
+          onClick={handleSelectRoomType("multiple")}
+        />
+      </div>
+      <div className="class-room-type-selector grid grid-cols-2 gap-6">
+        <SelectItem
+          thumbnail={
+            <Image src="/assets/icons/calendar-1.svg" alt="icon calendar" width={56} height={56} className="mb-4" />
+          }
+          title="Lớp học Offline đơn"
+          description="Diễn ra trong một buổi duy nhất với thời gian cố định."
+          isActive={roomType === "single"}
+          onClick={handleSelectRoomType("single")}
+        />
+
+        <SelectItem
+          thumbnail={
+            <Image src="/assets/icons/calendar-2.svg" alt="icon calendar" width={56} height={56} className="mb-4" />
+          }
+          title="Lớp học Offline chuỗi"
           description="Gồm nhiều lớp học trong một chương trình, diễn ra vào các khung giờ khác nhau."
           isActive={roomType === "multiple"}
           onClick={handleSelectRoomType("multiple")}

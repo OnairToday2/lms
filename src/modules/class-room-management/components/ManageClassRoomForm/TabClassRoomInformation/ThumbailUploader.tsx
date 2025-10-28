@@ -61,7 +61,7 @@ const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({ control, onChange
           accept={{ images: [".jpg", ".jpeg", ".png"] }}
           onChange={handleUploadImage}
           multiple={false}
-          maxCount={5}
+          hidePreviewThumbnail
         />
       )}
       {error?.message ? <FormHelperText error={!!error}>{error.message}</FormHelperText> : null}
