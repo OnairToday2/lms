@@ -24,6 +24,7 @@ const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => 
       { type: "file" as const, label: "Câu hỏi mẫu 1" },
       { type: "file" as const, label: "Câu hỏi mẫu 2" },
     ],
+    assignedEmployees: [],
   };
 
   const handleUpdateAssignment: ManageAssignmentFormProps["onSubmit"] = (formData) => {

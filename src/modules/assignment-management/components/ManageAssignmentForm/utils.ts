@@ -17,7 +17,7 @@ export const getKeyFieldByTab = (tabKey: keyof typeof TAB_KEYS_ASSIGNMENT) => {
       break;
     }
     case "assignTab-settings": {
-      keyListByTab = [];
+      keyListByTab = ["assignedEmployees"];
       break;
     }
   }

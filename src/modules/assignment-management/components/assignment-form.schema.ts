@@ -5,6 +5,15 @@ const questionSchema = zod.object({
   label: zod.string().min(1, { message: "Câu hỏi không được bỏ trống." }),
 });
 
+const employeeItemSchema = zod.object({
+  id: zod.string(),
+  fullName: zod.string(),
+  email: zod.string(),
+  employeeCode: zod.string(),
+  avatar: zod.string().nullable(),
+  empoyeeType: zod.enum(["teacher", "student"]),
+});
+
 const assignmentSchema = zod.object({
   name: zod.string().min(1, { message: "Tên bài kiểm tra không bỏ trống." }).max(200, "Vui lòng nhập tối đa 200 ký tự"),
   description: zod.string().min(1, { message: "Mô tả bài kiểm tra không bỏ trống." }),
@@ -13,10 +22,12 @@ const assignmentSchema = zod.object({
     .min(1, "Chọn tối thiểu 1 lĩnh vực.")
     .max(3, "Chọn tối đa 3 lĩnh vực."),
   questions: zod.array(questionSchema).min(1, { message: "Tạo ít nhất 1 câu hỏi." }),
+  assignedEmployees: zod.array(employeeItemSchema),
 });
 
 type Assignment = zod.infer<typeof assignmentSchema>;
 type Question = zod.infer<typeof questionSchema>;
+type EmployeeItem = zod.infer<typeof employeeItemSchema>;
 
-export { assignmentSchema, type Assignment, type Question };
+export { assignmentSchema, type Assignment, type Question, type EmployeeItem };
 
