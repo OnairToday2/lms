@@ -4,24 +4,29 @@ import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { Android12Switch } from "@/shared/ui/form/CustomSwithcher";
 import { styled, Typography, TypographyProps } from "@mui/material";
+import React from "react";
 interface QrSettingProps {
   className?: string;
 }
 const QrSetting: React.FC<QrSettingProps> = () => {
   const { control, getValues } = useClassRoomFormContext();
 
-  const { fields, update } = useFieldArray({
+  const { fields: fieldSessions, update } = useFieldArray({
     control: control,
     name: "classRoomSessions",
     keyName: "_sessionId",
   });
 
-  const classSessions = getValues("classRoomSessions");
+  // const classSessions = getValues("classRoomSessions");
 
   return (
     <div className="flex flex-col gap-3">
-      {classSessions.map((session, _index) => (
-        <SessionQrCodeConfigItem key={_index} control={control} sessionIndex={_index} title={session.title || ""} />
+      {fieldSessions.map((session, _index) => (
+        <React.Fragment key={_index}>
+          {session.isOnline ? (
+            <SessionQrCodeConfigItem control={control} sessionIndex={_index} title={session.title || ""} />
+          ) : null}
+        </React.Fragment>
       ))}
     </div>
   );

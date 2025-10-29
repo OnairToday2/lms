@@ -74,11 +74,12 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
           isUnlimited: session.limit_person === -1 ? true : false,
           agendas: agendas,
           isLimitTimeScanQrCode: true,
+          platform: "online",
           qrCode: {
             startDate: "",
             endDate: "",
           },
-        },
+        } as UpdateClassRoomFormValue["classRoomSessions"][number],
       ];
     }, []);
 
@@ -102,7 +103,7 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       galleries: galleries || [],
       communityInfo: communityInfo,
       status: data.status,
-      roomType: data.room_type,
+      roomType: data.room_type || "single",
       classRoomId: data.id,
       platform: "online",
     };

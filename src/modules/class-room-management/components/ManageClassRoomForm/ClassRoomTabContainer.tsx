@@ -37,11 +37,14 @@ export interface ClassRoomTabContainerProps {
 }
 const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRoomTabContainerProps>(
   ({ items, className, previewUI, actions, trigger, errors }, ref) => {
-    const [formSubmit, setFormSubmit] = React.useState(false);
-    const tabItemsStateRef = React.useRef<Map<TabKeyType, { status: "idle" | "invalid" | "valid" }>>(
-      new Map(items.map((tab) => [tab.tabKey, { status: "idle" }])),
+    const [tabsState, setTabsState] = React.useState(
+      () =>
+        Object.fromEntries(items.map((tab) => [tab.tabKey, { status: "idle" }])) as Record<
+          TabKeyType,
+          { status: ClassRoomTabStatus }
+        >,
     );
-    const [currentTab, setCurrentTab] = React.useState<TabKeyType | undefined>(() => items?.[0]?.tabKey);
+    const [currentTab, setCurrentTab] = React.useState<TabKeyType>(() => items?.[0]?.tabKey || "clsTab-information");
     const [isGotoNextTab, startGotoNextTab] = useTransition();
     const handleChange = React.useCallback((event: React.SyntheticEvent, newValue: TabKeyType) => {
       setCurrentTab(newValue);
@@ -56,15 +59,16 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
     };
 
     const goNextOrBackStep = (action: "next" | "back") => () => {
-      if (!currentTab) {
-        console.error("Current tab is undefined");
-        return;
-      }
-
       startGotoNextTab(async () => {
         await triggerFieldByTab(currentTab);
-
-        tabItemsStateRef.current.set(currentTab, { status: getStatusTabClassRoom(errors, currentTab) });
+        setTabsState((prevTabState) => {
+          return {
+            ...prevTabState,
+            [currentTab]: {
+              status: getStatusTabClassRoom(errors, currentTab),
+            },
+          } as typeof prevTabState;
+        });
         const status = getStatusTabClassRoom(errors, currentTab);
 
         if (status === "invalid") return;
@@ -85,16 +89,22 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
 
     React.useImperativeHandle(ref, () => ({
       checkStatusAllTabItems: () => {
-        items.forEach((tabItem) => {
-          tabItemsStateRef.current.set(tabItem.tabKey, { status: getStatusTabClassRoom(errors, tabItem.tabKey) });
+        setTabsState((prevTabState) => {
+          let updateTabState = { ...prevTabState };
+          items.forEach((tabItem) => {
+            updateTabState = {
+              ...updateTabState,
+              [tabItem.tabKey]: getStatusTabClassRoom(errors, tabItem.tabKey),
+            };
+          });
+          return updateTabState;
         });
-        setFormSubmit(true);
       },
     }));
 
     return (
       <div className={cn("class-room-tabs", className)}>
-        <TabContext value={currentTab ?? ""}>
+        <TabContext value={currentTab}>
           <div className="bg-white rounded-xl flex items-center justify-between mb-6 px-6 py-4">
             <ClassRoomTabList onChange={handleChange}>
               {items.map(({ tabKey, tabName, icon }) => (
@@ -103,17 +113,13 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
                   value={tabKey}
                   label={
                     <div className="flex items-center gap-1">
-                      {tabItemsStateRef.current?.get(tabKey)?.status === "valid" ? (
-                        <CheckCircleIcon />
-                      ) : icon ? (
-                        icon
-                      ) : null}
+                      {tabsState[tabKey].status === "valid" ? <CheckCircleIcon /> : icon ? icon : null}
                       {tabName}
                     </div>
                   }
                   className={cn("px-0", {
-                    "is-invalid": tabItemsStateRef.current?.get(tabKey)?.status === "invalid",
-                    "is-valid": tabItemsStateRef.current?.get(tabKey)?.status === "valid",
+                    "is-invalid": tabsState[tabKey].status === "invalid",
+                    "is-valid": tabsState[tabKey].status === "valid",
                   })}
                 />
               ))}

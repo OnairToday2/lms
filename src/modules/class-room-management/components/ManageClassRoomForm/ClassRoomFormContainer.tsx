@@ -1,20 +1,20 @@
 "use client";
 import * as React from "react";
-import TabClassRoomInformation from "./TabClassRoomInformation";
-import TabClassRoomResource from "./TabClassRoomResource";
-import TabClassRoomSession from "./TabClassRoomSession";
-import TabClassRoomSetting from "./TabClassRoomSetting";
+
 import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
 import { classRoomSchema, ClassRoom } from "../classroom-form.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, IconButton } from "@mui/material";
-import ClassRoomTabContainer, { ClassRoomTabContainerRef } from "./ClassRoomTabContainer";
-import { CalendarDateIcon, ClipboardIcon, CloseIcon, EyeIcon, InforCircleIcon } from "@/shared/assets/icons";
-import { UsersIcon2 } from "@/shared/assets/icons";
+import { CalendarDateIcon, ClipboardIcon, CloseIcon, EyeIcon, GlobeIcon, UsersPlusIcon } from "@/shared/assets/icons";
 import ClassRoomPreview from "./ClassRoomPreview";
 import ClassRoomTypeSelector, { ClassRoomTypeSelectorProps } from "./ClassRoomTypeSelector";
 import { useClassRoomStore } from "../../store/class-room-context";
 import { ClassRoomStore } from "../../store/class-room-store";
+import ClassRoomTabContainer, { ClassRoomTabContainerRef } from "./ClassRoomTabContainer";
+import TabClassRoomInformation from "./TabClassRoomInformation";
+import TabClassRoomResource from "./TabClassRoomResource";
+import TabClassRoomSession from "./TabClassRoomSession";
+import TabClassRoomSetting from "./TabClassRoomSetting";
 
 export const TAB_KEYS_CLASS_ROOM = {
   "clsTab-information": "clsTab-information",
@@ -166,25 +166,25 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
               {
                 tabName: "Thông tin chung",
                 tabKey: TAB_KEYS_CLASS_ROOM["clsTab-information"],
-                icon: <InforCircleIcon />,
+                icon: <GlobeIcon className="w-5 h-5" />,
                 content: <TabClassRoomInformation />,
               },
               {
                 tabName: "Thời gian",
                 tabKey: TAB_KEYS_CLASS_ROOM["clsTab-session"],
-                icon: <CalendarDateIcon />,
+                icon: <CalendarDateIcon className="w-5 h-5" />,
                 content: <TabClassRoomSession />,
               },
               {
                 tabName: "Tài nguyên",
                 tabKey: TAB_KEYS_CLASS_ROOM["clsTab-resource"],
-                icon: <ClipboardIcon />,
+                icon: <ClipboardIcon className="w-5 h-5" />,
                 content: <TabClassRoomResource />,
               },
               {
                 tabName: "Thiết lập",
                 tabKey: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
-                icon: <UsersIcon2 />,
+                icon: <UsersPlusIcon className="w-5 h-5" />,
                 content: <TabClassRoomSetting />,
               },
             ]}
