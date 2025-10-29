@@ -34,6 +34,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      class_attendances: {
+        Row: {
+          attendance_status:
+            | Database["public"]["Enums"]["attendance_status"]
+            | null
+          attended_at: string | null
+          class_room_id: string | null
+          class_session_id: string | null
+          created_at: string | null
+          device_info: Json | null
+          distance_from_class: number | null
+          employee_id: string
+          id: string
+          qr_code_id: string
+          rejection_reason: string | null
+          scan_location_lat: number | null
+          scan_location_lng: number | null
+        }
+        Insert: {
+          attendance_status?:
+            | Database["public"]["Enums"]["attendance_status"]
+            | null
+          attended_at?: string | null
+          class_room_id?: string | null
+          class_session_id?: string | null
+          created_at?: string | null
+          device_info?: Json | null
+          distance_from_class?: number | null
+          employee_id: string
+          id?: string
+          qr_code_id: string
+          rejection_reason?: string | null
+          scan_location_lat?: number | null
+          scan_location_lng?: number | null
+        }
+        Update: {
+          attendance_status?:
+            | Database["public"]["Enums"]["attendance_status"]
+            | null
+          attended_at?: string | null
+          class_room_id?: string | null
+          class_session_id?: string | null
+          created_at?: string | null
+          device_info?: Json | null
+          distance_from_class?: number | null
+          employee_id?: string
+          id?: string
+          qr_code_id?: string
+          rejection_reason?: string | null
+          scan_location_lat?: number | null
+          scan_location_lng?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_attendances_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_attendances_class_session_id_fkey"
+            columns: ["class_session_id"]
+            isOneToOne: false
+            referencedRelation: "class_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_attendances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_attendances_qr_code_id_fkey"
+            columns: ["qr_code_id"]
+            isOneToOne: false
+            referencedRelation: "class_qr_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_fields: {
         Row: {
           created_at: string
@@ -93,6 +176,94 @@ export type Database = {
             columns: ["hash_tag_id"]
             isOneToOne: false
             referencedRelation: "hash_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_qr_codes: {
+        Row: {
+          allowed_radius_meters: number | null
+          checkin_end_time: string
+          checkin_start_time: string
+          class_room_id: string | null
+          class_session_id: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_enabled: boolean | null
+          location_lat: number | null
+          location_lng: number | null
+          qr_code: string
+          qr_secret: string
+          status: Database["public"]["Enums"]["qr_code_status"] | null
+          title: string
+          updated_at: string | null
+          valid_from: string
+          valid_until: string
+        }
+        Insert: {
+          allowed_radius_meters?: number | null
+          checkin_end_time: string
+          checkin_start_time: string
+          class_room_id?: string | null
+          class_session_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          location_lat?: number | null
+          location_lng?: number | null
+          qr_code: string
+          qr_secret: string
+          status?: Database["public"]["Enums"]["qr_code_status"] | null
+          title: string
+          updated_at?: string | null
+          valid_from: string
+          valid_until: string
+        }
+        Update: {
+          allowed_radius_meters?: number | null
+          checkin_end_time?: string
+          checkin_start_time?: string
+          class_room_id?: string | null
+          class_session_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          location_lat?: number | null
+          location_lng?: number | null
+          qr_code?: string
+          qr_secret?: string
+          status?: Database["public"]["Enums"]["qr_code_status"] | null
+          title?: string
+          updated_at?: string | null
+          valid_from?: string
+          valid_until?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_qr_codes_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_qr_codes_class_session_id_fkey"
+            columns: ["class_session_id"]
+            isOneToOne: false
+            referencedRelation: "class_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_qr_codes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -783,9 +954,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_filtered_employees: {
+        Args: {
+          p_branch_id?: string
+          p_department_id?: string
+          p_limit?: number
+          p_page?: number
+          p_search?: string
+        }
+        Returns: {
+          employee_id: string
+          total_count: number
+        }[]
+      }
+      is_qr_code_valid: {
+        Args: { p_current_time?: string; p_qr_code: string }
+        Returns: {
+          is_valid: boolean
+          message: string
+          qr_code_id: string
+        }[]
+      }
     }
     Enums: {
+      attendance_status: "present" | "late" | "absent" | "rejected"
       channel_provider: "google_meet" | "zoom" | "microsoft_teams"
       class_room_status:
         | "publish"
@@ -801,6 +993,7 @@ export type Database = {
       gender: "male" | "female" | "other"
       hashtag_type: "class_room"
       organization_unit_type: "branch" | "department"
+      qr_code_status: "inactive" | "active" | "expired" | "disabled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -931,6 +1124,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      attendance_status: ["present", "late", "absent", "rejected"],
       channel_provider: ["google_meet", "zoom", "microsoft_teams"],
       class_room_status: [
         "publish",
@@ -947,6 +1141,7 @@ export const Constants = {
       gender: ["male", "female", "other"],
       hashtag_type: ["class_room"],
       organization_unit_type: ["branch", "department"],
+      qr_code_status: ["inactive", "active", "expired", "disabled"],
     },
   },
 } as const

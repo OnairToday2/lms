@@ -28,3 +28,13 @@ const useGetEmployeeQuery = (options?: { enabled?: boolean; queryParams?: Employ
 export default useGetEmployeeQuery;
 
 export { useGetClassFieldQuery, useGetClassHashTagQuery };
+
+export {
+  useGetQRCodeQuery,
+  useGetQRCodesByClassRoomQuery,
+  useGetQRCodesBySessionQuery,
+  useGetAttendancesByClassRoomQuery,
+  useGetAttendancesBySessionQuery,
+  useGetAttendancesByEmployeeQuery,
+  useGetAttendanceStatsQuery,
+} from "./qr-attendance/query";
