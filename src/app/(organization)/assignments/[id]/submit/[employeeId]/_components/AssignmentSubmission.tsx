@@ -26,6 +26,7 @@ import { useGetAssignmentQuery, useGetAssignmentQuestionsQuery } from "@/modules
 import { useGetEmployeeQuery } from "@/modules/employees/operations/query";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import Image from "next/image";
+import { formatFileSize } from "@/utils";
 
 interface QuestionAnswer {
   questionId: string;
@@ -120,14 +121,6 @@ export default function AssignmentSubmission() {
       return <AudiotrackIcon />;
     }
     return <CloudUploadIcon />;
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
   };
 
   const hasAnyFiles = () => {

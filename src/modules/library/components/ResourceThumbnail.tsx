@@ -38,6 +38,10 @@ export function ResourceThumbnail({ resource }: ResourceThumbnailProps) {
     );
   }
 
-  return <ResourceIcon resource={resource} />;
+  return <ResourceIcon
+    isFolder={resource.kind === "folder"}
+    mimeType={resource.mime_type || ""}
+    extension={resource.extension || ""}
+  />;
 }
 

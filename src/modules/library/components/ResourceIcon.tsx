@@ -9,48 +9,51 @@ import SlideshowIcon from "@mui/icons-material/Slideshow";
 import { Resource } from "../types";
 
 interface ResourceIconProps {
-  resource: Resource;
+  isFolder?: boolean;
+  size?: number;
+  mimeType?: string;
+  extension?: string;
 }
 
-export function ResourceIcon({ resource }: ResourceIconProps) {
-  if (resource.kind === "folder") {
-    return <FolderIcon sx={{ fontSize: 48, color: "#5f6368" }} />;
+export function ResourceIcon({ isFolder = false, size = 48, extension, mimeType}: ResourceIconProps) {
+  if (isFolder) {
+    return <FolderIcon sx={{ fontSize: size, color: "#5f6368" }} />;
   }
 
-  const mimeType = resource.mime_type?.toLowerCase() || "";
-  const extension = resource.extension?.toLowerCase() || "";
+  extension = extension?.toLowerCase() || "";
+  mimeType = mimeType?.toLowerCase() || "";
 
   if (mimeType.includes("pdf") || extension === "pdf") {
-    return <PictureAsPdfIcon sx={{ fontSize: 48, color: "#ea4335" }} />;
+    return <PictureAsPdfIcon sx={{ fontSize: size, color: "#ea4335" }} />;
   }
   if (mimeType.includes("image") || ["jpg", "jpeg", "png", "gif", "svg"].includes(extension)) {
-    return <ImageIcon sx={{ fontSize: 48, color: "#34a853" }} />;
+    return <ImageIcon sx={{ fontSize: size, color: "#34a853" }} />;
   }
   if (mimeType.includes("video") || ["mp4", "avi", "mov", "mkv"].includes(extension)) {
-    return <VideoFileIcon sx={{ fontSize: 48, color: "#fbbc04" }} />;
+    return <VideoFileIcon sx={{ fontSize: size, color: "#fbbc04" }} />;
   }
   if (
     mimeType.includes("spreadsheet") ||
     mimeType.includes("excel") ||
     ["xlsx", "xls", "csv"].includes(extension)
   ) {
-    return <TableChartIcon sx={{ fontSize: 48, color: "#0f9d58" }} />;
+    return <TableChartIcon sx={{ fontSize: size, color: "#0f9d58" }} />;
   }
   if (
     mimeType.includes("presentation") ||
     mimeType.includes("powerpoint") ||
     ["pptx", "ppt"].includes(extension)
   ) {
-    return <SlideshowIcon sx={{ fontSize: 48, color: "#f4b400" }} />;
+    return <SlideshowIcon sx={{ fontSize: size, color: "#f4b400" }} />;
   }
   if (
     mimeType.includes("document") ||
     mimeType.includes("word") ||
     ["docx", "doc", "txt"].includes(extension)
   ) {
-    return <DescriptionIcon sx={{ fontSize: 48, color: "#4285f4" }} />;
+    return <DescriptionIcon sx={{ fontSize: size, color: "#4285f4" }} />;
   }
 
-  return <InsertDriveFileIcon sx={{ fontSize: 48, color: "#5f6368" }} />;
+  return <InsertDriveFileIcon sx={{ fontSize: size, color: "#5f6368" }} />;
 }
 
