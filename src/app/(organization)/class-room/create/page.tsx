@@ -1,30 +1,6 @@
-"use client";
 import PageContainer from "@/shared/ui/PageContainer";
-import FormManageClassRoom, {
-  FormManageClassRoomProps,
-  FormManageClassRoomRef,
-} from "@/modules/class-room-management/components/ManageClassRoomForm";
-import { useCRUDClassRoom } from "@/modules/class-room-management/hooks/useCRUDClassRoom";
-import { useRef } from "react";
-import { useToast } from "@/shared/store/toast-snackbar/toast-snackbar-context";
-
+import CreateClassRoomForm from "./_components/CreateClassRoomForm";
 const CreateClassRoomPage = () => {
-  const showMessage = useToast((state) => state.showSnackbar);
-  const formClassRoomRef = useRef<FormManageClassRoomRef>(null);
-  const { onCreate, isLoading } = useCRUDClassRoom();
-
-  const handleCreateClassRoom: FormManageClassRoomProps["onSubmit"] = (formData, students, teachers) => {
-    onCreate(
-      { formData, employees: students, teachers: teachers },
-      {
-        onSuccess(data, variables, onMutateResult, context) {
-          showMessage("Tạo lớp học thành công.", "success");
-          formClassRoomRef.current?.resetForm();
-        },
-      },
-    );
-  };
-
   return (
     <PageContainer
       title="Tạo lớp học"
@@ -39,7 +15,7 @@ const CreateClassRoomPage = () => {
       ]}
     >
       <div className="max-w-[1200px]">
-        <FormManageClassRoom onSubmit={handleCreateClassRoom} ref={formClassRoomRef} isLoading={isLoading} />
+        <CreateClassRoomForm />
       </div>
     </PageContainer>
   );

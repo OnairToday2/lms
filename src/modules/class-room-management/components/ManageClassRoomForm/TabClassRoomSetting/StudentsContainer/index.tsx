@@ -16,13 +16,16 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import { EmployeeStudentWithProfileItem } from "@/model/employee.model";
-import EmployeeFilter, { EmployeeFilterProps } from "./EmployeeFilter";
+
+import EmployeeFilter from "./EmployeeFilter";
 import EmptyData from "@/shared/ui/EmptyData";
 import { cn } from "@/utils";
 import { CloseIcon } from "@/shared/assets/icons";
 import useDebounce from "@/hooks/useDebounce";
 import useGetEmployeeQuery from "@/modules/class-room-management/operation/query";
+import CheckAllStudents from "./CheckAllStudent";
+import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
+import { EmployeeStudentWithProfileItem } from "@/model/employee.model";
 
 const BoxWraper = styled("div")(({ theme }) => ({
   border: "1px solid",
@@ -52,21 +55,22 @@ const BoxContent = styled(Box)(() => ({
   scrollbarWidth: "thin",
 }));
 export interface StudentsContainerProps {
-  seletedItems?: EmployeeStudentWithProfileItem[];
-  onChange: (data: EmployeeStudentWithProfileItem[]) => void;
+  seletedItems?: StudentSelectedItem[];
+  selectedStudentIds?: string[];
+  onChange: (data: StudentSelectedItem[]) => void;
 }
 const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = [], onChange }) => {
-  const [selectedList, setSelectedList] = React.useState<EmployeeStudentWithProfileItem[]>(seletedItems);
   const [queryParams, setQueryParams] = React.useState({ page: 1, pageSize: 20, search: "" });
-  const [departmentIds, setDepartmentIds] = React.useState<string[]>([]);
-  const [branchIds, setBranchIds] = React.useState<string[]>([]);
+  const [selectedStudents, setSelectedStudents] = React.useState<StudentSelectedItem[]>(seletedItems);
+  const [selectedDepartmentIds, setSelectedDepartmentIds] = React.useState<string[]>([]);
+  const [selectedBranchIds, setSelectedBranchIds] = React.useState<string[]>([]);
   const searchEmployeeNameDebounce = useDebounce(queryParams.search, 600);
   const { data: employeeData, isPending } = useGetEmployeeQuery({
     enabled: true,
     queryParams: {
       ...queryParams,
       search: searchEmployeeNameDebounce,
-      organizationUnitIds: [...departmentIds, ...branchIds],
+      organizationUnitIds: [...selectedDepartmentIds, ...selectedBranchIds],
       // excludes: values,
     },
   });
@@ -90,93 +94,88 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
 
   const total = React.useMemo(() => employeeData?.count || 0, [employeeData?.count]);
 
-  const showingItemCount = React.useMemo(() => {
-    if (queryParams.page === pageTotal) return prevPaginationRef.current.total;
-    return queryParams.page * queryParams.pageSize;
+  const studentPagingCount = React.useMemo(() => {
+    if (queryParams.page === pageTotal) {
+      return `${(queryParams.page - 1) * queryParams.pageSize} - ${prevPaginationRef.current.total}`;
+    }
+    return `${(queryParams.page - 1) * queryParams.pageSize} - ${queryParams.page * queryParams.pageSize}`;
   }, [queryParams, pageTotal, prevPaginationRef]);
 
   const handleChagePage: PaginationProps["onChange"] = (evt, newPage) => {
     setQueryParams((prev) => ({ ...prev, page: newPage }));
   };
 
-  const handleAddEmployee = (epl: EmployeeStudentWithProfileItem) => {
-    setSelectedList((prevEmployeeList) => {
-      const newList = [...prevEmployeeList];
-      const existItem = newList.find((it) => it.id === epl.id);
-      return existItem ? prevEmployeeList : [...newList, epl];
+  const handleAddEmployee = (emp: EmployeeStudentWithProfileItem) => {
+    setSelectedStudents((prevSelectedStudents) => {
+      const existItem = prevSelectedStudents.find((it) => it.id === emp.id);
+      const newSelectedStudents = existItem
+        ? prevSelectedStudents
+        : [
+            ...prevSelectedStudents,
+            {
+              id: emp.id,
+              email: emp.profiles.email,
+              fullName: emp.profiles.full_name,
+              employeeCode: emp.employee_code,
+              avatar: emp.profiles.avatar,
+              empoyeeType: emp.employee_type,
+            },
+          ];
+      onChange(newSelectedStudents);
+      return newSelectedStudents;
     });
   };
 
-  const handleRemoveItem = (itemId: string, data: EmployeeStudentWithProfileItem) => {
-    setSelectedList((prevSelectedList) => {
-      return prevSelectedList.filter((item) => item.id !== itemId);
+  const handleRemoveItem = (itemId: string) => {
+    setSelectedStudents((prevSelectedStudents) => {
+      const newSelectedStudents = prevSelectedStudents.filter((item) => item.id !== itemId);
+      onChange(newSelectedStudents);
+      return newSelectedStudents;
     });
   };
 
-  const isCheckedAllItem = React.useMemo(() => {
-    const currentList = employeeData?.data;
-    if (!currentList?.length) return false;
-    return currentList.every((selectedItem) => selectedList.some((item) => item.id === selectedItem.id));
-  }, [selectedList, employeeData?.data]);
+  const handleCheckAllStudents = (checked?: boolean) => {
+    const students = employeeData?.data;
+    if (!students?.length) return;
 
-  const toggleCheckAll = (checked?: boolean) => {
-    const currentList = employeeData?.data;
-    if (!currentList?.length) return;
+    setSelectedStudents((prevSelectedStudents) => {
+      let newSelectedStudents: StudentSelectedItem[] = [];
 
-    setSelectedList((prevSelectedList) => {
-      let newSelectedList: EmployeeStudentWithProfileItem[] = [];
+      const studentsFormated = students.map<StudentSelectedItem>((item) => ({
+        id: item.id,
+        fullName: item.profiles.full_name,
+        email: item.profiles.email || "",
+        employeeCode: item.employee_code,
+        empoyeeType: item.employee_type,
+        avatar: item.profiles.avatar || "",
+      }));
 
       if (checked) {
-        const listMap = new Map<string, EmployeeStudentWithProfileItem>();
+        const studentsMap = new Map<string, StudentSelectedItem>();
 
-        [...currentList, ...prevSelectedList].forEach((item) => {
-          listMap.set(item.id, item);
+        [...studentsFormated, ...prevSelectedStudents].forEach((item) => {
+          studentsMap.set(item.id, item);
         });
 
-        for (const [key, value] of listMap.entries()) {
-          newSelectedList.push(value);
+        for (const [key, value] of studentsMap.entries()) {
+          newSelectedStudents.push(value);
         }
       } else {
-        prevSelectedList.forEach((sltItem) => {
-          if (currentList.every((it) => it.id !== sltItem.id)) {
-            newSelectedList.push(sltItem);
+        prevSelectedStudents.forEach((sltItem) => {
+          if (studentsFormated.every((it) => it.id !== sltItem.id)) {
+            newSelectedStudents.push(sltItem);
           }
         });
       }
-      return newSelectedList;
+      onChange(newSelectedStudents);
+      return newSelectedStudents;
     });
   };
 
   const handleRemoveALl = () => {
-    setSelectedList([]);
+    setSelectedStudents([]);
+    onChange([]);
   };
-  const isIndeterminate = React.useMemo(() => {
-    const currentList = employeeData?.data;
-    if (!currentList?.length) return false;
-    return currentList.some((item) => selectedList.some((it) => it.id === item.id));
-  }, [employeeData?.data, selectedList]);
-
-  const handleSearch: EmployeeFilterProps["onSearch"] = (searchText) => {
-    setQueryParams((prev) => ({ ...prev, search: searchText }));
-  };
-
-  const handleFilterDepartment: EmployeeFilterProps["onSelectDepartment"] = (departmentId) => {
-    setDepartmentIds((prev) => {
-      let newList = [...prev];
-      const isExist = newList.includes(departmentId);
-      return isExist ? newList.filter((it) => it !== departmentId) : [...newList, departmentId];
-    });
-  };
-  const handleFilterBranch: EmployeeFilterProps["onSelectDepartment"] = (branchId) => {
-    setBranchIds((prev) => {
-      let newList = [...prev];
-      const isExist = newList.includes(branchId);
-      return isExist ? newList.filter((it) => it !== branchId) : [...newList, branchId];
-    });
-  };
-  React.useEffect(() => {
-    onChange(selectedList);
-  }, [selectedList]);
 
   React.useEffect(() => {
     if (isPending) return;
@@ -190,7 +189,7 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
 
   React.useEffect(() => {
     if (!seletedItems.length) return;
-    setSelectedList(seletedItems);
+    setSelectedStudents(seletedItems);
   }, [seletedItems]);
 
   return (
@@ -203,19 +202,19 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
               <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem" }}>{`Tất cả học viên (${total})`}</Typography>
             </BoxHeader>
             <BoxToolbar>
-              <Checkbox
-                indeterminate={!isCheckedAllItem && isIndeterminate}
-                checked={isCheckedAllItem}
-                onChange={(evt, checked) => toggleCheckAll?.(checked)}
-                className="mr-4"
+              <CheckAllStudents
+                onCheckAll={handleCheckAllStudents}
+                selectedStudents={selectedStudents}
+                students={employeeData?.data}
               />
-
               <EmployeeFilter
-                onSearch={handleSearch}
-                departmentValues={departmentIds}
-                onSelectDepartment={handleFilterDepartment}
-                branchValues={branchIds}
-                onSelectBranch={handleFilterBranch}
+                onSearch={(searchText) => {
+                  setQueryParams((prev) => ({ ...prev, search: searchText }));
+                }}
+                setSelectedDepartmentIds={setSelectedDepartmentIds}
+                setSelectedBranchIds={setSelectedBranchIds}
+                seletectedBranchIds={selectedBranchIds}
+                selectedDepartmentIds={selectedDepartmentIds}
               />
             </BoxToolbar>
             <Divider />
@@ -228,9 +227,16 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
                 {(isPending && prevEmployeeList.current.length ? prevEmployeeList.current : employeeList).map((emp) => (
                   <StudentItem
                     key={emp.id}
-                    data={emp}
-                    onClick={handleAddEmployee}
-                    isSelected={hasSelected(emp.id, selectedList)}
+                    data={{
+                      id: emp.id,
+                      avatar: emp.profiles.avatar ?? undefined,
+                      email: emp.profiles.email,
+                      employeeCode: emp.employee_code,
+                      fullName: emp.profiles.full_name,
+                      departmentName: emp.employments[0]?.organization_units?.name,
+                    }}
+                    onClick={() => handleAddEmployee(emp)}
+                    isSelected={hasSelected(emp.id, selectedStudents)}
                   />
                 ))}
                 {!isPending && !employeeList.length && (
@@ -245,7 +251,7 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
               <div>
                 <Typography
                   sx={{ fontSize: "0.875rem", color: "text.secondary" }}
-                >{`Hiển thị ${showingItemCount} trên ${total}`}</Typography>
+                >{`Hiển thị ${studentPagingCount} trên ${total}`}</Typography>
               </div>
               <Pagination
                 variant="text"
@@ -264,16 +270,16 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
             <BoxHeader>
               <Typography
                 sx={{ fontWeight: "bold", fontSize: "0.875rem" }}
-              >{`Học viên đã chọn (${selectedList.length})`}</Typography>
+              >{`Học viên đã chọn (${selectedStudents.length})`}</Typography>
             </BoxHeader>
             <BoxToolbar>
-              <Button variant="text" className="ml-auto" disabled={!selectedList.length} onClick={handleRemoveALl}>
+              <Button variant="text" className="ml-auto" disabled={!selectedStudents.length} onClick={handleRemoveALl}>
                 Xoá tất cả
               </Button>
             </BoxToolbar>
             <Divider />
             <BoxContent>
-              {!selectedList?.length && (
+              {!selectedStudents?.length && (
                 <EmptyData
                   title="Đang trống"
                   description={
@@ -290,8 +296,19 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
                 />
               )}
               <div className="flex flex-col">
-                {selectedList.map((emp) => (
-                  <StudentItem key={emp.id} hideCheckbox data={emp} onRemove={handleRemoveItem} />
+                {selectedStudents.map((emp) => (
+                  <StudentItem
+                    key={emp.id}
+                    hideCheckbox
+                    data={{
+                      id: emp.id,
+                      avatar: emp.avatar ?? undefined,
+                      email: emp.email,
+                      employeeCode: emp.employeeCode,
+                      fullName: emp.fullName,
+                    }}
+                    onRemove={handleRemoveItem}
+                  />
                 ))}
               </div>
             </BoxContent>
@@ -305,21 +322,27 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
 export default StudentsContainer;
 
 interface StudentItemProps {
-  data: EmployeeStudentWithProfileItem;
-  onClick?: (data: EmployeeStudentWithProfileItem) => void;
+  data: {
+    id: string;
+    employeeCode?: string;
+    fullName?: string;
+    email?: string;
+    departmentName?: string;
+    avatar?: string;
+  };
+  onClick?: () => void;
   isSelected?: boolean;
   hideCheckbox?: boolean;
   viewOnly?: boolean;
-  onRemove?: (itemId: string, data: EmployeeStudentWithProfileItem) => void;
+  onRemove?: (itemId: string) => void;
 }
 const StudentItem: React.FC<StudentItemProps> = React.memo(
   ({ data, onClick, isSelected, viewOnly = false, onRemove, hideCheckbox = false }) => {
-    const { id, employee_code, profiles, employments } = data;
-    const departmentName = React.useMemo(() => employments[0]?.organization_units?.name, [employments]);
+    const { id, employeeCode, fullName, email, departmentName } = data;
     return (
       <ListItemButton
         role="listitem"
-        {...(!viewOnly ? { onClick: () => onClick?.(data) } : { disableRipple: true, disableTouchRipple: true })}
+        {...(!viewOnly ? { onClick } : { disableRipple: true, disableTouchRipple: true })}
         sx={(theme) => ({
           paddingInline: 2,
           paddingBlock: 1.5,
@@ -337,7 +360,7 @@ const StudentItem: React.FC<StudentItemProps> = React.memo(
           <div className="flex flex-col gap-1">
             <div className="flex gap-2">
               <Chip
-                label={employee_code}
+                label={employeeCode}
                 color="primary"
                 variant="filled"
                 sx={(theme) => ({
@@ -348,11 +371,11 @@ const StudentItem: React.FC<StudentItemProps> = React.memo(
                   fontSize: "0.75rem",
                 })}
               />
-              <Typography sx={{ fontWeight: 600, fontSize: "0.875rem" }}>{profiles?.full_name}</Typography>
+              <Typography sx={{ fontWeight: 600, fontSize: "0.875rem" }}>{fullName}</Typography>
             </div>
             <div className="flex gap-2">
               <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{departmentName}</Typography>
-              <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{profiles?.email}</Typography>
+              <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{email}</Typography>
             </div>
           </div>
           {onRemove ? (
@@ -363,7 +386,7 @@ const StudentItem: React.FC<StudentItemProps> = React.memo(
                 borderColor: theme.palette.grey[300],
                 backgroundColor: "white",
               })}
-              onClick={() => onRemove(data.id, data)}
+              onClick={() => onRemove(id)}
               size="small"
               className="ml-auto"
             >
@@ -376,6 +399,6 @@ const StudentItem: React.FC<StudentItemProps> = React.memo(
   },
 );
 
-const hasSelected = (itemId: string, items: EmployeeStudentWithProfileItem[]) => {
+const hasSelected = (itemId: string, items: StudentSelectedItem[]) => {
   return items.some((it) => it.id === itemId);
 };

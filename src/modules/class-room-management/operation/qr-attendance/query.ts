@@ -7,7 +7,7 @@ import {
   getAttendancesBySession,
   getAttendancesByEmployee,
   getAttendanceStatsByQRCode,
-} from "@/repository/classRoom";
+} from "@/repository/class-room-qr";
 import { QR_ATTENDANCE_KEYS } from "./key";
 
 export const useGetQRCodeQuery = (qrCodeId: string | undefined) => {

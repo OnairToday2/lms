@@ -1,4 +1,5 @@
 "use client";
+import { useLayoutEffect } from "react";
 import { type ClassRoom } from "../../classroom-form.schema";
 import QuantityPersonField from "./class-room-session-fields/QuantityPersonField";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
@@ -6,19 +7,25 @@ import ClassRoomSessionFromToDate from "./class-room-session-fields/ClassRoomSes
 import TeacherSelector from "./class-room-session-fields/TeacherSelector";
 import RoomChannel from "./class-room-session-fields/RoomChannel";
 import AgendarFields from "./class-room-session-fields/AgendarFields";
-import { Button } from "@mui/material";
+import { initClassSessionFormData } from ".";
 interface SingleSessionProps {
   methods: UseFormReturn<ClassRoom>;
 }
 const SingleSession: React.FC<SingleSessionProps> = ({ methods }) => {
-  const { control } = methods;
+  const { control, getValues } = methods;
 
-  const { fields: classSessionsFields } = useFieldArray({
+  const { fields: classSessionsFields, append } = useFieldArray({
     control,
     name: "classRoomSessions",
     keyName: "_sessionId",
   });
 
+  useLayoutEffect(() => {
+    if (classSessionsFields.length) return;
+    /** init one session for single type */
+    const platform = getValues("platform");
+    append(initClassSessionFormData({ isOnline: platform === "online" }));
+  }, [classSessionsFields]);
   return (
     <div className="class-single-session">
       {classSessionsFields.map((sessionField, _index) => (

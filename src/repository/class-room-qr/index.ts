@@ -14,8 +14,8 @@ import {
   AttendanceCheckInPayload,
   AttendanceCheckInResult,
   UpdateQRCodePayload,
-} from "./type";
-export * from "./type";
+} from "../classRoom/type";
+export * from "../classRoom/type";
 import type { QRCodeStatus, QRCodeWithRelations, AttendanceWithRelations } from "@/model/qr-attendance.model";
 
 const getClassFieldList = async () => {
