@@ -75,8 +75,6 @@ export type CreateQRCodePayload = Pick<
   ClassQRCode,
   | "title"
   | "description"
-  | "valid_from"
-  | "valid_until"
   | "checkin_start_time"
   | "checkin_end_time"
   | "created_by"
@@ -118,8 +116,6 @@ export interface AttendanceCheckInResult {
 export interface UpdateQRCodePayload {
   title?: string;
   description?: string;
-  valid_from?: string;
-  valid_until?: string;
-  checkin_start_time?: string;
-  checkin_end_time?: string;
+  checkin_start_time?: string | null;
+  checkin_end_time?: string | null;
 }

@@ -276,14 +276,51 @@ const deactivateQRCode = async (qrCodeId: string) => {
 
 const validateQRCode = async (qrCode: string): Promise<QRCodeValidationResult> => {
   try {
-    const { data, error } = await supabase.rpc("is_qr_code_valid", {
-      p_qr_code: qrCode,
-      p_current_time: new Date().toISOString(),
-    });
+    const { data: qrCodeData, error: qrError } = await supabase
+      .from("class_qr_codes")
+      .select("*")
+      .eq("qr_code", qrCode)
+      .single();
 
-    if (error) throw error;
+    if (qrError || !qrCodeData) {
+      return { is_valid: false, message: "QR code không tồn tại" };
+    }
 
-    return data?.[0] || { is_valid: false, message: "QR code không hợp lệ" };
+    // Check if disabled
+    if (qrCodeData.status === "disabled" || !qrCodeData.is_enabled) {
+      return { is_valid: false, message: "QR code đã bị vô hiệu hóa" };
+    }
+
+    // Check if expired
+    if (qrCodeData.status === "expired") {
+      return { is_valid: false, message: "QR code đã hết hạn" };
+    }
+
+    // Check if active
+    if (qrCodeData.status !== "active") {
+      return { is_valid: false, message: "QR code chưa được kích hoạt" };
+    }
+
+    // Check if within checkin time (if specified)
+    if (qrCodeData.checkin_start_time && qrCodeData.checkin_end_time) {
+      const now = new Date();
+      const start = new Date(qrCodeData.checkin_start_time);
+      const end = new Date(qrCodeData.checkin_end_time);
+
+      if (now < start) {
+        return { is_valid: false, message: "Chưa đến giờ check-in" };
+      }
+
+      if (now > end) {
+        return { is_valid: false, message: "Đã hết giờ check-in" };
+      }
+    }
+
+    return {
+      is_valid: true,
+      qr_code_id: qrCodeData.id,
+      message: "QR code hợp lệ",
+    };
   } catch (err: any) {
     console.error("Error validating QR code:", err);
     return { is_valid: false, message: err.message || "Lỗi khi kiểm tra QR code" };
