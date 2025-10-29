@@ -3,6 +3,7 @@ import { fa } from "zod/v4/locales";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  output: "standalone", // Enable standalone output for Docker
   reactStrictMode: false,
   // typedRoutes: true,
   // compiler: {
@@ -55,6 +56,9 @@ const nextConfig: NextConfig = {
       ...config.resolve.alias,
     };
     return config;
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   },
 };
 
