@@ -313,19 +313,24 @@ const useCRUDClassRoom = () => {
        * Step 3: Sync Classroom with Employee
        */
 
-      const pivotSudentWithClassRoomIds = classRoomDetail.employees.map((item) => item.id);
-      await classRoomRepository.deletePivotClassRoomAndEmployee(pivotSudentWithClassRoomIds);
+      const studentListDeletion = classRoomDetail.employees.filter((row) =>
+        students.every((std) => std.id !== row.employee?.id),
+      );
+      const studentListAddition = students.filter((std) =>
+        classRoomDetail.employees.every((row) => row.employee?.id !== std.id),
+      );
 
-      const { data: employeeWithClassRoom, error: pivotEmployeeWithClassRoomError } =
+      console.log({ studentListDeletion, studentListAddition, newList: students, oldList: classRoomDetail.employees });
+      if (studentListDeletion.length) {
+        await classRoomRepository.deletePivotClassRoomAndEmployee(studentListDeletion.map((row) => row.id));
+      }
+      if (studentListAddition.length) {
         await classRoomRepository.createPivotClassRoomAndEmployee(
-          students.map((tc) => ({
+          studentListAddition.map((tc) => ({
             class_room_id: classRoomData.id,
             employee_id: tc.id,
           })),
         );
-
-      if (pivotEmployeeWithClassRoomError) {
-        console.log(pivotEmployeeWithClassRoomError);
       }
 
       /**
@@ -337,7 +342,6 @@ const useCRUDClassRoom = () => {
         .filter((item) => !isUndefined(item));
 
       const classRoomFieldListAddition = classRoomField.filter((id) => !currentClassFieldIds.includes(id));
-
       const classRoomFieldListDeletation = currentClassRoomFields.filter((it) =>
         classRoomField.every((id) => id !== it.class_fields?.id),
       );
@@ -358,7 +362,6 @@ const useCRUDClassRoom = () => {
        * Step 5: Sync Classroom old hashtag to new hashtag
        */
       const currentClassRoomTags = [...classRoomDetail.class_hash_tag];
-
       const currentClassClassRoomHashTagIds = currentClassRoomTags
         .map((item) => item.hash_tags?.id)
         .filter((item) => !isUndefined(item));
@@ -367,7 +370,7 @@ const useCRUDClassRoom = () => {
 
       const classRoomHashTagsDeletation = currentClassRoomTags.filter((it) =>
         hashTags.every((id) => id !== it.hash_tags?.id),
-      ); // Delete list
+      );
 
       if (classRoomHashTagsAddition.length) {
         await classRoomRepository.createPivotClassRoomAndHashTag(
@@ -386,8 +389,6 @@ const useCRUDClassRoom = () => {
        * Step 6: Sync Classroom old sessions with new Sessions
        */
 
-      const classRoomSessionPayload = mapSessionWithClassRoom(classRoomSessions, roomType, title, description);
-
       const deleteSessionIds = classRoomDetail.sessions.map((sesion) => sesion.id);
 
       const pivotSessionWithTeacherIds = classRoomDetail.sessions.reduce<string[]>((acc, session) => {
@@ -400,36 +401,22 @@ const useCRUDClassRoom = () => {
         return [...acc, ...agendaIds];
       }, []);
 
-      const { data: deletePivotSessionWTeacherData, error: deletePivotSessionWTeacherError } =
-        await classRoomSessionRepository.deletePivotClassSessionAndTeacher(pivotSessionWithTeacherIds);
-      if (deletePivotSessionWTeacherError) {
-        throw new Error(deletePivotSessionWTeacherError.message);
-      }
+      await classRoomSessionRepository.deletePivotClassSessionAndTeacher(pivotSessionWithTeacherIds);
 
-      const { data: deleteSessionAgendsData, error: deleteSessionAgendsError } =
-        await classRoomSessionRepository.deleteSessionAgendas(sessionAgendasIds);
+      await classRoomSessionRepository.deleteSessionAgendas(sessionAgendasIds);
 
-      if (deleteSessionAgendsError) {
-        throw new Error(deleteSessionAgendsError.message);
-      }
+      await classRoomSessionRepository.deleteClassSession(deleteSessionIds);
 
-      const { data: deleteSessionData, error: deleteSessionError } =
-        await classRoomSessionRepository.deleteClassSession(deleteSessionIds);
-
-      if (deleteSessionError) {
-        throw new Error(deleteSessionError.message);
-      }
-
+      const classRoomSessionPayload = mapSessionWithClassRoom(classRoomSessions, roomType, title, description);
       console.log({ newSessionPayload: classRoomSessionPayload, deleteSessionIds });
-
-      const { data: sessionsData, error: sessionDataError } = await classRoomSessionRepository.createClassSession({
+      const { data: newSessionsData, error: sessionDataError } = await classRoomSessionRepository.createClassSession({
         classRoomId: classRoomData.id,
         sessions: classRoomSessionPayload,
       });
 
-      if (!sessionsData) {
+      if (sessionDataError) {
         console.error(sessionDataError);
-        throw new Error("Update Session Failue");
+        throw new Error(sessionDataError.message);
       }
 
       /**
@@ -438,7 +425,7 @@ const useCRUDClassRoom = () => {
 
       const sessionAgendasPayload = mapAgendaWithSessions(
         classRoomSessions,
-        sessionsData.map((s) => ({ id: s.id })),
+        newSessionsData.map((s) => ({ id: s.id })),
       );
 
       await classRoomSessionRepository.createSessionAgendas(sessionAgendasPayload);
@@ -450,13 +437,13 @@ const useCRUDClassRoom = () => {
       const createPivotClassSessionAndTeacherPayload = Object.entries(teachers).reduce<
         CreatePivotClassRoomSessionAndTeacherPayload[]
       >((acc, [_, teachers], _index) => {
-        const sessionId = sessionsData[_index]?.id;
+        const sessionId = newSessionsData[_index]?.id;
         if (sessionId) {
-          const teacherListWithSessionId = teachers.map<CreatePivotClassRoomSessionAndTeacherPayload>((tc) => ({
+          const teacherWithSessionIdList = teachers.map<CreatePivotClassRoomSessionAndTeacherPayload>((tc) => ({
             class_session_id: sessionId,
             teacher_id: tc.id,
           }));
-          acc = [...acc, ...teacherListWithSessionId];
+          acc = [...acc, ...teacherWithSessionIdList];
         }
         return acc;
       }, []);
@@ -464,7 +451,7 @@ const useCRUDClassRoom = () => {
       const { data: sessionTeacher, error: sessionTeacherError } =
         await classRoomSessionRepository.createPivotClassSessionAndTeacher(createPivotClassSessionAndTeacherPayload);
 
-      console.log("Update Susscess", classRoomData, sessionsData, employeeWithClassRoom, sessionTeacher);
+      console.log("Update Susscess", classRoomData, newSessionsData, sessionTeacher);
       return classRoomData;
     },
     onError: (error) => {
