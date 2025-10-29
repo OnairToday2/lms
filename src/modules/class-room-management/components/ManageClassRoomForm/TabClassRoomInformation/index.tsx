@@ -4,7 +4,6 @@ import TextEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { FormLabel, Typography } from "@mui/material";
 import { type ClassRoom } from "../../classroom-form.schema";
-interface TabClassRoomInformationProps {}
 import { useFormContext } from "react-hook-form";
 import ThumbnailUploader from "./ThumbailUploader";
 import ClassRoomSlugField from "./ClassRoomSlugField";
@@ -12,6 +11,9 @@ import ClassFieldSelector from "./ClassFieldSelector";
 import ClassHashTagSelector from "./ClassHashTagSelector";
 import GalleriesUploader from "./GalleriesUploader";
 
+interface TabClassRoomInformationProps {
+  className?: string;
+}
 const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = () => {
   const {
     control,

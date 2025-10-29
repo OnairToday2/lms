@@ -138,7 +138,9 @@ const RoomChannelSelect: React.FC<RoomChannelSelectProps> = ({ control, index })
             Chọn nền tảng
           </MenuItem>
           {CHANNEL_OPTIONS.map((opt) => (
-            <MenuItem value={opt.value}>{opt.label}</MenuItem>
+            <MenuItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </MenuItem>
           ))}
         </Select>
       </FormControl>

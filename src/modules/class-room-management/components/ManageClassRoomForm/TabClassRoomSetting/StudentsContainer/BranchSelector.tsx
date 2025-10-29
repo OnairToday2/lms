@@ -12,10 +12,6 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, va
     queryParams: { type: "branch" },
   });
 
-  if (branchData?.error) {
-    return <Alert severity="error">{branchData.error.message}</Alert>;
-  }
-
   const departmentList = useMemo(() => {
     return branchData?.data || [];
   }, [branchData?.data]);
@@ -23,6 +19,11 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, va
   const hasChecked = (itemId: string) => {
     return values?.some((val) => val === itemId);
   };
+
+  if (branchData?.error) {
+    return <Alert severity="error">{branchData.error.message}</Alert>;
+  }
+
   return (
     <div className="depart-ment">
       {departmentList.map((item) => (

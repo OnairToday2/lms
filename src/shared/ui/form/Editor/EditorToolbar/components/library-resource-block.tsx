@@ -6,11 +6,8 @@ import { useCallback, useState } from "react";
 // import { useStoreLibrary } from "@onair/store/library";
 
 const FILE_TYPES = ["video/mp4", "application/pdf", "image/png", "image/jpeg"];
-interface LibraryResourceBlockProps
-  extends Pick<EditorToolbarProps, "editor"> {}
-const LibraryResourceBlock: React.FC<LibraryResourceBlockProps> = ({
-  editor,
-}) => {
+type LibraryResourceBlockProps = Pick<EditorToolbarProps, "editor">;
+const LibraryResourceBlock: React.FC<LibraryResourceBlockProps> = ({ editor }) => {
   // const onOpenResource = useStoreLibrary((state) => state.onOpenResource);
 
   const handleOpenResource = () => {
