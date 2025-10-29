@@ -19,20 +19,6 @@ import { ClassRoomStore } from "../store/class-room-store";
 import { isUndefined } from "lodash";
 import { PostgrestError } from "@supabase/supabase-js";
 
-const tryCatchSupabase = async <T>(
-  fn: () => Promise<{ data: T | null; error: PostgrestError | null }>,
-  context?: string,
-) => {
-  try {
-    const { data, error } = await fn();
-    if (error) throw error;
-    return { ok: true, data } as const;
-  } catch (error) {
-    console.error(context || "Operation failed", error);
-    return { ok: false, error } as const;
-  }
-};
-
 const useCRUDClassRoom = () => {
   const userInfo = useUserOrganization((state) => state.data);
 
