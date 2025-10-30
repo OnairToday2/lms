@@ -1,4 +1,5 @@
 "use client";
+import { IMMUTABLE_ROLES } from "@/constants/roles.constant";
 import { RoleFormContainer } from "@/modules/roles/components/RoleForm";
 import { useUpdateRolePermissions } from "@/modules/roles/operations/mutation";
 import { useGetRolePermissions } from "@/modules/roles/operations/query";
@@ -62,6 +63,8 @@ const EditRolePage = () => {
     );
   };
 
+  const isSuperAdminRole = params.code === IMMUTABLE_ROLES.SUPER_ADMIN;
+
   return (
     <PageContainer title="Chỉnh sửa vai trò & phân quyền">
       <Backdrop
@@ -80,7 +83,14 @@ const EditRolePage = () => {
           </Typography>
         </Box>
       </Backdrop>
-      {rolePermissions && <RoleFormContainer initialData={rolePermissions} onSubmit={handleSubmit} isEditMode={true} />}
+      {rolePermissions && (
+        <RoleFormContainer
+          initialData={rolePermissions}
+          onSubmit={handleSubmit}
+          isEditMode={true}
+          isSuperAdminRole={isSuperAdminRole}
+        />
+      )}
     </PageContainer>
   );
 };

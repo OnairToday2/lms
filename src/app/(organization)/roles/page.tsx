@@ -18,6 +18,7 @@ import PageContainer from "@/shared/ui/PageContainer";
 import Link from "next/link";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import { useDeleteRole } from "@/modules/roles/operations/mutation";
+import { IMMUTABLE_ROLES } from "@/constants/roles.constant";
 
 interface RoleData {
   id: string;
@@ -217,40 +218,45 @@ const RolesPage = () => {
         </NoSsr>
       </Box>
 
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleMenuClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-        slotProps={{
-          paper: {
-            sx: {
-              minWidth: 180,
-              boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+      {selectedRole && (
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleMenuClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+          slotProps={{
+            paper: {
+              sx: {
+                minWidth: 180,
+                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+              },
             },
-          },
-        }}
-      >
-        <MenuItem onClick={handleEdit}>
-          <ListItemIcon>
-            <EditIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Chỉnh sửa vai trò</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={handleDelete} sx={{ color: "error.main" }}>
-          <ListItemIcon>
-            <DeleteIcon fontSize="small" color="error" />
-          </ListItemIcon>
-          <ListItemText>Xoá vai trò</ListItemText>
-        </MenuItem>
-      </Menu>
+          }}
+        >
+          <MenuItem onClick={handleEdit}>
+            <ListItemIcon>
+              <EditIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Chỉnh sửa vai trò</ListItemText>
+          </MenuItem>
+
+          {!Object.values(IMMUTABLE_ROLES).includes(selectedRole?.code as IMMUTABLE_ROLES) && (
+            <MenuItem onClick={handleDelete} sx={{ color: "error.main" }}>
+              <ListItemIcon>
+                <DeleteIcon fontSize="small" color="error" />
+              </ListItemIcon>
+              <ListItemText>Xoá vai trò</ListItemText>
+            </MenuItem>
+          )}
+        </Menu>
+      )}
     </PageContainer>
   );
 };

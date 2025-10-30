@@ -6,9 +6,12 @@ import { useGetGroupPermissionList } from "@/modules/roles/operations/query";
 import { RoleParams, RolePermissionsParams } from "@/repository/roles";
 import { useCreateRole } from "@/modules/roles/operations/mutation";
 import { Backdrop, Box, CircularProgress, Typography } from "@mui/material";
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 
 const CreateRolePage = () => {
   const router = useRouter();
+
+  const userInfo = useUserOrganization((state) => state.data);
 
   const { data: permissionModules, isLoading } = useGetGroupPermissionList();
   const { mutate: createRoleMutate, isPending } = useCreateRole();
@@ -22,7 +25,7 @@ const CreateRolePage = () => {
 
   const handleSubmit = (data: RoleParams & RolePermissionsParams) => {
     if (!data.title || data.title.trim() === "") return alert("Vui lòng nhập tên vai trò.");
-    
+
     if (!data.permissionsToAdd || data.permissionsToAdd.length === 0)
       return alert("Vui lòng chọn ít nhất một quyền cho vai trò.");
 
@@ -31,6 +34,7 @@ const CreateRolePage = () => {
         title: data.title,
         description: data.description,
         permissions: data.permissionsToAdd,
+        organization_id: userInfo.organization.id,
       },
       {
         onSuccess: () => {

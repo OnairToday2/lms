@@ -20,9 +20,15 @@ interface RoleFormContainerProps {
   initialData: Partial<RoleFormData>;
   onSubmit?: (data: RoleParams & RolePermissionsParams) => void;
   isEditMode?: boolean;
+  isSuperAdminRole?: boolean;
 }
 
-const RoleFormContainer: React.FC<RoleFormContainerProps> = ({ initialData, onSubmit, isEditMode = false }) => {
+const RoleFormContainer: React.FC<RoleFormContainerProps> = ({
+  initialData,
+  onSubmit,
+  isEditMode = false,
+  isSuperAdminRole = false,
+}) => {
   const {
     modules,
     selectedPermissions,
@@ -35,8 +41,6 @@ const RoleFormContainer: React.FC<RoleFormContainerProps> = ({ initialData, onSu
     setSelectedPermissions,
     selectedPermissionsArray,
   } = useRolePermissionFormData(initialData);
-
-
 
   const onClickSave = useCallback(
     (data: { title: string; description: string }) => {
@@ -63,36 +67,44 @@ const RoleFormContainer: React.FC<RoleFormContainerProps> = ({ initialData, onSu
         initialDescription={initialData.description}
       />
 
-      <Box sx={{ bgcolor: "white", borderRadius: 3, p: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-          <Typography variant="h6" fontWeight={600}>
-            Phân quyền cho vai trò
+      {!isSuperAdminRole ? (
+        <Box sx={{ bgcolor: "white", borderRadius: 3, p: 3 }}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+            <Typography variant="h6" fontWeight={600}>
+              Phân quyền cho vai trò
+            </Typography>
+          </Box>
+
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <PermissionSelector
+                modules={modules}
+                isFullySelected={isFullySelected}
+                isPartiallySelected={isPartiallySelected}
+                toggleAll={toggleAll}
+                selectedPermissions={selectedPermissions}
+                setSelectedPermissions={setSelectedPermissions}
+                toggleAction={toggleAction}
+                isPendingToggleAll={isPendingToggleAll}
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 6 }}>
+              <SelectedPermissionsSummary
+                selectedPermissionsArray={selectedPermissionsArray}
+                toggleAction={toggleAction}
+                isPendingToggleAll={isPendingToggleAll}
+              />
+            </Grid>
+          </Grid>
+        </Box>
+      ) : (
+        <Box sx={{ mt: 3 }} alignSelf={'center'}>
+          <Typography variant="body1" color="text.secondary" textAlign={'center'}>
+            Vai trò Super Admin có toàn quyền truy cập hệ thống và không thể chỉnh sửa phân quyền.
           </Typography>
         </Box>
-
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <PermissionSelector
-              modules={modules}
-              isFullySelected={isFullySelected}
-              isPartiallySelected={isPartiallySelected}
-              toggleAll={toggleAll}
-              selectedPermissions={selectedPermissions}
-              setSelectedPermissions={setSelectedPermissions}
-              toggleAction={toggleAction}
-              isPendingToggleAll={isPendingToggleAll}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 6 }}>
-            <SelectedPermissionsSummary
-              selectedPermissionsArray={selectedPermissionsArray}
-              toggleAction={toggleAction}
-              isPendingToggleAll={isPendingToggleAll}
-            />
-          </Grid>
-        </Grid>
-      </Box>
+      )}
     </Box>
   );
 };

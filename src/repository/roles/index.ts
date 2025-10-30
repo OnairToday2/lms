@@ -110,6 +110,7 @@ export interface RoleParams {
   id?: string;
   title: string;
   description?: string;
+  organization_id?: string;
 }
 
 export interface PermissionParams {
@@ -166,12 +167,16 @@ const generateCode = async (title: string) => {
 export const createRole = async (data: RoleParams & { permissions: PermissionParams[] }) => {
   let code = await generateCode(data.title);
 
+  if (!code) return Promise.reject("Failed to generate role code");
+  if (!data.organization_id) return Promise.reject("Organization ID is required");
+
   const { data: role, error: roleError } = await supabase
     .from("roles")
     .insert({
       title: data.title,
       code: code,
       description: data.description,
+      organization_id: data.organization_id,
     })
     .select()
     .single();

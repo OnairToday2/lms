@@ -9,8 +9,6 @@ const UserOrganizationWraper = async ({ children }: { readonly children: React.R
     throw new Error("Invalid Organization");
   }
 
-  console.log(employeeDetail);
-
   return (
     <UserOrganizationProvider
       data={{

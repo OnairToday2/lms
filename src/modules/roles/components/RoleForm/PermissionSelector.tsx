@@ -17,7 +17,9 @@ interface PermissionSelectorProps
     | "toggleAction"
     | "setSelectedPermissions"
     | "isPendingToggleAll"
-  > {}
+  > {
+    disabled?: boolean;
+  }
 
 const PermissionSelector: React.FC<PermissionSelectorProps> = ({
   isFullySelected,

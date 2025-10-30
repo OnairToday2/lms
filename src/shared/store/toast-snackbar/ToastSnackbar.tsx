@@ -14,7 +14,6 @@ export default function ToastSnackbar() {
   const removeMessage = useToast((state) => state.removeMessage);
   const hideMessage = useToast((state) => state.hideMessage);
 
-  console.log(messsages);
   const closeSnackbar = (_index: number) => {
     hideMessage(_index);
     removeMessage(_index);
