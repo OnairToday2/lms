@@ -57,7 +57,8 @@ async function deleteDepartment(id: string): Promise<void> {
 }
 
 async function getBranches(organizationId: string) {
-  return departmentRepository.getBranches(organizationId);
+  const branches = await departmentRepository.getBranches(organizationId);
+  return { data: branches };
 }
 
 async function importDepartments(payload: ImportDepartmentsDto): Promise<DepartmentImportResult> {
