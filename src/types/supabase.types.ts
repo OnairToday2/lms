@@ -34,6 +34,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      class_attendances: {
+        Row: {
+          attendance_status:
+            | Database["public"]["Enums"]["attendance_status"]
+            | null
+          attended_at: string | null
+          class_room_id: string | null
+          class_session_id: string | null
+          created_at: string | null
+          device_info: Json | null
+          distance_from_class: number | null
+          employee_id: string
+          id: string
+          qr_code_id: string
+          rejection_reason: string | null
+          scan_location_lat: number | null
+          scan_location_lng: number | null
+        }
+        Insert: {
+          attendance_status?:
+            | Database["public"]["Enums"]["attendance_status"]
+            | null
+          attended_at?: string | null
+          class_room_id?: string | null
+          class_session_id?: string | null
+          created_at?: string | null
+          device_info?: Json | null
+          distance_from_class?: number | null
+          employee_id: string
+          id?: string
+          qr_code_id: string
+          rejection_reason?: string | null
+          scan_location_lat?: number | null
+          scan_location_lng?: number | null
+        }
+        Update: {
+          attendance_status?:
+            | Database["public"]["Enums"]["attendance_status"]
+            | null
+          attended_at?: string | null
+          class_room_id?: string | null
+          class_session_id?: string | null
+          created_at?: string | null
+          device_info?: Json | null
+          distance_from_class?: number | null
+          employee_id?: string
+          id?: string
+          qr_code_id?: string
+          rejection_reason?: string | null
+          scan_location_lat?: number | null
+          scan_location_lng?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_attendances_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_attendances_class_session_id_fkey"
+            columns: ["class_session_id"]
+            isOneToOne: false
+            referencedRelation: "class_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_attendances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_attendances_qr_code_id_fkey"
+            columns: ["qr_code_id"]
+            isOneToOne: false
+            referencedRelation: "class_qr_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_fields: {
         Row: {
           created_at: string
@@ -93,6 +176,88 @@ export type Database = {
             columns: ["hash_tag_id"]
             isOneToOne: false
             referencedRelation: "hash_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_qr_codes: {
+        Row: {
+          allowed_radius_meters: number | null
+          checkin_end_time: string | null
+          checkin_start_time: string | null
+          class_room_id: string | null
+          class_session_id: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_enabled: boolean | null
+          location_lat: number | null
+          location_lng: number | null
+          qr_code: string
+          qr_secret: string
+          status: Database["public"]["Enums"]["qr_code_status"] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          allowed_radius_meters?: number | null
+          checkin_end_time?: string | null
+          checkin_start_time?: string | null
+          class_room_id?: string | null
+          class_session_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          location_lat?: number | null
+          location_lng?: number | null
+          qr_code: string
+          qr_secret: string
+          status?: Database["public"]["Enums"]["qr_code_status"] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          allowed_radius_meters?: number | null
+          checkin_end_time?: string | null
+          checkin_start_time?: string | null
+          class_room_id?: string | null
+          class_session_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          location_lat?: number | null
+          location_lng?: number | null
+          qr_code?: string
+          qr_secret?: string
+          status?: Database["public"]["Enums"]["qr_code_status"] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_qr_codes_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_qr_codes_class_session_id_fkey"
+            columns: ["class_session_id"]
+            isOneToOne: false
+            referencedRelation: "class_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_qr_codes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -211,8 +376,8 @@ export type Database = {
           id: string
           organization_id: string | null
           resource_id: string | null
-          room_type: Database["public"]["Enums"]["class_room_type"] | null
-          slug: string | null
+          room_type: Database["public"]["Enums"]["class_room_type"]
+          slug: string
           start_at: string | null
           status: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url: string | null
@@ -227,8 +392,8 @@ export type Database = {
           id?: string
           organization_id?: string | null
           resource_id?: string | null
-          room_type?: Database["public"]["Enums"]["class_room_type"] | null
-          slug?: string | null
+          room_type?: Database["public"]["Enums"]["class_room_type"]
+          slug: string
           start_at?: string | null
           status?: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url?: string | null
@@ -243,8 +408,8 @@ export type Database = {
           id?: string
           organization_id?: string | null
           resource_id?: string | null
-          room_type?: Database["public"]["Enums"]["class_room_type"] | null
-          slug?: string | null
+          room_type?: Database["public"]["Enums"]["class_room_type"]
+          slug?: string
           start_at?: string | null
           status?: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url?: string | null
@@ -528,6 +693,24 @@ export type Database = {
           },
         ]
       }
+      group_permission: {
+        Row: {
+          id: string
+          resource_code: string
+          title: string | null
+        }
+        Insert: {
+          id?: string
+          resource_code: string
+          title?: string | null
+        }
+        Update: {
+          id?: string
+          resource_code?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
       hash_tags: {
         Row: {
           created_at: string
@@ -555,23 +738,38 @@ export type Database = {
       libraries: {
         Row: {
           created_at: string
-          id: number
-          resource_name: string | null
-          user_id: string | null
+          id: string
+          organization_id: string
+          owner_id: string
         }
         Insert: {
           created_at?: string
-          id?: number
-          resource_name?: string | null
-          user_id?: string | null
+          id: string
+          organization_id: string
+          owner_id: string
         }
         Update: {
           created_at?: string
-          id?: number
-          resource_name?: string | null
-          user_id?: string | null
+          id?: string
+          organization_id?: string
+          owner_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "libraries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "libraries_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       managers_employees: {
         Row: {
@@ -751,41 +949,211 @@ export type Database = {
       resources: {
         Row: {
           created_at: string
-          id: string | null
-          library_id: number | null
+          deleted_at: string | null
+          extension: string | null
+          id: string
+          kind: Database["public"]["Enums"]["resource_kind"]
+          library_id: string
+          mime_type: string | null
+          name: string
+          organization_id: string
+          parent_id: string | null
           path: string | null
           size: string | null
-          title: string | null
-          type: string | null
+          thumbnail_url: string | null
+          updated_at: string
         }
         Insert: {
           created_at?: string
-          id?: string | null
-          library_id?: number | null
+          deleted_at?: string | null
+          extension?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["resource_kind"]
+          library_id: string
+          mime_type?: string | null
+          name: string
+          organization_id: string
+          parent_id?: string | null
           path?: string | null
           size?: string | null
-          title?: string | null
-          type?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
         }
         Update: {
           created_at?: string
-          id?: string | null
-          library_id?: number | null
+          deleted_at?: string | null
+          extension?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["resource_kind"]
+          library_id?: string
+          mime_type?: string | null
+          name?: string
+          organization_id?: string
+          parent_id?: string | null
           path?: string | null
           size?: string | null
-          title?: string | null
-          type?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "resources_library_id_fkey"
+            columns: ["library_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_permissions: {
+        Row: {
+          action_code: Database["public"]["Enums"]["action_code_enum"]
+          assigned_at: string | null
+          group_permission_id: string
+          role_id: string
+        }
+        Insert: {
+          action_code: Database["public"]["Enums"]["action_code_enum"]
+          assigned_at?: string | null
+          group_permission_id: string
+          role_id: string
+        }
+        Update: {
+          action_code?: Database["public"]["Enums"]["action_code_enum"]
+          assigned_at?: string | null
+          group_permission_id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_group_permission_id_fkey"
+            columns: ["group_permission_id"]
+            isOneToOne: false
+            referencedRelation: "group_permission"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          organization_id: string | null
+          title: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          organization_id?: string | null
+          title: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          organization_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          role_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          role_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          role_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_filtered_employees: {
+        Args: {
+          p_branch_id?: string
+          p_department_id?: string
+          p_limit?: number
+          p_page?: number
+          p_search?: string
+        }
+        Returns: {
+          employee_id: string
+          total_count: number
+        }[]
+      }
+      has_permission: {
+        Args: { action_code: string; resource_code: string }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_qr_code_valid: {
+        Args: { p_current_time?: string; p_qr_code: string }
+        Returns: {
+          is_valid: boolean
+          message: string
+          qr_code_id: string
+        }[]
+      }
     }
     Enums: {
+      action_code_enum: "create" | "read" | "update" | "delete"
+      attendance_status: "present" | "late" | "absent" | "rejected"
       channel_provider: "google_meet" | "zoom" | "microsoft_teams"
       class_room_status:
         | "publish"
@@ -794,13 +1162,14 @@ export type Database = {
         | "pending"
         | "deleted"
         | "draft"
-      class_room_statuss: "draft" | "published" | "archived"
       class_room_type: "single" | "multiple"
       employee_status: "active" | "inactive"
       employee_type: "admin" | "student" | "teacher"
       gender: "male" | "female" | "other"
       hashtag_type: "class_room"
       organization_unit_type: "branch" | "department"
+      qr_code_status: "inactive" | "active" | "expired" | "disabled"
+      resource_kind: "folder" | "file"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -931,6 +1300,8 @@ export const Constants = {
   },
   public: {
     Enums: {
+      action_code_enum: ["create", "read", "update", "delete"],
+      attendance_status: ["present", "late", "absent", "rejected"],
       channel_provider: ["google_meet", "zoom", "microsoft_teams"],
       class_room_status: [
         "publish",
@@ -940,13 +1311,14 @@ export const Constants = {
         "deleted",
         "draft",
       ],
-      class_room_statuss: ["draft", "published", "archived"],
       class_room_type: ["single", "multiple"],
       employee_status: ["active", "inactive"],
       employee_type: ["admin", "student", "teacher"],
       gender: ["male", "female", "other"],
       hashtag_type: ["class_room"],
       organization_unit_type: ["branch", "department"],
+      qr_code_status: ["inactive", "active", "expired", "disabled"],
+      resource_kind: ["folder", "file"],
     },
   },
 } as const

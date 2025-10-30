@@ -31,10 +31,9 @@ export default function ToastSnackbar() {
           anchorOrigin={{ vertical: "top", horizontal: "right" }}
           slotProps={{
             clickAwayListener: {
-              onClickAway: (event) => {
-                // Prevent's default 'onClickAway' behavior.
-                //@ts-ignore
-                event.defaultPrevented = true;
+              onClickAway: (evt) => {
+                evt.preventDefault();
+                return;
               },
             },
           }}

@@ -10,18 +10,14 @@ interface MainLayoutProps extends PropsWithChildren {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const theme = useTheme();
-  const [isDesktopNavigationExpanded, setIsDesktopNavigationExpanded] =
-    useState(true);
-  const [isMobileNavigationExpanded, setIsMobileNavigationExpanded] =
-    useState(false);
+  const [isDesktopNavigationExpanded, setIsDesktopNavigationExpanded] = useState(true);
+  const [isMobileNavigationExpanded, setIsMobileNavigationExpanded] = useState(false);
 
   const isOverLGViewport = useMediaQuery(theme.breakpoints.up("lg"), {
     defaultMatches: true,
   });
 
-  const isNavigationExpanded = isOverLGViewport
-    ? isDesktopNavigationExpanded
-    : isMobileNavigationExpanded;
+  const isNavigationExpanded = isOverLGViewport ? isDesktopNavigationExpanded : isMobileNavigationExpanded;
 
   const setIsNavigationExpanded = useCallback(
     (newExpanded: boolean) => {
@@ -31,11 +27,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         setIsMobileNavigationExpanded(newExpanded);
       }
     },
-    [
-      isOverLGViewport,
-      setIsDesktopNavigationExpanded,
-      setIsMobileNavigationExpanded,
-    ],
+    [isOverLGViewport, setIsDesktopNavigationExpanded, setIsMobileNavigationExpanded],
   );
 
   const handleToggleHeaderMenu = useCallback(
@@ -63,15 +55,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         expanded={isNavigationExpanded}
         setExpanded={setIsNavigationExpanded}
         container={layoutRef.current ?? undefined}
+        className="main-layout__sider"
       />
       {/* Main content */}
       <Box
+        component="div"
+        className="main-layout__content"
         sx={{
           display: "flex",
           flexDirection: "column",
           flex: 1,
           background: "#F5F8FF",
-          overflow: "auto",
+          overflowY: "auto",
           ...theme.applyStyles("dark", {
             background: "rgb(5 7 10)",
           }),

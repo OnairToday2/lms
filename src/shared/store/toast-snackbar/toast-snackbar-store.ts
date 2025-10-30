@@ -19,7 +19,7 @@ const createToastSnackbarStore = () => {
     messsages: [],
     removeMessage: (index) =>
       set((prev) => {
-        let newMessage = [...prev.messsages];
+        const newMessage = [...prev.messsages];
         newMessage.splice(index, 1);
         return {
           ...prev,
@@ -28,7 +28,7 @@ const createToastSnackbarStore = () => {
       }),
     hideMessage: (index) =>
       set((prev) => {
-        let newMessage = [...prev.messsages];
+        const newMessage = [...prev.messsages];
         const messageItem = newMessage[index];
         if (messageItem) {
           newMessage.splice(index, 1, { ...messageItem, open: false });

@@ -1,5 +1,5 @@
 export * as authRepository from "./auth";
-export * as classRoomRepository from "./classRoom";
+export * as classRoomRepository from "./class-room";
 export * as employeesRepository from "./employees";
 export * as employmentsRepository from "./employments";
 export * as managersEmployeesRepository from "./managers-employees";
@@ -10,3 +10,7 @@ export * as departmentRepository from "./department";
 export * as branchRepository from "./branch";
 export * as teacherRepository from "./teacher";
 export * as employeeRepository from "./employee";
+export * as classFieldRepository from "./class-room-field";
+export * as hashTagRepository from "./hash-tag";
+export * as classRoomSessionRepository from "./class-room-session";
+export * as classRoomMetaRepository from "./class-room-meta";

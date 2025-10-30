@@ -1,7 +1,7 @@
-import { Tables } from "@/types/supabase.types";
+import { Tables, Database } from "@/types/supabase.types";
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
 export type Employee = Tables<"employees">;
-export type EmployeeType = Employee["employee_type"];
+export type EmployeeType = Database["public"]["Enums"]["employee_type"];
 export type EmployeeStudentWithProfileItem = {
   id: string;
   employee_code: string;

@@ -17,7 +17,7 @@ const UserOrganizationWraper = async ({ children }: { readonly children: React.R
         id: employeeDetail.id,
         status: employeeDetail.status,
         employeeCode: employeeDetail.employee_code,
-        employeeType: employeeDetail.employee_type,
+        employeeType: employeeDetail.employee_type || "student",
         userId: currentUser.id,
         organization: {
           id: employeeDetail.organizations?.id,
