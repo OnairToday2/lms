@@ -23,7 +23,7 @@ export const PATHS = {
     ROLE: {
         ROOT: '/roles',
         ROLES_ID: (id: string = ':id') => `/roles/${id}`,
-        CREATE_ROLE: '/roles/create',
+        CREATE: '/roles/create',
     },
     CLASSROOMS: {
         ROOT: '/class-room',
