@@ -161,7 +161,6 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       {
         onSuccess(data, variables, onMutateResult, context) {
           enqueueSnackbar("Cập nhật lớp học thành công..", { variant: "success" });
-          formClassRoomRef.current?.resetForm();
           router.refresh();
         },
       },
