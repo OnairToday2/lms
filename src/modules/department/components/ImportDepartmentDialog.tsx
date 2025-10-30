@@ -47,7 +47,8 @@ export function ImportDepartmentDialog({
 
   const { mutateAsync: importDepartments, isPending } =
     useImportDepartmentsMutation();
-  const { data: branches = [] } = useGetBranchesForDepartmentQuery(organizationId);
+  const { data: branchesData } = useGetBranchesForDepartmentQuery(organizationId);
+  const branches = branchesData?.data || [];
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];

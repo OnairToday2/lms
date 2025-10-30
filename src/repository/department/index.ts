@@ -40,7 +40,7 @@ export const departmentRepository = {
 
     const { data, error, count } = await query;
 
-    if (countError) throw countError;
+    if (error) throw error;
 
     // Return plain objects to avoid Next.js serialization issues
     return {

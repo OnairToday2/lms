@@ -209,6 +209,7 @@ export default function BranchList() {
                 variant="outlined"
                 startIcon={<FileUploadIcon />}
                 onClick={handleImportBranches}
+                disabled={!organizationId || isLoadingOrgId}
               >
                 Import
               </Button>
@@ -216,6 +217,7 @@ export default function BranchList() {
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={handleCreateBranch}
+                disabled={!organizationId || isLoadingOrgId}
               >
                 Tạo chi nhánh
               </Button>
@@ -314,31 +316,27 @@ export default function BranchList() {
         </Card>
       </Box>
 
-      {organizationId && (
-        <>
-          <BranchDialog
-            open={createDialogOpen}
-            onClose={handleDialogClose}
-            organizationId={organizationId}
-            onSuccess={handleSuccess}
-          />
+      <BranchDialog
+        open={createDialogOpen}
+        onClose={handleDialogClose}
+        organizationId={organizationId || ""}
+        onSuccess={handleSuccess}
+      />
 
-          <BranchDialog
-            open={editDialogOpen}
-            onClose={handleDialogClose}
-            branch={selectedBranch}
-            organizationId={organizationId}
-            onSuccess={handleSuccess}
-          />
+      <BranchDialog
+        open={editDialogOpen}
+        onClose={handleDialogClose}
+        branch={selectedBranch}
+        organizationId={organizationId || ""}
+        onSuccess={handleSuccess}
+      />
 
-          <ImportBranchDialog
-            open={importDialogOpen}
-            onClose={handleDialogClose}
-            organizationId={organizationId}
-            onSuccess={handleSuccess}
-          />
-        </>
-      )}
+      <ImportBranchDialog
+        open={importDialogOpen}
+        onClose={handleDialogClose}
+        organizationId={organizationId || ""}
+        onSuccess={handleSuccess}
+      />
     </PageContainer>
   );
 }

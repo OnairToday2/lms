@@ -70,9 +70,11 @@ export default function DepartmentList() {
     setPage(0);
   }, [branchFilter]);
 
-  const { data: branches } = useGetBranchesForDepartmentQuery(organizationId!, {
+  const { data: branchesData } = useGetBranchesForDepartmentQuery(organizationId!, {
     enabled: !!organizationId,
   });
+
+  const branches = branchesData?.data || [];
 
   const {
     data: departmentsResult,
@@ -248,6 +250,7 @@ export default function DepartmentList() {
                 variant="outlined"
                 startIcon={<FileUploadIcon />}
                 onClick={handleImportDepartments}
+                disabled={!organizationId || isLoadingOrgId}
               >
                 Import
               </Button>
@@ -255,6 +258,7 @@ export default function DepartmentList() {
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={handleCreateDepartment}
+                disabled={!organizationId || isLoadingOrgId}
               >
                 Tạo phòng ban
               </Button>
@@ -355,31 +359,27 @@ export default function DepartmentList() {
         </Card>
       </Box>
 
-      {organizationId && (
-        <>
-          <DepartmentDialog
-            open={createDialogOpen}
-            onClose={handleDialogClose}
-            organizationId={organizationId}
-            onSuccess={handleSuccess}
-          />
+      <DepartmentDialog
+        open={createDialogOpen}
+        onClose={handleDialogClose}
+        organizationId={organizationId || ""}
+        onSuccess={handleSuccess}
+      />
 
-          <DepartmentDialog
-            open={editDialogOpen}
-            onClose={handleDialogClose}
-            department={selectedDepartment}
-            organizationId={organizationId}
-            onSuccess={handleSuccess}
-          />
+      <DepartmentDialog
+        open={editDialogOpen}
+        onClose={handleDialogClose}
+        department={selectedDepartment}
+        organizationId={organizationId || ""}
+        onSuccess={handleSuccess}
+      />
 
-          <ImportDepartmentDialog
-            open={importDialogOpen}
-            onClose={handleDialogClose}
-            organizationId={organizationId}
-            onSuccess={handleSuccess}
-          />
-        </>
-      )}
+      <ImportDepartmentDialog
+        open={importDialogOpen}
+        onClose={handleDialogClose}
+        organizationId={organizationId || ""}
+        onSuccess={handleSuccess}
+      />
     </PageContainer>
   );
 }
