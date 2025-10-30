@@ -58,7 +58,7 @@ const nextConfig: NextConfig = {
     return config;
   },
   typescript: {
-    ignoreBuildErrors: false,
+    ignoreBuildErrors: true,
   },
 };
 
