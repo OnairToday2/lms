@@ -10,7 +10,7 @@ import {
   type CreateQRCodePayload,
   type UpdateQRCodePayload,
   type AttendanceCheckInPayload,
-} from "@/repository/class-room-qr";
+} from "@/repository/qr-attendance";
 import { QR_ATTENDANCE_KEYS } from "./key";
 
 export const useCreateQRCodeMutation = () => {
