@@ -28,18 +28,19 @@ const ALL_FILE_TYPE = {
   videos: [".mp4", ".webm", ".avi", ".mov", ".mkv"],
 } as const;
 type FileTypesAccept = typeof ALL_FILE_TYPE;
-type AcceptKeyOfFileTypes = keyof typeof ALL_FILE_TYPE;
+type FileTypesAcceptKey = keyof FileTypesAccept;
 
 export interface UploaderProps {
   className?: string;
   variant?: "square" | "16/9";
-  accept?: Partial<Record<AcceptKeyOfFileTypes, Partial<FileTypesAccept[AcceptKeyOfFileTypes]>>>;
+  accept?: Partial<Record<FileTypesAcceptKey, Partial<FileTypesAccept[FileTypesAcceptKey]>>>;
   onChange?: (files: File[] | File) => void;
   disabled?: boolean;
   multiple?: boolean;
   maxCount?: number;
   hideButtonWhenSingle?: boolean;
   buttonUpload?: React.ReactNode;
+  hidePreviewThumbnail?: boolean;
 }
 const Uploader: React.FC<UploaderProps> = ({
   className,
@@ -51,6 +52,7 @@ const Uploader: React.FC<UploaderProps> = ({
   accept = ALL_FILE_TYPE,
   hideButtonWhenSingle = false,
   buttonUpload,
+  hidePreviewThumbnail = false,
 }) => {
   const mounted = useRef(false);
   const fieldId = useId();
@@ -131,13 +133,17 @@ const Uploader: React.FC<UploaderProps> = ({
   return (
     <div className={cn("thumbnail-uploader-container", className)}>
       <div className="flex items-center flex-wrap gap-2">
-        {Array.isArray(fileList) ? (
-          fileList?.map((file, _index) => (
-            <FileItem file={file} index={_index} key={_index} onRemove={onRemoveFileItem} />
-          ))
-        ) : (
-          <>{fileList ? <FileItem file={fileList} index={0} onRemove={onRemoveFileItem} /> : null}</>
-        )}
+        {!hidePreviewThumbnail ? (
+          <>
+            {Array.isArray(fileList) ? (
+              fileList?.map((file, _index) => (
+                <FileItem file={file} index={_index} key={_index} onRemove={onRemoveFileItem} />
+              ))
+            ) : (
+              <>{fileList ? <FileItem file={fileList} index={0} onRemove={onRemoveFileItem} /> : null}</>
+            )}
+          </>
+        ) : null}
 
         {multiple || (!multiple && !hideButtonWhenSingle) ? (
           <div className={cn("uploader-box")}>
@@ -148,7 +154,7 @@ const Uploader: React.FC<UploaderProps> = ({
                     "button-uploader flex items-center justify-center",
                     "bg-gray-50 rounded-lg border border-dashed border-gray-300",
                     {
-                      "w-32 h-32": variant === "square",
+                      "w-28 h-28": variant === "square",
                     },
                   )}
                 >
@@ -194,7 +200,7 @@ const FileItem: React.FC<FileItemProps> = ({ file, index, onRemove }) => {
     <div
       className={cn("file-item", "relative flex items-center rounded-lg overflow-hidden justify-center", "group/item")}
     >
-      <div className="file-item__thumbnail aspect-square w-32 bg-gray-100">
+      <div className="file-item__thumbnail aspect-square w-28 bg-gray-100">
         <img src={url} className="w-full h-full object-contain" />
       </div>
       <div

@@ -17,7 +17,7 @@ const ClassRoomSessionFromToDate: React.FC<ClassRoomSessionFromToDateProps> = ({
   const leftSessionList = useMemo(() => [...sessions].splice(0, index), [sessions]);
   const rightSessionList = useMemo(() => [...sessions].splice(index + 1), [sessions]);
 
-  console.table({ index, leftSessionList, rightSessionList });
+  // console.table({ index, leftSessionList, rightSessionList });
 
   const maxDateLeft = leftSessionList.reduce<string | undefined>((maxD, it) => {
     const dateMap = new Map();

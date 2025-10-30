@@ -1,6 +1,6 @@
 import { FilterFunnelIcon, SearchIcon } from "@/shared/assets/icons";
 import { Box, Button, ButtonProps, FilledInput, List, MenuItem, Popover, Typography } from "@mui/material";
-import { memo, useRef, useState } from "react";
+import { memo, SetStateAction, useRef, useState } from "react";
 import { useId } from "react";
 import DepartmentSelector, { DepartmentSelectorProps } from "./DepartmentSelector";
 import BranchSelector, { BranchSelectorProps } from "./BranchSelector";
@@ -8,11 +8,11 @@ import EmptyData from "@/shared/ui/EmptyData";
 
 export interface EmployeeFilterProps {
   className?: string;
+  selectedDepartmentIds?: DepartmentSelectorProps["values"];
+  seletectedBranchIds?: BranchSelectorProps["values"];
+  setSelectedDepartmentIds: React.Dispatch<SetStateAction<string[]>>;
+  setSelectedBranchIds: React.Dispatch<SetStateAction<string[]>>;
   onSearch?: (value: string) => void;
-  onSelectDepartment?: DepartmentSelectorProps["onSelect"];
-  departmentValues?: DepartmentSelectorProps["values"];
-  branchValues?: BranchSelectorProps["values"];
-  onSelectBranch?: BranchSelectorProps["onSelect"];
 }
 const TAB_KEY = {
   branch: "branch",
@@ -36,12 +36,11 @@ const TAB_MENU_LIST = [
 ];
 const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
   className,
-
-  departmentValues,
-  branchValues,
-  onSelectBranch,
+  selectedDepartmentIds,
+  seletectedBranchIds,
   onSearch,
-  onSelectDepartment,
+  setSelectedDepartmentIds,
+  setSelectedBranchIds,
 }) => {
   const [currentTabMenu, setCurrentTabMenu] = useState<keyof typeof TAB_KEY>(TAB_KEY.department);
   const id = useId();
@@ -58,8 +57,23 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
     setAnchorEl(evt.currentTarget);
   };
 
+  const handleSelectDepartmentIds: DepartmentSelectorProps["onSelect"] = (departmentId) => {
+    setSelectedDepartmentIds((prev) => {
+      const newList = [...prev];
+      const isExist = newList.includes(departmentId);
+      return isExist ? newList.filter((it) => it !== departmentId) : [...newList, departmentId];
+    });
+  };
+  const handleSelectBranch: BranchSelectorProps["onSelect"] = (branchId) => {
+    setSelectedBranchIds((prev) => {
+      const newList = [...prev];
+      const isExist = newList.includes(branchId);
+      return isExist ? newList.filter((it) => it !== branchId) : [...newList, branchId];
+    });
+  };
+
   return (
-    <form className="w-full flex items-center">
+    <div className="w-full flex items-center">
       <div className="flex-1 flex">
         <FilledInput
           placeholder="Tìm kiếm..."
@@ -127,9 +141,9 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
             >
               <div>
                 {currentTabMenu === "branch" ? (
-                  <BranchSelector values={branchValues} onSelect={onSelectBranch} />
+                  <BranchSelector values={seletectedBranchIds} onSelect={handleSelectBranch} />
                 ) : currentTabMenu === "department" ? (
-                  <DepartmentSelector onSelect={onSelectDepartment} values={departmentValues} />
+                  <DepartmentSelector onSelect={handleSelectDepartmentIds} values={selectedDepartmentIds} />
                 ) : currentTabMenu === "role" ? (
                   <div className="flex items-center justify-center p-4">
                     <EmptyData iconSize="small" description="Hiện chưa có vai trò nào." />
@@ -140,7 +154,7 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
           </div>
         </Popover>
       </div>
-    </form>
+    </div>
   );
 };
 
