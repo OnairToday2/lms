@@ -12,6 +12,7 @@ import {
   managersEmployeesRepository,
 } from "@/repository";
 import { createServiceRoleClient } from "@/services/supabase/service-role-client";
+import { createSVClient } from "@/services/supabase/server";
 
 interface CreateEmployeeResult {
   userId: string;
@@ -28,6 +29,17 @@ async function createEmployeeWithRelations(
   let profileId: string | null = null;
 
   try {
+    // Get the current authenticated user's organization_id
+    const supabase = await createSVClient();
+    const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !currentUser) {
+      throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
+    }
+
+    const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
+    console.log(`Creating employee in organization: ${organizationId}`);
+
     const adminSupabase = createServiceRoleClient();
 
     const temporaryPassword = "123456";
@@ -69,6 +81,7 @@ async function createEmployeeWithRelations(
       employee_order: employeeOrder,
       start_date: payload.start_date,
       position_id: payload.position_id || null,
+      organization_id: organizationId,
       status: "active",
     });
 

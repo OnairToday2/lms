@@ -223,6 +223,7 @@ export async function createEmployee(data: {
   employee_order: number;
   start_date: string;
   position_id?: string | null;
+  organization_id: string;
   status: Database["public"]["Enums"]["employee_status"];
 }) {
   const supabase = await createSVClient();
@@ -306,6 +307,26 @@ export async function findEmployeesByEmployeeCodes(employeeCodes: string[]) {
   }
 
   return data || [];
+}
+
+export async function getEmployeeOrganizationIdByUserId(userId: string): Promise<string> {
+  const supabase = await createSVClient();
+
+  const { data: employee, error } = await supabase
+    .from("employees")
+    .select("organization_id")
+    .eq("user_id", userId)
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to fetch employee organization: ${error.message}`);
+  }
+
+  if (!employee?.organization_id) {
+    throw new Error("Employee organization not found");
+  }
+
+  return employee.organization_id;
 }
 
 export {
