@@ -75,8 +75,8 @@ const getRuntimeStatusColor = (status: ClassRoomRuntimeStatus): string => {
 
 const MyClassSection = () => {
     const userOrganization = useUserOrganization((state) => state.data);
-    // const employeeId = userOrganization?.id;
-    const employeeId = "d899b0bf-5167-40a8-bb3a-6954260f8126"
+    const employeeId = userOrganization?.id;
+    // const employeeId = "d899b0bf-5167-40a8-bb3a-6954260f8126"
 
     const [search, setSearch] = useState("");
     const [runtimeStatus, setRuntimeStatus] = useState<ClassRoomRuntimeStatus>(ClassRoomRuntimeStatus.All);
