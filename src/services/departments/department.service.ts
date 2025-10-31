@@ -18,15 +18,14 @@ async function getDepartmentById(id: string): Promise<DepartmentDto> {
 }
 
 async function createDepartment(payload: CreateDepartmentDto): Promise<DepartmentDto> {
-  // Check if name already exists in the same branch
+  // Check if name already exists
   const exists = await departmentRepository.checkNameExists(
     payload.name,
-    payload.organization_id,
-    payload.parent_id || null
+    payload.organization_id
   );
 
   if (exists) {
-    throw new Error("Tên phòng ban đã tồn tại trong chi nhánh này");
+    throw new Error("Tên phòng ban đã tồn tại");
   }
 
   return departmentRepository.create(payload);
@@ -36,16 +35,14 @@ async function updateDepartment(payload: UpdateDepartmentDto): Promise<Departmen
   // Check if name already exists (excluding current department)
   if (payload.name) {
     const department = await departmentRepository.getById(payload.id);
-    const branchId = payload.parent_id !== undefined ? payload.parent_id : department.parent_id;
     const exists = await departmentRepository.checkNameExists(
       payload.name,
       department.organization_id,
-      branchId,
       payload.id
     );
 
     if (exists) {
-      throw new Error("Tên phòng ban đã tồn tại trong chi nhánh này");
+      throw new Error("Tên phòng ban đã tồn tại");
     }
   }
 
@@ -66,10 +63,6 @@ async function importDepartments(payload: ImportDepartmentsDto): Promise<Departm
   const errors: string[] = [];
   const validDepartments: CreateDepartmentDto[] = [];
 
-  // Get all branches for lookup
-  const branches = await departmentRepository.getBranches(organizationId);
-  const branchMap = new Map(branches.map((b) => [b.name.toLowerCase(), b.id]));
-
   // Validate each department
   for (let i = 0; i < departments.length; i++) {
     const dept = departments[i];
@@ -82,43 +75,28 @@ async function importDepartments(payload: ImportDepartmentsDto): Promise<Departm
       continue;
     }
 
-    // Find branch ID if branch_name is provided
-    let branchId: string | null = null;
-    if (dept.branch_name && dept.branch_name.trim() !== "") {
-      branchId = branchMap.get(dept.branch_name.toLowerCase()) || null;
-      if (!branchId) {
-        errors.push(`Dòng ${rowNumber}: Không tìm thấy chi nhánh "${dept.branch_name}"`);
-        continue;
-      }
-    }
-
-    // Check for duplicates in the import file (same name in same branch)
+    // Check for duplicates in the import file
     const duplicateInFile = validDepartments.find(
-      (d) =>
-        d.name.toLowerCase() === dept.name.toLowerCase() &&
-        d.parent_id === branchId
+      (d) => d.name.toLowerCase() === dept.name.toLowerCase()
     );
     if (duplicateInFile) {
       errors.push(`Dòng ${rowNumber}: Tên phòng ban "${dept.name}" bị trùng trong file`);
       continue;
     }
 
-    // Check if name already exists in database (in the same branch)
+    // Check if name already exists in database
     const exists = await departmentRepository.checkNameExists(
       dept.name,
-      organizationId,
-      branchId
+      organizationId
     );
     if (exists) {
-      const branchText = dept.branch_name ? ` trong chi nhánh "${dept.branch_name}"` : "";
-      errors.push(`Dòng ${rowNumber}: Tên phòng ban "${dept.name}"${branchText} đã tồn tại`);
+      errors.push(`Dòng ${rowNumber}: Tên phòng ban "${dept.name}" đã tồn tại`);
       continue;
     }
 
     validDepartments.push({
       name: dept.name,
       organization_id: organizationId,
-      parent_id: branchId,
     });
   }
 

@@ -70,6 +70,16 @@ async function importBranches(payload: ImportBranchesDto): Promise<BranchImportR
       continue;
     }
 
+    if (!branch.code || branch.code.trim() === "") {
+      errors.push(`Dòng ${rowNumber}: Mã chi nhánh không được để trống`);
+      continue;
+    }
+
+    if (!branch.address || branch.address.trim() === "") {
+      errors.push(`Dòng ${rowNumber}: Địa điểm không được để trống`);
+      continue;
+    }
+
     // Check for duplicates in the import file
     const duplicateInFile = validBranches.find(
       (b) => b.name.toLowerCase() === branch.name.toLowerCase()
@@ -91,6 +101,8 @@ async function importBranches(payload: ImportBranchesDto): Promise<BranchImportR
 
     validBranches.push({
       name: branch.name,
+      code: branch.code,
+      address: branch.address,
       organization_id: organizationId,
     });
   }

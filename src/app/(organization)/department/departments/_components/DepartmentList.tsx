@@ -22,16 +22,13 @@ import {
   Menu,
   MenuItem,
   ListItemText,
-  FormControl,
-  InputLabel,
-  Select,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import AddIcon from "@mui/icons-material/Add";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import PageContainer from "@/shared/ui/PageContainer";
-import { useGetDepartmentsQuery, useGetBranchesForDepartmentQuery } from "@/modules/department/operations/query";
+import { useGetDepartmentsQuery } from "@/modules/department/operations/query";
 import { useDeleteDepartmentMutation } from "@/modules/department/operations/mutation";
 import type { DepartmentDto } from "@/types/dto/departments";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
@@ -51,7 +48,6 @@ export default function DepartmentList() {
   const [rowsPerPage, setRowsPerPage] = React.useState(12);
   const [searchInput, setSearchInput] = React.useState("");
   const [debouncedSearch, setDebouncedSearch] = React.useState("");
-  const [branchFilter, setBranchFilter] = React.useState<string>("all");
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [importDialogOpen, setImportDialogOpen] = React.useState(false);
@@ -66,16 +62,6 @@ export default function DepartmentList() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  React.useEffect(() => {
-    setPage(0);
-  }, [branchFilter]);
-
-  const { data: branchesData } = useGetBranchesForDepartmentQuery(organizationId!, {
-    enabled: !!organizationId,
-  });
-
-  const branches = branchesData?.data || [];
-
   const {
     data: departmentsResult,
     isLoading,
@@ -85,7 +71,6 @@ export default function DepartmentList() {
     limit: rowsPerPage,
     search: debouncedSearch,
     organizationId: organizationId!,
-    branchId: branchFilter !== "all" ? branchFilter : undefined,
   }, {
     enabled: !!organizationId,
   });
@@ -178,12 +163,6 @@ export default function DepartmentList() {
     }
   };
 
-  const getBranchName = (department: DepartmentDto) => {
-    if (!department.parent_id) return "Không thuộc chi nhánh";
-    const branch = branches?.find((b) => b.id === department.parent_id);
-    return branch?.name || "N/A";
-  };
-
   const handleDialogClose = () => {
     setCreateDialogOpen(false);
     setEditDialogOpen(false);
@@ -225,24 +204,6 @@ export default function DepartmentList() {
                 }}
                 sx={{ maxWidth: 300 }}
               />
-
-              <FormControl size="small" sx={{ minWidth: 200 }}>
-                <InputLabel>Lọc theo chi nhánh</InputLabel>
-                <Select
-                  value={branchFilter}
-                  onChange={(e) => setBranchFilter(e.target.value)}
-                  label="Lọc theo chi nhánh"
-                >
-                  <MenuItem value="all">
-                    <em>Tất cả</em>
-                  </MenuItem>
-                  {branches?.map((branch) => (
-                    <MenuItem key={branch.id} value={branch.id}>
-                      {branch.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
             </Stack>
 
             <Stack direction="row" spacing={2}>
@@ -285,7 +246,6 @@ export default function DepartmentList() {
                   <TableHead>
                     <TableRow>
                       <TableCell>Tên phòng ban</TableCell>
-                      <TableCell>Chi nhánh</TableCell>
                       <TableCell>Ngày tạo</TableCell>
                       <TableCell align="center"></TableCell>
                     </TableRow>
@@ -293,7 +253,7 @@ export default function DepartmentList() {
                   <TableBody>
                     {departments.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
+                        <TableCell colSpan={3} align="center" sx={{ py: 8 }}>
                           <Typography variant="body2" color="text.secondary">
                             Không tìm thấy phòng ban nào
                           </Typography>
@@ -303,7 +263,6 @@ export default function DepartmentList() {
                       departments.map((department) => (
                         <TableRow key={department.id} hover sx={{ cursor: "pointer" }}>
                           <TableCell>{department.name}</TableCell>
-                          <TableCell>{getBranchName(department)}</TableCell>
                           <TableCell>
                             {new Date(department.created_at).toLocaleString("vi-VN")}
                           </TableCell>
