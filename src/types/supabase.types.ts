@@ -376,8 +376,8 @@ export type Database = {
           id: string
           organization_id: string | null
           resource_id: string | null
-          room_type: Database["public"]["Enums"]["class_room_type"]
-          slug: string
+          room_type: Database["public"]["Enums"]["class_room_type"] | null
+          slug: string | null
           start_at: string | null
           status: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url: string | null
@@ -392,8 +392,8 @@ export type Database = {
           id?: string
           organization_id?: string | null
           resource_id?: string | null
-          room_type?: Database["public"]["Enums"]["class_room_type"]
-          slug: string
+          room_type?: Database["public"]["Enums"]["class_room_type"] | null
+          slug?: string | null
           start_at?: string | null
           status?: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url?: string | null
@@ -408,8 +408,8 @@ export type Database = {
           id?: string
           organization_id?: string | null
           resource_id?: string | null
-          room_type?: Database["public"]["Enums"]["class_room_type"]
-          slug?: string
+          room_type?: Database["public"]["Enums"]["class_room_type"] | null
+          slug?: string | null
           start_at?: string | null
           status?: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url?: string | null
@@ -803,6 +803,8 @@ export type Database = {
       }
       organization_units: {
         Row: {
+          address: string
+          code: string
           created_at: string
           id: string
           name: string
@@ -811,6 +813,8 @@ export type Database = {
           type: Database["public"]["Enums"]["organization_unit_type"]
         }
         Insert: {
+          address?: string
+          code?: string
           created_at?: string
           id?: string
           name: string
@@ -819,6 +823,8 @@ export type Database = {
           type: Database["public"]["Enums"]["organization_unit_type"]
         }
         Update: {
+          address?: string
+          code?: string
           created_at?: string
           id?: string
           name?: string
@@ -1121,7 +1127,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      custom_access_token_hook: { Args: { event: Json }; Returns: Json }
       get_filtered_employees: {
         Args: {
           p_branch_id?: string
@@ -1160,6 +1165,7 @@ export type Database = {
         | "pending"
         | "deleted"
         | "draft"
+      class_room_statuss: "draft" | "published" | "archived"
       class_room_type: "single" | "multiple"
       employee_status: "active" | "inactive"
       employee_type: "admin" | "student" | "teacher"
@@ -1309,6 +1315,7 @@ export const Constants = {
         "deleted",
         "draft",
       ],
+      class_room_statuss: ["draft", "published", "archived"],
       class_room_type: ["single", "multiple"],
       employee_status: ["active", "inactive"],
       employee_type: ["admin", "student", "teacher"],

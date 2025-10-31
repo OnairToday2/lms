@@ -80,10 +80,16 @@ export function ImportBranchDialog({
             return;
           }
 
-          // Parse header to find name column
+          // Parse header to find columns
           const headers = lines[0].split(",").map((h) => h.trim().replace(/"/g, ""));
           const nameIndex = headers.findIndex(
             (h) => h === "Tên chi nhánh" || h === "name" || h === "Name"
+          );
+          const codeIndex = headers.findIndex(
+            (h) => h === "Mã chi nhánh" || h === "code" || h === "Code"
+          );
+          const addressIndex = headers.findIndex(
+            (h) => h === "Địa điểm" || h === "address" || h === "Address"
           );
 
           if (nameIndex === -1) {
@@ -95,13 +101,35 @@ export function ImportBranchDialog({
             return;
           }
 
+          if (codeIndex === -1) {
+            reject(
+              new Error(
+                'File phải có cột "Mã chi nhánh" hoặc "code"'
+              )
+            );
+            return;
+          }
+
+          if (addressIndex === -1) {
+            reject(
+              new Error(
+                'File phải có cột "Địa điểm" hoặc "address"'
+              )
+            );
+            return;
+          }
+
           // Parse data rows
           const rows: BranchImportRow[] = [];
           for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(",").map((v) => v.trim().replace(/"/g, ""));
-            if (values[nameIndex]) {
+            const line = lines[i];
+            if (!line) continue;
+            const values = line.split(",").map((v) => v.trim().replace(/"/g, ""));
+            if (values[nameIndex] && values[codeIndex] && values[addressIndex]) {
               rows.push({
                 name: values[nameIndex],
+                code: values[codeIndex],
+                address: values[addressIndex],
               });
             }
           }
@@ -191,8 +219,10 @@ export function ImportBranchDialog({
           {/* Instructions */}
           <Alert severity="info">
             <Typography variant="body2">
-              File import cần có cột <strong>"Tên chi nhánh"</strong> hoặc{" "}
-              <strong>"name"</strong>
+              File import cần có cột <strong>&quot;Tên chi nhánh&quot;</strong> hoặc{" "}
+              <strong>&quot;name&quot;</strong>, <strong>&quot;Mã chi nhánh&quot;</strong> hoặc{" "}
+              <strong>&quot;code&quot;</strong>, và <strong>&quot;Địa điểm&quot;</strong> hoặc{" "}
+              <strong>&quot;address&quot;</strong>.
             </Typography>
             <Typography variant="body2" sx={{ mt: 1 }}>
               Định dạng file hỗ trợ: .xlsx, .csv

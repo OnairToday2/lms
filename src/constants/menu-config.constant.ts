@@ -26,18 +26,6 @@ const MAIN_MENU_LIST: MenuItemType[] = [
         key: "branches-list",
         path: PATHS.BRANCHES.ROOT,
       },
-      {
-        title: "Tạo chi nhánh",
-        icon: React.createElement(GitIcon),
-        key: "create-branch",
-        path: PATHS.BRANCHES.CREATE_BRANCH,
-      },
-      {
-        title: "Import chi nhánh",
-        icon: React.createElement(GitIcon),
-        key: "import-branch",
-        path: PATHS.BRANCHES.IMPORT_BRANCHES,
-      },
     ],
   },
   {
@@ -52,18 +40,6 @@ const MAIN_MENU_LIST: MenuItemType[] = [
         icon: React.createElement(UsersIcon),
         key: "departments-list",
         path: PATHS.DEPARTMENTS.ROOT,
-      },
-      {
-        title: "Tạo phòng ban",
-        icon: React.createElement(UsersIcon),
-        key: "create-department",
-        path: PATHS.DEPARTMENTS.CREATE_DEPARTMENT,
-      },
-      {
-        title: "Import phòng ban",
-        icon: React.createElement(UsersIcon),
-        key: "import-department",
-        path: PATHS.DEPARTMENTS.IMPORT_DEPARTMENTS,
       },
     ],
   },
