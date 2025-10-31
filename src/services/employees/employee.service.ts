@@ -30,7 +30,7 @@ async function createEmployeeWithRelations(
   try {
     const adminSupabase = createServiceRoleClient();
 
-    const temporaryPassword = "123123123aA";
+    const temporaryPassword = "123456";
 
     const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
       email: payload.email,
