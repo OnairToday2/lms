@@ -1,14 +1,30 @@
 import attachActions from "./class-room-actions";
 import { createStore } from "zustand/vanilla";
 import { ClassRoomActions } from "./class-room-actions";
-import { EmployeeStudentWithProfileItem, EmployeeTeacherTypeItem } from "@/model/employee.model";
+import { EmployeeType } from "@/model/employee.model";
+
+export type TeacherSelectedItem = {
+  id: string;
+  fullName: string;
+  email: string;
+  employeeCode: string;
+  avatar: string | null;
+  empoyeeType: Exclude<EmployeeType, "admin" | "student">;
+};
+export type StudentSelectedItem = {
+  id: string;
+  fullName: string;
+  email: string;
+  employeeCode: string;
+  avatar: string | null;
+  empoyeeType: Exclude<EmployeeType, "admin" | "teacher">;
+};
 
 type ClassRoomState = {
-  formData?: {};
-  teacherList: {
-    [sessionIndex: number | string]: EmployeeTeacherTypeItem[];
+  selectedTeachers: {
+    [sessionIndex: number | string]: TeacherSelectedItem[];
   };
-  studentList: EmployeeStudentWithProfileItem[];
+  selectedStudents: StudentSelectedItem[];
 };
 
 type ClassRoomStore = {

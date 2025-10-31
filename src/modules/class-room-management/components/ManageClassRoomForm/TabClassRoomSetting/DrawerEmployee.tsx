@@ -50,6 +50,7 @@ const DrawerEmployee: React.FC<DrawerEmployeeProps> = ({ open, onClose, onOk, on
       <List>
         {employeeList.map((emp) => (
           <EmployeeItem
+            key={emp.id}
             fullName={emp.profiles.full_name}
             code={emp.employee_code}
             email={emp.profiles.email}

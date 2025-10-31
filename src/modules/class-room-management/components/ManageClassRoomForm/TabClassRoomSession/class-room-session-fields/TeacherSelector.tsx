@@ -3,35 +3,51 @@ import DialogTeacherContainer, {
   DialogTeacherContainerProps,
 } from "@/modules/teacher/container/DialogTeacherContainer";
 import { Button, Chip, FormLabel, IconButton, Typography } from "@mui/material";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useState, forwardRef, useImperativeHandle } from "react";
 
 import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
 import { CloseIcon } from "@/shared/assets/icons";
 import { cn } from "@/utils";
 import Avatar from "@/shared/ui/Avatar";
+import { TeacherSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 
+export interface TeacherSelectorRef {
+  removeTeachersBySessionIndex: (index: number) => void;
+}
 interface TeacherSelectorProps {
   sessionIndex: number;
   className?: string;
 }
 
-const TeacherSelector: React.FC<TeacherSelectorProps> = ({ sessionIndex, className }) => {
+const TeacherSelector = forwardRef<TeacherSelectorRef, TeacherSelectorProps>(({ sessionIndex, className }, ref) => {
   const [open, setOpen] = useState(false);
-  const setTeachers = useClassRoomStore(({ actions }) => actions.setSelectTeacher);
+  const setSelectedTeachers = useClassRoomStore(({ actions }) => actions.setSelectedTeachers);
   const removeTeacher = useClassRoomStore(({ actions }) => actions.removeTeacher);
-  const selectedTeachers = useClassRoomStore(({ state }) => state.teacherList);
+  const selectedTeachers = useClassRoomStore(({ actions }) => actions.getTeachersByIndexSession(sessionIndex));
+  const removeSessionTeacher = useClassRoomStore(({ actions }) => actions.removeTeachers);
 
-  const currentSelectedList = selectedTeachers[sessionIndex];
-
-  const handleConformSelect: DialogTeacherContainerProps["onOk"] = (teacherList) => {
+  const handleConformSelect: DialogTeacherContainerProps["onOk"] = (teachers) => {
     //Teacher must alway new List
-    setTeachers(sessionIndex, teacherList);
+    const teacherList = teachers.map<TeacherSelectedItem>((item) => ({
+      avatar: item.profiles.avatar,
+      id: item.id,
+      fullName: item.profiles.full_name,
+      empoyeeType: item.employee_type,
+      employeeCode: item.employee_code,
+      email: item.profiles.email,
+    }));
+    setSelectedTeachers(sessionIndex, teacherList);
   };
 
   const handleRemove: Exclude<TeacherItemProps["onRemove"], undefined> = useCallback((id) => {
     removeTeacher(id, sessionIndex);
   }, []);
 
+  useImperativeHandle(ref, () => ({
+    removeTeachersBySessionIndex(index) {
+      removeSessionTeacher(index);
+    },
+  }));
   return (
     <>
       <div className={cn(className)}>
@@ -49,15 +65,15 @@ const TeacherSelector: React.FC<TeacherSelectorProps> = ({ sessionIndex, classNa
           </div>
         </div>
 
-        {currentSelectedList?.length ? (
+        {selectedTeachers?.length ? (
           <div className="selected-teacher flex flex-col gap-3">
             <div className="h-6"></div>
-            {currentSelectedList.map((tc) => (
+            {selectedTeachers.map((tc) => (
               <TeacherItem
                 id={tc.id}
-                name={tc.profiles?.full_name || ""}
-                avatarUrl={tc.profiles?.avatar}
-                code={tc.employee_code}
+                name={tc.fullName}
+                avatarUrl={tc.avatar}
+                code={tc.employeeCode}
                 key={tc.id}
                 onRemove={handleRemove}
               />
@@ -66,14 +82,14 @@ const TeacherSelector: React.FC<TeacherSelectorProps> = ({ sessionIndex, classNa
         ) : null}
       </div>
       <DialogTeacherContainer
-        values={currentSelectedList?.map((tc) => tc.id)}
+        values={selectedTeachers?.map((tc) => tc.id)}
         open={open}
         onClose={() => setOpen(false)}
         onOk={handleConformSelect}
       />
     </>
   );
-};
+});
 export default TeacherSelector;
 
 interface TeacherItemProps {

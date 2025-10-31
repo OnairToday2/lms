@@ -1,8 +1,10 @@
 import FacebookIcon from "./FacebookIcon";
 import GoogleIcon from "./GoogleIcon";
+import GlobeIcon from "./GlobeIcon";
 import SquareFourIcon from "./SquareFourIcon";
 import GitIcon from "./GitIcon";
 import UsersIcon from "./UsersIcon";
+import UsersPlusIcon from "./UsersPlusIcon";
 import HelpIcon from "./HelpIcon";
 import LogoOnairIcon from "./LogoOnairIcon";
 import LogoOnairShortIcon from "./LogoOnairShortIcon";
@@ -39,9 +41,11 @@ import EmptyBoxIcon from "./EmptyBoxIcon";
 export {
   FacebookIcon,
   GoogleIcon,
+  GlobeIcon,
   SquareFourIcon,
   GitIcon,
   UsersIcon,
+  UsersPlusIcon,
   HelpIcon,
   LogoOnairIcon,
   LogoOnairShortIcon,

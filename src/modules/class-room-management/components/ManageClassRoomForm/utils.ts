@@ -1,7 +1,6 @@
 import { FieldErrors } from "react-hook-form";
-import { ClassRoom } from "../classroom-form.schema";
+import { ClassRoom, ClassRoomSession } from "../classroom-form.schema";
 
-type ClassRoomTabTypes = "idle" | "invalid" | "valid";
 import { TAB_KEYS_CLASS_ROOM } from "./ClassRoomFormContainer";
 
 /**
@@ -35,7 +34,7 @@ export const getKeyFieldByTab = (tabKey: keyof typeof TAB_KEYS_CLASS_ROOM) => {
       break;
     }
     case "clsTab-setting": {
-      keyListByTab = [];
+      keyListByTab = ["classRoomSessions"];
       break;
     }
   }
@@ -43,14 +42,37 @@ export const getKeyFieldByTab = (tabKey: keyof typeof TAB_KEYS_CLASS_ROOM) => {
 };
 
 export const getStatusTabClassRoom = (
-  error: FieldErrors<ClassRoom>,
+  errors: FieldErrors<ClassRoom>,
   tabKey: keyof typeof TAB_KEYS_CLASS_ROOM,
-): ClassRoomTabTypes => {
-  let tabStatus: ClassRoomTabTypes = "idle";
-
+): "invalid" | "valid" => {
   const keyListByTab = getKeyFieldByTab(tabKey);
 
-  const isValid = keyListByTab.every((key) => !error[key]);
+  const isValid = keyListByTab.every((key) => {
+    if (key === "classRoomSessions") {
+      const sessionsError = errors["classRoomSessions"] as FieldErrors<ClassRoomSession>[] | undefined;
+
+      if (!sessionsError) return true;
+
+      return sessionsError.every((session) => {
+        if (!session) return true;
+        /**
+         * remove Qrcode
+         */
+        const { qrCode, ...restKeys } = session;
+
+        if (tabKey === "clsTab-setting" && qrCode) {
+          return false;
+        }
+        if (tabKey === "clsTab-session" && Object.keys(restKeys).length) {
+          return false;
+        }
+
+        return true;
+      });
+    } else {
+      return !errors[key];
+    }
+  });
 
   return isValid ? "valid" : "invalid";
 };
