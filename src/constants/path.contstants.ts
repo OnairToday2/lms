@@ -20,5 +20,8 @@ export const PATHS = {
         ROOT: '/class-room',
         CREATE_CLASSROOM: '/class-room/create',
         LIST_CLASSROOM: '/class-room/list',
+    },
+    STUDENTS: {
+        ROOT: '/my-class',
     }
 }

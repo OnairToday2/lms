@@ -5,6 +5,7 @@ import { Select, MenuItem, InputLabel, FormControl, FormHelperText, SelectChange
 interface OPTION {
     value: string,
     label: string,
+    display: boolean,
 }
 
 interface PropTypes {
@@ -15,7 +16,8 @@ interface PropTypes {
     error?: {
         message?: string,
     },
-    options?: OPTION[] | undefined
+    options?: OPTION[] | undefined,
+    className: string,
 }
 
 export const SelectOption: React.FC<PropTypes> = (props) => {
@@ -30,7 +32,9 @@ export const SelectOption: React.FC<PropTypes> = (props) => {
     const renderMoreItem = useMemo(() => {
         if (options && options.length > 0) {
             return options.map((item, index) => {
-                return <MenuItem key={`${item.value}_${index}`} value={item.value}>{item.label}</MenuItem>;
+                if (item.display) {
+                    return <MenuItem key={`${item.value}_${index}`} value={item.value}>{item.label}</MenuItem>;
+                }
             });
         }
         return null;

@@ -7,15 +7,15 @@ const StudentsPage = async ({ params }: { params: Promise<{ classRoomId: string 
     return (
         <PageContainer
             title="Danh Sách học viên"
-            breadcrumbs={[
-                {
-                    title: "LMS",
-                    path: "/dashboard",
-                },
-                {
-                    title: "Khoá học cơ bản về AI dành cho Doanh nghiệp trong thời kỳ...",
-                },
-            ]}
+        // breadcrumbs={[
+        //     {
+        //         title: "LMS",
+        //         path: "/dashboard",
+        //     },
+        //     {
+        //         title: "Khoá học cơ bản về AI dành cho Doanh nghiệp trong thời kỳ...",
+        //     },
+        // ]}
         >
             <StudentsSection classRoomId={classRoomId} />
         </PageContainer>

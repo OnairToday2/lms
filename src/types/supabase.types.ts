@@ -7,31 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       class_fields: {
@@ -89,10 +64,52 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "class_hash_tag_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "class_hash_tag_hash_tag_id_fkey"
             columns: ["hash_tag_id"]
             isOneToOne: false
             referencedRelation: "hash_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_room_attendance: {
+        Row: {
+          check_in_at: string | null
+          check_out_at: string | null
+          class_room_employee_id: number
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          check_in_at?: string | null
+          check_out_at?: string | null
+          class_room_employee_id: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          check_in_at?: string | null
+          check_out_at?: string | null
+          class_room_employee_id?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_room_attendance_class_room_employee_id_fkey"
+            columns: ["class_room_employee_id"]
+            isOneToOne: false
+            referencedRelation: "class_room_employee"
             referencedColumns: ["id"]
           },
         ]
@@ -108,13 +125,13 @@ export type Database = {
           class_room_id?: string | null
           created_at?: string
           employee_id?: string | null
-          id?: number
+          id?: never
         }
         Update: {
           class_room_id?: string | null
           created_at?: string
           employee_id?: string | null
-          id?: number
+          id?: never
         }
         Relationships: [
           {
@@ -122,6 +139,13 @@ export type Database = {
             columns: ["class_room_id"]
             isOneToOne: false
             referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_room_employee_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
             referencedColumns: ["id"]
           },
           {
@@ -167,6 +191,13 @@ export type Database = {
             referencedRelation: "class_rooms"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "class_room_field_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
+            referencedColumns: ["id"]
+          },
         ]
       }
       class_room_metadata: {
@@ -197,6 +228,13 @@ export type Database = {
             columns: ["class_room_id"]
             isOneToOne: false
             referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_room_metadata_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
             referencedColumns: ["id"]
           },
         ]
@@ -230,7 +268,7 @@ export type Database = {
           room_type?: Database["public"]["Enums"]["class_room_type"] | null
           slug?: string | null
           start_at?: string | null
-          status?: Database["public"]["Enums"]["class_room_status"]
+          status: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url?: string | null
           title?: string | null
         }
@@ -392,6 +430,13 @@ export type Database = {
             referencedRelation: "class_rooms"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "class_session_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
+            referencedColumns: ["id"]
+          },
         ]
       }
       class_sessions_agendas: {
@@ -534,21 +579,21 @@ export type Database = {
           id: string
           name: string | null
           slug: string | null
-          type: Database["public"]["Enums"]["hashtag_type"] | null
+          type: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           name?: string | null
           slug?: string | null
-          type?: Database["public"]["Enums"]["hashtag_type"] | null
+          type?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           name?: string | null
           slug?: string | null
-          type?: Database["public"]["Enums"]["hashtag_type"] | null
+          type?: string | null
         }
         Relationships: []
       }
@@ -561,13 +606,13 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          id?: number
+          id?: never
           resource_name?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
-          id?: number
+          id?: never
           resource_name?: string | null
           user_id?: string | null
         }
@@ -780,10 +825,74 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      class_rooms_priority: {
+        Row: {
+          computed_end_at: string | null
+          computed_start_at: string | null
+          created_at: string | null
+          description: string | null
+          employee_id: string | null
+          end_at: string | null
+          id: string | null
+          organization_id: string | null
+          resource_id: string | null
+          room_type: Database["public"]["Enums"]["class_room_type"] | null
+          runtime_status: string | null
+          slug: string | null
+          sort_rank_primary: number | null
+          sort_rank_secondary: number | null
+          start_at: string | null
+          status: Database["public"]["Enums"]["class_room_status"] | null
+          thumbnail_url: string | null
+          title: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_rooms_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_rooms_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
-      [_ in never]: never
+      class_room_status_counts_filtered: {
+        Args: {
+          in_from: string
+          in_owner_id: string
+          in_search: string
+          in_to: string
+          in_user_id: string
+        }
+        Returns: {
+          runtime_status: string
+          total: number
+        }[]
+      }
+      count_class_room_runtime_status_by_employee: {
+        Args: {
+          p_employee_id: string
+          p_from?: string
+          p_search?: string
+          p_session_mode?: string
+          p_status?: string
+          p_to?: string
+          p_type?: string
+        }
+        Returns: {
+          runtime_status: string
+          total: number
+        }[]
+      }
     }
     Enums: {
       channel_provider: "google_meet" | "zoom" | "microsoft_teams"
@@ -794,12 +903,11 @@ export type Database = {
         | "pending"
         | "deleted"
         | "draft"
-      class_room_statuss: "draft" | "published" | "archived"
       class_room_type: "single" | "multiple"
       employee_status: "active" | "inactive"
       employee_type: "admin" | "student" | "teacher"
       gender: "male" | "female" | "other"
-      hashtag_type: "class_room"
+      hastag_type: "class_room"
       organization_unit_type: "branch" | "department"
     }
     CompositeTypes: {
@@ -926,9 +1034,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       channel_provider: ["google_meet", "zoom", "microsoft_teams"],
@@ -940,12 +1045,11 @@ export const Constants = {
         "deleted",
         "draft",
       ],
-      class_room_statuss: ["draft", "published", "archived"],
       class_room_type: ["single", "multiple"],
       employee_status: ["active", "inactive"],
       employee_type: ["admin", "student", "teacher"],
       gender: ["male", "female", "other"],
-      hashtag_type: ["class_room"],
+      hastag_type: ["class_room"],
       organization_unit_type: ["branch", "department"],
     },
   },

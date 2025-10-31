@@ -6,24 +6,23 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { viVN } from "@mui/x-date-pickers/locales";
 import { SelectOption } from "@/shared/ui/form/SelectOption";
-import { ClassRoomRuntimeStatus, ClassRoomStatus } from "../types/types";
-import { PUBLICATION_STATUS_OPTIONS, RUNTIME_STATUS_OPTIONS } from "../constants";
-
-const ITEM_LAYOUT_SX = {
-  flex: { xs: "1 1 100%", md: "1 1 220px" },
-  minWidth: { xs: "100%", md: 220 },
-};
-
+import { ClassRoomRuntimeStatus, ClassRoomStatus, ClassRoomType, ClassSessionMode } from "../types/types";
+import { PUBLICATION_STATUS_OPTIONS, RUNTIME_STATUS_OPTIONS, SESSION_MODE_OPTIONS, TYPE_OPTIONS } from "../constants";
+import Link from "next/link";
 interface ClassRoomFiltersProps {
   search: string;
   startDate?: string | null;
   endDate?: string | null;
   runtimeStatus: ClassRoomRuntimeStatus;
   status: ClassRoomStatus;
+  type: ClassRoomType;
+  sessionMode: ClassSessionMode;
   onSearchChange: (value: string) => void;
   onDateChange: (field: "startDate" | "endDate", value: string | null) => void;
   onRuntimeStatusChange: (runtimeStatus: ClassRoomRuntimeStatus) => void;
   onStausChange: (status: ClassRoomStatus) => void;
+  onTypeChange: (status: ClassRoomType) => void;
+  onSessionModeChange: (mode: ClassSessionMode) => void;
 }
 
 const parseDate = (value?: string | null): Dayjs | null => {
@@ -40,6 +39,10 @@ export default function ClassRoomFilters({
   endDate,
   runtimeStatus,
   status,
+  type,
+  sessionMode,
+  onTypeChange,
+  onSessionModeChange,
   onSearchChange,
   onDateChange,
   onRuntimeStatusChange,
@@ -58,16 +61,16 @@ export default function ClassRoomFilters({
         sx={{ flexWrap: "wrap" }}
         useFlexGap
       >
-        <Box sx={ITEM_LAYOUT_SX}>
+        <Box>
           <TextField
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Tìm kiếm lớp học theo tên"
+            placeholder="Tìm kiếm..."
             size="small"
             fullWidth
           />
         </Box>
-        <Box sx={ITEM_LAYOUT_SX}>
+        <Box>
           <DatePicker
             label="Ngày bắt đầu"
             value={parseDate(startDate)}
@@ -81,7 +84,7 @@ export default function ClassRoomFilters({
             }}
           />
         </Box>
-        <Box sx={ITEM_LAYOUT_SX}>
+        <Box>
           <DatePicker
             label="Ngày kết thúc"
             value={parseDate(endDate)}
@@ -95,7 +98,7 @@ export default function ClassRoomFilters({
             }}
           />
         </Box>
-        <Box sx={ITEM_LAYOUT_SX}>
+        <Box>
           <SelectOption
             inputLabel="Trạng thái diễn ra"
             onChange={(runtimeStatus) => onRuntimeStatusChange(runtimeStatus)}
@@ -104,7 +107,7 @@ export default function ClassRoomFilters({
             size="small"
           />
         </Box>
-        <Box sx={ITEM_LAYOUT_SX}>
+        <Box>
           <SelectOption
             inputLabel="Trạng thái xuất bản"
             onChange={(status) => onStausChange(status)}
@@ -113,19 +116,38 @@ export default function ClassRoomFilters({
             size="small"
           />
         </Box>
-        <Button
-          href="/class-room/create"
-          variant="contained"
-          color="primary"
-          sx={{
-            minWidth: { xs: "100%", lg: 160 },
-            flex: { xs: "1 1 100%", lg: "0 0 auto" },
-            alignSelf: { xs: "stretch", lg: "center" },
-            py: 1.1,
-          }}
-        >
-          Tạo lớp học
-        </Button>
+        <Box>
+          <SelectOption
+            inputLabel="Loại lớp học"
+            onChange={(type) => onTypeChange(type)}
+            value={type}
+            options={TYPE_OPTIONS}
+            size="small"
+          />
+        </Box>
+        <Box>
+          <SelectOption
+            inputLabel="Hình thức buổi học"
+            onChange={(mode) => onSessionModeChange(mode)}
+            value={sessionMode}
+            options={SESSION_MODE_OPTIONS}
+            size="small"
+          />
+        </Box>
+        <Link href="/class-room/create">
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{
+              minWidth: { xs: "100%", lg: 160 },
+              flex: { xs: "1 1 100%", lg: "0 0 auto" },
+              alignSelf: { xs: "stretch", lg: "center" },
+              py: 1.1,
+            }}
+          >
+            Tạo lớp học
+          </Button>
+        </Link>
       </Stack>
     </LocalizationProvider>
   );

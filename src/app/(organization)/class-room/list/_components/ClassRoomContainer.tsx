@@ -9,31 +9,30 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import PageContainer from "@/shared/ui/PageContainer";
 import {
   ClassRoomFilters,
   ClassRoomRuntimeStatus,
   ClassRoomStatus,
+  ClassRoomType,
+  ClassSessionMode,
 } from "../types/types";
-import CourseFiltersBar from "./ClassRoomCourseFilters";
-import CourseStatusTabs from "./ClassRoomStatusTabs";
 import {
   GetClassRoomsQueryInput,
-  GetClassRoomStatusCountsInput,
-  useCountStatusClassRoomsQuery,
-  useGetClassRoomsQuery,
+  useGetClassRoomsPriorityQuery,
 } from "@/modules/class-room-management/operations/query";
 import { Pagination } from "@/shared/ui/Pagination";
-import { useAuthStore } from "@/modules/auth/store/AuthProvider";
-import ClassRoomListTable from "./list-view/ClassRoomListTable";
 import ClassRoomListFilters from "./ClassRoomCourseFilters";
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import ClassRoomListTable from "./ClassRoomListTable";
 
 const initialFilters: ClassRoomFilters = {
-  search: "",
+  type: ClassRoomType.All,
+  sessionMode: ClassSessionMode.All,
   runtimeStatus: ClassRoomRuntimeStatus.All,
+  status: ClassRoomStatus.All,
+  search: "",
   startDate: null,
   endDate: null,
-  status: ClassRoomStatus.All,
 };
 
 const PAGE_SIZE = 8;
@@ -41,7 +40,10 @@ const PAGE_SIZE = 8;
 export default function ClassRoomContainer() {
   const [filters, setFilters] = useState<ClassRoomFilters>(initialFilters);
   const [page, setPage] = useState(1);
-  const org_id = "6f0e0c9c-94a5-43cd-9b4f-04b2d30f082e";
+  const { organization, ...rest } = useUserOrganization((state) => state.data);
+  const isAdmin = rest.employeeType === "admin";
+  const organizationId = isAdmin ? organization?.id : undefined;
+  const employeeId = rest.employeeType === "teacher" ? rest.id : undefined;
 
   const queryInput = useMemo<GetClassRoomsQueryInput>(() => {
     const trimmedSearch = filters.search.trim();
@@ -55,9 +57,14 @@ export default function ClassRoomContainer() {
         : undefined,
       runtimeStatus: filters.runtimeStatus,
       status: filters.status,
+      type: filters.type,
+      sessionMode: filters.sessionMode,
       page,
       limit: PAGE_SIZE,
-      org_id,
+      organizationId,
+      employeeId,
+      orderField: "created_at",
+      orderBy: "desc"
     };
   }, [
     filters.search,
@@ -65,24 +72,18 @@ export default function ClassRoomContainer() {
     filters.endDate,
     filters.runtimeStatus,
     filters.status,
+    filters.type,
+    filters.sessionMode,
     page,
+    organizationId,
+    employeeId,
   ]);
 
   const { data: classRoomsResult, isLoading, isError, refetch } =
-    useGetClassRoomsQuery(queryInput);
+    useGetClassRoomsPriorityQuery(queryInput);
 
-  const classRooms = classRoomsResult?.items ?? [];
+  const classRooms = classRoomsResult?.data ?? [];
   const totalClassRooms = classRoomsResult?.total ?? 0;
-  // const countQueryInput = useMemo<GetClassRoomStatusCountsInput>(
-  //   () => ({
-  //     q: queryInput.q,
-  //     from: queryInput.from,
-  //     to: queryInput.to,
-  //   }),
-  //   [queryInput.q, queryInput.from, queryInput.to],
-  // );
-  // const { data: countStatus } = useCountStatusClassRoomsQuery(countQueryInput);
-
 
   const handleSearchChange = (value: string) => {
     setPage(1);
@@ -103,16 +104,6 @@ export default function ClassRoomContainer() {
     }));
   };
 
-  const handleResetFilters = () => {
-    setPage(1);
-    setFilters((prev) => ({
-      ...prev,
-      search: "",
-      startDate: null,
-      endDate: null,
-    }));
-  };
-
   const handleRuntimeStatusChange = (runtimeStatus: ClassRoomRuntimeStatus) => {
     setPage(1);
     setFilters((prev) => ({
@@ -129,21 +120,25 @@ export default function ClassRoomContainer() {
     }));
   }
 
-  // const handleStatusChange = (status: ClassRoomRuntimeStatus) => {
-  //   setPage(1);
-  //   setFilters((prev) => ({
-  //     ...prev,
-  //     status,
-  //   }));
-  // };
+  const handleTypeChange = (type: ClassRoomType) => {
+    setPage(1);
+    setFilters((prev) => ({
+      ...prev,
+      type,
+    }));
+  }
+
+  const handleSessionModeChange = (mode: ClassSessionMode) => {
+    setPage(1);
+    setFilters((prev) => ({
+      ...prev,
+      sessionMode: mode,
+    }));
+  }
 
   const handlePaginationChange = (nextPage: number) => {
     setPage(nextPage);
   };
-
-  console.log("classRooms", classRooms);
-
-
 
   return (
     <Box
@@ -154,6 +149,8 @@ export default function ClassRoomContainer() {
     >
       <Stack spacing={3}>
         <ClassRoomListFilters
+          type={filters.type}
+          sessionMode={filters.sessionMode}
           search={filters.search}
           startDate={filters.startDate}
           endDate={filters.endDate}
@@ -163,20 +160,9 @@ export default function ClassRoomContainer() {
           onDateChange={handleDateChange}
           onRuntimeStatusChange={handleRuntimeStatusChange}
           onStausChange={handleStausChange}
+          onTypeChange={handleTypeChange}
+          onSessionModeChange={handleSessionModeChange}
         />
-        {/* <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={2}
-          alignItems={{ xs: "stretch", md: "center" }}
-        >
-          <Box flex={1} sx={{ minWidth: 0 }}>
-                <CourseStatusTabs
-                  value={filters.status}
-                  onChange={handleStatusChange}
-                  counts={countStatus}
-                />
-              </Box>
-        </Stack> */}
 
         {isLoading ? (
           <Stack

@@ -61,6 +61,26 @@ const MAIN_MENU_LIST: MenuItemType[] = [
     ],
   },
   {
+    title: "Lớp học của tôi",
+    icon: React.createElement(UsersIcon),
+    key: "my-class",
+    path: PATHS.STUDENTS.ROOT,
+    // children: [
+    //   {
+    //     title: "Tạo nhân viên",
+    //     icon: React.createElement(UsersIcon),
+    //     key: 'employees/create',
+    //     path: PATHS.EMPLOYEE.CREATE_EMPLOYEE,
+    //   },
+    //   {
+    //     title: "Import danh sách",
+    //     icon: React.createElement(UsersIcon),
+    //     key: 'employees/import',
+    //     path: PATHS.EMPLOYEE.IMPORT_EMPLOYEES,
+    //   },
+    // ],
+  },
+  {
     title: "Trợ giúp",
     icon: React.createElement(HelpIcon),
     key: "help",

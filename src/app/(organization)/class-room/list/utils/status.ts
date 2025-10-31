@@ -1,6 +1,6 @@
 import { ClassRoomRuntimeStatus, ClassRoomStatus, ClassRoomType } from "../types/types";
 
-const RUNTIME_STATUS_COLOR_MAP: Record<
+export const RUNTIME_STATUS_COLOR_MAP: Record<
   ClassRoomRuntimeStatus,
   "primary" | "error" | "secondary" | "default" | "info" | "success"
 > = {
@@ -18,7 +18,7 @@ const STATUS_COLOR_MAP: Record<
 > = {
   [ClassRoomStatus.All]: "default",
   [ClassRoomStatus.Active]: "error",
-  [ClassRoomStatus.Daft]: "primary",
+  [ClassRoomStatus.Daft]: "default",
   [ClassRoomStatus.Deactive]: "success",
   [ClassRoomStatus.Deleted]: "default",
   [ClassRoomStatus.Pending]: "info",
@@ -55,7 +55,7 @@ export const CLASSROOM_STATUS_LABEL: Record<ClassRoomStatus, string> = {
   [ClassRoomStatus.Active]: "Hoạt động",
   [ClassRoomStatus.Daft]: "Bản nháp",
   [ClassRoomStatus.Deactive]: "Vô hiệu hóa",
-  [ClassRoomStatus.Deleted]: "Đã xó",
+  [ClassRoomStatus.Deleted]: "Đã xóa",
   [ClassRoomStatus.Pending]: "Chờ kiểm duyệt",
   [ClassRoomStatus.Publish]: "Xuất bản",
 };
