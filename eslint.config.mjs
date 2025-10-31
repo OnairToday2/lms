@@ -15,13 +15,7 @@ const eslintConfig = [
     extends: ["next", "prettier"],
   }),
   {
-    ignores: [
-      "node_modules/**",
-      ".next/**",
-      "out/**",
-      "build/**",
-      "next-env.d.ts",
-    ],
+    ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts"],
     rules: {
       "react/react-in-jsx-scope": "off",
       "react/jsx-uses-react": "off",
@@ -31,6 +25,7 @@ const eslintConfig = [
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/ban-ts-comment": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-empty-object-type": "off",
     },
   },
 ];

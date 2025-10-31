@@ -19,6 +19,7 @@ export interface DashboardSidebarProps {
   setExpanded?: (expanded: boolean) => void;
   disableCollapsibleSidebar?: boolean;
   container?: Element;
+  className?: string;
 }
 
 const Sidebar: React.FC<DashboardSidebarProps> = ({
@@ -26,6 +27,7 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({
   setExpanded,
   disableCollapsibleSidebar = false,
   container,
+  className,
 }) => {
   const theme = useTheme();
 
@@ -72,8 +74,7 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({
     [setExpanded],
   );
 
-  const hasDrawerTransitions =
-    isOverSmViewport && (!disableCollapsibleSidebar || isOverMdViewport);
+  const hasDrawerTransitions = isOverSmViewport && (!disableCollapsibleSidebar || isOverMdViewport);
 
   const getDrawerSharedSx = React.useCallback(
     (isTemporary: boolean) => {
@@ -114,17 +115,10 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({
               )}
             </Link>
           </div>
-          <MenuList
-            items={MAIN_MENU_LIST}
-            mini={mini}
-            isFullyExpanded={isFullyExpanded}
-          />
+          <MenuList items={MAIN_MENU_LIST} mini={mini} isFullyExpanded={isFullyExpanded} />
           {!mini ? <CardAlert /> : null}
           <div className="p-3">
-            <SignOutButton
-              className="w-full"
-              type={mini ? "icon" : undefined}
-            />
+            <SignOutButton className="w-full" type={mini ? "icon" : undefined} />
           </div>
         </>
       );
@@ -148,6 +142,7 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({
           },
           ...getDrawerSharedSx(false),
         }}
+        className={className}
       >
         {renderMenuContent("mobile")}
       </Drawer>
@@ -164,6 +159,7 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({
             },
           },
         }}
+        className={className}
       >
         {renderMenuContent("desktop")}
       </Drawer>

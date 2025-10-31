@@ -3,26 +3,14 @@ import { alpha, Theme, Components } from "@mui/material/styles";
 import CheckBoxOutlineBlankRoundedIcon from "@mui/icons-material/CheckBoxOutlineBlankRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
-import {
-  primary,
-  secondary,
-  grey,
-  success,
-  warning,
-  info,
-  error,
-} from "../../theme-color";
+import { primary, secondary, grey, success, warning, info, error } from "../../theme-color";
 
 /* eslint-disable import/prefer-default-export */
 export const checkboxCustomizations: Components<Theme> = {
   MuiCheckbox: {
     defaultProps: {
       // disableRipple: true,
-      icon: (
-        <CheckBoxOutlineBlankRoundedIcon
-          sx={{ color: "hsla(210, 0%, 0%, 0.0)" }}
-        />
-      ),
+      icon: <CheckBoxOutlineBlankRoundedIcon sx={{ color: "hsla(210, 0%, 0%, 0.0)" }} />,
       checkedIcon: <CheckRoundedIcon sx={{ height: 14, width: 14 }} />,
       indeterminateIcon: <RemoveRoundedIcon sx={{ height: 14, width: 14 }} />,
     },
@@ -195,6 +183,18 @@ export const checkboxCustomizations: Components<Theme> = {
                   borderColor: grey[800],
                 },
               },
+            },
+          },
+          {
+            props: {
+              size: "small",
+            },
+            style: {
+              // margin: "0.2rem",
+              height: "1rem",
+              width: "1rem",
+              borderRadius: "0.325rem",
+              padding: "7px",
             },
           },
         ],

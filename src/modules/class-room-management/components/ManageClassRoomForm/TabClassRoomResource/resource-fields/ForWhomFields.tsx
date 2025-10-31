@@ -35,13 +35,6 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
     append({ description: "" });
   }, [forWhomFields]);
 
-  useLayoutEffect(() => {
-    append({ description: "" });
-    return () => {
-      setValue("forWhom", []);
-    };
-  }, []);
-
   return (
     <div className={className}>
       {forWhomFields.length ? (
@@ -59,7 +52,13 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
                   placeholder={`Đối tượng ${_index + 1}`}
                   control={control}
                 />
-                <IconButton size="small" className="p-0 bg-transparent mt-[2px]" onClick={() => remove(_index)}>
+
+                <IconButton
+                  size="small"
+                  className="p-0 bg-transparent mt-[2px]"
+                  disabled={_index === 0}
+                  {...(_index !== 0 ? { onClick: () => remove(_index) } : undefined)}
+                >
                   <TrashIcon1 className="w-4 h-4" />
                 </IconButton>
               </div>

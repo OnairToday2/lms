@@ -12,7 +12,7 @@ import { PaginatedResult } from "@/types/dto/pagination.dto";
 import type { Database } from "@/types/supabase.types";
 import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { CLASS_ROOM_STUDENTS_SELECT, CLASS_ROOMS_SELECT, CLASS_SESSION_WITH_CLASS_ROOM_SELECT, LIMIT, PAGE } from "./constants";
+import { CLASS_ROOM_STUDENTS_SELECT, CLASS_ROOMS_SELECT, CLASS_SESSION_WITH_CLASS_ROOM_SELECT, LIMIT, PAGE } from "../class-room/constants";
 import { ClassRoomRuntimeStatus, ClassRoomStatus, ClassRoomType, ClassSessionMode } from "./type";
 
 const getClassFieldList = async () => {

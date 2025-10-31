@@ -249,8 +249,8 @@ export type Database = {
           id: string
           organization_id: string | null
           resource_id: string | null
-          room_type: Database["public"]["Enums"]["class_room_type"] | null
-          slug: string | null
+          room_type: Database["public"]["Enums"]["class_room_type"]
+          slug: string
           start_at: string | null
           status: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url: string | null
@@ -265,8 +265,8 @@ export type Database = {
           id?: string
           organization_id?: string | null
           resource_id?: string | null
-          room_type?: Database["public"]["Enums"]["class_room_type"] | null
-          slug?: string | null
+          room_type?: Database["public"]["Enums"]["class_room_type"]
+          slug: string
           start_at?: string | null
           status: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url?: string | null
@@ -281,8 +281,8 @@ export type Database = {
           id?: string
           organization_id?: string | null
           resource_id?: string | null
-          room_type?: Database["public"]["Enums"]["class_room_type"] | null
-          slug?: string | null
+          room_type?: Database["public"]["Enums"]["class_room_type"]
+          slug?: string
           start_at?: string | null
           status?: Database["public"]["Enums"]["class_room_status"]
           thumbnail_url?: string | null
@@ -374,8 +374,8 @@ export type Database = {
         Row: {
           channel_info: Json | null
           channel_provider:
-            | Database["public"]["Enums"]["channel_provider"]
-            | null
+          | Database["public"]["Enums"]["channel_provider"]
+          | null
           class_room_id: string | null
           created_at: string
           description: string | null
@@ -391,8 +391,8 @@ export type Database = {
         Insert: {
           channel_info?: Json | null
           channel_provider?:
-            | Database["public"]["Enums"]["channel_provider"]
-            | null
+          | Database["public"]["Enums"]["channel_provider"]
+          | null
           class_room_id?: string | null
           created_at?: string
           description?: string | null
@@ -408,8 +408,8 @@ export type Database = {
         Update: {
           channel_info?: Json | null
           channel_provider?:
-            | Database["public"]["Enums"]["channel_provider"]
-            | null
+          | Database["public"]["Enums"]["channel_provider"]
+          | null
           class_room_id?: string | null
           created_at?: string
           description?: string | null
@@ -573,6 +573,24 @@ export type Database = {
           },
         ]
       }
+      group_permission: {
+        Row: {
+          id: string
+          resource_code: string
+          title: string | null
+        }
+        Insert: {
+          id?: string
+          resource_code: string
+          title?: string | null
+        }
+        Update: {
+          id?: string
+          resource_code?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
       hash_tags: {
         Row: {
           created_at: string
@@ -600,9 +618,9 @@ export type Database = {
       libraries: {
         Row: {
           created_at: string
-          id: number
-          resource_name: string | null
-          user_id: string | null
+          id: string
+          organization_id: string
+          owner_id: string
         }
         Insert: {
           created_at?: string
@@ -796,32 +814,172 @@ export type Database = {
       resources: {
         Row: {
           created_at: string
-          id: string | null
-          library_id: number | null
+          deleted_at: string | null
+          extension: string | null
+          id: string
+          kind: Database["public"]["Enums"]["resource_kind"]
+          library_id: string
+          mime_type: string | null
+          name: string
+          organization_id: string
+          parent_id: string | null
           path: string | null
           size: string | null
-          title: string | null
-          type: string | null
+          thumbnail_url: string | null
+          updated_at: string
         }
         Insert: {
           created_at?: string
-          id?: string | null
-          library_id?: number | null
+          deleted_at?: string | null
+          extension?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["resource_kind"]
+          library_id: string
+          mime_type?: string | null
+          name: string
+          organization_id: string
+          parent_id?: string | null
           path?: string | null
           size?: string | null
-          title?: string | null
-          type?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
         }
         Update: {
           created_at?: string
-          id?: string | null
-          library_id?: number | null
+          deleted_at?: string | null
+          extension?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["resource_kind"]
+          library_id?: string
+          mime_type?: string | null
+          name?: string
+          organization_id?: string
+          parent_id?: string | null
           path?: string | null
           size?: string | null
-          title?: string | null
-          type?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "resources_library_id_fkey"
+            columns: ["library_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_permissions: {
+        Row: {
+          action_code: Database["public"]["Enums"]["action_code_enum"]
+          assigned_at: string | null
+          group_permission_id: string
+          role_id: string
+        }
+        Insert: {
+          action_code: Database["public"]["Enums"]["action_code_enum"]
+          assigned_at?: string | null
+          group_permission_id: string
+          role_id: string
+        }
+        Update: {
+          action_code?: Database["public"]["Enums"]["action_code_enum"]
+          assigned_at?: string | null
+          group_permission_id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_group_permission_id_fkey"
+            columns: ["group_permission_id"]
+            isOneToOne: false
+            referencedRelation: "group_permission"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          organization_id: string | null
+          title: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          organization_id?: string | null
+          title: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          organization_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          role_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          role_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          role_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -895,20 +1053,24 @@ export type Database = {
       }
     }
     Enums: {
+      action_code_enum: "create" | "read" | "update" | "delete"
+      attendance_status: "present" | "late" | "absent" | "rejected"
       channel_provider: "google_meet" | "zoom" | "microsoft_teams"
       class_room_status:
-        | "publish"
-        | "active"
-        | "deactive"
-        | "pending"
-        | "deleted"
-        | "draft"
+      | "publish"
+      | "active"
+      | "deactive"
+      | "pending"
+      | "deleted"
+      | "draft"
       class_room_type: "single" | "multiple"
       employee_status: "active" | "inactive"
       employee_type: "admin" | "student" | "teacher"
       gender: "male" | "female" | "other"
       hastag_type: "class_room"
       organization_unit_type: "branch" | "department"
+      qr_code_status: "inactive" | "active" | "expired" | "disabled"
+      resource_kind: "folder" | "file"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -922,120 +1084,122 @@ type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-    ? R
-    : never
+  ? R
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
+    DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+  ? R
+  : never
+  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
+    Insert: infer I
+  }
+  ? I
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
+  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
+    Update: infer U
+  }
+  ? U
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Update: infer U
+  }
+  ? U
+  : never
+  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Enums"]
+  | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["CompositeTypes"]
+  | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+  : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never
 
 export const Constants = {
   public: {
     Enums: {
+      action_code_enum: ["create", "read", "update", "delete"],
+      attendance_status: ["present", "late", "absent", "rejected"],
       channel_provider: ["google_meet", "zoom", "microsoft_teams"],
       class_room_status: [
         "publish",
@@ -1051,6 +1215,8 @@ export const Constants = {
       gender: ["male", "female", "other"],
       hastag_type: ["class_room"],
       organization_unit_type: ["branch", "department"],
+      qr_code_status: ["inactive", "active", "expired", "disabled"],
+      resource_kind: ["folder", "file"],
     },
   },
 } as const

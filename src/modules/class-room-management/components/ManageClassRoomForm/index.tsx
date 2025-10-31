@@ -1,21 +1,34 @@
 "use client";
 import { ClassRoomProvider } from "../../store/class-room-context";
+import { ClassRoomStore } from "../../store/class-room-store";
 import ClassRoomFormContainer, {
   ClassRoomFormContainerProps,
   ClassRoomFormContainerRef,
 } from "./ClassRoomFormContainer";
 import { forwardRef, memo } from "react";
 
-export interface FormManageClassRoomRef extends ClassRoomFormContainerRef {}
-export interface FormManageClassRoomProps {
+export type ManageClassRoomFormRef = ClassRoomFormContainerRef;
+export interface ManageClassRoomFormProps {
   onSubmit?: ClassRoomFormContainerProps["onSubmit"];
-  value?: any;
+  isLoading?: boolean;
+  action?: "create" | "edit";
+  initFormValue?: ClassRoomFormContainerProps["value"];
+  students?: ClassRoomStore["state"]["selectedStudents"]; // init students
+  teachers?: ClassRoomStore["state"]["selectedTeachers"]; // init teachers
 }
-const FormManageClassRoom = forwardRef<FormManageClassRoomRef, FormManageClassRoomProps>(({ onSubmit, value }, ref) => {
-  return (
-    <ClassRoomProvider>
-      <ClassRoomFormContainer onSubmit={onSubmit} ref={ref} />
-    </ClassRoomProvider>
-  );
-});
-export default memo(FormManageClassRoom);
+const ManageClassRoomForm = forwardRef<ManageClassRoomFormRef, ManageClassRoomFormProps>(
+  ({ onSubmit, initFormValue, action = "create", isLoading = false, teachers, students }, ref) => {
+    return (
+      <ClassRoomProvider selectedStudents={students} selectedTeachers={teachers}>
+        <ClassRoomFormContainer
+          ref={ref}
+          onSubmit={onSubmit}
+          isLoading={isLoading}
+          action={action}
+          value={initFormValue}
+        />
+      </ClassRoomProvider>
+    );
+  },
+);
+export default memo(ManageClassRoomForm);

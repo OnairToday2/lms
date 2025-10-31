@@ -1,26 +1,45 @@
-import { useGetClassHashTagQuery } from "@/modules/class-room-management/hooks/useGetClassField";
-import { Control } from "react-hook-form";
+import { Control, useController } from "react-hook-form";
 import { ClassRoom } from "../../classroom-form.schema";
 import RHFSelectField from "@/shared/ui/form/RHFSelectField";
+import RHFMultipleSelectField, { RHFMultipleSelectFieldProps } from "@/shared/ui/form/RHFMultipleSelectField";
+import { useGetClassHashTagsQuery } from "@/modules/hash-tag/operation/query";
+import { useCreateHashTagMutation } from "@/modules/hash-tag/operation/mutation";
+import { slugify } from "@/utils/slugify";
+
 interface ClassHashTagSelectorProps {
   control: Control<ClassRoom>;
 }
 const ClassHashTagSelector: React.FC<ClassHashTagSelectorProps> = ({ control }) => {
-  const { data: hashTagListData, isPending } = useGetClassHashTagQuery();
+  const {
+    field: { value: hasTagsList, onChange },
+  } = useController({ control, name: "hashTags" });
+  const { data: hashTagListData, isPending } = useGetClassHashTagsQuery();
+  const { mutate: createhashTag, isPending: isLoadingCreate } = useCreateHashTagMutation();
   const hashTags = hashTagListData?.data || [];
 
+  const handleInputEnter = (value: string) => {
+    if (!value.length) return;
+    createhashTag({
+      name: value,
+      slug: `${slugify(value)}-${new Date().getTime()}`,
+    });
+  };
+  const handleRemoveItem = (value: string) => {
+    const newHashTags = [...hasTagsList].filter((val) => val !== value);
+    onChange(newHashTags);
+  };
   return (
-    <RHFSelectField
+    <RHFMultipleSelectField
       label="Hash tags"
       control={control}
       name="hashTags"
       placeholder="Hash tags"
-      multiple={true}
-      optionField={{
-        value: "id",
-        label: "name",
-      }}
-      options={hashTags}
+      onInputEnter={handleInputEnter}
+      onRemove={handleRemoveItem}
+      options={hashTags.map((it) => ({
+        label: it.name || "",
+        value: it.id,
+      }))}
     />
   );
 };

@@ -5,7 +5,7 @@ import Button from "@mui/material/Button";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import useGetEmployeeQuery from "@/modules/class-room-management/hooks/useGetEmployee";
+import useGetEmployeeQuery from "@/modules/class-room-management/operation/query";
 import {
   Checkbox,
   Chip,
@@ -50,6 +50,7 @@ const DrawerEmployee: React.FC<DrawerEmployeeProps> = ({ open, onClose, onOk, on
       <List>
         {employeeList.map((emp) => (
           <EmployeeItem
+            key={emp.id}
             fullName={emp.profiles.full_name}
             code={emp.employee_code}
             email={emp.profiles.email}

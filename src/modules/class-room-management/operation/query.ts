@@ -1,7 +1,16 @@
 import { useTQuery } from "@/lib";
+import { getClassFields } from "@/repository/class-room-field";
 import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { employeeRepository } from "@/repository";
 import { EmployeeQueryParams } from "@/repository/employee";
+
+const useGetClassFieldQuery = () => {
+  return useTQuery({
+    queryFn: getClassFields,
+    queryKey: [QUERY_KEYS.GET_CLASS_FIELDS],
+  });
+};
+
 const useGetEmployeeQuery = (options?: { enabled?: boolean; queryParams?: EmployeeQueryParams }) => {
   const { enabled, queryParams } = options || {};
   return useTQuery({
@@ -11,3 +20,5 @@ const useGetEmployeeQuery = (options?: { enabled?: boolean; queryParams?: Employ
   });
 };
 export default useGetEmployeeQuery;
+
+export { useGetClassFieldQuery };
