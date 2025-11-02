@@ -1,5 +1,7 @@
 export interface BranchImportRow {
   name: string;
+  code: string;
+  address: string;
 }
 
 export interface ImportBranchesDto {

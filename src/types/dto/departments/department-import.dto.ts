@@ -1,6 +1,5 @@
 export interface DepartmentImportRow {
   name: string;
-  branch_name?: string;
 }
 
 export interface ImportDepartmentsDto {

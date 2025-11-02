@@ -13,14 +13,14 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
   const status = params?.status;
 
   // Check if we have organization unit filters
-  const hasDepartmentFilter = departmentId && departmentId !== 'all';
-  const hasBranchFilter = branchId && branchId !== 'all';
+  const hasDepartmentFilter = departmentId && departmentId !== "all";
+  const hasBranchFilter = branchId && branchId !== "all";
   const hasAnyFilter = hasDepartmentFilter || hasBranchFilter || (search && search.length > 0);
 
   // Use RPC function for efficient server-side filtering
   if (hasAnyFilter) {
     // Call the PostgreSQL RPC function to get filtered employee IDs
-    const { data: rpcResult, error: rpcError } = await supabase.rpc('get_filtered_employees', {
+    const { data: rpcResult, error: rpcError } = await supabase.rpc("get_filtered_employees", {
       p_page: page,
       p_limit: limit,
       p_search: search || undefined,
@@ -79,10 +79,10 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
           manager_id
         )
       `)
-      .in('id', employeeIds);
+      .in("id", employeeIds);
 
     if (status) {
-      employeeQuery = employeeQuery.eq('status', status);
+      employeeQuery = employeeQuery.eq("status", status);
     }
 
     const { data: fullEmployeeData, error: dataError } = await employeeQuery
@@ -132,11 +132,11 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
       managers_employees!managers_employees_employee_id_fkey (
         manager_id
       )
-    `, { count: 'exact' });
+    `, { count: "exact" });
 
   // Apply status filter if present
   if (status) {
-    query = query.eq('status', status);
+    query = query.eq("status", status);
   }
 
   const from = page * limit;
@@ -206,7 +206,7 @@ export async function getLastEmployeeOrder() {
   const { data: lastEmployee, error: orderError } = await supabase
     .from("employees")
     .select("employee_order")
-    .order("created_at", { ascending: false })
+    .order("employee_order", { ascending: false, nullsFirst: false })
     .limit(1)
     .single();
 
@@ -223,6 +223,7 @@ export async function createEmployee(data: {
   employee_order: number;
   start_date: string;
   position_id?: string | null;
+  organization_id: string;
   status: Database["public"]["Enums"]["employee_status"];
 }) {
   const supabase = await createSVClient();
@@ -246,7 +247,7 @@ export async function updateEmployeeById(
     employee_code?: string;
     start_date?: string;
     position_id?: string | null;
-  }
+  },
 ) {
   const supabase = await createSVClient();
 
@@ -306,6 +307,26 @@ export async function findEmployeesByEmployeeCodes(employeeCodes: string[]) {
   }
 
   return data || [];
+}
+
+export async function getEmployeeOrganizationIdByUserId(userId: string): Promise<string> {
+  const supabase = await createSVClient();
+
+  const { data: employee, error } = await supabase
+    .from("employees")
+    .select("organization_id")
+    .eq("user_id", userId)
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to fetch employee organization: ${error.message}`);
+  }
+
+  if (!employee?.organization_id) {
+    throw new Error("Employee organization not found");
+  }
+
+  return employee.organization_id;
 }
 
 export {

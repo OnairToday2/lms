@@ -6,6 +6,7 @@
   "scripts": {
     "dev:local": "dotenv -e .env.local -- next dev",
     "dev:dev": "dotenv -e .env.dev -- next dev",
+    "dev": "dotenv -e .env -- next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
