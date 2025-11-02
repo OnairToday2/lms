@@ -24,6 +24,7 @@ import { Pagination } from "@/shared/ui/Pagination";
 import ClassRoomListFilters from "./ClassRoomCourseFilters";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import ClassRoomListTable from "./ClassRoomListTable";
+import { redirect } from "next/navigation";
 
 const initialFilters: ClassRoomFilters = {
   type: ClassRoomType.All,
@@ -35,13 +36,14 @@ const initialFilters: ClassRoomFilters = {
   endDate: null,
 };
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 12;
 
 export default function ClassRoomContainer() {
   const [filters, setFilters] = useState<ClassRoomFilters>(initialFilters);
   const [page, setPage] = useState(1);
   const { organization, ...rest } = useUserOrganization((state) => state.data);
   const isAdmin = rest.employeeType === "admin";
+  const isHasAccess = rest.employeeType === "admin" || rest.employeeType === "teacher"
   const organizationId = isAdmin ? organization?.id : undefined;
   const employeeId = rest.employeeType === "teacher" ? rest.id : undefined;
 
@@ -139,6 +141,10 @@ export default function ClassRoomContainer() {
   const handlePaginationChange = (nextPage: number) => {
     setPage(nextPage);
   };
+
+  if (!isHasAccess) {
+    redirect('/403');
+  }
 
   return (
     <Box

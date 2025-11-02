@@ -76,7 +76,6 @@ const getRuntimeStatusColor = (status: ClassRoomRuntimeStatus): string => {
 const MyClassSection = () => {
     const userOrganization = useUserOrganization((state) => state.data);
     const employeeId = userOrganization?.id;
-    // const employeeId = "d899b0bf-5167-40a8-bb3a-6954260f8126"
 
     const [search, setSearch] = useState("");
     const [runtimeStatus, setRuntimeStatus] = useState<ClassRoomRuntimeStatus>(ClassRoomRuntimeStatus.All);
@@ -268,8 +267,11 @@ const MyClassSection = () => {
                                     runtimeStatusColor={runtimeStatusColor}
                                     runtimeStatusLabel={runtimeStatusLabel}
                                     sessionModeLabel={sessionModeLabel}
-                                    thumbnail={item.thumbnail_url!}
+                                    thumbnail={item.thumbnail_url ?? ""}
                                     title={item.title!}
+                                    slug={item.slug ?? ""}
+                                    roomType={(item.room_type as ClassRoomType) ?? ClassRoomType.Single}
+                                    sessions={item.class_sessions ?? []}
                                 />
                             </Grid>
                         );

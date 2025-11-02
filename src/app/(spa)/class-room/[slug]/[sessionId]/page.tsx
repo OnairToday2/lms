@@ -6,9 +6,10 @@ interface ClassRoomCountDown {
   }
 }
 
-const ClassRoomCountDownPage = ({ params }: ClassRoomCountDown) => {
+async function ClassRoomCountDownPage({ params }: ClassRoomCountDown) {
+  const { sessionId } = await params
   return (
-    <ClassRoomCountDownSection sessionId={params.sessionId} />
+    <ClassRoomCountDownSection sessionId={sessionId} />
   );
 }
 

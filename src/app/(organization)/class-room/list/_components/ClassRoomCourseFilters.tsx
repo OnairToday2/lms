@@ -1,6 +1,6 @@
 "use client";
 import dayjs, { Dayjs } from "dayjs";
-import { Box, Button, Paper, Stack, TextField } from "@mui/material";
+import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -9,6 +9,7 @@ import { SelectOption } from "@/shared/ui/form/SelectOption";
 import { ClassRoomRuntimeStatus, ClassRoomStatus, ClassRoomType, ClassSessionMode } from "../types/types";
 import { PUBLICATION_STATUS_OPTIONS, RUNTIME_STATUS_OPTIONS, SESSION_MODE_OPTIONS, TYPE_OPTIONS } from "../constants";
 import Link from "next/link";
+import { SearchIcon } from "@/shared/assets/icons";
 interface ClassRoomFiltersProps {
   search: string;
   startDate?: string | null;
@@ -68,6 +69,15 @@ export default function ClassRoomFilters({
             placeholder="Tìm kiếm..."
             size="small"
             fullWidth
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              },
+            }}
           />
         </Box>
         <Box>

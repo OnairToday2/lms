@@ -13,10 +13,10 @@ export default function ForbiddenPage() {
                 Vui lòng liên hệ quản trị viên để được cấp quyền hoặc kiểm tra xem bạn đã được gán vào lớp học hay chưa.
             </p>
             <Link
-                href="/class-room"
+                href="/"
                 className="mt-8 inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
             >
-                Quay về danh sách lớp học
+                Quay về trang chủ
             </Link>
         </div>
     );

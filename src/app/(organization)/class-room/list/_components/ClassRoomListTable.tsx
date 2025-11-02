@@ -182,7 +182,7 @@ export default function ClassRoomListTable({
                             <Tooltip key={teacher.profile?.id} title={teacher.profile?.full_name}>
                               <Avatar
                                 alt={teacher.profile?.full_name}
-                                src="/static/images/avatar/3.jpg"
+                                src={teacher.profile?.avatar as string}
                                 sx={{ width: 24, height: 24 }}
                               />
                             </Tooltip>
@@ -216,7 +216,7 @@ export default function ClassRoomListTable({
                     <TableCell align="left">
                       <Stack direction="row" alignItems="center" spacing={1}>
                         <Avatar
-                          src="/static/images/avatar/3.jpg"
+                          src={room.creator?.profile?.avatar as string}
                           sx={{ width: 24, height: 24 }}
                         />
                         <Stack>

@@ -132,17 +132,17 @@ const classRoomSchema = zod
     description: zod.string().min(1, { error: "Không bỏ trống nội dung." }),
     slug: zod.string(),
     thumbnailUrl: zod
-      .string(),
-    // .min(1, { error: "Ảnh bìa không bỏ trống." })
-    // .superRefine((value, ctx) => {
-    //   if (!value.startsWith("http://") && !value.startsWith("https://")) {
-    //     ctx.addIssue({
-    //       code: "invalid_format",
-    //       format: "starts_with",
-    //       message: "Đường dẫn không hợp lệ.",
-    //     });
-    //   }
-    // }),
+      .string()
+      .min(1, { error: "Ảnh bìa không bỏ trống." })
+      .superRefine((value, ctx) => {
+        if (!value.startsWith("http://") && !value.startsWith("https://")) {
+          ctx.addIssue({
+            code: "invalid_format",
+            format: "starts_with",
+            message: "Đường dẫn không hợp lệ.",
+          });
+        }
+      }),
     classRoomField: zod
       .array(zod.string())
       .min(1, "Chọn tối thiểu 1 lĩnh vực và tối đa 3 lĩnh vực.")

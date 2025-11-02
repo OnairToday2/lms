@@ -1,5 +1,4 @@
 "use client";
-
 import { useMemo, useState } from "react";
 import {
   Alert,
@@ -8,6 +7,7 @@ import {
   Chip,
   CircularProgress,
   IconButton,
+  InputAdornment,
   Menu,
   MenuItem,
   Stack,
@@ -23,7 +23,7 @@ import {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { grey } from "@mui/material/colors";
 import { STUDENT_TABLE_HEAD, ATTENDANCE_OPTIONS } from "./constants";
-import { useGetClassRoomsByEmployeeId, useGetClassRoomStudentsQuery } from "@/modules/class-room-management/operations/query";
+import { useGetClassRoomStudentsQuery } from "@/modules/class-room-management/operations/query";
 import useDebounce from "@/hooks/useDebounce";
 import { Pagination } from "@/shared/ui/Pagination";
 import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
@@ -37,6 +37,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ConfirmDialog } from "@/shared/ui/custom-dialog";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import DownloadIcon from '@mui/icons-material/Download';
+import { SearchIcon } from "@/shared/assets/icons";
 
 interface StudentsSectionProps {
   classRoomId: string;
@@ -264,8 +265,6 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
     }
   };
 
-  console.log("students", students);
-
 
   return (
     <Stack spacing={2}>
@@ -283,6 +282,15 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
             onChange={handleSearchChange}
             size="small"
             sx={{ minWidth: 240 }}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              },
+            }}
           />
         </Box>
         <Stack
