@@ -17,6 +17,10 @@ export class EmployeeDto {
     birthday: string | null;
     avatar: string | null;
   } | null;
+  positions!: {
+    id: string;
+    title: string;
+  } | null;
   employments!: Array<{
     id: string;
     organization_unit_id: string;

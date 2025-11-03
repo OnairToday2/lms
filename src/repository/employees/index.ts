@@ -66,6 +66,10 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
           birthday,
           avatar
         ),
+        positions (
+          id,
+          title
+        ),
         employments (
           id,
           organization_unit_id,
@@ -119,6 +123,10 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
         gender,
         birthday,
         avatar
+      ),
+      positions (
+        id,
+        title
       ),
       employments (
         id,
@@ -176,6 +184,10 @@ const getEmployeeById = async (id: string) => {
         gender,
         birthday,
         avatar
+      ),
+      positions (
+        id,
+        title
       ),
       employments (
         id,

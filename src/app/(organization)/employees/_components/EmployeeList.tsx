@@ -196,6 +196,10 @@ export default function EmployeeList() {
     return branch?.organization_units?.name || "-";
   };
 
+  const getPositionTitle = (employee: EmployeeDto) => {
+    return employee.positions?.title || "-";
+  };
+
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "active":
@@ -357,7 +361,7 @@ export default function EmployeeList() {
                             {employee.profiles?.full_name || "-"}
                           </TableCell>
                           <TableCell>{employee.profiles?.email || "-"}</TableCell>
-                          <TableCell>-</TableCell>
+                          <TableCell>{getPositionTitle(employee)}</TableCell>
                           <TableCell>Nhân viên</TableCell>
                           <TableCell>{getBranchName(employee)}</TableCell>
                           <TableCell>{getDepartmentName(employee)}</TableCell>
