@@ -11,12 +11,15 @@ import {
   CircularProgress,
   Alert,
   Stack,
+  LinearProgress,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PageContainer from "@/shared/ui/PageContainer";
 import { useGetAssignmentQuery, useGetAssignmentQuestionsQuery } from "@/modules/assignment-management/operations/query";
 import { useGetEmployeeQuery } from "@/modules/employees/operations/query";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
+import useNotifications from "@/hooks/useNotifications/useNotifications";
+import { uploadFileToS3 } from "@/utils/s3-upload";
 import AssignmentHeader from "./AssignmentHeader";
 import QuestionCard from "./QuestionCard";
 import SubmissionActions from "./SubmissionActions";
@@ -34,6 +37,7 @@ export default function AssignmentSubmission() {
   const params = useParams();
   const router = useRouter();
   const { confirm } = useDialogs();
+  const notifications = useNotifications();
 
   const assignmentId = params.id as string;
   const employeeId = params.employeeId as string;
@@ -48,6 +52,8 @@ export default function AssignmentSubmission() {
     },
   });
 
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [uploadProgress, setUploadProgress] = React.useState(0);
   const isLoading = isLoadingAssignment || isLoadingQuestions || isLoadingEmployee;
   const answers = watch("answers");
 
@@ -121,23 +127,93 @@ export default function AssignmentSubmission() {
 
     if (!confirmed) return;
 
-    // For now, just log the data to console
-    console.log("Submission data:", {
-      assignmentId,
-      employeeId,
-      answers: data.answers.map((answer) => ({
-        questionId: answer.questionId,
-        fileCount: answer.files.length,
-        files: answer.files.map((f) => ({
-          name: f.name,
-          size: f.size,
-          type: f.type,
-        })),
-      })),
-    });
+    setIsSubmitting(true);
+    setUploadProgress(0);
 
-    // TODO: Implement actual file upload and submission API call
-    alert("Dữ liệu đã được log ra console. API submission sẽ được implement sau.");
+    try {
+      const questionMap = new Map(
+        questions?.map(q => [q.id, q.label]) || []
+      );
+
+      const answersWithFiles = data.answers.filter(answer => answer.files.length > 0);
+
+      if (answersWithFiles.length === 0) {
+        throw new Error("Vui lòng tải lên ít nhất một file");
+      }
+
+      const totalFiles = answersWithFiles.reduce((sum, answer) => sum + answer.files.length, 0);
+      let completedFiles = 0;
+
+      const answersWithUrls = await Promise.all(
+        answersWithFiles.map(async (answer) => {
+          const uploadedFileResults = await Promise.all(
+            answer.files.map(async (file) => {
+              const result = await uploadFileToS3(file, {
+                onProgress: (percent) => {
+                  const currentFileProgress = percent / 100;
+                  const overallProgress = Math.round(
+                    ((completedFiles + currentFileProgress) / totalFiles) * 100
+                  );
+                  setUploadProgress(overallProgress);
+                },
+              });
+
+              completedFiles++;
+              setUploadProgress(Math.round((completedFiles / totalFiles) * 100));
+
+              return {
+                url: result.url,
+                fileName: result.fileName,
+                fileType: result.fileType,
+                fileSize: result.fileSize,
+              };
+            })
+          );
+
+          return {
+            questionId: answer.questionId,
+            questionLabel: questionMap.get(answer.questionId) || "",
+            files: uploadedFileResults,
+          };
+        })
+      );
+
+      const response = await fetch(`/api/assignments/${assignmentId}/submit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId,
+          answers: answersWithUrls,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Có lỗi xảy ra khi nộp bài");
+      }
+
+      notifications.show(result.message || "Nộp bài thành công!", {
+        severity: "success",
+      });
+
+      router.push(`/assignments/${assignmentId}/students`);
+    } catch (error) {
+      console.error("Error submitting assignment:", error);
+
+      const errorMessage = error instanceof Error
+        ? error.message
+        : "Có lỗi xảy ra khi nộp bài. Vui lòng thử lại.";
+
+      notifications.show(errorMessage, {
+        severity: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+      setUploadProgress(0);
+    }
   };
 
   return (
@@ -195,6 +271,16 @@ export default function AssignmentSubmission() {
           ) : (
             <form onSubmit={handleSubmit(onSubmit)}>
               <Stack spacing={4}>
+                {/* Upload Progress */}
+                {isSubmitting && uploadProgress > 0 && (
+                  <Box>
+                    <LinearProgress variant="determinate" value={uploadProgress} />
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                      Đang tải lên... {uploadProgress}%
+                    </Typography>
+                  </Box>
+                )}
+
                 {questions.map((question, index) => {
                   const answer = answers?.find((a) => a.questionId === question.id);
                   const files = answer?.files || [];
@@ -215,7 +301,8 @@ export default function AssignmentSubmission() {
                 <SubmissionActions
                   onCancel={handleBack}
                   onSubmit={() => {}}
-                  isSubmitDisabled={!hasAnyFiles()}
+                  isSubmitDisabled={!hasAnyFiles() || isSubmitting}
+                  isSubmitting={isSubmitting}
                 />
               </Stack>
             </form>

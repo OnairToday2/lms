@@ -77,6 +77,7 @@ export type Database = {
       }
       assignment_results: {
         Row: {
+          answers: Json
           assignment_id: string
           created_at: string
           employee_id: string
@@ -84,6 +85,7 @@ export type Database = {
           id: string
         }
         Insert: {
+          answers: Json
           assignment_id: string
           created_at?: string
           employee_id: string
@@ -91,6 +93,7 @@ export type Database = {
           id?: string
         }
         Update: {
+          answers?: Json
           assignment_id?: string
           created_at?: string
           employee_id?: string
