@@ -8,11 +8,12 @@ import {
   DialogActions,
   Button,
   TextField,
-  Alert,
   CircularProgress,
   Box,
+  IconButton,
+  SvgIcon,
 } from "@mui/material";
-import { useCreateBranchMutation, useUpdateBranchMutation } from "../operations/mutation";
+import { useCreateBranchMutation, useUpdateBranchMutation, useGenerateBranchCodeMutation } from "../operations/mutation";
 import { branchRepository } from "@/repository/branch";
 import type { BranchDto } from "@/types/dto/branches";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
@@ -53,34 +54,83 @@ export function BranchDialog({
     Partial<Record<keyof BranchFormData, string>>
   >({});
   const [isCheckingName, setIsCheckingName] = useState(false);
+  const [isAutoGenerateCode, setIsAutoGenerateCode] = useState(true);
 
   const { mutateAsync: createBranch, isPending: isCreating } = useCreateBranchMutation();
   const { mutateAsync: updateBranch, isPending: isUpdating } = useUpdateBranchMutation();
+  const { mutateAsync: generateCode, isPending: isGeneratingCode } = useGenerateBranchCodeMutation();
 
   useEffect(() => {
+    const generateBranchCode = async () => {
+      if (!organizationId) return;
+      
+      try {
+        const result = await generateCode(organizationId);
+        setFormData((prev) => ({ ...prev, code: result.data.code }));
+      } catch (error) {
+        console.error("Error generating branch code:", error);
+        notifications.show("Có lỗi xảy ra khi tạo mã chi nhánh", {
+          severity: "error",
+          autoHideDuration: 3000,
+        });
+      }
+    };
+
     if (open) {
       if (branch) {
+        // Edit mode: use existing code, manual mode
         setFormData({
           name: branch.name,
           code: branch.code,
           address: branch.address,
           organization_id: branch.organization_id,
         });
+        setIsAutoGenerateCode(false);
       } else {
+        // Create mode: auto-generate code by default
         setFormData({
           name: "",
           code: "",
           address: "",
           organization_id: organizationId,
         });
+        setIsAutoGenerateCode(true);
+        // Auto-generate code when dialog opens in create mode
+        if (organizationId) {
+          generateBranchCode();
+        }
       }
       setErrors({});
     }
-  }, [open, branch, organizationId]);
+  }, [open, branch, organizationId, notifications, generateCode]);
 
   const handleInputChange = (field: keyof BranchFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const handleToggleCodeMode = async () => {
+    const newMode = !isAutoGenerateCode;
+    setIsAutoGenerateCode(newMode);
+    
+    if (newMode) {
+      // Switched to auto-generate mode - generate new code
+      if (!organizationId) return;
+      
+      try {
+        const result = await generateCode(organizationId);
+        setFormData((prev) => ({ ...prev, code: result.data.code }));
+      } catch (error) {
+        console.error("Error generating branch code:", error);
+        notifications.show("Có lỗi xảy ra khi tạo mã chi nhánh", {
+          severity: "error",
+          autoHideDuration: 3000,
+        });
+      }
+    } else {
+      // Switched to manual mode - clear the code
+      setFormData((prev) => ({ ...prev, code: "" }));
+    }
   };
 
   const validateForm = async () => {
@@ -112,6 +162,20 @@ export function BranchDialog({
       newErrors.code = "Mã chi nhánh không được để trống";
     } else if (formData.code.length > 50) {
       newErrors.code = "Mã chi nhánh không được vượt quá 50 ký tự";
+    } else {
+      // Check if code already exists
+      try {
+        const codeExists = await branchRepository.checkCodeExists(
+          formData.code,
+          formData.organization_id,
+          branch?.id
+        );
+        if (codeExists) {
+          newErrors.code = "Mã chi nhánh đã tồn tại";
+        }
+      } catch (error) {
+        console.error("Failed to check code:", error);
+      }
     }
 
     if (!formData.address.trim()) {
@@ -166,7 +230,7 @@ export function BranchDialog({
     }
   };
 
-  const isLoading = isCreating || isUpdating || isCheckingName;
+  const isLoading = isCreating || isUpdating || isCheckingName || isGeneratingCode;
   const isFormValid = formData.name.trim() && formData.code.trim() && formData.address.trim();
 
   return (
@@ -194,9 +258,44 @@ export function BranchDialog({
             value={formData.code}
             onChange={(e) => handleInputChange("code", e.target.value)}
             error={!!errors.code}
-            helperText={errors.code}
-            disabled={isLoading}
+            helperText={
+              errors.code ||
+              (isAutoGenerateCode
+                ? "Hệ thống tự sinh mã"
+                : "Nhập mã chi nhánh thủ công")
+            }
+            disabled={isLoading || isAutoGenerateCode}
             inputProps={{ maxLength: 50 }}
+            InputProps={{
+              endAdornment: !isEditMode && (
+                <IconButton
+                  onClick={handleToggleCodeMode}
+                  disabled={isLoading || isGeneratingCode}
+                  edge="end"
+                  size="small"
+                  sx={{ ml: 1 }}
+                  title={isAutoGenerateCode ? "Chuyển sang nhập thủ công" : "Chuyển sang tự động"}
+                >
+                  <SvgIcon sx={{ fontSize: 20 }}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="18"
+                      height="20"
+                      viewBox="0 0 18 20"
+                      fill="none"
+                    >
+                      <path
+                        d="M17 15H1M1 15L5 11M1 15L5 19M1 5H17M17 5L13 1M17 5L13 9"
+                        stroke="#0050FF"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </SvgIcon>
+                </IconButton>
+              ),
+            }}
           />
           <TextField
             label="Địa điểm"
