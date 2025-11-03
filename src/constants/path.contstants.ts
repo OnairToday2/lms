@@ -26,6 +26,8 @@ export const PATHS = {
   },
   CLASSROOMS: {
     ROOT: "/class-room",
+    CREATE_CLASSROOM_OFFLINE: "/class-room/offline/create",
+    CREATE_CLASSROOM_ONLINE: "/class-room/online/create",
     CREATE_CLASSROOM: "/class-room/create",
     LIST_CLASSROOM: "/class-room/list",
   },
