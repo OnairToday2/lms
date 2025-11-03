@@ -221,6 +221,7 @@ async function deleteEmployeeWithRelations(
 ): Promise<void> {
   const userId = await employeesRepository.getEmployeeUserId(employeeId);
 
+  await managersEmployeesRepository.deleteAllManagerRelationshipsForEmployee(employeeId);
   await employmentsRepository.deleteEmploymentsByEmployeeId(employeeId);
   await profilesRepository.deleteProfileByEmployeeId(employeeId);
   await employeesRepository.deleteEmployeeById(employeeId);
