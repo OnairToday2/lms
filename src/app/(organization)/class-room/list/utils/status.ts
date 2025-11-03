@@ -75,7 +75,7 @@ export const getClassRoomRuntimeStatusLabel = (status: ClassRoomRuntimeStatus) =
 export const getColorClassRoomRuntimeStatus = (status: ClassRoomRuntimeStatus) =>
   RUNTIME_STATUS_COLOR_MAP[status] ?? RUNTIME_STATUS_COLOR_MAP[ClassRoomRuntimeStatus.All];
 
-export const getStatusAndLabelBtnJoin = (status: ClassRoomRuntimeStatus): { label: string, disabled: boolean } => {
+export const getStatusAndLabelBtnJoin = (status: ClassRoomRuntimeStatus, isOnline: boolean): { label: string, disabled: boolean } => {
   switch (status) {
     case ClassRoomRuntimeStatus.Draft:
       return {
@@ -85,9 +85,16 @@ export const getStatusAndLabelBtnJoin = (status: ClassRoomRuntimeStatus): { labe
     case ClassRoomRuntimeStatus.Upcoming:
     case ClassRoomRuntimeStatus.Today:
     case ClassRoomRuntimeStatus.Ongoing:
-      return {
-        label: "Vào lớp học",
-        disabled: false,
+      if (isOnline) {
+        return {
+          label: "Vào lớp học",
+          disabled: false,
+        }
+      } else {
+        return {
+          label: "Quét mã QR",
+          disabled: false,
+        }
       }
     case ClassRoomRuntimeStatus.Past:
       return {
