@@ -9,10 +9,11 @@ import ClassRoomSessionFromToDate from "../class-room-session-fields/ClassRoomSe
 import AccordionSessionItem, { AccordionSessionItemProps } from "./AccordionSessionItem";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
 import RHFRichEditor from "@/shared/ui/form/RHFRichEditor";
-import ClassRoomChannel from "../class-room-session-fields/RoomChannel";
+import RoomChannel from "../class-room-session-fields/RoomChannel";
 import TeacherSelector, { TeacherSelectorRef } from "../class-room-session-fields/TeacherSelector";
 import AgendarFields from "../class-room-session-fields/AgendarFields";
 import { initClassSessionFormData } from "..";
+import { MarkerPin01Icon } from "@/shared/assets/icons";
 
 interface MultipleSessionProps {
   methods: UseFormReturn<ClassRoom>;
@@ -94,14 +95,6 @@ const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
     }, 0);
   }, []);
 
-  useLayoutEffect(() => {
-    if (classSessionsFields.length) return;
-    /** init at least 2 session for class room multiple */
-    const platform = getValues("platform");
-    append(initClassSessionFormData({ isOnline: platform === "online" }));
-    append(initClassSessionFormData({ isOnline: platform === "online" }));
-  }, [classSessionsFields]);
-
   return (
     <div className="class-multiple-session">
       <div className="inner bg-white rounded-xl p-6 mb-6">
@@ -111,11 +104,11 @@ const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
           </Typography>
         </div>
         <div className="session-list flex flex-col gap-3">
-          {classSessionsFields.map((sessionField, _index) => (
-            <div key={sessionField._sessionId}>
+          {classSessionsFields.map(({ _sessionId, title, isOnline }, _index) => (
+            <div key={_sessionId}>
               <AccordionSessionItem
                 index={_index}
-                title={sessionField.title}
+                title={title}
                 onRemove={classSessionsFields.length > 2 ? handleRemoveSession : undefined}
                 status={hasErrorSession(_index)}
               >
@@ -138,7 +131,18 @@ const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
                       label="Nội dung"
                       required
                     />
-                    <ClassRoomChannel index={_index} control={control} />
+                    {isOnline ? (
+                      <RoomChannel control={control} index={_index} />
+                    ) : (
+                      <RHFTextField
+                        name={`classRoomSessions.${_index}.location`}
+                        control={control}
+                        label="Địa điểm tổ chức"
+                        required
+                        startAdornment={<MarkerPin01Icon />}
+                        placeholder="Nhập địa điểm tổ chức lớp học"
+                      />
+                    )}
                   </div>
                   <div className="h-6"></div>
                   <TeacherSelector

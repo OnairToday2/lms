@@ -1,4 +1,12 @@
-import { ClassIcon, GitIcon, HelpIcon, SquareFourIcon, UsersIcon } from "@/shared/assets/icons";
+import {
+  ClassIcon,
+  GitIcon,
+  HelpIcon,
+  SquareFourIcon,
+  UsersIcon,
+  MonitorIcon,
+  BookOpenIcon,
+} from "@/shared/assets/icons";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
 import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
@@ -9,7 +17,7 @@ const MAIN_MENU_LIST: MenuItemType[] = [
   {
     title: "Dashboard",
     icon: React.createElement(SquareFourIcon),
-    key: 'dashboard',
+    key: "dashboard",
     path: PATHS.DASHBOARD,
     type: "item",
   },
@@ -68,16 +76,32 @@ const MAIN_MENU_LIST: MenuItemType[] = [
     ],
   },
   {
-    title: "Quản lý lớp học",
-    icon: React.createElement(ClassIcon),
-    key: "class-room",
-    path: PATHS.CLASSROOMS.ROOT,
+    title: "Quản lý lớp học trực tuyến",
+    subTitle: "(Live)",
+    icon: React.createElement(MonitorIcon),
+    key: "class-room-online",
+    path: PATHS.CLASSROOMS.CREATE_CLASSROOM_ONLINE,
     children: [
       {
         title: "Tạo lớp học",
         icon: React.createElement(ClassIcon),
-        key: "class-room/create",
-        path: PATHS.CLASSROOMS.CREATE_CLASSROOM,
+        key: "class-room-online-create",
+        path: PATHS.CLASSROOMS.CREATE_CLASSROOM_ONLINE,
+      },
+    ],
+  },
+  {
+    title: "Quản lý lớp học trực tiếp",
+    subTitle: "(In house)",
+    icon: React.createElement(BookOpenIcon),
+    key: "class-room-offline",
+    path: PATHS.CLASSROOMS.CREATE_CLASSROOM_OFFLINE,
+    children: [
+      {
+        title: "Tạo lớp học",
+        icon: React.createElement(ClassIcon),
+        key: "class-room-offline-create",
+        path: PATHS.CLASSROOMS.CREATE_CLASSROOM_OFFLINE,
       },
     ],
   },
@@ -90,13 +114,13 @@ const MAIN_MENU_LIST: MenuItemType[] = [
       {
         title: "Tạo nhân viên",
         icon: React.createElement(UsersIcon),
-        key: 'employees/create',
+        key: "employees/create",
         path: PATHS.EMPLOYEE.CREATE_EMPLOYEE,
       },
       {
         title: "Import danh sách",
         icon: React.createElement(UsersIcon),
-        key: 'employees/import',
+        key: "employees/import",
         path: PATHS.EMPLOYEE.IMPORT_EMPLOYEES,
       },
     ],

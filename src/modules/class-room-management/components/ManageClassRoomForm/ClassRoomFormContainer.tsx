@@ -1,6 +1,5 @@
 "use client";
-import * as React from "react";
-
+import React, { useEffect, useRef, useImperativeHandle, useCallback, forwardRef } from "react";
 import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
 import { classRoomSchema, ClassRoom } from "../classroom-form.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,15 +12,46 @@ import { ClassRoomStore } from "../../store/class-room-store";
 import ClassRoomTabContainer, { ClassRoomTabContainerRef } from "./ClassRoomTabContainer";
 import TabClassRoomInformation from "./TabClassRoomInformation";
 import TabClassRoomResource from "./TabClassRoomResource";
-import TabClassRoomSession from "./TabClassRoomSession";
+import TabClassRoomSession, { initClassSessionFormData } from "./TabClassRoomSession";
 import TabClassRoomSetting from "./TabClassRoomSetting";
-
+import { ClassRoomPlatformType } from "@/constants/class-room.constant";
 export const TAB_KEYS_CLASS_ROOM = {
   "clsTab-information": "clsTab-information",
   "clsTab-session": "clsTab-session",
   "clsTab-resource": "clsTab-resource",
   "clsTab-setting": "clsTab-setting",
 } as const;
+
+export const TAB_NODES_CLASS_ROOM = new Map([
+  [
+    TAB_KEYS_CLASS_ROOM["clsTab-information"],
+    {
+      prev: null,
+      next: TAB_KEYS_CLASS_ROOM["clsTab-session"],
+    },
+  ],
+  [
+    TAB_KEYS_CLASS_ROOM["clsTab-session"],
+    {
+      prev: TAB_KEYS_CLASS_ROOM["clsTab-information"],
+      next: TAB_KEYS_CLASS_ROOM["clsTab-resource"],
+    },
+  ],
+  [
+    TAB_KEYS_CLASS_ROOM["clsTab-resource"],
+    {
+      prev: TAB_KEYS_CLASS_ROOM["clsTab-session"],
+      next: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+    },
+  ],
+  [
+    TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+    {
+      prev: TAB_KEYS_CLASS_ROOM["clsTab-resource"],
+      next: null,
+    },
+  ],
+]);
 
 export interface ClassRoomFormContainerRef {
   resetForm: () => void;
@@ -32,12 +62,13 @@ export interface ClassRoomFormContainerProps {
     selectedStudents: ClassRoomStore["state"]["selectedStudents"],
     selectedTeachers: ClassRoomStore["state"]["selectedTeachers"],
   ) => void;
+  platform: ClassRoomPlatformType;
   value?: ClassRoom;
   isLoading?: boolean;
   action?: "create" | "edit";
 }
 
-export const initClassRoomFormData = (): Partial<ClassRoom> => {
+export const initClassRoomFormData = (platform: ClassRoomPlatformType): Partial<ClassRoom> => {
   return {
     title: "",
     description: "",
@@ -57,21 +88,21 @@ export const initClassRoomFormData = (): Partial<ClassRoom> => {
     whies: [],
     galleries: [],
     docs: [],
-    platform: undefined,
+    platform: platform,
     classRoomSessions: [],
   };
 };
 
-const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, ClassRoomFormContainerProps>(
-  ({ onSubmit, isLoading, action, value: initFormValue }, ref) => {
-    const classRoomTabContainerRef = React.useRef<ClassRoomTabContainerRef>(null);
+const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFormContainerProps>(
+  ({ onSubmit, isLoading, action, value: initFormValue, platform }, ref) => {
+    const classRoomTabContainerRef = useRef<ClassRoomTabContainerRef>(null);
     const resetStore = useClassRoomStore(({ actions }) => actions.reset);
     const selectedStudents = useClassRoomStore(({ state }) => state.selectedStudents);
     const selectedTeachers = useClassRoomStore(({ state }) => state.selectedTeachers);
 
     const methods = useForm<ClassRoom>({
       resolver: zodResolver(classRoomSchema),
-      defaultValues: initFormValue ?? initClassRoomFormData(),
+      defaultValues: initFormValue ? { ...initFormValue, platform: platform } : initClassRoomFormData(platform),
     });
 
     const {
@@ -88,9 +119,14 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
     console.log({ errors, value: getValues(), selectedStudents, selectedTeachers });
     const watchRoomType = watch("roomType");
 
-    const handleSelectRoomType: ClassRoomTypeSelectorProps["onSelect"] = React.useCallback((type, platform) => {
+    const handleSelectRoomType: ClassRoomTypeSelectorProps["onSelect"] = useCallback((type) => {
       setValue("roomType", type);
-      setValue("platform", platform);
+      const initSessionsFormData = initClassSessionFormData({ isOnline: platform === "online" });
+
+      setValue(
+        "classRoomSessions",
+        type === "multiple" ? [initSessionsFormData, initSessionsFormData] : [initSessionsFormData],
+      );
     }, []);
 
     const triggerBeforeSubmitForm = (submitAction: () => void, status: "draft" | "publish") => async () => {
@@ -98,9 +134,9 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
         setValue("status", status);
         const isValidAllClassRoomFields = await trigger();
         classRoomTabContainerRef.current?.checkStatusAllTabItems();
-        if (isValidAllClassRoomFields) {
-          submitAction();
-        }
+        // if (isValidAllClassRoomFields) {
+        //   submitAction();
+        // }
       } catch (error) {
         console.log(error);
       }
@@ -132,17 +168,16 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
       reset(); //Reset Form
     };
 
-    React.useImperativeHandle(ref, () => ({
+    useImperativeHandle(ref, () => ({
       resetForm: () => {
         resetStore(); // Reset all selected value in classRoom store
         reset(); //Reset Form
       },
     }));
-
     /**
      * Init form value
      */
-    React.useEffect(() => {
+    useEffect(() => {
       if (!initFormValue) return;
       Object.entries(initFormValue).forEach(([key, value]) => {
         setValue(key as keyof ClassRoom, value);
@@ -153,7 +188,7 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
       <FormProvider {...methods}>
         {!watchRoomType ? (
           <div className="max-w-[1040px] mx-auto">
-            <ClassRoomTypeSelector onSelect={handleSelectRoomType} />
+            <ClassRoomTypeSelector onSelect={handleSelectRoomType} platform={platform} />
             <div className="h-6"></div>
           </div>
         ) : (

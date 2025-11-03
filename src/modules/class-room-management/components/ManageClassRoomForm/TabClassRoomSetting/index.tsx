@@ -10,6 +10,7 @@ import { useClassRoomFormContext } from "../ClassRoomFormContainer";
 const TabClassRoomSetting = () => {
   const { control, getValues } = useClassRoomFormContext();
   const classRoomPlatform = getValues("platform");
+
   const setStudents = useClassRoomStore((state) => state.actions.setSelectedStudents);
   const selectedStudents = useClassRoomStore((state) => state.state.selectedStudents);
 
@@ -27,23 +28,8 @@ const TabClassRoomSetting = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      {classRoomPlatform === "offline" || classRoomPlatform === "hybrid" ? (
-        <div className="bg-white p-6 rounded-lg">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <Typography component="h3" sx={{ fontSize: "16px", fontWeight: "bold" }}>
-                Thiết lập thời gian hiệu lực QR cho lớp học
-              </Typography>
-              <Typography variant="body2">Hệ thống mặc định mã QR có hiệu lực điểm danh vô thời hạn</Typography>
-            </div>
-            <IconButton>
-              <ChevronDownIcon />
-            </IconButton>
-          </div>
-          <QrSetting />
-        </div>
-      ) : null}
-      <div className="bg-white p-6 rounded-lg">
+      {classRoomPlatform === "online" ? null : <QrSetting />}
+      <div className="bg-white p-6 rounded-xl">
         <div className="flex items-center justify-between mb-6">
           <Typography component="h3" sx={{ fontSize: "16px", fontWeight: "bold" }}>
             Thêm học viên <span className="text-red-600">*</span>

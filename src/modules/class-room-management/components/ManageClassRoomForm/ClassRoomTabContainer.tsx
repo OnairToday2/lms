@@ -1,5 +1,5 @@
 "use client";
-import * as React from "react";
+import React, { useCallback, useMemo, useState, useImperativeHandle } from "react";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabPanel from "@mui/lab/TabPanel";
@@ -9,7 +9,7 @@ import { useTheme } from "@mui/material";
 import { tabClasses } from "@mui/material";
 import { cn } from "@/utils";
 import { CheckCircleIcon } from "@/shared/assets/icons";
-import { TAB_KEYS_CLASS_ROOM } from "./ClassRoomFormContainer";
+import { TAB_KEYS_CLASS_ROOM, TAB_NODES_CLASS_ROOM } from "./ClassRoomFormContainer";
 import { useTransition } from "react";
 import { getKeyFieldByTab } from "./utils";
 import { FieldErrors, UseFormTrigger } from "react-hook-form";
@@ -24,6 +24,7 @@ type ClassRoomTabItem = {
   content?: React.ReactNode;
   icon?: React.ReactNode;
 };
+type TabStateType = Record<TabKeyType, { status: ClassRoomTabStatus }>;
 export interface ClassRoomTabContainerRef {
   checkStatusAllTabItems: () => void;
 }
@@ -35,69 +36,78 @@ export interface ClassRoomTabContainerProps {
   trigger: UseFormTrigger<ClassRoom>;
   errors: FieldErrors<ClassRoom>;
 }
+
 const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRoomTabContainerProps>(
   ({ items, className, previewUI, actions, trigger, errors }, ref) => {
-    const [tabsState, setTabsState] = React.useState(
-      () =>
-        Object.fromEntries(items.map((tab) => [tab.tabKey, { status: "idle" }])) as Record<
-          TabKeyType,
-          { status: ClassRoomTabStatus }
-        >,
-    );
-    const [currentTab, setCurrentTab] = React.useState<TabKeyType>(() => items?.[0]?.tabKey || "clsTab-information");
     const [isGotoNextTab, startGotoNextTab] = useTransition();
-    const handleChange = React.useCallback((event: React.SyntheticEvent, newValue: TabKeyType) => {
-      setCurrentTab(newValue);
+    const [currentTab, setCurrentTab] = useState<TabKeyType>(() => items?.[0]?.tabKey || "clsTab-information");
+    const [tabsState, setTabsState] = useState(
+      () => Object.fromEntries(items.map((tab) => [tab.tabKey, { status: "idle" }])) as TabStateType,
+    );
+
+    /**
+     * Trigger validate all field in current tab before process next action
+     */
+    const validateCurrentTabBeforeProceed = useCallback(async (tab: TabKeyType, callback?: () => void) => {
+      const keyList = getKeyFieldByTab(tab);
+
+      await Promise.all(keyList.map((key) => trigger(key)));
+
+      const status = getStatusTabClassRoom(errors, tab);
+
+      setTabsState((prevState) => {
+        return {
+          ...prevState,
+          [tab]: {
+            status: status,
+          },
+        } as typeof prevState;
+      });
+
+      if (status === "invalid") return;
+
+      callback?.();
     }, []);
 
-    const triggerFieldByTab = async (takKey: keyof typeof TAB_KEYS_CLASS_ROOM) => {
-      const keysTriggerByTab = getKeyFieldByTab(takKey);
-      const triggersInformationKeys = keysTriggerByTab.map((key) => {
-        return trigger(key);
-      });
-      return (await Promise.all(triggersInformationKeys)).every(Boolean);
-    };
+    const handleChangeTab = useCallback(
+      (_: React.SyntheticEvent, newTab: TabKeyType) =>
+        setCurrentTab((oldTab) => {
+          const nextTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.next;
+          const prevTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.prev;
+          return nextTab === newTab || prevTab === newTab ? newTab : oldTab;
+        }),
+      [currentTab],
+    );
+    /**
+     * Next and back action each tab
+     */
+    const goNextOrBackStep = useCallback(
+      (action: "next" | "back") => () =>
+        validateCurrentTabBeforeProceed(currentTab, () => {
+          startGotoNextTab(async () => {
+            setCurrentTab((oldTab) => {
+              const newTab =
+                action === "next" ? TAB_NODES_CLASS_ROOM.get(oldTab)?.next : TAB_NODES_CLASS_ROOM.get(oldTab)?.prev;
+              return newTab ? newTab : oldTab;
+            });
+            const scrollContainer = document.querySelector(".main-layout__content");
+            scrollContainer?.scrollTo({ top: 0 });
+          });
+        }),
+      [],
+    );
 
-    const goNextOrBackStep = (action: "next" | "back") => () => {
-      startGotoNextTab(async () => {
-        await triggerFieldByTab(currentTab);
-        setTabsState((prevTabState) => {
-          return {
-            ...prevTabState,
-            [currentTab]: {
-              status: getStatusTabClassRoom(errors, currentTab),
-            },
-          } as typeof prevTabState;
-        });
-        const status = getStatusTabClassRoom(errors, currentTab);
-
-        if (status === "invalid") return;
-
-        if (currentTab === "clsTab-information") {
-          setCurrentTab(action === "next" ? "clsTab-session" : "clsTab-information");
-        }
-        if (currentTab === "clsTab-session") {
-          setCurrentTab(action === "next" ? "clsTab-resource" : "clsTab-information");
-        }
-        if (currentTab === "clsTab-resource") {
-          setCurrentTab(action === "next" ? "clsTab-setting" : "clsTab-session");
-        }
-        const scrollContainer = document.querySelector(".main-layout__content");
-        scrollContainer?.scrollTo({ top: 0 });
-      });
-    };
-
-    React.useImperativeHandle(ref, () => ({
+    useImperativeHandle(ref, () => ({
       checkStatusAllTabItems: () => {
         setTabsState((prevTabState) => {
-          let updateTabState = { ...prevTabState };
+          let newTabStateUpdate = { ...prevTabState };
           items.forEach((tabItem) => {
-            updateTabState = {
-              ...updateTabState,
-              [tabItem.tabKey]: getStatusTabClassRoom(errors, tabItem.tabKey),
+            newTabStateUpdate = {
+              ...newTabStateUpdate,
+              [tabItem.tabKey]: { status: getStatusTabClassRoom(errors, tabItem.tabKey) },
             };
           });
-          return updateTabState;
+          return newTabStateUpdate;
         });
       },
     }));
@@ -106,7 +116,7 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
       <div className={cn("class-room-tabs", className)}>
         <TabContext value={currentTab}>
           <div className="bg-white rounded-xl flex items-center justify-between mb-6 px-6 py-4">
-            <ClassRoomTabList onChange={handleChange}>
+            <ClassRoomTabList onChange={handleChangeTab}>
               {items.map(({ tabKey, tabName, icon }) => (
                 <Tab
                   key={tabKey}

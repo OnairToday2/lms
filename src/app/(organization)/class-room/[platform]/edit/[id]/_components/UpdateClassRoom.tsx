@@ -10,8 +10,10 @@ import { getClassRoomMetaValue } from "@/modules/class-room-management/utils";
 import { useSnackbar } from "notistack";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
+import { ClassRoomPlatformType } from "@/constants/class-room.constant";
 interface UpdateClassRoomProps {
   data: Exclude<GetClassRoomByIdData, null>;
+  platform: ClassRoomPlatformType;
 }
 type UpdateClassRoomFormValue = Exclude<ManageClassRoomFormProps["initFormValue"], undefined>;
 type ClassRoomSession = UpdateClassRoomFormValue["classRoomSessions"][number];
@@ -20,14 +22,14 @@ type SessionAgenda = UpdateClassRoomFormValue["classRoomSessions"][number]["agen
 type TeacherType = Exclude<ManageClassRoomFormProps["teachers"], undefined>;
 type StudentType = Exclude<ManageClassRoomFormProps["students"], undefined>;
 
-const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
+const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data, platform }) => {
   const router = useRouter();
   const { sessions, class_room_metadata, employees } = data;
   const { enqueueSnackbar } = useSnackbar();
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
   const { isLoading, onUpdate } = useCRUDClassRoom();
 
-  const updateClassRoomFormData = useMemo<UpdateClassRoomFormValue>(() => {
+  const initFormValue = useMemo<UpdateClassRoomFormValue>(() => {
     const hastTags = data?.class_hash_tag.reduce<string[]>((acc, ht) => {
       const hastTagId = ht.hash_tags?.id;
       return hastTagId ? [...acc, hastTagId] : acc;
@@ -63,6 +65,7 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
           title: session.title || "",
           description: session.description || "",
           thumbnailUrl: "",
+          location: "",
           endDate: session.end_at ? dayjs(session.end_at).toISOString() : "",
           startDate: session.start_at ? dayjs(session.start_at).toISOString() : "",
           isOnline: session.is_online || false,
@@ -72,8 +75,8 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
           limitPerson: session.limit_person || -1,
           isUnlimited: session.limit_person === -1 ? true : false,
           agendas: agendas,
-          isLimitTimeScanQrCode: false,
           qrCode: {
+            isLimitTimeScanQrCode: false,
             startDate: "",
             endDate: "",
           },
@@ -86,11 +89,11 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
     const whies = getClassRoomMetaValue(class_room_metadata, "why");
     const forWhom = getClassRoomMetaValue(class_room_metadata, "forWhom");
 
-    const platform = classRoomSessions.every((s) => s.isOnline)
-      ? "online"
-      : classRoomSessions.every((s) => !s.isOnline)
-      ? "offline"
-      : "hybrid";
+    // const platform = classRoomSessions.every((s) => s.isOnline)
+    //   ? "online"
+    //   : classRoomSessions.every((s) => !s.isOnline)
+    //   ? "offline"
+    //   : "hybrid";
 
     return {
       title: data.title || "",
@@ -107,7 +110,7 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       galleries: galleries || [],
       communityInfo: communityInfo,
       status: data.status,
-      roomType: data.room_type || "single",
+      roomType: data.room_type,
       classRoomId: data.id,
       platform: platform,
     };
@@ -169,11 +172,12 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
 
   return (
     <ManageClassRoomForm
-      initFormValue={updateClassRoomFormData}
+      initFormValue={initFormValue}
       action="edit"
       students={studentList}
       teachers={teacherList}
       isLoading={isLoading}
+      platform={platform}
       onSubmit={handleUpdateClassRoom}
       ref={formClassRoomRef}
     />
