@@ -1,7 +1,7 @@
 import { ClassSession } from "@/model/class-session.model";
 import { ClassSessionAgenda } from "@/model/class-session-agenda.model";
 
-export type CreateAgendasWithSessionPayload = Pick<
+export type CreateSessionAgendasPayload = Pick<
   ClassSessionAgenda,
   "title" | "description" | "end_at" | "start_at" | "thumbnail_url" | "class_session_id"
 >;

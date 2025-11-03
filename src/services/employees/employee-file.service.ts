@@ -484,7 +484,7 @@ async function importEmployees(file: File): Promise<ImportEmployeesResultDto> {
     try {
       const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
         email: record.email,
-        password: "123123123aA",
+        password: "123456",
         email_confirm: true,
         user_metadata: {
           full_name: record.full_name,

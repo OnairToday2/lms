@@ -6,6 +6,7 @@ export type ClassRoomActions = {
   setSelectedTeachers: (sessionIndex: number, teachers: TeacherSelectedItem[]) => void;
   getTeachersByIndexSession: (sessionIndex: number) => TeacherSelectedItem[] | undefined;
   removeTeacher: (id: string, sessionIndex: number) => void;
+  removeTeachers: (sessionIndex: number) => void;
   setSelectedStudents: (students: StudentSelectedItem[]) => void;
 };
 
@@ -27,13 +28,35 @@ const attachActions =
           },
         },
       })),
-    removeTeacher: (id, sessionIndex) => {
-      const {
-        state: { selectedTeachers },
-      } = get();
-
+    removeTeachers: (sessionIndex) => {
       set((prev) => {
-        const currentTeacherList = selectedTeachers[sessionIndex];
+        const newSelectedTeachers = { ...prev.state.selectedTeachers };
+        delete newSelectedTeachers[sessionIndex];
+
+        /**
+         * Resort Index session
+         */
+        let newSelectedTeachersResortByIndex: typeof newSelectedTeachers = {};
+        Object.entries(newSelectedTeachers).forEach(([key, value], _index) => {
+          newSelectedTeachersResortByIndex = {
+            ...newSelectedTeachersResortByIndex,
+            [_index]: value,
+          };
+        });
+        return {
+          ...prev,
+          state: {
+            ...prev.state,
+            selectedTeachers: {
+              ...newSelectedTeachersResortByIndex,
+            },
+          },
+        };
+      });
+    },
+    removeTeacher: (id, sessionIndex) => {
+      set((prev) => {
+        const currentTeacherList = prev.state.selectedTeachers[sessionIndex];
         const newListTeacher = currentTeacherList?.filter((tc) => tc.id !== id);
         return {
           ...prev,

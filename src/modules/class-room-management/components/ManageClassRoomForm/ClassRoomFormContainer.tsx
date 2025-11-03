@@ -1,23 +1,20 @@
 "use client";
 import * as React from "react";
 
-import TabClassRoomInformation from "./TabClassRoomInformation";
-import TabClassRoomResource from "./TabClassRoomResource";
-import TabClassRoomSession from "./TabClassRoomSession";
-import TabClassRoomSetting from "./TabClassRoomSetting";
 import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
 import { classRoomSchema, ClassRoom } from "../classroom-form.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, IconButton } from "@mui/material";
-import ClassRoomTabContainer from "./ClassRoomTabContainer";
-import { getKeyFieldByTab, getStatusTabClassRoom } from "./utils";
-import { CalendarDateIcon, ClipboardIcon, CloseIcon, EyeIcon, InforCircleIcon } from "@/shared/assets/icons";
-import { UsersIcon2 } from "@/shared/assets/icons";
+import { CalendarDateIcon, ClipboardIcon, CloseIcon, EyeIcon, GlobeIcon, UsersPlusIcon } from "@/shared/assets/icons";
 import ClassRoomPreview from "./ClassRoomPreview";
 import ClassRoomTypeSelector, { ClassRoomTypeSelectorProps } from "./ClassRoomTypeSelector";
-import { initClassSessionFormData } from "./TabClassRoomSession/MultipleSession";
 import { useClassRoomStore } from "../../store/class-room-context";
 import { ClassRoomStore } from "../../store/class-room-store";
+import ClassRoomTabContainer, { ClassRoomTabContainerRef } from "./ClassRoomTabContainer";
+import TabClassRoomInformation from "./TabClassRoomInformation";
+import TabClassRoomResource from "./TabClassRoomResource";
+import TabClassRoomSession from "./TabClassRoomSession";
+import TabClassRoomSetting from "./TabClassRoomSetting";
 
 export const TAB_KEYS_CLASS_ROOM = {
   "clsTab-information": "clsTab-information",
@@ -61,13 +58,13 @@ export const initClassRoomFormData = (): Partial<ClassRoom> => {
     galleries: [],
     docs: [],
     platform: undefined,
-    classRoomSessions: [initClassSessionFormData()],
+    classRoomSessions: [],
   };
 };
 
 const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, ClassRoomFormContainerProps>(
   ({ onSubmit, isLoading, action, value: initFormValue }, ref) => {
-    const formSubmitStateRef = React.useRef<boolean>(false);
+    const classRoomTabContainerRef = React.useRef<ClassRoomTabContainerRef>(null);
     const resetStore = useClassRoomStore(({ actions }) => actions.reset);
     const selectedStudents = useClassRoomStore(({ state }) => state.selectedStudents);
     const selectedTeachers = useClassRoomStore(({ state }) => state.selectedTeachers);
@@ -91,21 +88,17 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
     console.log({ errors, value: getValues(), selectedStudents, selectedTeachers });
     const watchRoomType = watch("roomType");
 
-    const handleSelectRoomType: ClassRoomTypeSelectorProps["onSelect"] = React.useCallback((type) => {
+    const handleSelectRoomType: ClassRoomTypeSelectorProps["onSelect"] = React.useCallback((type, platform) => {
       setValue("roomType", type);
+      setValue("platform", platform);
     }, []);
 
-    const handleTriggerFieldsByTab = async (takKey: keyof typeof TAB_KEYS_CLASS_ROOM) => {
-      const keysTriggerByTab = getKeyFieldByTab(takKey);
-      const triggersInformationKeys = keysTriggerByTab.map((key) => trigger(key));
-      return (await Promise.all(triggersInformationKeys)).every(Boolean);
-    };
-
-    const triggerForm = (submitAction: Function) => async () => {
-      formSubmitStateRef.current = true;
+    const triggerBeforeSubmitForm = (submitAction: () => void, status: "draft" | "publish") => async () => {
       try {
-        const isValidAllClassRoomForm = await trigger();
-        if (isValidAllClassRoomForm) {
+        setValue("status", status);
+        const isValidAllClassRoomFields = await trigger();
+        classRoomTabContainerRef.current?.checkStatusAllTabItems();
+        if (isValidAllClassRoomFields) {
           submitAction();
         }
       } catch (error) {
@@ -135,15 +128,13 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
     };
 
     const cancelCreateClassRoom = () => {
-      formSubmitStateRef.current = false; //Reset state form submit
-      resetStore(); // Reset all selected value in store
+      resetStore(); // Reset all selected value in classRoom store
       reset(); //Reset Form
     };
 
     React.useImperativeHandle(ref, () => ({
       resetForm: () => {
-        formSubmitStateRef.current = false; //Reset state form submit
-        resetStore(); // Reset all selected value in store
+        resetStore(); // Reset all selected value in classRoom store
         reset(); //Reset Form
       },
     }));
@@ -167,71 +158,61 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
           </div>
         ) : (
           <ClassRoomTabContainer
+            ref={classRoomTabContainerRef}
             previewUI={<ClassRoomPreview control={control} />}
-            checkStatusTab={handleTriggerFieldsByTab}
+            trigger={trigger}
+            errors={errors}
             items={[
               {
                 tabName: "Thông tin chung",
                 tabKey: TAB_KEYS_CLASS_ROOM["clsTab-information"],
-                icon: <InforCircleIcon />,
+                icon: <GlobeIcon className="w-5 h-5" />,
                 content: <TabClassRoomInformation />,
-                status: formSubmitStateRef.current
-                  ? getStatusTabClassRoom(errors, TAB_KEYS_CLASS_ROOM["clsTab-information"])
-                  : "idle",
               },
               {
                 tabName: "Thời gian",
                 tabKey: TAB_KEYS_CLASS_ROOM["clsTab-session"],
-                icon: <CalendarDateIcon />,
+                icon: <CalendarDateIcon className="w-5 h-5" />,
                 content: <TabClassRoomSession />,
-                status: formSubmitStateRef.current
-                  ? getStatusTabClassRoom(errors, TAB_KEYS_CLASS_ROOM["clsTab-session"])
-                  : "idle",
               },
               {
                 tabName: "Tài nguyên",
                 tabKey: TAB_KEYS_CLASS_ROOM["clsTab-resource"],
-                icon: <ClipboardIcon />,
+                icon: <ClipboardIcon className="w-5 h-5" />,
                 content: <TabClassRoomResource />,
-                status: formSubmitStateRef.current
-                  ? getStatusTabClassRoom(errors, TAB_KEYS_CLASS_ROOM["clsTab-resource"])
-                  : "idle",
               },
               {
                 tabName: "Thiết lập",
                 tabKey: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
-                icon: <UsersIcon2 />,
+                icon: <UsersPlusIcon className="w-5 h-5" />,
                 content: <TabClassRoomSetting />,
-                status: formSubmitStateRef.current
-                  ? getStatusTabClassRoom(errors, TAB_KEYS_CLASS_ROOM["clsTab-setting"])
-                  : "idle",
               },
             ]}
             actions={
               <div className="flex items-center gap-2">
                 <IconButton
-                  className="border rounded-lg border-gray-400 bg-white"
+                  className="border rounded-lg border-gray-300 bg-white"
                   onClick={cancelCreateClassRoom}
                   disabled={isLoading}
                 >
                   <CloseIcon />
                 </IconButton>
-                <IconButton className="border rounded-lg border-gray-400 bg-white" disabled={isLoading}>
+                <IconButton className="border rounded-lg border-gray-300 bg-white" disabled={isLoading}>
                   <EyeIcon />
                 </IconButton>
                 <Button
                   size="large"
                   color="inherit"
                   variant="outlined"
-                  className="border-gray-400"
+                  className="border-gray-300"
                   disabled={isLoading}
-                  onClick={triggerForm(handleSubmit(submitForm))}
+                  onClick={triggerBeforeSubmitForm(handleSubmit(submitForm), "draft")}
                 >
                   Lưu nháp
                 </Button>
                 <Button
                   size="large"
-                  onClick={triggerForm(handleSubmit(submitForm))}
+                  onClick={triggerBeforeSubmitForm(handleSubmit(submitForm), "publish")}
                   disabled={isLoading}
                   loading={isLoading}
                 >

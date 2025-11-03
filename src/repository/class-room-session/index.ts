@@ -1,7 +1,7 @@
 import { supabase } from "@/services";
 import {
   CreateClassRoomSessionsPayload,
-  CreateAgendasWithSessionPayload,
+  CreateSessionAgendasPayload,
   CreatePivotClassRoomSessionAndTeacherPayload,
 } from "./type";
 export * from "./type";
@@ -28,9 +28,17 @@ const deleteClassSession = async (ids: string[]) => {
   }
 };
 
-const createAgendasWithSession = async (payload: CreateAgendasWithSessionPayload[]) => {
+const createSessionAgendas = async (payload: CreateSessionAgendasPayload[]) => {
   try {
     return await supabase.from("class_sessions_agendas").insert(payload).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error create Agendas");
+  }
+};
+const deleteSessionAgendas = async (ids: string[]) => {
+  try {
+    return await supabase.from("class_sessions_agendas").delete().in("id", ids).select(`id, title, class_session_id`);
   } catch (err: any) {
     console.error("Unexpected error:", err);
     throw new Error(err.message ?? "Unknown error create Agendas");
@@ -48,7 +56,10 @@ const createPivotClassSessionAndTeacher = async (payload: CreatePivotClassRoomSe
 
 const deletePivotClassSessionAndTeacher = async (ids: string[]) => {
   try {
-    return await supabase.from("class_session_teacher").delete().in("id", ids).select("id, name, employee_code");
+    return await supabase.from("class_session_teacher").delete().in("id", ids).select(`
+        id,
+        employee:employees(id, employee_code)
+      `);
   } catch (err: any) {
     console.error("Unexpected error:", err);
     throw new Error(err.message ?? "Unknown error create Agendas");
@@ -59,6 +70,7 @@ export {
   createClassSession,
   deleteClassSession,
   createPivotClassSessionAndTeacher,
-  createAgendasWithSession,
+  createSessionAgendas,
   deletePivotClassSessionAndTeacher,
+  deleteSessionAgendas,
 };

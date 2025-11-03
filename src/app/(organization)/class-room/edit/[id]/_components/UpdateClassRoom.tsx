@@ -68,12 +68,16 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
           isOnline: session.is_online || false,
           channelProvider: session.channel_provider || "zoom",
           channelInfo: channelInfo,
-          teachers: [],
           resources: [],
           limitPerson: session.limit_person || -1,
           isUnlimited: session.limit_person === -1 ? true : false,
           agendas: agendas,
-        },
+          isLimitTimeScanQrCode: false,
+          qrCode: {
+            startDate: "",
+            endDate: "",
+          },
+        } as UpdateClassRoomFormValue["classRoomSessions"][number],
       ];
     }, []);
 
@@ -81,6 +85,12 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
     const galleries = getClassRoomMetaValue(class_room_metadata, "galleries");
     const whies = getClassRoomMetaValue(class_room_metadata, "why");
     const forWhom = getClassRoomMetaValue(class_room_metadata, "forWhom");
+
+    const platform = classRoomSessions.every((s) => s.isOnline)
+      ? "online"
+      : classRoomSessions.every((s) => !s.isOnline)
+      ? "offline"
+      : "hybrid";
 
     return {
       title: data.title || "",
@@ -97,9 +107,9 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       galleries: galleries || [],
       communityInfo: communityInfo,
       status: data.status,
-      roomType: data.room_type,
+      roomType: data.room_type || "single",
       classRoomId: data.id,
-      platform: "online",
+      platform: platform,
     };
   }, [data]);
 
@@ -151,7 +161,6 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       {
         onSuccess(data, variables, onMutateResult, context) {
           enqueueSnackbar("Cập nhật lớp học thành công..", { variant: "success" });
-          formClassRoomRef.current?.resetForm();
           router.refresh();
         },
       },

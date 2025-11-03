@@ -18,7 +18,7 @@ const CreateClassRoomForm = () => {
       {
         onSuccess(data, variables, onMutateResult, context) {
           enqueueSnackbar("Tạo lớp học thành công", { variant: "success" });
-          // formClassRoomRef.current?.resetForm();
+          formClassRoomRef.current?.resetForm();
         },
       },
     );

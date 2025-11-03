@@ -1,8 +1,8 @@
 export const CLASS_ROOM_META_KEY = {
-  faqs: "_faqs",
-  why: "_why",
-  forWhom: "_forWhom",
-  galleries: "_galleries",
+  faqs: "faqs",
+  why: "why",
+  forWhom: "forWhom",
+  galleries: "galleries",
 } as const;
 
 export type ClassRoomMetaKey = keyof typeof CLASS_ROOM_META_KEY;

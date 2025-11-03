@@ -139,7 +139,7 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
     if (!students?.length) return;
 
     setSelectedStudents((prevSelectedStudents) => {
-      let newSelectedStudents: StudentSelectedItem[] = [];
+      const newSelectedStudents: StudentSelectedItem[] = [];
 
       const studentsFormated = students.map<StudentSelectedItem>((item) => ({
         id: item.id,

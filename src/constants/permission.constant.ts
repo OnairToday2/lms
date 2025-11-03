@@ -1,6 +1,5 @@
-export enum ERolesFunctions {
-  CREATE_TASK = "CREATE_TASK",
-  VIEW_TASK = "VIEW_TASK",
-}
+import { Constants, Database } from "@/types/supabase.types";
+import { createEnum } from "@/utils";
 
-export type TRoleCondition = (ERolesFunctions | { $or: TRoleCondition })[];
+export const PermissionActions = createEnum(Constants.public.Enums.action_code_enum)
+export type TPermissionActions = Database["public"]["Enums"]["action_code_enum"];

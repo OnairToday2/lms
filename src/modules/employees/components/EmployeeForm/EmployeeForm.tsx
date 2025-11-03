@@ -24,13 +24,14 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
-import { EmployeeFormSchema, EmployeeFormData, ROLE_OPTIONS } from "./schema";
+import { EmployeeFormSchema, EmployeeFormData } from "./schema";
 import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
 import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
 import { useGetPositionsQuery } from "@/modules/positions/operations/query";
 import { useCreatePositionMutation } from "@/modules/positions/operations/mutation";
 import { Constants } from "@/types/supabase.types";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
+import { EMPLOYEE_TYPE_OPTIONS } from "@/utils/employee-type";
 import "dayjs/locale/vi";
 
 export interface EmployeeFormProps {
@@ -81,8 +82,8 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
       department: defaultValues?.department || "",
       employee_code: defaultValues?.employee_code || "",
       manager_id: defaultValues?.manager_id || "",
-      role: defaultValues?.role || "",
       position_id: defaultValues?.position_id || "",
+      employee_type: defaultValues?.employee_type || undefined,
       start_date: defaultValues?.start_date || "",
     },
     resolver: zodResolver(EmployeeFormSchema),
@@ -395,24 +396,25 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 
             <Grid size={{ xs: 12, md: 6 }}>
               <Controller
-                name="role"
+                name="employee_type"
                 control={control}
                 render={({ field, fieldState: { error } }) => (
                   <FormControl fullWidth error={!!error}>
-                    <FormLabel htmlFor="role" sx={{ mb: 1 }}>
+                    <FormLabel htmlFor="employee_type" sx={{ mb: 1 }}>
                       Vai trò
                     </FormLabel>
                     <Select
                       {...field}
-                      id="role"
+                      id="employee_type"
                       displayEmpty
+                      value={field.value || ""}
                     >
                       <MenuItem value="">
                         <em>Chọn vai trò</em>
                       </MenuItem>
-                      {ROLE_OPTIONS.map((role) => (
-                        <MenuItem key={role} value={role}>
-                          {role}
+                      {EMPLOYEE_TYPE_OPTIONS.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
                         </MenuItem>
                       ))}
                     </Select>
