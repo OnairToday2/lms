@@ -5,6 +5,7 @@ export class EmployeeDto {
   employee_code!: string;
   start_date!: string | null;
   position_id!: string | null;
+  employee_type!: Database["public"]["Enums"]["employee_type"] | null;
   user_id!: string;
   created_at!: string;
   status!: Database["public"]["Enums"]["employee_status"];

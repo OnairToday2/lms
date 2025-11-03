@@ -54,6 +54,7 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
         employee_code,
         start_date,
         position_id,
+        employee_type,
         user_id,
         created_at,
         status,
@@ -112,6 +113,7 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
       employee_code,
       start_date,
       position_id,
+      employee_type,
       user_id,
       created_at,
       status,
@@ -174,6 +176,7 @@ const getEmployeeById = async (id: string) => {
       employee_code,
       start_date,
       position_id,
+      employee_type,
       user_id,
       created_at,
       profiles!profiles_employee_id_fkey (
@@ -235,6 +238,7 @@ export async function createEmployee(data: {
   employee_order: number;
   start_date: string;
   position_id?: string | null;
+  employee_type?: Database["public"]["Enums"]["employee_type"] | null;
   organization_id: string;
   status: Database["public"]["Enums"]["employee_status"];
 }) {
@@ -259,6 +263,7 @@ export async function updateEmployeeById(
     employee_code?: string;
     start_date?: string;
     position_id?: string | null;
+    employee_type?: Database["public"]["Enums"]["employee_type"] | null;
   },
 ) {
   const supabase = await createSVClient();

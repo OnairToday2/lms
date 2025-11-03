@@ -41,6 +41,7 @@ import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { useQueryClient } from "@tanstack/react-query";
 import { Database } from "@/types/supabase.types";
+import { getEmployeeTypeLabel } from "@/utils/employee-type";
 
 export default function EmployeeList() {
   const router = useRouter();
@@ -362,7 +363,7 @@ export default function EmployeeList() {
                           </TableCell>
                           <TableCell>{employee.profiles?.email || "-"}</TableCell>
                           <TableCell>{getPositionTitle(employee)}</TableCell>
-                          <TableCell>Nhân viên</TableCell>
+                          <TableCell>{getEmployeeTypeLabel(employee.employee_type)}</TableCell>
                           <TableCell>{getBranchName(employee)}</TableCell>
                           <TableCell>{getDepartmentName(employee)}</TableCell>
                           <TableCell>
