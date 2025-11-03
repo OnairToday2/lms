@@ -3,7 +3,7 @@ import * as React from "react";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Drawer from "@mui/material/Drawer";
-import type {} from "@mui/material/themeCssVarsAugmentation";
+import type { } from "@mui/material/themeCssVarsAugmentation";
 import { DRAWER_WIDTH, MINI_DRAWER_WIDTH } from "./constants";
 import { getDrawerWidthTransitionMixin } from "./mixins";
 import MenuList from "../MenuList";
@@ -48,7 +48,7 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({
 
     setIsFullyExpanded(false);
 
-    return () => {};
+    return () => { };
   }, [expanded, theme.transitions.duration.enteringScreen]);
 
   React.useEffect(() => {
@@ -62,7 +62,7 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({
 
     setIsFullyCollapsed(false);
 
-    return () => {};
+    return () => { };
   }, [expanded, theme.transitions.duration.leavingScreen]);
 
   const mini = !disableCollapsibleSidebar && !expanded;

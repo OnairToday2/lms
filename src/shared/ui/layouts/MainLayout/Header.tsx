@@ -57,17 +57,15 @@ export default function Header({
 
       return (
         <Tooltip
-          title={`${
-            isExpanded ? collapseMenuActionText : expandMenuActionText
-          } menu`}
+          title={`${isExpanded ? collapseMenuActionText : expandMenuActionText
+            } menu`}
           enterDelay={1000}
         >
           <div>
             <IconButton
               size="small"
-              aria-label={`${
-                isExpanded ? collapseMenuActionText : expandMenuActionText
-              } navigation menu`}
+              aria-label={`${isExpanded ? collapseMenuActionText : expandMenuActionText
+                } navigation menu`}
               onClick={handleMenuOpen}
             >
               {isExpanded ? <MenuOpenIcon /> : <MenuIcon />}

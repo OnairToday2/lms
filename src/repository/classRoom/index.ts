@@ -1,154 +1,43 @@
-import { supabase } from "@/services";
+import { ClassRoom } from "@/model/class-room.model";
+import { ClassSessionAgenda } from "@/model/class-session-agenda.model";
+import { ClassSession } from "@/model/class-session.model";
 import {
-  CreateClassRoomPayload,
-  CreatePivotClassRoomAndHashTagPayload,
-  CreatePivotClassRoomAndFieldPayload,
-  CreatePivotClassRoomAndEmployeePayload,
-  UpSertClassRoomPayload,
-  ClassRoomStatus,
-  ClassRoomType,
-  ClassRoomRuntimeStatus,
-  ClassSessionMode,
-} from "./type";
-import { ClassRoomMetaKey, ClassRoomMetaValue } from "@/constants/class-room-meta.constant";
-import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
-import { GetClassRoomsQueryInput, GetClassRoomStatusCountsInput, GetClassRoomStudentsQueryInput } from "@/modules/class-room-management/operations/query";
-import { PaginatedResult } from "@/types/dto/pagination.dto";
+  GetClassRoomsQueryInput,
+  GetClassRoomStatusCountsInput,
+  GetClassRoomStudentsQueryInput,
+} from "@/modules/class-room-management/operations/query";
+import { supabase } from "@/services";
 import { ClassRoomPriorityDto, ClassRoomSessionDetailDto, ClassRoomStatusCountDto, ClassRoomStudentDto } from "@/types/dto/classRooms/classRoom.dto";
-import { CLASS_ROOM_STUDENTS_SELECT, CLASS_ROOMS_SELECT, CLASS_SESSION_WITH_CLASS_ROOM_SELECT, LIMIT, PAGE } from "./constants";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@/types/supabase.types";
-export * from "./type";
+import { PaginatedResult } from "@/types/dto/pagination.dto";
+import type { Database } from "@/types/supabase.types";
+import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { CLASS_ROOM_STUDENTS_SELECT, CLASS_ROOMS_SELECT, CLASS_SESSION_WITH_CLASS_ROOM_SELECT, LIMIT, PAGE } from "../class-room/constants";
+import { ClassRoomRuntimeStatus, ClassRoomStatus, ClassRoomType, ClassSessionMode } from "./type";
 
-const getClassRoomById = async (classRoomId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from("class_rooms")
-      .select(
-        `
-          id, 
-          title,
-          slug,
-          description,
-          room_type,
-          comunity_info,
-          thumbnail_url,
-          start_at,
-          end_at,
-          status,
-          employee_id,
-          class_room_metadata(id, key, value, class_room_id),
-          class_hash_tag(
-            id,
-            hash_tags(
-              id, name, slug, type
-            )
-          ),
-          class_room_field(
-            id,
-            class_fields(
-              id, name, slug
-            )
-          ),
-          employees:class_room_employee(
-            id,
-            employee:employees(
-              id,
-              employee_type,
-              employee_code,
-              profile:profiles(
-                id,
-                full_name,
-                email,
-                employee_id,
-                avatar
-              )
-            )
-          ),
-          owner:employees(
-            id,
-            employee_type,
-            employee_code,
-            profile:profiles(
-              id,
-              full_name,
-              email,
-              employee_id,
-              avatar
-            )
-          ),
-          organizations(
-            id, 
-            name
-          ),
-          sessions:class_sessions(
-            id,
-            title,
-            description,
-            start_at,
-            end_at,
-            class_room_id,
-            is_online,
-            channel_provider,
-            channel_info,
-            limit_person,
-            teachers:class_session_teacher(
-              id,
-              employee:employees!class_session_teacher_teacher_id_fkey(
-                id,
-                employee_type,
-                employee_code,
-                profile:profiles(
-                  id,
-                  full_name,
-                  email,
-                  employee_id,
-                  avatar
-                )
-              )
-            ),
-            agendas:class_sessions_agendas(
-              id,
-              title,
-              description,
-              thumbnail_url,
-              start_at,
-              end_at,
-              class_session_id
-            ),
-            metadata:class_session_metadata(
-              id,
-              class_session_id,
-              key,
-              value
-            )
-          )
-      `,
-      )
-      .eq("id", classRoomId)
-      .single()
-      .overrideTypes<{
-        class_room_metadata: {
-          class_room_id: string;
-          id: string;
-          key: ClassRoomMetaKey;
-          value: ClassRoomMetaValue;
-        }[];
-        comunity_info: { name: string; url: string };
-        sessions: {
-          channel_info: {
-            providerId: string;
-            url: string;
-            password: string;
-          };
-        }[];
-      }>();
-    return { data, error };
-  } catch (err: any) {
-    throw new Error(err?.message ?? "Fetching ClassRoom Detail failed not found");
-  }
+const getClassFieldList = async () => {
+  return await supabase.from("class_fields").select("*");
 };
-export type GetClassRoomByIdResponse = Awaited<ReturnType<typeof getClassRoomById>>;
+
+const getClassHasTagList = async () => {
+  return await supabase.from("hash_tags").select("*");
+};
+
+type CreateClassRoomPayload = Pick<
+  ClassRoom,
+  | "description"
+  | "comunity_info"
+  | "room_type"
+  | "slug"
+  | "start_at"
+  | "end_at"
+  | "status"
+  | "thumbnail_url"
+  | "title"
+  | "organization_id"
+  | "resource_id"
+  | "employee_id"
+>;
 
 const createClassRoom = async (payload: CreateClassRoomPayload) => {
   try {
@@ -159,33 +48,18 @@ const createClassRoom = async (payload: CreateClassRoomPayload) => {
   }
 };
 
-const upsertClassRoom = async (payload: UpSertClassRoomPayload) => {
-  try {
-    return await supabase.from("class_rooms").upsert(payload).select().single();
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err?.message ?? "Unknown error craete Class Room");
-  }
+type CreatePivotClassRoomAndHashTagPayload = {
+  class_room_id: string;
+  hash_tag_id: string;
 };
-
 const createPivotClassRoomAndHashTag = async (payload: CreatePivotClassRoomAndHashTagPayload[]) => {
-  try {
-    return await supabase.from("class_hash_tag").insert(payload).select("*");
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err?.message ?? "Unknown error craete hash tag");
-  }
+  return await supabase.from("class_hash_tag").insert(payload).select("*");
 };
 
-const deletePivotClassRoomAndHashTag = async (ids: string[]) => {
-  try {
-    return await supabase.from("class_hash_tag").delete().in("id", ids);
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err?.message ?? "Unknown error craete hash tag");
-  }
+type CreatePivotClassRoomAndFieldPayload = {
+  class_room_id: string;
+  class_field_id: string;
 };
-
 const createPivotClassRoomAndField = async (payload: CreatePivotClassRoomAndFieldPayload[]) => {
   try {
     return await supabase.from("class_room_field").insert(payload).select("*");
@@ -195,38 +69,68 @@ const createPivotClassRoomAndField = async (payload: CreatePivotClassRoomAndFiel
   }
 };
 
-const deletePivotClassRoomAndField = async (ids: string[]) => {
+type CreateClassRoomSessionsPayload = {
+  classRoomId: string;
+  sessions: Pick<
+    ClassSession,
+    | "title"
+    | "start_at"
+    | "end_at"
+    | "description"
+    | "limit_person"
+    | "is_online"
+    | "resource_ids"
+    | "channel_info"
+    | "channel_provider"
+  >[];
+};
+
+const createClassSession = async (payload: CreateClassRoomSessionsPayload) => {
   try {
-    return await supabase.from("class_room_field").delete().in("id", ids);
+    const sessionInsertPayload = payload.sessions.map((session) => ({
+      ...session,
+      class_room_id: payload.classRoomId,
+    }));
+    return await supabase.from("class_sessions").insert(sessionInsertPayload).select();
   } catch (err: any) {
     console.error("Unexpected error:", err);
-    throw new Error(err?.message ?? "Unknown error craete Class Room");
+    throw new Error(err.message ?? "Unknown error craete Sessions");
   }
 };
 
+type CreateAgendasWithSessionPayload = Pick<
+  ClassSessionAgenda,
+  "title" | "description" | "end_at" | "start_at" | "thumbnail_url" | "class_session_id"
+>;
+const createAgendasWithSession = async (payload: CreateAgendasWithSessionPayload[]) => {
+  try {
+    return await supabase.from("class_sessions_agendas").insert(payload).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error create Agendas");
+  }
+};
+type CreatePivotClassSessionAndTeacherPayload = {
+  class_session_id: string;
+  teacher_id: string;
+};
+const createPivotClassSessionAndTeacher = async (payload: CreatePivotClassSessionAndTeacherPayload[]) => {
+  return await supabase.from("class_session_teacher").insert(payload).select();
+};
+
+type CreatePivotClassRoomAndEmployeePayload = {
+  class_room_id: string;
+  employee_id: string;
+};
 const createPivotClassRoomAndEmployee = async (payload: CreatePivotClassRoomAndEmployeePayload[]) => {
-  try {
-    return await supabase.from("class_room_employee").insert(payload).select();
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err.message ?? "Unknown error create Class Room and Employee");
-  }
-};
-
-const deletePivotClassRoomAndEmployee = async (ids: number[]) => {
-  try {
-    return await supabase.from("class_room_employee").delete().in("id", ids);
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err.message ?? "Unknown error create Class Room and Employee");
-  }
+  return await supabase.from("class_room_employee").insert(payload).select();
 };
 
 type DeletePivotClassRoomAndEmployeePayload = {
   class_room_id: string;
   employeeIds: string[];
 };
-const deletePivotClassRoomAndEmployee2 = async (payload: DeletePivotClassRoomAndEmployeePayload) => {
+const deletePivotClassRoomAndEmployee = async (payload: DeletePivotClassRoomAndEmployeePayload) => {
   const { error } = await supabase
     .from("class_room_employee")
     .delete()
@@ -677,24 +581,32 @@ const getClassRoomsByEmployeeId = async (
   };
 };
 
-
-
 export {
+  getClassFieldList,
+  getClassHasTagList,
+  getClassRooms,
+  getClassRoomStudents,
+  getClassRoomStatusCounts,
   createClassRoom,
+  createClassSession,
+  createPivotClassSessionAndTeacher,
   createPivotClassRoomAndHashTag,
   createPivotClassRoomAndField,
-  deletePivotClassRoomAndField,
+  createAgendasWithSession,
   createPivotClassRoomAndEmployee,
-  upsertClassRoom,
-  deletePivotClassRoomAndHashTag,
-  getClassRoomById,
   deletePivotClassRoomAndEmployee,
-
-  getClassRoomsByEmployeeId,
-  getClassRoomSessionDetail,
   deleteClassRoomById,
-  getClassRoomStatusCounts,
-  getClassRoomStudents,
-  getClassRooms,
-  deletePivotClassRoomAndEmployee2,
+  getClassRoomSessionDetail,
+  getClassRoomsByEmployeeId,
+}
+export type {
+  CreateClassRoomPayload,
+  CreateClassRoomSessionsPayload,
+  CreatePivotClassSessionAndTeacherPayload,
+  CreatePivotClassRoomAndFieldPayload,
+  CreatePivotClassRoomAndHashTagPayload,
+  CreateAgendasWithSessionPayload,
+  CreatePivotClassRoomAndEmployeePayload,
+  DeletePivotClassRoomAndEmployeePayload,
+  GetClassRoomsByEmployeeIdInput,
 };

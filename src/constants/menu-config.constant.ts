@@ -55,6 +55,12 @@ const MAIN_MENU_LIST: MenuItemType[] = [
         key: "class-room/create",
         path: PATHS.CLASSROOMS.CREATE_CLASSROOM,
       },
+      {
+        title: "Danh sách lớp học",
+        icon: React.createElement(ClassIcon),
+        key: "class-room/list",
+        path: PATHS.CLASSROOMS.LIST_CLASSROOM,
+      },
     ],
   },
   {
@@ -96,6 +102,26 @@ const MAIN_MENU_LIST: MenuItemType[] = [
         path: PATHS.ROLE.CREATE,
       },
     ],
+  },
+  {
+    title: "Lớp học của tôi",
+    icon: React.createElement(UsersIcon),
+    key: "my-class",
+    path: PATHS.STUDENTS.ROOT,
+    // children: [
+    //   {
+    //     title: "Tạo nhân viên",
+    //     icon: React.createElement(UsersIcon),
+    //     key: 'employees/create',
+    //     path: PATHS.EMPLOYEE.CREATE_EMPLOYEE,
+    //   },
+    //   {
+    //     title: "Import danh sách",
+    //     icon: React.createElement(UsersIcon),
+    //     key: 'employees/import',
+    //     path: PATHS.EMPLOYEE.IMPORT_EMPLOYEES,
+    //   },
+    // ],
   },
   {
     title: "Trợ giúp",
