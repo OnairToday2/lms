@@ -81,6 +81,12 @@ const MAIN_MENU_LIST: MenuItemType[] = [
         key: "employees/import",
         path: PATHS.EMPLOYEE.IMPORT_EMPLOYEES,
       },
+      {
+        title: "Danh sách nhân viên",
+        icon: React.createElement(UsersIcon),
+        key: "employees",
+        path: PATHS.EMPLOYEE.ROOT,
+      },
     ],
   },
   {
