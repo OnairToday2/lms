@@ -41,6 +41,7 @@ import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { useQueryClient } from "@tanstack/react-query";
 import { Database } from "@/types/supabase.types";
+import { getEmployeeTypeLabel } from "@/utils/employee-type";
 
 export default function EmployeeList() {
   const router = useRouter();
@@ -194,6 +195,10 @@ export default function EmployeeList() {
       (emp) => emp.organization_units?.type === "branch",
     );
     return branch?.organization_units?.name || "-";
+  };
+
+  const getPositionTitle = (employee: EmployeeDto) => {
+    return employee.positions?.title || "-";
   };
 
   const getStatusLabel = (status: string) => {
@@ -357,8 +362,8 @@ export default function EmployeeList() {
                             {employee.profiles?.full_name || "-"}
                           </TableCell>
                           <TableCell>{employee.profiles?.email || "-"}</TableCell>
-                          <TableCell>-</TableCell>
-                          <TableCell>Nhân viên</TableCell>
+                          <TableCell>{getPositionTitle(employee)}</TableCell>
+                          <TableCell>{getEmployeeTypeLabel(employee.employee_type)}</TableCell>
                           <TableCell>{getBranchName(employee)}</TableCell>
                           <TableCell>{getDepartmentName(employee)}</TableCell>
                           <TableCell>
