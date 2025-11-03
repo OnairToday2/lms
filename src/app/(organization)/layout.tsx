@@ -1,6 +1,7 @@
 import MainLayout from "@/shared/ui/layouts/MainLayout";
 import Authorized from "@/modules/authWrapper/Authorized";
 import UserOrganizationWraper from "@/modules/organization/container/UserOrganizationWraper";
+import PermissionsWrapper from "@/modules/roles/store/PermissionsWrapper";
 
 export default async function RootLayout({
   children,
@@ -10,7 +11,9 @@ export default async function RootLayout({
   return (
     <Authorized>
       <UserOrganizationWraper>
-        <MainLayout>{children}</MainLayout>
+        <PermissionsWrapper>
+          <MainLayout>{children}</MainLayout>
+        </PermissionsWrapper>
       </UserOrganizationWraper>
     </Authorized>
   );

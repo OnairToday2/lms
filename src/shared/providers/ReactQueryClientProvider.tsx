@@ -10,7 +10,7 @@ const ReactQueryClientProvider = ({
   const queryclient = getQueryClient();
   return (
     <QueryClientProvider client={queryclient}>
-      <ReactQueryDevtools initialIsOpen={true} />
+      <ReactQueryDevtools initialIsOpen={false} />
       {children}
     </QueryClientProvider>
   );

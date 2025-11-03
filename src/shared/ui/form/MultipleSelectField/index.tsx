@@ -135,7 +135,7 @@ const MultipleSelectField = <T,>({
     setSelectedItem((prevSelectedItem) => {
       const indexValue = prevSelectedItem.findIndex((item) => value === value);
       if (indexValue !== -1) {
-        let newItem = [...prevSelectedItem];
+        const newItem = [...prevSelectedItem];
         newItem.splice(indexValue, 1);
         return newItem;
       }

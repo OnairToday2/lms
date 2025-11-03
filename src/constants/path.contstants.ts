@@ -4,7 +4,16 @@ export const PATHS = {
     DASHBOARD: '/dashboard',
     ANALYTIC: '/analytic',
     ORGANIZATION: '/organization',
-    DEPARTMENTS: '/departments',
+    DEPARTMENTS: {
+        ROOT: '/department/departments',
+        CREATE_DEPARTMENT: '/department/departments/create',
+        IMPORT_DEPARTMENTS: '/department/departments/import',
+    },
+    BRANCHES: {
+        ROOT: '/department/branches',
+        CREATE_BRANCH: '/department/branches/create',
+        IMPORT_BRANCHES: '/department/branches/import',
+    },
     EMPLOYEE: {
         ROOT: '/employees',
         EMPLOYEES_ID: (id: string = ':id') => `/employees/${id}`,
@@ -14,10 +23,14 @@ export const PATHS = {
     ROLE: {
         ROOT: '/roles',
         ROLES_ID: (id: string = ':id') => `/roles/${id}`,
-        CREATE_ROLE: '/roles/create',
+        CREATE: '/roles/create',
     },
     CLASSROOMS: {
         ROOT: '/class-room',
         CREATE_CLASSROOM: '/class-room/create',
+        LIST_CLASSROOM: '/class-room/list',
+    },
+    STUDENTS: {
+        ROOT: '/my-class',
     }
 }

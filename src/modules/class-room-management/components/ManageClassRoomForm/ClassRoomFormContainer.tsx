@@ -93,7 +93,7 @@ const ClassRoomFormContainer = React.forwardRef<ClassRoomFormContainerRef, Class
       setValue("platform", platform);
     }, []);
 
-    const triggerBeforeSubmitForm = (submitAction: Function, status: "draft" | "publish") => async () => {
+    const triggerBeforeSubmitForm = (submitAction: () => void, status: "draft" | "publish") => async () => {
       try {
         setValue("status", status);
         const isValidAllClassRoomFields = await trigger();

@@ -20,7 +20,7 @@ const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({ control, onChange
   const { onUploadSingle } = useUpload();
 
   const handleUploadImage: UploaderProps["onChange"] = (file) => {
-    let fileUpload = Array.isArray(file) ? file[0] : file;
+    const fileUpload = Array.isArray(file) ? file[0] : file;
 
     if (!fileUpload) return;
 

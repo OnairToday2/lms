@@ -7,7 +7,7 @@ import ClassRoomFormContainer, {
 } from "./ClassRoomFormContainer";
 import { forwardRef, memo } from "react";
 
-export interface ManageClassRoomFormRef extends ClassRoomFormContainerRef {}
+export type ManageClassRoomFormRef = ClassRoomFormContainerRef;
 export interface ManageClassRoomFormProps {
   onSubmit?: ClassRoomFormContainerProps["onSubmit"];
   isLoading?: boolean;

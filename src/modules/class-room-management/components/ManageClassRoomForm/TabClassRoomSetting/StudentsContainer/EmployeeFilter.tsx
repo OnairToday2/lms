@@ -59,14 +59,14 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
 
   const handleSelectDepartmentIds: DepartmentSelectorProps["onSelect"] = (departmentId) => {
     setSelectedDepartmentIds((prev) => {
-      let newList = [...prev];
+      const newList = [...prev];
       const isExist = newList.includes(departmentId);
       return isExist ? newList.filter((it) => it !== departmentId) : [...newList, departmentId];
     });
   };
   const handleSelectBranch: BranchSelectorProps["onSelect"] = (branchId) => {
     setSelectedBranchIds((prev) => {
-      let newList = [...prev];
+      const newList = [...prev];
       const isExist = newList.includes(branchId);
       return isExist ? newList.filter((it) => it !== branchId) : [...newList, branchId];
     });

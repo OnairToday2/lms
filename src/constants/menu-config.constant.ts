@@ -9,16 +9,39 @@ const MAIN_MENU_LIST: MenuItemType[] = [
   {
     title: "Dashboard",
     icon: React.createElement(SquareFourIcon),
-    key: 'dashboard',
+    key: "dashboard",
     path: PATHS.DASHBOARD,
     type: "item",
   },
   {
-    title: "Quản lý phòng ban",
+    title: "Quản lý chi nhánh",
     icon: React.createElement(GitIcon),
-    key: 'departments',
-    path: PATHS.DEPARTMENTS,
+    key: "branches",
+    path: PATHS.BRANCHES.ROOT,
     type: "item",
+    children: [
+      {
+        title: "Danh sách chi nhánh",
+        icon: React.createElement(GitIcon),
+        key: "branches-list",
+        path: PATHS.BRANCHES.ROOT,
+      },
+    ],
+  },
+  {
+    title: "Quản lý phòng ban",
+    icon: React.createElement(UsersIcon),
+    key: "departments",
+    path: PATHS.DEPARTMENTS.ROOT,
+    type: "item",
+    children: [
+      {
+        title: "Danh sách phòng ban",
+        icon: React.createElement(UsersIcon),
+        key: "departments-list",
+        path: PATHS.DEPARTMENTS.ROOT,
+      },
+    ],
   },
   {
     title: "Quản lý lớp học",
@@ -32,6 +55,12 @@ const MAIN_MENU_LIST: MenuItemType[] = [
         key: "class-room/create",
         path: PATHS.CLASSROOMS.CREATE_CLASSROOM,
       },
+      {
+        title: "Danh sách lớp học",
+        icon: React.createElement(ClassIcon),
+        key: "class-room/list",
+        path: PATHS.CLASSROOMS.LIST_CLASSROOM,
+      },
     ],
   },
   {
@@ -43,16 +72,56 @@ const MAIN_MENU_LIST: MenuItemType[] = [
       {
         title: "Tạo nhân viên",
         icon: React.createElement(UsersIcon),
-        key: 'employees/create',
+        key: "employees/create",
         path: PATHS.EMPLOYEE.CREATE_EMPLOYEE,
       },
       {
         title: "Import danh sách",
         icon: React.createElement(UsersIcon),
-        key: 'employees/import',
+        key: "employees/import",
         path: PATHS.EMPLOYEE.IMPORT_EMPLOYEES,
       },
     ],
+  },
+  {
+    title: "Quản lý vai trò",
+    icon: React.createElement(UsersIcon),
+    key: "roles",
+    path: PATHS.ROLE.ROOT,
+    children: [
+      {
+        title: "Danh sách vai trò",
+        icon: React.createElement(UsersIcon),
+        key: "roles",
+        path: PATHS.ROLE.ROOT,
+      },
+      {
+        title: "Tạo vai trò",
+        icon: React.createElement(UsersIcon),
+        key: "roles/create",
+        path: PATHS.ROLE.CREATE,
+      },
+    ],
+  },
+  {
+    title: "Lớp học của tôi",
+    icon: React.createElement(UsersIcon),
+    key: "my-class",
+    path: PATHS.STUDENTS.ROOT,
+    // children: [
+    //   {
+    //     title: "Tạo nhân viên",
+    //     icon: React.createElement(UsersIcon),
+    //     key: 'employees/create',
+    //     path: PATHS.EMPLOYEE.CREATE_EMPLOYEE,
+    //   },
+    //   {
+    //     title: "Import danh sách",
+    //     icon: React.createElement(UsersIcon),
+    //     key: 'employees/import',
+    //     path: PATHS.EMPLOYEE.IMPORT_EMPLOYEES,
+    //   },
+    // ],
   },
   {
     title: "Trợ giúp",

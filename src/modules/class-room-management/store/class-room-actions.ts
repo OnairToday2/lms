@@ -30,7 +30,7 @@ const attachActions =
       })),
     removeTeachers: (sessionIndex) => {
       set((prev) => {
-        let newSelectedTeachers = { ...prev.state.selectedTeachers };
+        const newSelectedTeachers = { ...prev.state.selectedTeachers };
         delete newSelectedTeachers[sessionIndex];
 
         /**

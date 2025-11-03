@@ -2,7 +2,7 @@
 import { RefObject } from "react";
 import { useEffect } from "react";
 
-const useClickOutSide = (ref: RefObject<HTMLElement | null>, cb?: Function) => {
+const useClickOutSide = (ref: RefObject<HTMLElement | null>, cb?: () => void) => {
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
