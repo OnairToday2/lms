@@ -20,7 +20,6 @@ import {
   useCreateDepartmentMutation,
   useUpdateDepartmentMutation,
 } from "../operations/mutation";
-import { useGetBranchesForDepartmentQuery } from "../operations/query";
 import type { DepartmentDto } from "@/types/dto/departments";
 import { departmentRepository } from "@/repository";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
@@ -28,7 +27,6 @@ import useNotifications from "@/hooks/useNotifications/useNotifications";
 interface DepartmentFormData {
   name: string;
   organization_id: string;
-  parent_id: string | null;
 }
 
 interface DepartmentDialogProps {
@@ -52,7 +50,6 @@ export function DepartmentDialog({
   const [formData, setFormData] = useState<DepartmentFormData>({
     name: "",
     organization_id: organizationId,
-    parent_id: null,
   });
 
   const [errors, setErrors] = useState<
@@ -63,10 +60,6 @@ export function DepartmentDialog({
     useCreateDepartmentMutation();
   const { mutateAsync: updateDepartment, isPending: isUpdating } =
     useUpdateDepartmentMutation();
-  const { data: branchesData, isLoading: branchesLoading } =
-    useGetBranchesForDepartmentQuery(organizationId);
-
-  const branches = branchesData?.data || [];
 
   useEffect(() => {
     if (open) {
@@ -74,13 +67,11 @@ export function DepartmentDialog({
         setFormData({
           name: department.name,
           organization_id: department.organization_id,
-          parent_id: department.parent_id,
         });
       } else {
         setFormData({
           name: "",
           organization_id: organizationId,
-          parent_id: null,
         });
       }
       setErrors({});
@@ -104,11 +95,10 @@ export function DepartmentDialog({
         const nameExists = await departmentRepository.checkNameExists(
           formData.name,
           formData.organization_id,
-          formData.parent_id,
           department?.id
         );
         if (nameExists) {
-          newErrors.name = "Tên phòng ban đã tồn tại trong chi nhánh này";
+          newErrors.name = "Tên phòng ban đã tồn tại";
         }
       } catch (error) {
         console.error("Failed to check name:", error);
@@ -128,7 +118,6 @@ export function DepartmentDialog({
         await updateDepartment({
           id: department.id,
           name: formData.name,
-          parent_id: formData.parent_id || undefined,
         });
         notifications.show("Cập nhật phòng ban thành công!", {
           severity: "success",
@@ -137,7 +126,6 @@ export function DepartmentDialog({
         await createDepartment({
           name: formData.name,
           organization_id: formData.organization_id,
-          parent_id: formData.parent_id || undefined,
         });
         notifications.show("Tạo phòng ban thành công!", {
           severity: "success",
@@ -157,7 +145,7 @@ export function DepartmentDialog({
     }
   };
 
-  const isLoading = isCreating || isUpdating || branchesLoading;
+  const isLoading = isCreating || isUpdating;
 
   const isFormValid = formData.name.trim();
 
@@ -179,25 +167,6 @@ export function DepartmentDialog({
             disabled={isLoading}
             inputProps={{ maxLength: 100 }}
           />
-
-          <FormControl fullWidth>
-            <InputLabel>Chi nhánh</InputLabel>
-            <Select
-              value={formData.parent_id || ""}
-              onChange={(e) => handleInputChange("parent_id", e.target.value || null)}
-              disabled={isLoading}
-              label="Chi nhánh"
-            >
-              <MenuItem value="">
-                <em>Không thuộc chi nhánh nào</em>
-              </MenuItem>
-              {branches.map((branch) => (
-                <MenuItem key={branch.id} value={branch.id}>
-                  {branch.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
         </Box>
       </DialogContent>
       <DialogActions>

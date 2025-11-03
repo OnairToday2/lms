@@ -39,8 +39,8 @@ const EditEmployeePage = () => {
       department: departmentEmployment?.organization_unit_id || "",
       branch: branchEmployment?.organization_unit_id || "",
       manager_id: managerRelationship?.manager_id || "",
-      role: "", // Placeholder - will be implemented when role field is added to DB
       position_id: employee.position_id || "",
+      employee_type: employee.employee_type || undefined,
       start_date: employee.start_date || null,
     };
   }, [employee]);
@@ -58,8 +58,8 @@ const EditEmployeePage = () => {
         department: formData.department,
         branch: formData.branch,
         manager_id: formData.manager_id,
-        role: formData.role,
         position_id: formData.position_id,
+        employee_type: formData.employee_type,
         start_date: formData.start_date || null,
       });
 

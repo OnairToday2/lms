@@ -22,12 +22,14 @@ export const PATHS = {
   ROLE: {
     ROOT: "/roles",
     ROLES_ID: (id: string = ":id") => `/roles/${id}`,
-    CREATE_ROLE: "/roles/create",
+    CREATE: "/roles/create",
   },
   CLASSROOMS: {
     ROOT: "/class-room",
-    CREATE_CLASSROOM_OFFLINE: "/class-room/offline/create",
-    CREATE_CLASSROOM_ONLINE: "/class-room/online/create",
     CREATE_CLASSROOM: "/class-room/create",
+    LIST_CLASSROOM: "/class-room/list",
+  },
+  STUDENTS: {
+    ROOT: "/my-class",
   },
 };

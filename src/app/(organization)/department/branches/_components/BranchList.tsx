@@ -209,6 +209,7 @@ export default function BranchList() {
                 variant="outlined"
                 startIcon={<FileUploadIcon />}
                 onClick={handleImportBranches}
+                disabled={!organizationId || isLoadingOrgId}
               >
                 Import
               </Button>
@@ -216,6 +217,7 @@ export default function BranchList() {
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={handleCreateBranch}
+                disabled={!organizationId || isLoadingOrgId}
               >
                 Tạo chi nhánh
               </Button>
@@ -242,6 +244,8 @@ export default function BranchList() {
                   <TableHead>
                     <TableRow>
                       <TableCell>Tên chi nhánh</TableCell>
+                      <TableCell>Mã chi nhánh</TableCell>
+                      <TableCell>Địa điểm</TableCell>
                       <TableCell>Ngày tạo</TableCell>
                       <TableCell align="center"></TableCell>
                     </TableRow>
@@ -249,7 +253,7 @@ export default function BranchList() {
                   <TableBody>
                     {branches.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={3} align="center" sx={{ py: 8 }}>
+                        <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
                           <Typography variant="body2" color="text.secondary">
                             Không tìm thấy chi nhánh nào
                           </Typography>
@@ -259,6 +263,8 @@ export default function BranchList() {
                       branches.map((branch) => (
                         <TableRow key={branch.id} hover sx={{ cursor: "pointer" }}>
                           <TableCell>{branch.name}</TableCell>
+                          <TableCell>{branch.code}</TableCell>
+                          <TableCell>{branch.address}</TableCell>
                           <TableCell>
                             {new Date(branch.created_at).toLocaleString("vi-VN")}
                           </TableCell>
@@ -314,31 +320,27 @@ export default function BranchList() {
         </Card>
       </Box>
 
-      {organizationId && (
-        <>
-          <BranchDialog
-            open={createDialogOpen}
-            onClose={handleDialogClose}
-            organizationId={organizationId}
-            onSuccess={handleSuccess}
-          />
+      <BranchDialog
+        open={createDialogOpen}
+        onClose={handleDialogClose}
+        organizationId={organizationId || ""}
+        onSuccess={handleSuccess}
+      />
 
-          <BranchDialog
-            open={editDialogOpen}
-            onClose={handleDialogClose}
-            branch={selectedBranch}
-            organizationId={organizationId}
-            onSuccess={handleSuccess}
-          />
+      <BranchDialog
+        open={editDialogOpen}
+        onClose={handleDialogClose}
+        branch={selectedBranch}
+        organizationId={organizationId || ""}
+        onSuccess={handleSuccess}
+      />
 
-          <ImportBranchDialog
-            open={importDialogOpen}
-            onClose={handleDialogClose}
-            organizationId={organizationId}
-            onSuccess={handleSuccess}
-          />
-        </>
-      )}
+      <ImportBranchDialog
+        open={importDialogOpen}
+        onClose={handleDialogClose}
+        organizationId={organizationId || ""}
+        onSuccess={handleSuccess}
+      />
     </PageContainer>
   );
 }

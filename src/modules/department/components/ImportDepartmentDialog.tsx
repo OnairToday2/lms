@@ -7,23 +7,19 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  Box,
-  Typography,
   Alert,
   CircularProgress,
+  Box,
+  Typography,
   List,
   ListItem,
   ListItemText,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
 } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
 import { useImportDepartmentsMutation } from "../operations/mutation";
-import { useGetBranchesForDepartmentQuery } from "../operations/query";
-import type { DepartmentImportRow } from "@/types/dto/departments";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
+import type { DepartmentImportRow } from "@/types/dto/departments";
+import * as XLSX from "xlsx";
 
 interface ImportDepartmentDialogProps {
   open: boolean;
@@ -40,14 +36,12 @@ export function ImportDepartmentDialog({
 }: ImportDepartmentDialogProps) {
   const notifications = useNotifications();
   const [file, setFile] = useState<File | null>(null);
-  const [defaultBranchId, setDefaultBranchId] = useState<string>("");
   const [importErrors, setImportErrors] = useState<string[]>([]);
   const [importSuccess, setImportSuccess] = useState(false);
   const [error, setError] = useState<string>("");
 
   const { mutateAsync: importDepartments, isPending } =
     useImportDepartmentsMutation();
-  const { data: branches = [] } = useGetBranchesForDepartmentQuery(organizationId);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -59,9 +53,9 @@ export function ImportDepartmentDialog({
       "text/csv",
     ];
 
-    if (!validTypes.includes(selectedFile.type) && !selectedFile.name.endsWith('.csv')) {
+    if (!validTypes.includes(selectedFile.type)) {
       setError(
-        "Định dạng file không hợp lệ. Vui lòng chọn file .csv"
+        "Định dạng file không hợp lệ. Vui lòng chọn file .xlsx hoặc .csv"
       );
       setFile(null);
       return;
@@ -73,26 +67,39 @@ export function ImportDepartmentDialog({
     setImportSuccess(false);
   };
 
-  const parseFile = async (file: File): Promise<DepartmentImportRow[]> => {
+    const parseFile = async (file: File): Promise<DepartmentImportRow[]> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
 
       reader.onload = (e) => {
         try {
-          const text = e.target?.result as string;
-          const lines = text.split("\n").filter((line) => line.trim());
+          const data = e.target?.result;
+          let workbook: XLSX.WorkBook;
 
-          if (lines.length < 2) {
+          if (file.name.endsWith(".csv")) {
+            const text = data as string;
+            workbook = XLSX.read(text, { type: "string" });
+          } else {
+            const arrayBuffer = data as ArrayBuffer;
+            workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: "array" });
+          }
+
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]!];
+          if (!firstSheet) {
+            reject(new Error("File không có dữ liệu"));
+            return;
+          }
+
+          const jsonData = XLSX.utils.sheet_to_json<any>(firstSheet, { header: 1 });
+
+          if (jsonData.length < 2) {
             reject(new Error("File phải có ít nhất 1 dòng dữ liệu"));
             return;
           }
 
-          const headers = lines[0]?.split(",").map((h) => h.trim().replace(/"/g, "")) || [];
+          const headers = (jsonData[0] as any[]).map((h) => String(h || "").trim());
           const nameIndex = headers.findIndex(
             (h) => h === "Tên phòng ban" || h === "name" || h === "Name"
-          );
-          const branchIndex = headers.findIndex(
-            (h) => h === "Chi nhánh" || h === "branch" || h === "Branch"
           );
 
           if (nameIndex === -1) {
@@ -105,13 +112,13 @@ export function ImportDepartmentDialog({
           }
 
           const rows: DepartmentImportRow[] = [];
-          for (let i = 1; i < lines.length; i++) {
-            const values = lines[i]?.split(",").map((v) => v.trim().replace(/"/g, ""));
+          for (let i = 1; i < jsonData.length; i++) {
+            const values = jsonData[i] as any[];
             if (values && values[nameIndex]) {
-              rows.push({
-                name: values[nameIndex],
-                branch_name: branchIndex !== -1 && values[branchIndex] ? values[branchIndex] : undefined,
-              });
+              const name = String(values[nameIndex] || "").trim();
+              if (name) {
+                rows.push({ name });
+              }
             }
           }
 
@@ -127,7 +134,11 @@ export function ImportDepartmentDialog({
         reject(new Error("Lỗi khi đọc file"));
       };
 
-      reader.readAsText(file);
+      if (file.name.endsWith(".csv")) {
+        reader.readAsText(file);
+      } else {
+        reader.readAsArrayBuffer(file);
+      }
     });
   };
 
@@ -180,7 +191,6 @@ export function ImportDepartmentDialog({
 
   const handleReset = () => {
     setFile(null);
-    setDefaultBranchId("");
     setError("");
     setImportErrors([]);
     setImportSuccess(false);
@@ -199,34 +209,12 @@ export function ImportDepartmentDialog({
           <Alert severity="info">
             <Typography variant="body2">
               File import cần có cột <strong>&quot;Tên phòng ban&quot;</strong> hoặc{" "}
-              <strong>&quot;name&quot;</strong>
+              <strong>&quot;name&quot;</strong>.
             </Typography>
             <Typography variant="body2" sx={{ mt: 1 }}>
-              Có thể có cột <strong>&quot;Chi nhánh&quot;</strong> hoặc{" "}
-              <strong>&quot;branch&quot;</strong> để chỉ định chi nhánh
-            </Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              Định dạng file hỗ trợ: .csv
+              Định dạng file hỗ trợ: .xlsx, .csv
             </Typography>
           </Alert>
-
-          <FormControl fullWidth>
-            <InputLabel>Chi nhánh mặc định (tùy chọn)</InputLabel>
-            <Select
-              value={defaultBranchId}
-              onChange={(e) => setDefaultBranchId(e.target.value)}
-              label="Chi nhánh mặc định (tùy chọn)"
-            >
-              <MenuItem value="">
-                <em>Không chọn</em>
-              </MenuItem>
-              {branches.map((branch) => (
-                <MenuItem key={branch.id} value={branch.id}>
-                  {branch.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
 
           <Box
             sx={{
@@ -246,7 +234,7 @@ export function ImportDepartmentDialog({
             <input
               type="file"
               hidden
-              accept=".csv"
+              accept=".xlsx,.xls,.csv"
               onChange={handleFileChange}
             />
             <CloudUpload sx={{ fontSize: 48, color: "action.active", mb: 2 }} />
@@ -254,7 +242,7 @@ export function ImportDepartmentDialog({
               Kéo & thả file hoặc <strong>chọn file</strong>
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Hỗ trợ: .csv
+              Hỗ trợ: .xlsx, .csv
             </Typography>
           </Box>
 

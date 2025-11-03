@@ -19,6 +19,8 @@ import useNotifications from "@/hooks/useNotifications/useNotifications";
 
 interface BranchFormData {
   name: string;
+  code: string;
+  address: string;
   organization_id: string;
 }
 
@@ -42,6 +44,8 @@ export function BranchDialog({
 
   const [formData, setFormData] = useState<BranchFormData>({
     name: "",
+    code: "",
+    address: "",
     organization_id: organizationId,
   });
 
@@ -58,11 +62,15 @@ export function BranchDialog({
       if (branch) {
         setFormData({
           name: branch.name,
+          code: branch.code,
+          address: branch.address,
           organization_id: branch.organization_id,
         });
       } else {
         setFormData({
           name: "",
+          code: "",
+          address: "",
           organization_id: organizationId,
         });
       }
@@ -100,6 +108,18 @@ export function BranchDialog({
       }
     }
 
+    if (!formData.code.trim()) {
+      newErrors.code = "Mã chi nhánh không được để trống";
+    } else if (formData.code.length > 50) {
+      newErrors.code = "Mã chi nhánh không được vượt quá 50 ký tự";
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = "Địa điểm không được để trống";
+    } else if (formData.address.length > 255) {
+      newErrors.address = "Địa điểm không được vượt quá 255 ký tự";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -113,6 +133,8 @@ export function BranchDialog({
         await updateBranch({
           id: branch.id,
           name: formData.name,
+          code: formData.code,
+          address: formData.address,
         });
         notifications.show("Cập nhật chi nhánh thành công!", {
           severity: "success",
@@ -121,6 +143,8 @@ export function BranchDialog({
       } else {
         await createBranch({
           name: formData.name,
+          code: formData.code,
+          address: formData.address,
           organization_id: formData.organization_id,
         });
         notifications.show("Tạo chi nhánh thành công!", {
@@ -143,7 +167,7 @@ export function BranchDialog({
   };
 
   const isLoading = isCreating || isUpdating || isCheckingName;
-  const isFormValid = formData.name.trim();
+  const isFormValid = formData.name.trim() && formData.code.trim() && formData.address.trim();
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -162,6 +186,30 @@ export function BranchDialog({
             helperText={errors.name}
             disabled={isLoading}
             inputProps={{ maxLength: 100 }}
+          />
+          <TextField
+            label="Mã chi nhánh"
+            required
+            fullWidth
+            value={formData.code}
+            onChange={(e) => handleInputChange("code", e.target.value)}
+            error={!!errors.code}
+            helperText={errors.code}
+            disabled={isLoading}
+            inputProps={{ maxLength: 50 }}
+          />
+          <TextField
+            label="Địa điểm"
+            required
+            fullWidth
+            multiline
+            rows={3}
+            value={formData.address}
+            onChange={(e) => handleInputChange("address", e.target.value)}
+            error={!!errors.address}
+            helperText={errors.address}
+            disabled={isLoading}
+            inputProps={{ maxLength: 255 }}
           />
         </Box>
       </DialogContent>

@@ -40,7 +40,7 @@ export const departmentRepository = {
 
     const { data, error, count } = await query;
 
-    if (countError) throw countError;
+    if (error) throw error;
 
     // Return plain objects to avoid Next.js serialization issues
     return {
@@ -134,12 +134,11 @@ export const departmentRepository = {
   },
 
   /**
-   * Check if department name already exists in the same branch
+   * Check if department name already exists in the organization
    */
   async checkNameExists(
     name: string,
     organizationId: string,
-    branchId: string | null,
     excludeId?: string
   ): Promise<boolean> {
     const supabase = createClient();
@@ -149,12 +148,6 @@ export const departmentRepository = {
       .eq("organization_id", organizationId)
       .eq("type", "department")
       .eq("name", name);
-
-    if (branchId) {
-      query = query.eq("parent_id", branchId);
-    } else {
-      query = query.is("parent_id", null);
-    }
 
     if (excludeId) {
       query = query.neq("id", excludeId);

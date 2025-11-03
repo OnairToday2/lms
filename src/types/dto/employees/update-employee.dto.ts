@@ -11,8 +11,8 @@ export class UpdateEmployeeDto {
   department!: string;
   branch?: string;
   manager_id!: string;
-  role?: string;
   position_id?: string;
+  employee_type?: Database["public"]["Enums"]["employee_type"];
   start_date?: string | null;
 }
 
