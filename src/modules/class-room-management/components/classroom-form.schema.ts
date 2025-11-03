@@ -36,6 +36,7 @@ const classRoomSessionSchema = zod
     isUnlimited: zod.boolean(),
     agendas: zod.array(classRoomSessionAgendaSchema),
     qrCode: zod.object({
+      id: zod.string().optional(),
       isLimitTimeScanQrCode: zod.boolean(),
       startDate: zod.string(),
       endDate: zod.string(),

@@ -116,7 +116,7 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({
             </Link>
           </div>
           <MenuList items={MAIN_MENU_LIST} mini={mini} isFullyExpanded={isFullyExpanded} />
-          {!mini ? <CardAlert /> : null}
+          {/* {!mini ? <CardAlert /> : null} */}
           <div className="p-3">
             <SignOutButton className="w-full" type={mini ? "icon" : undefined} />
           </div>

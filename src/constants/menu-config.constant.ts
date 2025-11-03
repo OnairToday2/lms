@@ -160,46 +160,46 @@ const MAIN_MENU_LIST: MenuItemType[] = [
       },
     ],
   },
-  {
-    title: "Tasks",
-    icon: React.createElement(AssignmentRoundedIcon),
-    key: "task",
-    type: "group",
-    children: [
-      {
-        title: "clients sub 2",
-        icon: React.createElement(PeopleRoundedIcon),
-        key: "clients12",
-        path: "clients111",
-        children: [
-          {
-            title: "client sub sub 1",
-            icon: React.createElement(PeopleRoundedIcon),
-            key: "clients11",
-            path: "clients11122112",
-          },
-          {
-            title: "clients sub sub 2",
-            icon: React.createElement(PeopleRoundedIcon),
-            key: "clients11",
-            path: "clients11122332",
-          },
-        ],
-      },
-      {
-        title: "clients sub 3",
-        icon: React.createElement(PeopleRoundedIcon),
-        key: "clients32",
-        path: "clients111333",
-      },
-      {
-        title: "clients sub 4",
-        icon: React.createElement(PeopleRoundedIcon),
-        key: "clients32",
-        path: "clients111333444",
-      },
-    ],
-  },
+  // {
+  //   title: "Tasks",
+  //   icon: React.createElement(AssignmentRoundedIcon),
+  //   key: "task",
+  //   type: "group",
+  //   children: [
+  //     {
+  //       title: "clients sub 2",
+  //       icon: React.createElement(PeopleRoundedIcon),
+  //       key: "clients12",
+  //       path: "clients111",
+  //       children: [
+  //         {
+  //           title: "client sub sub 1",
+  //           icon: React.createElement(PeopleRoundedIcon),
+  //           key: "clients11",
+  //           path: "clients11122112",
+  //         },
+  //         {
+  //           title: "clients sub sub 2",
+  //           icon: React.createElement(PeopleRoundedIcon),
+  //           key: "clients11",
+  //           path: "clients11122332",
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       title: "clients sub 3",
+  //       icon: React.createElement(PeopleRoundedIcon),
+  //       key: "clients32",
+  //       path: "clients111333",
+  //     },
+  //     {
+  //       title: "clients sub 4",
+  //       icon: React.createElement(PeopleRoundedIcon),
+  //       key: "clients32",
+  //       path: "clients111333444",
+  //     },
+  //   ],
+  // },
 ];
 
 export { MAIN_MENU_LIST };

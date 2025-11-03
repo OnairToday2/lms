@@ -26,7 +26,8 @@ type ClassRoomTabItem = {
 };
 type TabStateType = Record<TabKeyType, { status: ClassRoomTabStatus }>;
 export interface ClassRoomTabContainerRef {
-  checkStatusAllTabItems: () => void;
+  checkStatusAllTabItems: () => boolean;
+  setTabStatus: (tabKey: TabKeyType, status: ClassRoomTabStatus) => void;
 }
 export interface ClassRoomTabContainerProps {
   items: ClassRoomTabItem[];
@@ -48,33 +49,38 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
     /**
      * Trigger validate all field in current tab before process next action
      */
-    const validateCurrentTabBeforeProceed = useCallback(async (tab: TabKeyType, callback?: () => void) => {
-      const keyList = getKeyFieldByTab(tab);
+    const validateCurrentTabBeforeProceed = useCallback(
+      async (tab: TabKeyType, callback?: () => void) => {
+        const keyList = getKeyFieldByTab(tab);
 
-      await Promise.all(keyList.map((key) => trigger(key)));
+        await Promise.all(keyList.map((key) => trigger(key)));
 
-      const status = getStatusTabClassRoom(errors, tab);
+        const status = getStatusTabClassRoom(errors, tab);
 
-      setTabsState((prevState) => {
-        return {
-          ...prevState,
-          [tab]: {
-            status: status,
-          },
-        } as typeof prevState;
-      });
+        setTabsState((prevState) => {
+          return {
+            ...prevState,
+            [tab]: {
+              status: status,
+            },
+          } as typeof prevState;
+        });
 
-      if (status === "invalid") return;
+        if (status === "invalid") return;
 
-      callback?.();
-    }, []);
+        callback?.();
+      },
+      [errors],
+    );
 
     const handleChangeTab = useCallback(
       (_: React.SyntheticEvent, newTab: TabKeyType) =>
-        setCurrentTab((oldTab) => {
-          const nextTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.next;
-          const prevTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.prev;
-          return nextTab === newTab || prevTab === newTab ? newTab : oldTab;
+        validateCurrentTabBeforeProceed(currentTab, () => {
+          setCurrentTab((oldTab) => {
+            const nextTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.next;
+            const prevTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.prev;
+            return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
+          });
         }),
       [currentTab],
     );
@@ -94,21 +100,22 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
             scrollContainer?.scrollTo({ top: 0 });
           });
         }),
-      [],
+      [currentTab],
     );
 
     useImperativeHandle(ref, () => ({
       checkStatusAllTabItems: () => {
-        setTabsState((prevTabState) => {
-          let newTabStateUpdate = { ...prevTabState };
-          items.forEach((tabItem) => {
-            newTabStateUpdate = {
-              ...newTabStateUpdate,
-              [tabItem.tabKey]: { status: getStatusTabClassRoom(errors, tabItem.tabKey) },
-            };
-          });
-          return newTabStateUpdate;
-        });
+        const updateAllTabState = items.reduce<TabStateType>((acc, item) => {
+          return {
+            ...acc,
+            [item.tabKey]: { status: getStatusTabClassRoom(errors, item.tabKey) },
+          };
+        }, {} as TabStateType);
+        setTabsState(updateAllTabState);
+        return items.every((item) => getStatusTabClassRoom(errors, item.tabKey) === "valid");
+      },
+      setTabStatus: (tabKey, status) => {
+        setTabsState((oldState) => ({ ...oldState, [tabKey]: { status: status } }));
       },
     }));
 

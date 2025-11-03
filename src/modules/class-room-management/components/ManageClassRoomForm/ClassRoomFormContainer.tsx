@@ -134,9 +134,9 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
         setValue("status", status);
         const isValidAllClassRoomFields = await trigger();
         classRoomTabContainerRef.current?.checkStatusAllTabItems();
-        // if (isValidAllClassRoomFields) {
-        //   submitAction();
-        // }
+        if (isValidAllClassRoomFields) {
+          submitAction();
+        }
       } catch (error) {
         console.log(error);
       }
@@ -145,11 +145,6 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
     const submitForm: SubmitHandler<ClassRoom> = (data) => {
       console.log({ errors, data, selectedTeachers, selectedStudents });
 
-      if (!selectedStudents.length) {
-        console.error("Students is Empty ");
-        return;
-      }
-
       const sessionList = getValues("classRoomSessions");
       const isEverySessionHasTeacher = sessionList.every((session, _index) => {
         return Boolean(selectedTeachers[_index]?.length);
@@ -157,6 +152,13 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
 
       if (!isEverySessionHasTeacher) {
         console.error("Some class session is Empty teacher");
+        classRoomTabContainerRef.current?.setTabStatus("clsTab-session", "invalid");
+        return;
+      }
+
+      if (!selectedStudents.length) {
+        console.error("Students is Empty ");
+        classRoomTabContainerRef.current?.setTabStatus("clsTab-setting", "invalid");
         return;
       }
 

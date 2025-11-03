@@ -1,15 +1,17 @@
 "use client";
-import { classRoomRepository, classRoomSessionRepository, classRoomMetaRepository } from "@/repository";
+import {
+  classRoomRepository,
+  classRoomSessionRepository,
+  classRoomMetaRepository,
+  classSessionAgendaRepository,
+} from "@/repository";
 import type {
   CreatePivotClassRoomAndEmployeePayload,
   CreatePivotClassRoomAndFieldPayload,
   CreatePivotClassRoomAndHashTagPayload,
 } from "@/repository/class-room";
-import type {
-  CreateClassRoomSessionsPayload,
-  CreatePivotClassRoomSessionAndTeacherPayload,
-  CreateSessionAgendasPayload,
-} from "@/repository/class-room-session";
+import type { CreateClassRoomSessionPayload, UpSertClassRoomSessionPayload } from "@/repository/class-session";
+import { CreateSessionAgendasPayload, UpSertSessionAgendaPayload } from "@/repository/class-session-agenda";
 import { enqueueSnackbar } from "notistack";
 
 import { ClassRoom } from "../components/classroom-form.schema";
@@ -17,8 +19,8 @@ import { useUserOrganization } from "@/modules/organization/store/UserOrganizati
 import { useTMutation } from "@/lib";
 import { ClassRoomStore } from "../store/class-room-store";
 import { isUndefined } from "lodash";
-import { PostgrestError } from "@supabase/supabase-js";
-
+import { qrAttendanceRepository } from "@/repository";
+import { CreateQRCodePayload, UpSertQrCodePayload } from "@/repository/qr-attendance";
 const useCRUDClassRoom = () => {
   const userInfo = useUserOrganization((state) => state.data);
 
@@ -32,6 +34,7 @@ const useCRUDClassRoom = () => {
       const { formData, teachers, students } = payload;
       const {
         classRoomField,
+        platform,
         hashTags,
         classRoomSessions,
         communityInfo,
@@ -53,18 +56,22 @@ const useCRUDClassRoom = () => {
        * Step 1: Create ClassRoom
        */
       const { data: classRoomData, error } = await classRoomRepository.upsertClassRoom({
-        comunity_info: communityInfo,
-        description: description,
-        room_type: roomType,
-        slug: slug,
-        status: status,
-        thumbnail_url: thumbnailUrl,
-        title: title,
-        employee_id: userInfo.id,
-        start_at: startDate,
-        end_at: endDate,
-        organization_id: userInfo.organization.id,
-        resource_id: null,
+        action: "create",
+        payload: {
+          comunity_info: communityInfo,
+          description: description,
+          room_type: roomType,
+          slug: slug,
+          status: status,
+          thumbnail_url: thumbnailUrl,
+          title: title,
+          employee_id: userInfo.id,
+          start_at: startDate,
+          end_at: endDate,
+          organization_id: userInfo.organization.id,
+          resource_id: null,
+          documents: docs || null,
+        },
       });
 
       if (error) {
@@ -136,49 +143,79 @@ const useCRUDClassRoom = () => {
       );
 
       /**
-       * Step 6: Create Class room Session
-       */
-      const classRoomSessionPayload = mapSessionWithClassRoom(classRoomSessions, roomType, title, description);
-      const { data: sessionsData, error: sessionDataError } = await classRoomSessionRepository.createClassSession({
-        classRoomId: classRoomData.id,
-        sessions: classRoomSessionPayload,
-      });
-      if (!sessionsData) {
-        console.log("Create Session failed", sessionDataError);
-        throw new Error("Create Classroom Session Failue");
-      }
-
-      /**
-       * Step 7: Create Agenda Session
+       * Step 6: Create Class room Sessions
        */
 
-      const createSessionAgendasPayload = mapAgendaWithSessions(
-        classRoomSessions,
-        sessionsData.map((s) => ({ id: s.id })),
+      await Promise.all(
+        classRoomSessions.map(async (classSession, _sessionIndex) => {
+          try {
+            const sessionPayload = mapSessionWithClassRoom(
+              classSession,
+              roomType,
+              title,
+              description,
+              classRoomData.id,
+            );
+
+            const { data: sessionData, error: sessionError } = await classRoomSessionRepository.createClassSession(
+              sessionPayload,
+            );
+
+            if (sessionError) {
+              console.log("Create Session failed", sessionError);
+              throw new Error("Create Classroom Session Failed");
+            }
+
+            /**
+             * Agendas
+             */
+            const agendaPromise = (async () => {
+              const { error: agendaError } = await classSessionAgendaRepository.createAgendas(
+                mapAgendaWithSessions(classSession.agendas, sessionData.id),
+              );
+            })();
+
+            /**
+             * Teachers
+             */
+            const teacherPromise = (async () => {
+              const teachersList = teachers[_sessionIndex] || [];
+              const { error: teacherError } = await classRoomSessionRepository.createPivotClassSessionAndTeacher(
+                teachersList.map((tc) => ({
+                  class_session_id: sessionData.id,
+                  teacher_id: tc.id,
+                })),
+              );
+              if (teacherError) throw new Error("Create Teacher failed");
+            })();
+
+            /**
+             * QRCode
+             */
+            const qrCodePromise = (async () => {
+              if (platform !== "offline") return;
+              const { error: qrcodeError } = await qrAttendanceRepository.createClassQRCode(
+                mapQrcodeWithSession({
+                  qrCode: classSession.qrCode,
+                  classRoomId: classRoomData.id,
+                  classSessionId: sessionData.id,
+                  useId: userInfo.id,
+                }),
+              );
+              if (qrcodeError) throw new Error("Create Qrcode Failed");
+            })();
+
+            /**
+             * Run all promise in parrallel
+             */
+            await Promise.all([agendaPromise, teacherPromise, qrCodePromise]);
+          } catch (err) {
+            console.error(`Session ${_sessionIndex} failed:`, error);
+            throw error;
+          }
+        }),
       );
-      await classRoomSessionRepository.createSessionAgendas(createSessionAgendasPayload);
-
-      /**
-       * Step 8: Sync Session with Teachers
-       */
-
-      const createPivotClassSessionAndTeacherPayload = Object.entries(teachers).reduce<
-        CreatePivotClassRoomSessionAndTeacherPayload[]
-      >((acc, [_, teachers], _index) => {
-        const sessionId = sessionsData[_index]?.id;
-        if (sessionId) {
-          const teachersWithSessionId = teachers.map<CreatePivotClassRoomSessionAndTeacherPayload>((tc) => ({
-            class_session_id: sessionId,
-            teacher_id: tc.id,
-          }));
-          acc = [...acc, ...teachersWithSessionId];
-        }
-        return acc;
-      }, []);
-      const { data: sessionTeacher, error: sessionTeacherError } =
-        await classRoomSessionRepository.createPivotClassSessionAndTeacher(createPivotClassSessionAndTeacherPayload);
-
-      console.log("Create Classroom", classRoomData, sessionsData, employeeWithClassRoom, sessionTeacher);
+      console.log("Create Classroom", classRoomData);
       return classRoomData;
     },
     onError: (error) => {
@@ -218,6 +255,7 @@ const useCRUDClassRoom = () => {
         faqs,
         forWhom,
         docs,
+        platform,
         whies,
       } = formData;
 
@@ -226,19 +264,23 @@ const useCRUDClassRoom = () => {
        * Step 1: Create ClassRoom
        */
       const { data: classRoomData, error: updateError } = await classRoomRepository.upsertClassRoom({
-        id: classRoomId,
-        comunity_info: communityInfo,
-        description: description,
-        room_type: roomType,
-        slug: slug,
-        status: status,
-        thumbnail_url: thumbnailUrl,
-        title: title,
-        employee_id: userInfo.id,
-        start_at: startDate,
-        end_at: endDate,
-        organization_id: userInfo.organization.id,
-        resource_id: null,
+        action: "update",
+        payload: {
+          id: classRoomId,
+          comunity_info: communityInfo,
+          description: description,
+          room_type: roomType,
+          slug: slug,
+          status: status,
+          thumbnail_url: thumbnailUrl,
+          title: title,
+          employee_id: userInfo.id,
+          start_at: startDate,
+          end_at: endDate,
+          organization_id: userInfo.organization.id,
+          resource_id: null,
+          documents: docs || null,
+        },
       });
 
       if (updateError) {
@@ -251,7 +293,7 @@ const useCRUDClassRoom = () => {
        */
 
       const faqMetadata = classRoomDetail.class_room_metadata.find((item) => item.key === "faqs");
-      const { data: faqsData, error: faqsDataError } = await classRoomMetaRepository.upsertClassRoomMeta({
+      const { error: faqsDataError } = await classRoomMetaRepository.upsertClassRoomMeta({
         id: faqMetadata?.id,
         class_room_id: classRoomData.id,
         key: "faqs",
@@ -261,7 +303,7 @@ const useCRUDClassRoom = () => {
         console.error(faqsDataError);
       }
       const whyMetadata = classRoomDetail.class_room_metadata.find((item) => item.key === "why");
-      const { data: whyData, error: whyError } = await classRoomMetaRepository.upsertClassRoomMeta({
+      const { error: whyError } = await classRoomMetaRepository.upsertClassRoomMeta({
         id: whyMetadata?.id,
         class_room_id: classRoomData.id,
         key: "why",
@@ -273,7 +315,7 @@ const useCRUDClassRoom = () => {
       }
 
       const forWhomMetadata = classRoomDetail.class_room_metadata.find((item) => item.key === "forWhom");
-      const { data: forWhomData, error: forWhomError } = await classRoomMetaRepository.upsertClassRoomMeta({
+      const { error: forWhomError } = await classRoomMetaRepository.upsertClassRoomMeta({
         id: forWhomMetadata?.id,
         class_room_id: classRoomData.id,
         key: "forWhom",
@@ -284,7 +326,7 @@ const useCRUDClassRoom = () => {
         console.log(forWhomError);
       }
       const galleriesMeta = classRoomDetail.class_room_metadata.find((item) => item.key === "galleries");
-      const { data: galleriesData, error: galleriesDataError } = await classRoomMetaRepository.upsertClassRoomMeta({
+      const { error: galleriesDataError } = await classRoomMetaRepository.upsertClassRoomMeta({
         id: galleriesMeta?.id,
         class_room_id: classRoomData.id,
         key: "galleries",
@@ -372,72 +414,112 @@ const useCRUDClassRoom = () => {
       }
 
       /**
-       * Step 6: Sync Classroom old sessions with new Sessions
+       * Step 6: Sync Old Sessions with new Sessions
+       * todo: compare new sessions List: classRoomSessions vs old Session List: classRoomDetail/sessions
+       * - delete: these session has Id in classRoomSessions is not in classRoomDetail/sessions.
+       * - create: if some sessions in classRoomSessions has no Id
        */
-
-      const deleteSessionIds = classRoomDetail.sessions.map((sesion) => sesion.id);
-
-      const pivotSessionWithTeacherIds = classRoomDetail.sessions.reduce<string[]>((acc, session) => {
-        const pivotIds = session.teachers.map((tc) => tc.id);
-        return [...acc, ...pivotIds];
-      }, []);
-
-      const sessionAgendasIds = classRoomDetail.sessions.reduce<string[]>((acc, session) => {
-        const agendaIds = session.agendas.map((ag) => ag.id);
-        return [...acc, ...agendaIds];
-      }, []);
-
-      await classRoomSessionRepository.deletePivotClassSessionAndTeacher(pivotSessionWithTeacherIds);
-
-      await classRoomSessionRepository.deleteSessionAgendas(sessionAgendasIds);
-
-      await classRoomSessionRepository.deleteClassSession(deleteSessionIds);
-
-      const classRoomSessionPayload = mapSessionWithClassRoom(classRoomSessions, roomType, title, description);
-      console.log({ newSessionPayload: classRoomSessionPayload, deleteSessionIds });
-      const { data: newSessionsData, error: sessionDataError } = await classRoomSessionRepository.createClassSession({
-        classRoomId: classRoomData.id,
-        sessions: classRoomSessionPayload,
-      });
-
-      if (sessionDataError) {
-        console.error(sessionDataError);
-        throw new Error(sessionDataError.message);
-      }
 
       /**
-       * Step 7: Sync Agenda Session.
+       * Step 6 - 1: Delete Session
+       */
+      const sessionListDeletion = classRoomDetail.sessions.filter((s) =>
+        classRoomSessions.every((newS) => s.id !== newS.id),
+      );
+      const sessionListAddNew = classRoomSessions.filter((newS) => !newS.id);
+
+      console.log({ classRoomSessions, sessionListDeletion, sessionListAddNew });
+
+      if (sessionListDeletion.length) {
+        const pivotSessionWithTeacherIdsDeletion = sessionListDeletion.reduce<string[]>((acc, session) => {
+          const pivotIds = session.teachers.map((tc) => tc.id);
+          return [...acc, ...pivotIds];
+        }, []);
+
+        const agendaIdsDeletion = sessionListDeletion.reduce<string[]>((acc, session) => {
+          const agendaIds = session.agendas.map((ag) => ag.id);
+          return [...acc, ...agendaIds];
+        }, []);
+
+        await classRoomSessionRepository.deletePivotClassSessionAndTeacher(pivotSessionWithTeacherIdsDeletion);
+
+        await classSessionAgendaRepository.deleteAgendas(agendaIdsDeletion);
+
+        await classRoomSessionRepository.deleteClassSession(sessionListDeletion.map((s) => s.id));
+      }
+      /**
+       * Step 6 - 2: UpSert Session
        */
 
-      const sessionAgendasPayload = mapAgendaWithSessions(
-        classRoomSessions,
-        newSessionsData.map((s) => ({ id: s.id })),
+      await Promise.all(
+        classRoomSessions.map(async (classSession, _sessionIndex) => {
+          const classSessionPayload = mapUpSertSessionWithClassRoom({
+            classRoomTitle: title,
+            classRoomDescription: description,
+            classRoomId: classRoomData.id,
+            classSession: classSession,
+            roomType: roomType,
+          });
+          const { data: sessionData, error: sessionDataError } = await classRoomSessionRepository.upsertClassSession(
+            classSessionPayload,
+          );
+
+          if (sessionDataError) {
+            throw new Error("Upsert session failed");
+          }
+
+          const sessionId = sessionData.id;
+          /**
+           * UpdateAgenda
+           */
+          const upsertAgendaPromise = (async () => {
+            const upsertAgendasPayload = mapUpsertAgendaWithSessions(classSession.agendas, sessionId);
+            await classSessionAgendaRepository.bulkUpsertAgendas(upsertAgendasPayload);
+          })();
+
+          /**
+           * Update Teacher
+           */
+          const upsertTeacherPromise = (async () => {
+            const pivotTeacherIdsDeletion = sessionData.teachers.map((tc) => tc.id);
+            await classRoomSessionRepository.deletePivotClassSessionAndTeacher(pivotTeacherIdsDeletion);
+            const newTeacherListBySession = teachers[_sessionIndex] || [];
+
+            const { data: sessionTeacher, error: sessionTeacherError } =
+              await classRoomSessionRepository.createPivotClassSessionAndTeacher(
+                newTeacherListBySession.map((tc) => ({
+                  class_session_id: sessionId,
+                  teacher_id: tc.id,
+                })),
+              );
+            if (sessionTeacherError) throw new Error(`Upsert Teacher Session index: ${_sessionIndex} failed`);
+          })();
+
+          /**
+           * Update QRCode
+           */
+          const upsertQrcodePromise = (async () => {
+            if (platform !== "offline") return;
+            const createQrCodePayload = mapUpSertQrcodeWithSession({
+              classRoomId: classRoomId,
+              classSessionId: sessionId,
+              qrCode: classSession.qrCode,
+              useId: userInfo.id,
+            });
+            const { data: qrCodeData, error: qrCodeError } = await qrAttendanceRepository.upsertQRCode(
+              createQrCodePayload,
+            );
+            if (qrCodeError) throw new Error(`Upsert QrCode Session index: ${_sessionIndex} failed`);
+          })();
+
+          /**
+           * Parallel update
+           */
+          await Promise.all([upsertAgendaPromise, upsertTeacherPromise, upsertQrcodePromise]);
+        }),
       );
 
-      await classRoomSessionRepository.createSessionAgendas(sessionAgendasPayload);
-
-      /**
-       * Step 8: Sync Teacher with Session.
-       */
-
-      const createPivotClassSessionAndTeacherPayload = Object.entries(teachers).reduce<
-        CreatePivotClassRoomSessionAndTeacherPayload[]
-      >((acc, [_, teachers], _index) => {
-        const sessionId = newSessionsData[_index]?.id;
-        if (sessionId) {
-          const teacherWithSessionIdList = teachers.map<CreatePivotClassRoomSessionAndTeacherPayload>((tc) => ({
-            class_session_id: sessionId,
-            teacher_id: tc.id,
-          }));
-          acc = [...acc, ...teacherWithSessionIdList];
-        }
-        return acc;
-      }, []);
-
-      const { data: sessionTeacher, error: sessionTeacherError } =
-        await classRoomSessionRepository.createPivotClassSessionAndTeacher(createPivotClassSessionAndTeacherPayload);
-
-      console.log("Update Susscess", classRoomData, newSessionsData, sessionTeacher);
+      console.log("Update Susscess", classRoomData);
       return classRoomData;
     },
     onError: (error) => {
@@ -475,54 +557,182 @@ const useCRUDClassRoom = () => {
   };
 
   /** --------------------------------------------------------
-   *  Helper: Map session payloads
+   *  Helper: Map qrCode payloads for offline class
+   * -------------------------------------------------------- */
+  const mapQrcodeWithSession = (data: {
+    qrCode: ClassRoom["classRoomSessions"][number]["qrCode"];
+    classRoomId: string;
+    classSessionId: string;
+    useId: string;
+  }): CreateQRCodePayload => {
+    const { classRoomId, classSessionId, useId, qrCode } = data;
+    return {
+      title: `QrCode`,
+      description: "",
+      checkin_start_time: qrCode.isLimitTimeScanQrCode ? qrCode.startDate : null,
+      checkin_end_time: qrCode.isLimitTimeScanQrCode ? qrCode.endDate : null,
+      created_by: useId,
+      class_room_id: classRoomId,
+      class_session_id: classSessionId,
+    };
+  };
+
+  /** --------------------------------------------------------
+   *  Helper: Map Update Qrcode payloads
+   * -------------------------------------------------------- */
+
+  const mapUpSertQrcodeWithSession = (data: {
+    qrCode: ClassRoom["classRoomSessions"][number]["qrCode"];
+    classRoomId: string;
+    classSessionId: string;
+    useId: string;
+  }): UpSertQrCodePayload => {
+    const { classRoomId, classSessionId, useId, qrCode } = data;
+    const qrCodeId = qrCode.id;
+
+    const basePayload = {
+      title: `QrCode`,
+      description: "",
+      checkin_start_time: qrCode.isLimitTimeScanQrCode ? qrCode.startDate : null,
+      checkin_end_time: qrCode.isLimitTimeScanQrCode ? qrCode.endDate : null,
+    };
+
+    return qrCodeId
+      ? {
+          action: "update",
+          payload: {
+            id: qrCodeId,
+            ...basePayload,
+          },
+        }
+      : {
+          action: "create",
+          payload: {
+            ...basePayload,
+            created_by: useId,
+            class_room_id: classRoomId,
+            class_session_id: classSessionId,
+          },
+        };
+  };
+
+  /** --------------------------------------------------------
+   *  Helper: Map Upsert session payloads
+   * -------------------------------------------------------- */
+  const mapUpSertSessionWithClassRoom = (data: {
+    classSession: ClassRoom["classRoomSessions"][number];
+    roomType: ClassRoom["roomType"];
+    classRoomTitle: string;
+    classRoomDescription: string;
+    classRoomId: string;
+  }): UpSertClassRoomSessionPayload => {
+    const { classSession, roomType, classRoomTitle, classRoomDescription, classRoomId } = data;
+    const sessionId = classSession.id;
+    const payload = {
+      title: roomType === "single" ? classRoomTitle : classSession.title,
+      description: roomType === "single" ? classRoomDescription : classSession.description,
+      location: classSession.location,
+      channel_info: classSession.channelInfo,
+      channel_provider: classSession.channelProvider,
+      end_at: classSession.endDate,
+      start_at: classSession.startDate,
+      is_online: classSession.isOnline,
+      limit_person: classSession.isUnlimited ? -1 : classSession.limitPerson,
+      resource_ids: null,
+    };
+
+    return sessionId
+      ? {
+          action: "update",
+          payload: {
+            ...payload,
+            id: sessionId,
+          },
+        }
+      : {
+          action: "create",
+          payload: {
+            ...payload,
+            class_room_id: classRoomId,
+          },
+        };
+  };
+
+  /** --------------------------------------------------------
+   *  Helper: Map create session payloads
    * -------------------------------------------------------- */
   const mapSessionWithClassRoom = (
-    classRoomSessions: ClassRoom["classRoomSessions"],
+    classSession: ClassRoom["classRoomSessions"][number],
     roomType: ClassRoom["roomType"],
     classRoomTitle: string,
     classRoomDescription: string,
-  ): CreateClassRoomSessionsPayload["sessions"] => {
-    return classRoomSessions.reduce<CreateClassRoomSessionsPayload["sessions"]>((acc, session) => {
-      return [
-        ...acc,
-        {
-          title: roomType === "single" ? classRoomTitle : session.title,
-          description: roomType === "single" ? classRoomDescription : session.description,
-          channel_info: session.channelInfo,
-          channel_provider: session.channelProvider,
-          end_at: session.endDate,
-          start_at: session.startDate,
-          is_online: session.isOnline,
-          limit_person: session.isUnlimited ? -1 : session.limitPerson,
-          resource_ids: null,
-        },
-      ];
-    }, []);
+    classRoomId: string,
+  ): CreateClassRoomSessionPayload => {
+    return {
+      title: roomType === "single" ? classRoomTitle : classSession.title,
+      description: roomType === "single" ? classRoomDescription : classSession.description,
+      location: classSession.location,
+      channel_info: classSession.channelInfo,
+      channel_provider: classSession.channelProvider,
+      end_at: classSession.endDate,
+      start_at: classSession.startDate,
+      is_online: classSession.isOnline,
+      limit_person: classSession.isUnlimited ? -1 : classSession.limitPerson,
+      resource_ids: null,
+      class_room_id: classRoomId,
+    };
+  };
+
+  /** --------------------------------------------------------
+   *  Helper: Map Upsert Agenda with session payloads
+   * -------------------------------------------------------- */
+  const mapUpsertAgendaWithSessions = (
+    agendas: ClassRoom["classRoomSessions"][number]["agendas"],
+    sessionId: string,
+  ): UpSertSessionAgendaPayload[] => {
+    return agendas.map<UpSertSessionAgendaPayload>((agenda) => {
+      const agendaId = agenda.id;
+      const payload = {
+        title: agenda.title,
+        description: agenda.description,
+        start_at: agenda.startDate,
+        end_at: agenda.endDate,
+        thumbnail_url: null,
+      };
+
+      return agendaId
+        ? {
+            action: "update",
+            payload: {
+              ...payload,
+              id: agendaId,
+            },
+          }
+        : {
+            action: "create",
+            payload: {
+              ...payload,
+              class_session_id: sessionId,
+            },
+          };
+    });
   };
 
   /** --------------------------------------------------------
    *  Helper: Map Agenda with session payloads
    * -------------------------------------------------------- */
   const mapAgendaWithSessions = (
-    classRoomSessions: ClassRoom["classRoomSessions"],
-    sessionsData: { id: string }[],
+    agendas: ClassRoom["classRoomSessions"][number]["agendas"],
+    sessionId: string,
   ): CreateSessionAgendasPayload[] => {
-    return classRoomSessions?.reduce<CreateSessionAgendasPayload[]>((acc, session, _sIndex) => {
-      const sessionId = sessionsData[_sIndex]?.id;
-      if (sessionId) {
-        const agendas = session.agendas.map<CreateSessionAgendasPayload>((agenda) => ({
-          class_session_id: sessionId,
-          title: agenda.title,
-          description: agenda.description,
-          start_at: agenda.startDate,
-          end_at: agenda.endDate,
-          thumbnail_url: null,
-        }));
-        acc = [...acc, ...agendas];
-      }
-      return acc;
-    }, []);
+    return agendas.map<CreateSessionAgendasPayload>((agenda) => ({
+      class_session_id: sessionId,
+      title: agenda.title,
+      description: agenda.description,
+      start_at: agenda.startDate,
+      end_at: agenda.endDate,
+      thumbnail_url: null,
+    }));
   };
 
   return {

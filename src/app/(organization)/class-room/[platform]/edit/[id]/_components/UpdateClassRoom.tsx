@@ -18,6 +18,7 @@ interface UpdateClassRoomProps {
 type UpdateClassRoomFormValue = Exclude<ManageClassRoomFormProps["initFormValue"], undefined>;
 type ClassRoomSession = UpdateClassRoomFormValue["classRoomSessions"][number];
 type SessionAgenda = UpdateClassRoomFormValue["classRoomSessions"][number]["agendas"][number];
+type QrCodeSession = UpdateClassRoomFormValue["classRoomSessions"][number]["qrCode"];
 
 type TeacherType = Exclude<ManageClassRoomFormProps["teachers"], undefined>;
 type StudentType = Exclude<ManageClassRoomFormProps["students"], undefined>;
@@ -52,6 +53,7 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data, platform }) => 
       };
 
       const agendas = session.agendas.map<SessionAgenda>((agenda) => ({
+        id: agenda.id,
         endDate: agenda.end_at ? dayjs(session.end_at).toISOString() : "",
         startDate: agenda.start_at ? dayjs(session.start_at).toISOString() : "",
         title: agenda.title || "",
@@ -61,24 +63,27 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data, platform }) => 
       return [
         ...acc,
         {
-          id: data.id,
+          id: session.id,
           title: session.title || "",
           description: session.description || "",
           thumbnailUrl: "",
-          location: "",
+          location: session.location,
           endDate: session.end_at ? dayjs(session.end_at).toISOString() : "",
           startDate: session.start_at ? dayjs(session.start_at).toISOString() : "",
           isOnline: session.is_online || false,
           channelProvider: session.channel_provider || "zoom",
           channelInfo: channelInfo,
           resources: [],
-          limitPerson: session.limit_person || -1,
+          limitPerson: session.limit_person === -1 ? 0 : session.limit_person,
           isUnlimited: session.limit_person === -1 ? true : false,
           agendas: agendas,
           qrCode: {
-            isLimitTimeScanQrCode: false,
-            startDate: "",
-            endDate: "",
+            id: session.class_qr_codes[0]?.id,
+            isLimitTimeScanQrCode:
+              Boolean(session.class_qr_codes[0]?.checkin_start_time) &&
+              Boolean(session.class_qr_codes[0]?.checkin_end_time),
+            startDate: session.class_qr_codes[0]?.checkin_start_time || "",
+            endDate: session.class_qr_codes[0]?.checkin_end_time || "",
           },
         } as UpdateClassRoomFormValue["classRoomSessions"][number],
       ];
@@ -103,14 +108,14 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data, platform }) => 
       thumbnailUrl: data.thumbnail_url || "",
       hashTags: hastTags,
       classRoomField: classRoomFields,
-      docs: [],
+      docs: data.documents,
       faqs: faqs || [],
       whies: whies ? whies.map((item) => ({ description: item })) : [],
       forWhom: forWhom ? forWhom.map((item) => ({ description: item })) : [],
       galleries: galleries || [],
       communityInfo: communityInfo,
       status: data.status,
-      roomType: data.room_type,
+      roomType: data.room_type || "single",
       classRoomId: data.id,
       platform: platform,
     };

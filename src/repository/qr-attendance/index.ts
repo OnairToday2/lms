@@ -5,6 +5,7 @@ import {
   AttendanceCheckInPayload,
   AttendanceCheckInResult,
   UpdateQRCodePayload,
+  UpSertQrCodePayload,
 } from "./type";
 import type { QRCodeStatus, QRCodeWithRelations, AttendanceWithRelations } from "@/model/qr-attendance.model";
 
@@ -20,36 +21,20 @@ const generateQRCode = (): { qrCode: string; qrSecret: string } => {
 
 const createClassQRCode = async (payload: CreateQRCodePayload) => {
   try {
-    // phải có class_room_id hoặc class_session_id
-    if (!payload.class_room_id && !payload.class_session_id) {
-      throw new Error("Phải cung cấp class_room_id hoặc class_session_id");
+    if (!payload.class_room_id || !payload.class_session_id) {
+      throw new Error("Phải cung cấp class_room_id và class_session_id");
     }
-
-    // không được có cả hai
-    if (payload.class_room_id && payload.class_session_id) {
-      throw new Error("Không thể có cả class_room_id và class_session_id");
-    }
-
     const { qrCode, qrSecret } = generateQRCode();
 
     const insertPayload = {
       ...payload,
       qr_code: qrCode,
       qr_secret: qrSecret,
-      status: "inactive" as QRCodeStatus,
-      is_enabled: false,
+      status: "active" as QRCodeStatus,
+      is_enabled: true,
       allowed_radius_meters: 200,
     };
-
-    const { data, error } = await supabase
-      .from("class_qr_codes")
-      .insert(insertPayload)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return { data, error: null };
+    return await supabase.from("class_qr_codes").insert(insertPayload).select().single();
   } catch (err: any) {
     console.error("Error creating QR code:", err);
     return { data: null, error: err.message || "Lỗi khi tạo QR code" };
@@ -65,7 +50,7 @@ const getQRCodeById = async (qrCodeId: string) => {
         *,
         class_rooms (id, title, start_at, end_at),
         class_sessions (id, title, start_at, end_at)
-      `
+      `,
       )
       .eq("id", qrCodeId)
       .single();
@@ -86,7 +71,7 @@ const getQRCodesByClassRoom = async (classRoomId: string) => {
         `
         *,
         class_rooms (id, title, start_at, end_at)
-      `
+      `,
       )
       .eq("class_room_id", classRoomId)
       .order("created_at", { ascending: false });
@@ -107,7 +92,7 @@ const getQRCodesBySession = async (sessionId: string) => {
         `
         *,
         class_sessions (id, title, start_at, end_at)
-      `
+      `,
       )
       .eq("class_session_id", sessionId)
       .order("created_at", { ascending: false });
@@ -233,7 +218,7 @@ const checkInWithQR = async (payload: AttendanceCheckInPayload): Promise<Attenda
         *,
         class_rooms (id),
         class_sessions (id)
-      `
+      `,
       )
       .eq("qr_code", payload.qr_code)
       .single();
@@ -248,7 +233,7 @@ const checkInWithQR = async (payload: AttendanceCheckInPayload): Promise<Attenda
 
     // 3. Lấy class_room_id từ qrCode hoặc từ session
     let classRoomId = qrCode.class_room_id;
-    
+
     if (!classRoomId && qrCode.class_session_id) {
       // Nếu là session, lấy class_room_id từ session
       const { data: session } = await supabase
@@ -256,7 +241,7 @@ const checkInWithQR = async (payload: AttendanceCheckInPayload): Promise<Attenda
         .select("class_room_id")
         .eq("id", qrCode.class_session_id)
         .single();
-      
+
       classRoomId = session?.class_room_id || null;
     }
 
@@ -342,7 +327,7 @@ const getAttendancesByClassRoom = async (classRoomId: string) => {
         *,
         employees (id, employee_code, user_id),
         class_qr_codes (id, title, qr_code)
-      `
+      `,
       )
       .eq("class_room_id", classRoomId)
       .order("attended_at", { ascending: false });
@@ -364,7 +349,7 @@ const getAttendancesBySession = async (sessionId: string) => {
         *,
         employees (id, employee_code, user_id),
         class_qr_codes (id, title, qr_code)
-      `
+      `,
       )
       .eq("class_session_id", sessionId)
       .order("attended_at", { ascending: false });
@@ -387,7 +372,7 @@ const getAttendancesByEmployee = async (employeeId: string) => {
         class_rooms (id, title),
         class_sessions (id, title),
         class_qr_codes (id, title)
-      `
+      `,
       )
       .eq("employee_id", employeeId)
       .order("attended_at", { ascending: false });
@@ -402,12 +387,7 @@ const getAttendancesByEmployee = async (employeeId: string) => {
 
 const updateQRCode = async (qrCodeId: string, updates: UpdateQRCodePayload) => {
   try {
-    const { data, error } = await supabase
-      .from("class_qr_codes")
-      .update(updates)
-      .eq("id", qrCodeId)
-      .select()
-      .single();
+    const { data, error } = await supabase.from("class_qr_codes").update(updates).eq("id", qrCodeId).select().single();
 
     if (error) throw error;
     return { data, error: null };
@@ -456,6 +436,29 @@ const getAttendanceStatsByQRCode = async (qrCodeId: string) => {
   }
 };
 
+const upsertQRCode = async (upSertPayload: UpSertQrCodePayload) => {
+  try {
+    const { qrCode, qrSecret } = generateQRCode();
+
+    return await supabase
+      .from("class_qr_codes")
+      .upsert({
+        ...upSertPayload.payload,
+        title: upSertPayload.payload.title || "",
+        qr_code: qrCode,
+        qr_secret: qrSecret,
+        status: "active" as QRCodeStatus,
+        is_enabled: false,
+        allowed_radius_meters: 200,
+      })
+      .select()
+      .single();
+  } catch (err: any) {
+    console.error("Error creating QR code:", err);
+    return { data: null, error: err.message || "Lỗi khi tạo QR code" };
+  }
+};
+
 export {
   generateQRCode,
   createClassQRCode,
@@ -472,4 +475,5 @@ export {
   updateQRCode,
   deleteQRCode,
   getAttendanceStatsByQRCode,
+  upsertQRCode,
 };

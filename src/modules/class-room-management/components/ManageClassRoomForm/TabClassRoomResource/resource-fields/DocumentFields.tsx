@@ -63,31 +63,26 @@ const DocumentFields: React.FC<DocumentFieldsProps> = ({ className }) => {
       <Typography sx={{ fontSize: "0.875rem", color: "text.secondary", mb: 3 }}>
         * Hỗ trợ tài liệu có dung lượng tối đa 5MB.
       </Typography>
-      {fileList.length ? (
+      {docFields.length ? (
         <div className="flex items-center flex-wrap mb-4 -mx-2">
-          {fileList.map((item, _index) => (
+          {docFields.map((item, _index) => (
             <div key={_index} className="w-32 px-1 mb-2">
               <div className="py-4 px-2 bg-gray-100 relative flex flex-col rounded-lg w-full">
                 <div className="file-icon mx-auto mb-4">
-                  {item.fileType === "images" ? (
+                  {item.type === "images" ? (
                     <FileImageIcon className="w-10 h-10" />
-                  ) : item.fileType === "audios" ? (
+                  ) : item.type === "audios" ? (
                     <FileAdioIcon className="w-10 h-10" />
-                  ) : item.fileType === "docs" ? (
+                  ) : item.type === "docs" ? (
                     <FileWordIcon className="w-10 h-10" />
-                  ) : item.fileType === "videos" ? (
+                  ) : item.type === "videos" ? (
                     <FileVideoIcon className="w-10 h-10" />
                   ) : (
                     <FileUnknownIcon className="w-10 h-10" />
                   )}
                 </div>
-                <div className="file-name line-clamp-2 text-xs">{item.data?.path}</div>
-                {item.isLoading && (
-                  <div className="file-loading absolute left-0 top-0 w-full h-full flex items-center justify-center bg-gray-950/60 z-10">
-                    <span className="text-xs text-white">Đang tải...</span>
-                  </div>
-                )}
-                <IconButton className="w-6 h-6 absolute top-1 right-1">
+                <div className="file-name line-clamp-2 text-xs">{item.url}</div>
+                <IconButton className="w-6 h-6 absolute top-1 right-1" onClick={() => remove(_index)}>
                   <CloseIcon className="w-4 h-4" />
                 </IconButton>
               </div>
@@ -115,27 +110,6 @@ const DocumentFields: React.FC<DocumentFieldsProps> = ({ className }) => {
           </Box>
         }
       />
-
-      {docFields.length ? (
-        <div className="flex flex-col gap-4">
-          {docFields.map((field, _index) => (
-            <div className="faq-field" key={field._docs}>
-              <div className="flex justify-between items-center mb-2">
-                <Typography className="font-bold">Câu {_index + 1}</Typography>
-                {_index !== 0 ? (
-                  <IconButton
-                    size="small"
-                    className="p-0 bg-transparent"
-                    {...(_index !== 0 ? { onClick: () => remove(_index) } : undefined)}
-                  >
-                    <TrashIcon1 className="w-4 h-4" />
-                  </IconButton>
-                ) : null}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : null}
     </div>
   );
 };

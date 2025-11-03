@@ -4,7 +4,6 @@ import StudentsContainer, { StudentsContainerProps } from "./StudentsContainer";
 import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
 import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 import QrSetting from "./QrSetting";
-import { ChevronDownIcon } from "@/shared/assets/icons";
 import { useClassRoomFormContext } from "../ClassRoomFormContainer";
 
 const TabClassRoomSetting = () => {
@@ -35,6 +34,13 @@ const TabClassRoomSetting = () => {
             Thêm học viên <span className="text-red-600">*</span>
           </Typography>
         </div>
+        {/* {!selectedStudents.length ? (
+          <div className="py-2">
+            <Typography sx={(theme) => ({ color: theme.palette.error["main"], fontSize: "0.75rem" })}>
+              {!selectedStudents.length ? "Chưa chọn học viên" : null}
+            </Typography>
+          </div>
+        ) : null} */}
         <StudentsContainer seletedItems={selectedStudents} onChange={handleSelect} />
       </div>
     </div>

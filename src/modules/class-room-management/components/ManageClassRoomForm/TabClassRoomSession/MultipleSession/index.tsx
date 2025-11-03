@@ -14,7 +14,7 @@ import TeacherSelector, { TeacherSelectorRef } from "../class-room-session-field
 import AgendarFields from "../class-room-session-fields/AgendarFields";
 import { initClassSessionFormData } from "..";
 import { MarkerPin01Icon } from "@/shared/assets/icons";
-
+import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
 interface MultipleSessionProps {
   methods: UseFormReturn<ClassRoom>;
 }
@@ -35,41 +35,48 @@ const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
     name: "classRoomSessions",
     keyName: "_sessionId",
   });
+  const getTeachersByIndexSession = useClassRoomStore(({ actions }) => actions.getTeachersByIndexSession);
   const teacherSelectorRefs = useRef(new Map<number, TeacherSelectorRef>());
   const [isTransition, startTransition] = useTransition();
   /**
    * Session init items to validate when click add more button.
    */
-  const [sessionsState, setSessionsState] = useState<{ index: number; isInit: boolean }[]>(() => {
-    return classSessionsFields.map((session, _index) => ({
-      index: _index,
-      isInit: true,
-    }));
-  });
+
+  const [sessionsState, setSessionsState] = useState<{
+    [key: number]: {
+      isInit: boolean;
+    };
+  }>(() => Object.fromEntries(classSessionsFields.map((fields, _index) => [_index, { isInit: true }])));
 
   const hasErrorSession = (index: number): AccordionSessionItemProps["status"] => {
-    if (sessionsState.find((it) => it.index === index)?.isInit) {
+    if (sessionsState[index]?.isInit) {
       return "idle";
     }
     const sessionError = errors.classRoomSessions?.[index];
-
-    if (!sessionError) return "valid";
-
+    const selectedTeacher = getTeachersByIndexSession(index);
     /**
      * qrcode check in tab setting
      */
-    const { qrCode, ...restSessionError } = sessionError;
+    const { qrCode, ...restSessionError } = sessionError || {};
 
-    if (!Object.keys(restSessionError).length) return "valid";
+    if (!selectedTeacher || !selectedTeacher.length || Object.keys(restSessionError).length) return "invalid";
 
-    return "invalid";
+    return "valid";
   };
 
   const handleAddClassSession = async () => {
     /**
      * Mark all section isInited
      */
-    setSessionsState((prev) => prev.map((it) => ({ ...it, isInit: false })));
+    setSessionsState((oldState) => {
+      const newState = { ...oldState };
+      for (const key in newState) {
+        if (newState[key]) {
+          newState[key].isInit = false;
+        }
+      }
+      return newState;
+    });
 
     try {
       const isAllSessionValid = await trigger("classRoomSessions");
@@ -80,7 +87,7 @@ const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
         const nextSessionIndex = classSessionsFields.length;
         const platform = getValues("platform");
         append(initClassSessionFormData({ isOnline: platform === "online" }));
-        setSessionsState((prev) => [...prev, { index: nextSessionIndex, isInit: true }]);
+        setSessionsState((prev) => ({ ...prev, [nextSessionIndex]: { isInit: true } }));
       });
     } catch (err) {
       console.log(err);
@@ -150,6 +157,8 @@ const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
                       tRef && teacherSelectorRefs.current.set(_index, tRef);
                     }}
                     sessionIndex={_index}
+                    error={sessionsState[_index]?.isInit ? undefined : !getTeachersByIndexSession(_index)?.length}
+                    helperText="Hiện chưa có giáo viên nào được chọn"
                   />
                   <div className="h-6"></div>
                   <AgendarFields sessionIndex={_index} />

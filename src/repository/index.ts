@@ -12,6 +12,7 @@ export * as teacherRepository from "./teacher";
 export * as employeeRepository from "./employee";
 export * as classFieldRepository from "./class-room-field";
 export * as hashTagRepository from "./hash-tag";
-export * as classRoomSessionRepository from "./class-room-session";
+export * as classRoomSessionRepository from "./class-session";
 export * as classRoomMetaRepository from "./class-room-meta";
 export * as qrAttendanceRepository from "./qr-attendance";
+export * as classSessionAgendaRepository from "./class-session-agenda";
