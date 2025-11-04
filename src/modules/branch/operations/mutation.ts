@@ -80,3 +80,24 @@ export const useImportBranchesMutation = () => {
     },
   });
 };
+
+export const useGenerateBranchCodeMutation = () => {
+  return useTMutation({
+    mutationFn: async (organizationId: string) => {
+      const response = await fetch("/api/branches/generate-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ organizationId }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to generate branch code");
+      }
+
+      return response.json();
+    },
+  });
+};
