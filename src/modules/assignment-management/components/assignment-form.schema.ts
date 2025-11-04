@@ -1,9 +1,31 @@
 import * as zod from "zod";
+import { Constants } from "@/types/supabase.types";
 
-const questionSchema = zod.object({
-  type: zod.literal("file"),
-  label: zod.string().min(1, { message: "Câu hỏi không được bỏ trống." }),
+const questionTypeValues = Constants.public.Enums.question_type;
+
+const optionSchema = zod.object({
+  id: zod.string(),
+  label: zod.string().min(1, { message: "Tùy chọn không được bỏ trống." }),
+  correct: zod.boolean(),
 });
+
+const questionSchema = zod
+  .object({
+    type: zod.enum(questionTypeValues),
+    label: zod.string().min(1, { message: "Câu hỏi không được bỏ trống." }),
+    options: zod.array(optionSchema).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.type === "checkbox") {
+      if (!data.options || data.options.length === 0) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Câu hỏi trắc nghiệm phải có ít nhất 1 tùy chọn.",
+          path: ["options"],
+        });
+      }
+    }
+  });
 
 const employeeItemSchema = zod.object({
   id: zod.string(),
@@ -27,7 +49,8 @@ const assignmentSchema = zod.object({
 
 type Assignment = zod.infer<typeof assignmentSchema>;
 type Question = zod.infer<typeof questionSchema>;
+type QuestionOption = zod.infer<typeof optionSchema>;
 type EmployeeItem = zod.infer<typeof employeeItemSchema>;
 
-export { assignmentSchema, type Assignment, type Question, type EmployeeItem };
+export { assignmentSchema, type Assignment, type Question, type QuestionOption, type EmployeeItem };
 

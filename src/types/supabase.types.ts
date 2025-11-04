@@ -1171,6 +1171,7 @@ export type Database = {
           created_by: string
           id: string
           label: string
+          options: Json | null
           type: Database["public"]["Enums"]["question_type"]
           updated_at: string
         }
@@ -1180,6 +1181,7 @@ export type Database = {
           created_by: string
           id?: string
           label: string
+          options?: Json | null
           type: Database["public"]["Enums"]["question_type"]
           updated_at?: string
         }
@@ -1189,6 +1191,7 @@ export type Database = {
           created_by?: string
           id?: string
           label?: string
+          options?: Json | null
           type?: Database["public"]["Enums"]["question_type"]
           updated_at?: string
         }

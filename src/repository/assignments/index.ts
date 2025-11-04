@@ -1,6 +1,6 @@
 import { createClient, createSVClient } from "@/services";
 import type { Database } from "@/types/supabase.types";
-import type { AssignmentDto, GetAssignmentsParams } from "@/types/dto/assignments";
+import type { AssignmentDto, GetAssignmentsParams, QuestionOption } from "@/types/dto/assignments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 
 const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedResult<AssignmentDto>> => {
@@ -21,6 +21,7 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
         id,
         label,
         type,
+        options,
         created_at,
         updated_at
       ),
@@ -90,6 +91,7 @@ const getAssignmentById = async (id: string): Promise<AssignmentDto> => {
         id,
         label,
         type,
+        options,
         created_at,
         updated_at
       ),
@@ -173,6 +175,7 @@ export async function createQuestions(
     assignment_id: string;
     type: Database["public"]["Enums"]["question_type"];
     label: string;
+    options?: QuestionOption[] | null;
     created_by: string;
   }>
 ) {

@@ -1,13 +1,24 @@
 "use client";
 import { memo, useCallback } from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
-import { type Assignment, type Question } from "../../assignment-form.schema";
-import { Button, Divider, FormControl, FormLabel, IconButton, MenuItem, Select, Typography } from "@mui/material";
+import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
+import { type Assignment, type Question, type QuestionOption } from "../../assignment-form.schema";
+import { Button, Divider, FormControl, FormLabel, IconButton, MenuItem, Select, Typography, Checkbox, FormControlLabel } from "@mui/material";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
 import { TrashIcon1 } from "@/shared/assets/icons";
+import { v4 as uuidv4 } from "uuid";
+import { Database } from "@/types/supabase.types";
 
 interface TabAssignmentContentProps {}
+
+type QuestionType = Database["public"]["Enums"]["question_type"];
+
+const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
+  file: "File",
+  text: "Tự luận",
+  checkbox: "Trắc nghiệm",
+  radio: "Radio",
+};
 
 const getQuestionInitData = (): Question => {
   return {
@@ -17,7 +28,7 @@ const getQuestionInitData = (): Question => {
 };
 
 const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
-  const { control, trigger } = useFormContext<Assignment>();
+  const { control, trigger, setValue } = useFormContext<Assignment>();
 
   const {
     fields: questionFields,
@@ -39,6 +50,54 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
     append(getQuestionInitData());
   }, [questionFields, trigger, append]);
 
+  const handleQuestionTypeChange = useCallback((index: number, newType: QuestionType) => {
+    setValue(`questions.${index}.type`, newType);
+
+    if (newType === "checkbox") {
+      setValue(`questions.${index}.options`, [
+        { id: uuidv4(), label: "", correct: false }
+      ]);
+    } else {
+      setValue(`questions.${index}.options`, undefined);
+    }
+  }, [setValue]);
+
+  const handleAddOption = useCallback((questionIndex: number, currentOptions: QuestionOption[] = []) => {
+    const newOption: QuestionOption = {
+      id: uuidv4(),
+      label: "",
+      correct: false,
+    };
+    setValue(`questions.${questionIndex}.options`, [...currentOptions, newOption]);
+  }, [setValue]);
+
+  const handleRemoveOption = useCallback((questionIndex: number, optionIndex: number, currentOptions: QuestionOption[] = []) => {
+    const newOptions = currentOptions.filter((_, idx) => idx !== optionIndex);
+    setValue(`questions.${questionIndex}.options`, newOptions);
+  }, [setValue]);
+
+  const handleOptionLabelChange = useCallback((questionIndex: number, optionIndex: number, value: string, currentOptions: QuestionOption[] = []) => {
+    const newOptions = [...currentOptions];
+    const currentOption = newOptions[optionIndex];
+    newOptions[optionIndex] = {
+      id: currentOption?.id || uuidv4(),
+      label: value,
+      correct: currentOption?.correct || false
+    };
+    setValue(`questions.${questionIndex}.options`, newOptions);
+  }, [setValue]);
+
+  const handleOptionCorrectChange = useCallback((questionIndex: number, optionIndex: number, checked: boolean, currentOptions: QuestionOption[] = []) => {
+    const newOptions = [...currentOptions];
+    const currentOption = newOptions[optionIndex];
+    newOptions[optionIndex] = {
+      id: currentOption?.id || uuidv4(),
+      label: currentOption?.label || "",
+      correct: checked
+    };
+    setValue(`questions.${questionIndex}.options`, newOptions);
+  }, [setValue]);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="bg-white rounded-xl p-6">
@@ -53,42 +112,107 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
 
         {questionFields.length > 0 && (
           <div className="flex flex-col gap-4 mb-6">
-            {questionFields.map((field, index) => (
-              <div key={field._questionId} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-start justify-between mb-4">
-                  <Typography className="text-sm font-medium text-gray-700">Câu hỏi {index + 1}</Typography>
-                  <IconButton
-                    size="small"
-                    className="p-0 bg-transparent"
-                    onClick={() => remove(index)}
-                    disabled={questionFields.length === 1}
-                  >
-                    <TrashIcon1 className="w-4 h-4" />
-                  </IconButton>
-                </div>
+            {questionFields.map((field, index) => {
+              const questionType = useWatch({ control, name: `questions.${index}.type` });
+              const questionOptions = useWatch({ control, name: `questions.${index}.options` });
 
-                <div className="flex flex-col gap-4">
-                  <FormControl fullWidth>
-                    <FormLabel className="text-sm mb-2">
-                      Loại câu hỏi <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <Select value="file" disabled size="small">
-                      <MenuItem value="file">File</MenuItem>
-                    </Select>
-                  </FormControl>
+              return (
+                <div key={field._questionId} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-start justify-between mb-4">
+                    <Typography className="text-sm font-medium text-gray-700">Câu hỏi {index + 1}</Typography>
+                    <IconButton
+                      size="small"
+                      className="p-0 bg-transparent"
+                      onClick={() => remove(index)}
+                      disabled={questionFields.length === 1}
+                    >
+                      <TrashIcon1 className="w-4 h-4" />
+                    </IconButton>
+                  </div>
 
-                  <RHFTextField
-                    control={control}
-                    name={`questions.${index}.label`}
-                    label="Nội dung câu hỏi"
-                    placeholder="Nhập nội dung câu hỏi"
-                    required
-                    multiline
-                    rows={2}
-                  />
+                  <div className="flex flex-col gap-4">
+                    <FormControl fullWidth>
+                      <FormLabel className="text-sm mb-2">
+                        Loại câu hỏi <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <Select
+                        value={questionType || "file"}
+                        onChange={(e) => handleQuestionTypeChange(index, e.target.value as QuestionType)}
+                        size="small"
+                      >
+                        <MenuItem value="file">{QUESTION_TYPE_LABELS.file}</MenuItem>
+                        <MenuItem value="text">{QUESTION_TYPE_LABELS.text}</MenuItem>
+                        <MenuItem value="checkbox">{QUESTION_TYPE_LABELS.checkbox}</MenuItem>
+                      </Select>
+                    </FormControl>
+
+                    <RHFTextField
+                      control={control}
+                      name={`questions.${index}.label`}
+                      label="Nội dung câu hỏi"
+                      placeholder="Nhập nội dung câu hỏi"
+                      required
+                    />
+
+                    {questionType === "checkbox" && (
+                      <div className="flex flex-col gap-3">
+                        <FormLabel className="text-sm">
+                          Các tùy chọn <span className="text-red-500">*</span>
+                        </FormLabel>
+
+                        {questionOptions && questionOptions.length > 0 && (
+                          <div className="flex flex-col gap-2">
+                            {questionOptions.map((option, optionIndex) => (
+                              <div key={option.id} className="flex items-center gap-2">
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      checked={option.correct}
+                                      onChange={(e) => handleOptionCorrectChange(index, optionIndex, e.target.checked, questionOptions)}
+                                      size="small"
+                                    />
+                                  }
+                                  label={
+                                    <Typography className="text-xs text-gray-600">
+                                      Đáp án đúng
+                                    </Typography>
+                                  }
+                                  className="mr-2"
+                                />
+                                <input
+                                  type="text"
+                                  value={option.label}
+                                  onChange={(e) => handleOptionLabelChange(index, optionIndex, e.target.value, questionOptions)}
+                                  placeholder={`Tùy chọn ${optionIndex + 1}`}
+                                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleRemoveOption(index, optionIndex, questionOptions)}
+                                  disabled={questionOptions.length === 1}
+                                >
+                                  <TrashIcon1 className="w-4 h-4" />
+                                </IconButton>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <Button
+                          onClick={() => handleAddOption(index, questionOptions)}
+                          startIcon={<PlusIcon />}
+                          variant="outlined"
+                          size="small"
+                          className="self-start"
+                        >
+                          Thêm tùy chọn
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

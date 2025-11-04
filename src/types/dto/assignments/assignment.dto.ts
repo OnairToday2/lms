@@ -1,4 +1,5 @@
 import { Database } from "@/types/supabase.types";
+import { QuestionOption } from "./question-option.dto";
 
 export class AssignmentDto {
   id!: string;
@@ -11,6 +12,7 @@ export class AssignmentDto {
     id: string;
     label: string;
     type: Database["public"]["Enums"]["question_type"];
+    options?: QuestionOption[];
     created_at: string;
     updated_at: string;
   }>;

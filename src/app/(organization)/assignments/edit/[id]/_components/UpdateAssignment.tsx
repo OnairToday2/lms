@@ -48,6 +48,7 @@ const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => 
         questions: assignmentData.questions.map((q) => ({
           type: q.type,
           label: q.label,
+          options: q.options ? (q.options as any) : undefined,
         })),
         assignedEmployees: assignmentData.assignment_employees.map((ae) => ({
           id: ae.employee_id,

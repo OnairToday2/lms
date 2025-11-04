@@ -34,6 +34,7 @@ async function createAssignmentWithRelations(
         assignment_id: assignmentId as string,
         type: question.type,
         label: question.label,
+        options: question.options || null,
         created_by: createdBy,
       }));
 
@@ -105,6 +106,7 @@ async function updateAssignmentWithRelations(payload: UpdateAssignmentDto, updat
       assignment_id: payload.id,
       type: question.type,
       label: question.label,
+      options: question.options || null,
       created_by: updatedBy,
     }));
 

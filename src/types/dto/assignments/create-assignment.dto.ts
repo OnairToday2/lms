@@ -1,4 +1,5 @@
 import { Database } from "@/types/supabase.types";
+import { QuestionOption } from "./question-option.dto";
 
 export class CreateAssignmentDto {
   name!: string;
@@ -7,6 +8,7 @@ export class CreateAssignmentDto {
   questions!: Array<{
     type: Database["public"]["Enums"]["question_type"];
     label: string;
+    options?: QuestionOption[];
   }>;
   assignedEmployees!: string[]; // employee IDs
 }
