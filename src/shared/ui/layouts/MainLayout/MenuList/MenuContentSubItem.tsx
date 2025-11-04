@@ -1,23 +1,11 @@
 import * as React from "react";
 import Link from "next/link";
-import {
-  Typography,
-  Paper,
-  ListItemText,
-  ListItemButton,
-  Collapse,
-  Grow,
-  Box,
-  ListItem,
-} from "@mui/material";
+import { Typography, Paper, ListItemText, ListItemButton, Collapse, Grow, Box, ListItem } from "@mui/material";
 import { type Theme, SxProps } from "@mui/material/styles";
 import type {} from "@mui/material/themeCssVarsAugmentation";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-import MenuContextProvider, {
-  MenuContextApi,
-  useMenuContext,
-} from "./MenuContext";
+import MenuContextProvider, { MenuContextApi, useMenuContext } from "./MenuContext";
 
 export interface MenuContentSubItemProps {
   id: string;
@@ -75,14 +63,9 @@ export default function MenuContentSubItem({
     };
   }
 
-  const hasExternalHref = href
-    ? href.startsWith("http://") || href.startsWith("https://")
-    : false;
+  const hasExternalHref = href ? href.startsWith("http://") || href.startsWith("https://") : false;
 
-  const correctPath = React.useCallback(
-    (path: string) => (path.startsWith("/") ? path : ["/", path].join("")),
-    [],
-  );
+  const correctPath = React.useCallback((path: string) => (path.startsWith("/") ? path : ["/", path].join("")), []);
 
   const LinkComponent = hasExternalHref ? "a" : Link;
 
@@ -118,7 +101,7 @@ export default function MenuContentSubItem({
         marginLeft: "-2px",
         "& .MuiButtonBase-root": {
           minHeight: 42,
-          padding: "10px 6px 10px 18px",
+          padding: "6px 6px 6px 18px",
           borderRadius: 0,
           opacity: 0.7,
           borderLeft: "2px solid transparent",
@@ -212,9 +195,7 @@ export default function MenuContentSubItem({
               }}
             />
           ) : null}
-          {nestedNavigation ? (
-            <ExpandMoreIcon sx={nestedNavigationCollapseSx} />
-          ) : null}
+          {nestedNavigation ? <ExpandMoreIcon sx={nestedNavigationCollapseSx} /> : null}
         </ListItemButton>
         {nestedNavigation && mini ? (
           <Grow in={isHovered}>
@@ -235,9 +216,7 @@ export default function MenuContentSubItem({
                   background: "white",
                 }}
               >
-                <MenuContextProvider value={nestedMenuItemContext}>
-                  {nestedNavigation}
-                </MenuContextProvider>
+                <MenuContextProvider value={nestedMenuItemContext}>{nestedNavigation}</MenuContextProvider>
               </Paper>
             </Box>
           </Grow>

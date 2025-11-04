@@ -7,10 +7,9 @@ export type CreateQRCodePayload = Pick<
   | "checkin_start_time"
   | "checkin_end_time"
   | "created_by"
-> & {
-  class_room_id?: string;
-  class_session_id?: string;
-};
+  | "class_session_id"
+  | "class_room_id"
+>;
 
 export interface QRCodeValidationResult {
   is_valid: boolean;
@@ -48,3 +47,10 @@ export interface UpdateQRCodePayload {
   checkin_start_time?: string | null;
   checkin_end_time?: string | null;
 }
+
+export type UpSertQrCodePayload =
+  | {
+      action: "create";
+      payload: CreateQRCodePayload;
+    }
+  | { action: "update"; payload: UpdateQRCodePayload & { id: string } };

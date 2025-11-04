@@ -33,6 +33,7 @@ const getClassRoomById = async (classRoomId: string) => {
           room_type,
           comunity_info,
           thumbnail_url,
+          documents,
           start_at,
           end_at,
           status,
@@ -88,6 +89,7 @@ const getClassRoomById = async (classRoomId: string) => {
             start_at,
             end_at,
             class_room_id,
+            location,
             is_online,
             channel_provider,
             channel_info,
@@ -121,9 +123,16 @@ const getClassRoomById = async (classRoomId: string) => {
               class_session_id,
               key,
               value
+            ),
+            class_qr_codes(
+              id,
+              class_room_id, 
+              class_session_id, 
+              checkin_start_time, 
+              checkin_end_time
             )
           )
-      `,
+        `,
       )
       .eq("id", classRoomId)
       .single()
@@ -142,6 +151,12 @@ const getClassRoomById = async (classRoomId: string) => {
             password: string;
           };
         }[];
+        documents: {
+          fileExtension: string;
+          size: number;
+          type: string;
+          url: string;
+        }[];
       }>();
     return { data, error };
   } catch (err: any) {
@@ -159,9 +174,9 @@ const createClassRoom = async (payload: CreateClassRoomPayload) => {
   }
 };
 
-const upsertClassRoom = async (payload: UpSertClassRoomPayload) => {
+const upsertClassRoom = async (upsertPayload: UpSertClassRoomPayload) => {
   try {
-    return await supabase.from("class_rooms").upsert(payload).select().single();
+    return await supabase.from("class_rooms").upsert(upsertPayload.payload).select().single();
   } catch (err: any) {
     console.error("Unexpected error:", err);
     throw new Error(err?.message ?? "Unknown error craete Class Room");

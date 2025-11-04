@@ -1,6 +1,5 @@
 import { FieldErrors } from "react-hook-form";
 import { ClassRoom, ClassRoomSession } from "../classroom-form.schema";
-
 import { TAB_KEYS_CLASS_ROOM } from "./ClassRoomFormContainer";
 
 /**
@@ -49,11 +48,11 @@ export const getStatusTabClassRoom = (
 
   const isValid = keyListByTab.every((key) => {
     if (key === "classRoomSessions") {
-      const sessionsError = errors["classRoomSessions"] as FieldErrors<ClassRoomSession>[] | undefined;
+      const sessionsErrors = errors["classRoomSessions"] as FieldErrors<ClassRoomSession>[] | undefined;
 
-      if (!sessionsError) return true;
+      if (!sessionsErrors || !sessionsErrors.length) return true;
 
-      return sessionsError.every((session) => {
+      return sessionsErrors.every((session) => {
         if (!session) return true;
         /**
          * remove Qrcode

@@ -32,7 +32,6 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
   children,
   title,
   onRemove,
-
   status = "idle",
 }) => {
   const [isTransition, startTransition] = useTransition();
