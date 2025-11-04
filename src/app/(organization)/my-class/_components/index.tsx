@@ -281,6 +281,7 @@ const MyClassSection = () => {
                                     thumbnail={item.thumbnail_url ?? ""}
                                     title={item.title!}
                                     slug={item.slug ?? ""}
+                                    classRoomId={item.id ?? undefined}
                                     roomType={(item.room_type as ClassRoomType) ?? ClassRoomType.Single}
                                     sessions={item.class_sessions ?? []}
                                 />

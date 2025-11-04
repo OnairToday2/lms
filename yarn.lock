@@ -4805,6 +4805,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"html5-qrcode@npm:^2.3.8":
+  version: 2.3.8
+  resolution: "html5-qrcode@npm:2.3.8"
+  checksum: 10c0/3d7d0b3687e41a6fc0a06345f67e89ad3c7c00a3d0d8846d6fd31985e1ed2ac1c310e625f0b650dbc689f6b83469e3378417e7431ae5a9194178f1172bf6a93a
+  languageName: node
+  linkType: hard
+
 "http-cache-semantics@npm:^4.1.1":
   version: 4.2.0
   resolution: "http-cache-semantics@npm:4.2.0"
@@ -6052,6 +6059,7 @@ __metadata:
     eslint: "npm:^9"
     eslint-config-next: "npm:15.5.4"
     eslint-config-prettier: "npm:^10.1.8"
+    html5-qrcode: "npm:^2.3.8"
     lodash: "npm:^4.17.21"
     lowlight: "npm:^3.3.0"
     material-ui-popup-state: "npm:^5.3.6"
