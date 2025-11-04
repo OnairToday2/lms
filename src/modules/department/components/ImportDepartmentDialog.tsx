@@ -67,7 +67,7 @@ export function ImportDepartmentDialog({
     setImportSuccess(false);
   };
 
-    const parseFile = async (file: File): Promise<DepartmentImportRow[]> => {
+      const parseFile = async (file: File): Promise<DepartmentImportRow[]> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
 
@@ -90,7 +90,7 @@ export function ImportDepartmentDialog({
             return;
           }
 
-          const jsonData = XLSX.utils.sheet_to_json<any>(firstSheet, { header: 1 });
+          const jsonData = XLSX.utils.sheet_to_json<any>(firstSheet, { header: 1, blankrows: false });
 
           if (jsonData.length < 2) {
             reject(new Error("File phải có ít nhất 1 dòng dữ liệu"));

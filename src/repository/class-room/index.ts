@@ -241,7 +241,7 @@ type DeletePivotClassRoomAndEmployeePayload = {
   class_room_id: string;
   employeeIds: string[];
 };
-const deletePivotClassRoomAndEmployee2 = async (payload: DeletePivotClassRoomAndEmployeePayload) => {
+const deletePivotClassRoomAndEmployeeByEmployeeId = async (payload: DeletePivotClassRoomAndEmployeePayload) => {
   const { error } = await supabase
     .from("class_room_employee")
     .delete()
@@ -711,5 +711,5 @@ export {
   getClassRoomStatusCounts,
   getClassRoomStudents,
   getClassRooms,
-  deletePivotClassRoomAndEmployee2,
+  deletePivotClassRoomAndEmployeeByEmployeeId,
 };

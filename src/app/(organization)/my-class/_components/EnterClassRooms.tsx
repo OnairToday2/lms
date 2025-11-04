@@ -29,6 +29,7 @@ interface EnterClassRoomsDialogProps {
     thumbnail?: string | null;
     classTitle?: string | null;
     onSelectSession: (sessionId: string) => void;
+    actionLabel?: string;
 }
 
 const PALETTE_COLOR_TO_HEX: Record<
@@ -112,6 +113,7 @@ const EnterClassRoomsDialog = ({
     thumbnail,
     classTitle,
     onSelectSession,
+    actionLabel = "Tham gia",
 }: EnterClassRoomsDialogProps) => {
     return (
         <Dialog
@@ -228,7 +230,7 @@ const EnterClassRoomsDialog = ({
                                             onClick={() => canJoin && session.id && onSelectSession(session.id)}
                                             sx={{ minWidth: 120 }}
                                         >
-                                            Tham gia
+                                            {actionLabel}
                                         </Button>
                                     </Box>
                                 </Stack>
