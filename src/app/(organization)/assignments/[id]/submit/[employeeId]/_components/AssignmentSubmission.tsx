@@ -26,7 +26,15 @@ import SubmissionActions from "./SubmissionActions";
 
 interface QuestionAnswer {
   questionId: string;
-  files: File[];
+  questionType: "file" | "text" | "checkbox" | "radio";
+  // For file type
+  files?: File[];
+  // For text type
+  textAnswer?: string;
+  // For radio type
+  radioAnswer?: string;
+  // For checkbox type
+  checkboxAnswers?: string[];
 }
 
 interface SubmissionFormData {
@@ -62,7 +70,11 @@ export default function AssignmentSubmission() {
     if (questions && questions.length > 0) {
       const initialAnswers = questions.map((q) => ({
         questionId: q.id,
-        files: [],
+        questionType: q.type,
+        files: q.type === "file" ? [] : undefined,
+        textAnswer: q.type === "text" ? "" : undefined,
+        radioAnswer: q.type === "radio" ? "" : undefined,
+        checkboxAnswers: q.type === "checkbox" ? [] : undefined,
       }));
       setValue("answers", initialAnswers);
     }
@@ -85,8 +97,8 @@ export default function AssignmentSubmission() {
       const newFiles = Array.from(files);
       const updatedAnswers = [...currentAnswers];
       updatedAnswers[answerIndex] = {
-        questionId: currentAnswer.questionId,
-        files: [...currentAnswer.files, ...newFiles],
+        ...currentAnswer,
+        files: [...(currentAnswer.files || []), ...newFiles],
       };
       setValue("answers", updatedAnswers);
     }
@@ -98,21 +110,88 @@ export default function AssignmentSubmission() {
 
     if (answerIndex >= 0) {
       const currentAnswer = currentAnswers[answerIndex];
-      if (!currentAnswer) return;
+      if (!currentAnswer || !currentAnswer.files) return;
 
       const updatedAnswers = [...currentAnswers];
       const updatedFiles = [...currentAnswer.files];
       updatedFiles.splice(fileIndex, 1);
       updatedAnswers[answerIndex] = {
-        questionId: currentAnswer.questionId,
+        ...currentAnswer,
         files: updatedFiles,
       };
       setValue("answers", updatedAnswers);
     }
   };
 
-  const hasAnyFiles = () => {
-    return answers?.some((answer) => answer.files.length > 0) || false;
+  const handleTextChange = (questionId: string, text: string) => {
+    const currentAnswers = answers || [];
+    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+
+    if (answerIndex >= 0) {
+      const currentAnswer = currentAnswers[answerIndex];
+      if (!currentAnswer) return;
+
+      const updatedAnswers = [...currentAnswers];
+      updatedAnswers[answerIndex] = {
+        questionId: currentAnswer.questionId,
+        questionType: currentAnswer.questionType,
+        textAnswer: text,
+      };
+      setValue("answers", updatedAnswers);
+    }
+  };
+
+  const handleRadioChange = (questionId: string, optionId: string) => {
+    const currentAnswers = answers || [];
+    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+
+    if (answerIndex >= 0) {
+      const currentAnswer = currentAnswers[answerIndex];
+      if (!currentAnswer) return;
+
+      const updatedAnswers = [...currentAnswers];
+      updatedAnswers[answerIndex] = {
+        questionId: currentAnswer.questionId,
+        questionType: currentAnswer.questionType,
+        radioAnswer: optionId,
+      };
+      setValue("answers", updatedAnswers);
+    }
+  };
+
+  const handleCheckboxChange = (questionId: string, optionIds: string[]) => {
+    const currentAnswers = answers || [];
+    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+
+    if (answerIndex >= 0) {
+      const currentAnswer = currentAnswers[answerIndex];
+      if (!currentAnswer) return;
+
+      const updatedAnswers = [...currentAnswers];
+      updatedAnswers[answerIndex] = {
+        questionId: currentAnswer.questionId,
+        questionType: currentAnswer.questionType,
+        checkboxAnswers: optionIds,
+      };
+      setValue("answers", updatedAnswers);
+    }
+  };
+
+  const hasAnyAnswers = () => {
+    return answers?.some((answer) => {
+      switch (answer.questionType) {
+        case "file":
+          return answer.files && answer.files.length > 0;
+        case "text":
+          return answer.textAnswer && answer.textAnswer.trim() !== "";
+        case "radio":
+          return answer.radioAnswer && answer.radioAnswer.trim() !== "";
+        case "checkbox":
+          return answer.checkboxAnswers && answer.checkboxAnswers.length > 0;
+        default:
+          return false;
+      }
+    }) || false;
   };
 
   const onSubmit = async (data: SubmissionFormData) => {
@@ -131,49 +210,104 @@ export default function AssignmentSubmission() {
     setUploadProgress(0);
 
     try {
-      const questionMap = new Map(
-        questions?.map(q => [q.id, q.label]) || []
-      );
+      // Validate that all questions have answers
+      const unansweredQuestions = data.answers.filter((answer) => {
+        switch (answer.questionType) {
+          case "file":
+            return !answer.files || answer.files.length === 0;
+          case "text":
+            return !answer.textAnswer || answer.textAnswer.trim() === "";
+          case "radio":
+            return !answer.radioAnswer || answer.radioAnswer.trim() === "";
+          case "checkbox":
+            return !answer.checkboxAnswers || answer.checkboxAnswers.length === 0;
+          default:
+            return true;
+        }
+      });
 
-      const answersWithFiles = data.answers.filter(answer => answer.files.length > 0);
-
-      if (answersWithFiles.length === 0) {
-        throw new Error("Vui lòng tải lên ít nhất một file");
+      if (unansweredQuestions.length > 0) {
+        throw new Error("Vui lòng trả lời tất cả các câu hỏi");
       }
 
-      const totalFiles = answersWithFiles.reduce((sum, answer) => sum + answer.files.length, 0);
+      // Count total files to upload (only for file type questions)
+      const fileAnswers = data.answers.filter(a => a.questionType === "file" && a.files);
+      const totalFiles = fileAnswers.reduce((sum, answer) => sum + (answer.files?.length || 0), 0);
       let completedFiles = 0;
 
-      const answersWithUrls = await Promise.all(
-        answersWithFiles.map(async (answer) => {
-          const uploadedFileResults = await Promise.all(
-            answer.files.map(async (file) => {
-              const result = await uploadFileToS3(file, {
-                onProgress: (percent) => {
-                  const currentFileProgress = percent / 100;
-                  const overallProgress = Math.round(
-                    ((completedFiles + currentFileProgress) / totalFiles) * 100
-                  );
-                  setUploadProgress(overallProgress);
-                },
-              });
+      // Process answers based on question type
+      const processedAnswers = await Promise.all(
+        data.answers.map(async (answer) => {
+          const question = questions?.find(q => q.id === answer.questionId);
+          if (!question) {
+            throw new Error("Không tìm thấy thông tin câu hỏi");
+          }
 
-              completedFiles++;
-              setUploadProgress(Math.round((completedFiles / totalFiles) * 100));
+          let answerData: string | string[];
 
-              return {
-                url: result.url,
-                fileName: result.fileName,
-                fileType: result.fileType,
-                fileSize: result.fileSize,
-              };
-            })
-          );
+          switch (answer.questionType) {
+            case "file":
+              // Upload files to S3 and get URLs
+              if (!answer.files || answer.files.length === 0) {
+                throw new Error(`Vui lòng tải lên file cho câu hỏi: ${question.label}`);
+              }
+
+              const uploadedUrls = await Promise.all(
+                answer.files.map(async (file) => {
+                  const result = await uploadFileToS3(file, {
+                    onProgress: (percent) => {
+                      if (totalFiles > 0) {
+                        const currentFileProgress = percent / 100;
+                        const overallProgress = Math.round(
+                          ((completedFiles + currentFileProgress) / totalFiles) * 100
+                        );
+                        setUploadProgress(overallProgress);
+                      }
+                    },
+                  });
+
+                  completedFiles++;
+                  if (totalFiles > 0) {
+                    setUploadProgress(Math.round((completedFiles / totalFiles) * 100));
+                  }
+
+                  return result.url;
+                })
+              );
+              answerData = uploadedUrls;
+              break;
+
+            case "text":
+              if (!answer.textAnswer || answer.textAnswer.trim() === "") {
+                throw new Error(`Vui lòng nhập câu trả lời cho câu hỏi: ${question.label}`);
+              }
+              answerData = answer.textAnswer.trim();
+              break;
+
+            case "radio":
+              if (!answer.radioAnswer || answer.radioAnswer.trim() === "") {
+                throw new Error(`Vui lòng chọn đáp án cho câu hỏi: ${question.label}`);
+              }
+              answerData = answer.radioAnswer;
+              break;
+
+            case "checkbox":
+              if (!answer.checkboxAnswers || answer.checkboxAnswers.length === 0) {
+                throw new Error(`Vui lòng chọn ít nhất một đáp án cho câu hỏi: ${question.label}`);
+              }
+              answerData = answer.checkboxAnswers;
+              break;
+
+            default:
+              throw new Error(`Loại câu hỏi không hợp lệ: ${answer.questionType}`);
+          }
 
           return {
             questionId: answer.questionId,
-            questionLabel: questionMap.get(answer.questionId) || "",
-            files: uploadedFileResults,
+            questionLabel: question.label,
+            questionType: answer.questionType,
+            options: question.options,
+            answer: answerData,
           };
         })
       );
@@ -185,7 +319,7 @@ export default function AssignmentSubmission() {
         },
         body: JSON.stringify({
           employeeId,
-          answers: answersWithUrls,
+          answers: processedAnswers,
         }),
       });
 
@@ -283,16 +417,25 @@ export default function AssignmentSubmission() {
 
                 {questions.map((question, index) => {
                   const answer = answers?.find((a) => a.questionId === question.id);
-                  const files = answer?.files || [];
 
                   return (
                     <QuestionCard
                       key={question.id}
                       question={question}
                       questionNumber={index + 1}
-                      files={files}
+                      // File type props
+                      files={answer?.files}
                       onFileSelect={(files) => handleFileSelect(question.id, files)}
                       onRemoveFile={(fileIndex) => handleRemoveFile(question.id, fileIndex)}
+                      // Text type props
+                      textAnswer={answer?.textAnswer}
+                      onTextChange={(text) => handleTextChange(question.id, text)}
+                      // Radio type props
+                      radioAnswer={answer?.radioAnswer}
+                      onRadioChange={(optionId) => handleRadioChange(question.id, optionId)}
+                      // Checkbox type props
+                      checkboxAnswers={answer?.checkboxAnswers}
+                      onCheckboxChange={(optionIds) => handleCheckboxChange(question.id, optionIds)}
                     />
                   );
                 })}
@@ -301,7 +444,7 @@ export default function AssignmentSubmission() {
                 <SubmissionActions
                   onCancel={handleBack}
                   onSubmit={() => {}}
-                  isSubmitDisabled={!hasAnyFiles() || isSubmitting}
+                  isSubmitDisabled={!hasAnyAnswers() || isSubmitting}
                   isSubmitting={isSubmitting}
                 />
               </Stack>

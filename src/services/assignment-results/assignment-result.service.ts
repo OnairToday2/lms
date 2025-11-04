@@ -1,15 +1,16 @@
 import { assignmentResultsRepository } from "@/repository";
 import type { AnswerData } from "@/repository/assignment-results";
+import { Database } from "@/types/supabase.types";
+import { QuestionOption } from "@/types/dto/assignments";
+
+type QuestionType = Database["public"]["Enums"]["question_type"];
 
 export interface QuestionAnswer {
   questionId: string;
   questionLabel: string;
-  files: Array<{
-    url: string;
-    fileName: string;
-    fileType: string;
-    fileSize: number;
-  }>;
+  questionType: QuestionType;
+  options?: QuestionOption[];
+  answer: string | string[]; // Format depends on question type
 }
 
 export interface SubmitAssignmentPayload {
@@ -39,16 +40,17 @@ export async function submitAssignment(
     throw new Error("Bài kiểm tra đã được nộp trước đó. Không thể nộp lại.");
   }
 
-  const answersData: AnswerData[] = answers
-    .filter(answer => answer.files.length > 0)
-    .map(answer => ({
-      questionId: answer.questionId,
-      questionLabel: answer.questionLabel,
-      files: answer.files,
-    }));
+  // Convert answers to storage format
+  const answersData: AnswerData[] = answers.map(answer => ({
+    questionId: answer.questionId,
+    questionLabel: answer.questionLabel,
+    questionType: answer.questionType,
+    options: answer.options,
+    answer: answer.answer,
+  }));
 
   if (answersData.length === 0) {
-    throw new Error("Vui lòng tải lên ít nhất một file trả lời.");
+    throw new Error("Vui lòng trả lời ít nhất một câu hỏi.");
   }
 
   try {
@@ -90,7 +92,7 @@ export async function getSubmissionStatus(
     employeeId: result.employee_id,
     submittedAt: result.created_at,
     grade: result.grade,
-    answers: result.answers as unknown as AnswerData[],
+    answers: result.data as unknown as AnswerData[], // Database uses 'data' field to store answers
   };
 }
 

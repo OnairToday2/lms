@@ -1,18 +1,17 @@
 import { createSVClient } from "@/services";
 import { Database } from "@/types/supabase.types";
+import { QuestionOption } from "@/types/dto/assignments";
 
 type AssignmentResultInsert = Database["public"]["Tables"]["assignment_results"]["Insert"];
 type AssignmentResultRow = Database["public"]["Tables"]["assignment_results"]["Row"];
+type QuestionType = Database["public"]["Enums"]["question_type"];
 
 export interface AnswerData {
   questionId: string;
   questionLabel: string;
-  files: Array<{
-    url: string;
-    fileName: string;
-    fileType: string;
-    fileSize: number;
-  }>;
+  questionType: QuestionType;
+  options?: QuestionOption[];
+  answer: string | string[]; // Format depends on question type
 }
 
 export async function createAssignmentResult(data: {
@@ -26,7 +25,7 @@ export async function createAssignmentResult(data: {
   const insertData: AssignmentResultInsert = {
     assignment_id: data.assignment_id,
     employee_id: data.employee_id,
-    answers: data.answers as any,
+    data: data.answers as any, // Database uses 'data' field to store answers
     grade: data.grade || 0,
   };
 
@@ -75,7 +74,7 @@ export async function updateAssignmentResult(
   const updateData: Database["public"]["Tables"]["assignment_results"]["Update"] = {};
 
   if (data.answers !== undefined) {
-    updateData.answers = data.answers as any;
+    updateData.data = data.answers as any; // Database uses 'data' field to store answers
   }
 
   if (data.grade !== undefined) {

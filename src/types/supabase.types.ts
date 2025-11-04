@@ -1176,6 +1176,7 @@ export type Database = {
           id: string
           label: string
           options: Json | null
+          score: number
           type: Database["public"]["Enums"]["question_type"]
           updated_at: string
         }
@@ -1187,6 +1188,7 @@ export type Database = {
           id?: string
           label: string
           options?: Json | null
+          score: number
           type: Database["public"]["Enums"]["question_type"]
           updated_at?: string
         }
@@ -1198,6 +1200,7 @@ export type Database = {
           id?: string
           label?: string
           options?: Json | null
+          score?: number
           type?: Database["public"]["Enums"]["question_type"]
           updated_at?: string
         }
