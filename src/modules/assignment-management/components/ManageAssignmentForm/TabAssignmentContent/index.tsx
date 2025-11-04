@@ -40,6 +40,8 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
     keyName: "_questionId",
   });
 
+  const watchedQuestions = useWatch({ control, name: "questions" }) || [];
+
   const handleAddQuestion = useCallback(async () => {
     const questionCount = questionFields.length;
 
@@ -113,8 +115,8 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
         {questionFields.length > 0 && (
           <div className="flex flex-col gap-4 mb-6">
             {questionFields.map((field, index) => {
-              const questionType = useWatch({ control, name: `questions.${index}.type` });
-              const questionOptions = useWatch({ control, name: `questions.${index}.options` });
+              const questionType = watchedQuestions[index]?.type || "file";
+              const questionOptions = watchedQuestions[index]?.options || [];
 
               return (
                 <div key={field._questionId} className="border border-gray-200 rounded-lg p-4">
