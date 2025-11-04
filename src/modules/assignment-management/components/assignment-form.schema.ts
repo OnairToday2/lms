@@ -16,13 +16,22 @@ const questionSchema = zod
     options: zod.array(optionSchema).optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.type === "checkbox") {
+    if (data.type === "checkbox" || data.type === "radio") {
       if (!data.options || data.options.length === 0) {
         ctx.addIssue({
           code: "custom",
           message: "Câu hỏi trắc nghiệm phải có ít nhất 1 tùy chọn.",
           path: ["options"],
         });
+      } else {
+        const correctAnswers = data.options.filter((opt) => opt.correct);
+        if (correctAnswers.length === 0) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Vui lòng chọn ít nhất một đáp án đúng.",
+            path: ["options"],
+          });
+        }
       }
     }
   });
