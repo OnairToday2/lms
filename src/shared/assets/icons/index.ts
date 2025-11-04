@@ -11,6 +11,7 @@ import LogoOnairShortIcon from "./LogoOnairShortIcon";
 import SettingIcon from "./SettingIcon";
 import BellIcon from "./BellIcon";
 import BookOpenIcon from "./BookOpenIcon";
+import BarChart10Icon from "./BarChart10Icon";
 import EyeIcon from "./EyeIcon";
 import EyeOffIcon from "./EyeOffIcon";
 import Loading from "./LoadingIcon";
@@ -49,6 +50,7 @@ import FileVideoIcon from "./FileVideoIcon";
 import FileAdioIcon from "./FileAudioIcon";
 
 export {
+  BarChart10Icon,
   BellIcon,
   BookOpenIcon,
   CalendarDateIcon,

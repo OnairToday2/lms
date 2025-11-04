@@ -34,4 +34,8 @@ export const PATHS = {
   STUDENTS: {
     ROOT: "/my-class",
   },
+  REPORTS: {
+    ROOT: "/report",
+    OVER_VIEW: "/report/overview",
+  },
 };
