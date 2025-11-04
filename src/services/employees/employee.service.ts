@@ -81,6 +81,7 @@ async function createEmployeeWithRelations(
       employee_order: employeeOrder,
       start_date: payload.start_date,
       position_id: payload.position_id || null,
+      employee_type: payload.employee_type || null,
       organization_id: organizationId,
       status: "active",
     });
@@ -174,6 +175,7 @@ async function updateEmployeeWithRelations(
     employee_code: payload.employee_code,
     start_date: payload.start_date,
     position_id: payload.position_id || null,
+    employee_type: payload.employee_type || null,
   });
 
   await profilesRepository.updateProfileByEmployeeId(payload.id, {
@@ -221,6 +223,7 @@ async function deleteEmployeeWithRelations(
 ): Promise<void> {
   const userId = await employeesRepository.getEmployeeUserId(employeeId);
 
+  await managersEmployeesRepository.deleteAllManagerRelationshipsForEmployee(employeeId);
   await employmentsRepository.deleteEmploymentsByEmployeeId(employeeId);
   await profilesRepository.deleteProfileByEmployeeId(employeeId);
   await employeesRepository.deleteEmployeeById(employeeId);

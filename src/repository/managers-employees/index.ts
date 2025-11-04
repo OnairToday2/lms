@@ -28,3 +28,16 @@ export async function deleteManagerRelationshipsByEmployeeId(employeeId: string)
   }
 }
 
+export async function deleteAllManagerRelationshipsForEmployee(employeeId: string) {
+  const supabase = await createSVClient();
+
+  const { error } = await supabase
+    .from("managers_employees")
+    .delete()
+    .or(`employee_id.eq.${employeeId},manager_id.eq.${employeeId}`);
+
+  if (error) {
+    throw new Error(`Failed to delete all manager relationships: ${error.message}`);
+  }
+}
+

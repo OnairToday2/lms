@@ -37,26 +37,36 @@ const PAGE_SIZE = 12;
 
 const SESSION_MODE_BADGE_LABEL = {
     online: "Trực tuyến (Live)",
-    offline: "Trực tiếp",
+    offline: "Trực tiếp (In-House)",
     mixed: "Kết hợp",
     pending: "Chưa xác định",
 } as const;
 
-const getSessionModeLabel = (
+const getSessionMode = (
     sessions: ClassRoomPriorityDto["class_sessions"],
-): string => {
+) => {
+
     if (!sessions || sessions.length === 0) {
-        return SESSION_MODE_BADGE_LABEL.pending;
+        return {
+            label: SESSION_MODE_BADGE_LABEL.pending,
+            isOnline: false,
+        };
     }
 
     const hasOnline = sessions.some((session) => Boolean(session?.is_online));
     const hasOffline = sessions.some((session) => session?.is_online === false);
 
     if (hasOnline && hasOffline) {
-        return SESSION_MODE_BADGE_LABEL.mixed;
+        return {
+            label: SESSION_MODE_BADGE_LABEL.mixed,
+            isOnline: false,
+        };
     }
 
-    return hasOnline ? SESSION_MODE_BADGE_LABEL.online : SESSION_MODE_BADGE_LABEL.offline;
+    return {
+        label: hasOnline ? SESSION_MODE_BADGE_LABEL.online : SESSION_MODE_BADGE_LABEL.offline,
+        isOnline: hasOnline
+    };
 };
 
 const PALETTE_COLOR_TO_HEX: Record<"primary" | "error" | "secondary" | "default" | "info" | "success", string> = {
@@ -251,14 +261,15 @@ const MyClassSection = () => {
                         const runtimeStatusLabel =
                             CLASSROOM_RUNTIME_STATUS_LABEL[runtimeStatusKey] ?? item.runtime_status ?? "Chưa xác định";
                         const runtimeStatusColor = getRuntimeStatusColor(runtimeStatusKey)
-                        const sessionModeLabel = getSessionModeLabel(item.class_sessions);
+                        const { label: sessionModeLabel, isOnline } = getSessionMode(item.class_sessions);
                         const participantCount = item.studentCount?.[0]?.count ?? 0;
                         const { label: actionLabel, disabled: actionDisabled } =
-                            getStatusAndLabelBtnJoin(runtimeStatusKey);
+                            getStatusAndLabelBtnJoin(runtimeStatusKey, isOnline);
 
                         return (
                             <Grid key={item.id ?? item.slug} size={{ xs: 12, md: 6, lg: 3 }}>
                                 <ClassRoomCard
+                                    isOnline={isOnline}
                                     actionDisabled={actionDisabled}
                                     actionLabel={actionLabel}
                                     end_at={item.end_at!}

@@ -155,6 +155,67 @@ export const branchRepository = {
   },
 
   /**
+   * Check if branch code already exists
+   */
+  async checkCodeExists(
+    code: string,
+    organizationId: string,
+    excludeId?: string
+  ): Promise<boolean> {
+    const supabase = createClient();
+    let query = supabase
+      .from("organization_units")
+      .select("id")
+      .eq("organization_id", organizationId)
+      .eq("type", "branch")
+      .eq("code", code);
+
+    if (excludeId) {
+      query = query.neq("id", excludeId);
+    }
+
+    const { data, error } = await query.limit(1);
+
+    if (error) throw error;
+    return data && data.length > 0;
+  },
+
+  /**
+   * Generate next branch code (CN001, CN002, etc.)
+   */
+  async generateNextBranchCode(organizationId: string): Promise<string> {
+    const supabase = createClient();
+    
+    // Get all branch codes for this organization
+    const { data, error } = await supabase
+      .from("organization_units")
+      .select("code")
+      .eq("organization_id", organizationId)
+      .eq("type", "branch")
+      .like("code", "CN%");
+
+    if (error) throw error;
+
+    // Extract numeric parts and find the max
+    let maxNumber = 0;
+    if (data && data.length > 0) {
+      data.forEach((item) => {
+        const match = item.code.match(/^CN(\d+)$/);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          if (num > maxNumber) {
+            maxNumber = num;
+          }
+        }
+      });
+    }
+
+    // Generate next code
+    const nextNumber = maxNumber + 1;
+    return `CN${nextNumber.toString().padStart(3, "0")}`;
+  },
+
+  /**
    * Bulk import branches
    */
   async bulkImport(branches: CreateBranchDto[]): Promise<BranchDto[]> {
