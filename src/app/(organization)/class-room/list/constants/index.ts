@@ -1,4 +1,4 @@
-import { ClassRoomRuntimeStatus, ClassRoomStatus, ClassRoomType, ClassSessionMode } from "../types/types";
+import { ClassRoomRuntimeStatusFilter, ClassRoomStatusFilter, ClassRoomTypeFilter, ClassSessionModeFilter } from "../types/types";
 
 export const TABLE_HEAD = [
     { id: "stt", label: "STT", width: 72, align: "center" as const },
@@ -12,32 +12,32 @@ export const TABLE_HEAD = [
 ];
 
 export const RUNTIME_STATUS_OPTIONS = [
-    { label: "Tất cả", value: ClassRoomRuntimeStatus.All, display: true },
-    { label: "Đang diễn ra", value: ClassRoomRuntimeStatus.Ongoing, display: true },
-    { label: "Diễn ra hôm nay", value: ClassRoomRuntimeStatus.Today, display: true },
-    { label: "Sắp diễn ra", value: ClassRoomRuntimeStatus.Upcoming, display: true },
-    { label: "Đã diễn ra", value: ClassRoomRuntimeStatus.Past, display: true },
-    { label: "Nháp", value: ClassRoomRuntimeStatus.Draft, display: false },
+    { label: "Tất cả", value: ClassRoomRuntimeStatusFilter.All, display: true },
+    { label: "Đang diễn ra", value: ClassRoomRuntimeStatusFilter.Ongoing, display: true },
+    { label: "Diễn ra hôm nay", value: ClassRoomRuntimeStatusFilter.Today, display: true },
+    { label: "Sắp diễn ra", value: ClassRoomRuntimeStatusFilter.Upcoming, display: true },
+    { label: "Đã diễn ra", value: ClassRoomRuntimeStatusFilter.Past, display: true },
+    { label: "Nháp", value: ClassRoomRuntimeStatusFilter.Draft, display: false },
 ];
 
 export const PUBLICATION_STATUS_OPTIONS = [
-    { label: "Tất cả", value: ClassRoomStatus.All, display: true },
-    { label: "Bản nháp", value: ClassRoomStatus.Daft, display: true },
-    { label: "Chờ kiểm duyệt", value: ClassRoomStatus.Pending, display: true },
-    { label: "Xuất bản", value: ClassRoomStatus.Publish, display: true },
-    { label: "Đang hoạt động", value: ClassRoomStatus.Active, display: true },
-    { label: "Bị tạm dừng", value: ClassRoomStatus.Deactive, display: false },
-    { label: "Đã xoá", value: ClassRoomStatus.Deleted, display: false },
+    { label: "Tất cả", value: ClassRoomStatusFilter.All, display: true },
+    { label: "Bản nháp", value: ClassRoomStatusFilter.Daft, display: true },
+    { label: "Chờ kiểm duyệt", value: ClassRoomStatusFilter.Pending, display: true },
+    { label: "Xuất bản", value: ClassRoomStatusFilter.Publish, display: true },
+    { label: "Đang hoạt động", value: ClassRoomStatusFilter.Active, display: true },
+    { label: "Bị tạm dừng", value: ClassRoomStatusFilter.Deactive, display: false },
+    { label: "Đã xoá", value: ClassRoomStatusFilter.Deleted, display: false },
 ];
 
 export const TYPE_OPTIONS = [
-    { label: "Tất cả", value: ClassRoomType.All, display: true },
-    { label: "Đơn", value: ClassRoomType.Single, display: true },
-    { label: "Chuỗi", value: ClassRoomType.Multiple, display: true },
+    { label: "Tất cả", value: ClassRoomTypeFilter.All, display: true },
+    { label: "Đơn", value: ClassRoomTypeFilter.Single, display: true },
+    { label: "Chuỗi", value: ClassRoomTypeFilter.Multiple, display: true },
 ];
 
 export const SESSION_MODE_OPTIONS = [
-    { label: "Tất cả", value: ClassSessionMode.All, display: true },
-    { label: "Online", value: ClassSessionMode.Online, display: true },
-    { label: "Offline", value: ClassSessionMode.Offline, display: true },
+    { label: "Tất cả", value: ClassSessionModeFilter.All, display: true },
+    { label: "Online", value: ClassSessionModeFilter.Online, display: true },
+    { label: "Offline", value: ClassSessionModeFilter.Offline, display: true },
 ];

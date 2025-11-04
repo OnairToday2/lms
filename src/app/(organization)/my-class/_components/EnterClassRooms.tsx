@@ -16,7 +16,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { Image } from "@/shared/ui/Image";
-import { ClassRoomRuntimeStatus } from "../../class-room/list/types/types";
+import { ClassRoomRuntimeStatusFilter } from "../../class-room/list/types/types";
 import {
     CLASSROOM_RUNTIME_STATUS_LABEL,
     RUNTIME_STATUS_COLOR_MAP,
@@ -55,36 +55,36 @@ const isSameDay = (dateA: Date, dateB: Date) => {
 const resolveRuntimeStatusByTime = (
     startAt?: string | null,
     endAt?: string | null,
-): ClassRoomRuntimeStatus => {
+): ClassRoomRuntimeStatusFilter => {
     const startDate = startAt ? new Date(startAt) : null;
     const endDate = endAt ? new Date(endAt) : null;
 
     if (!startDate && !endDate) {
-        return ClassRoomRuntimeStatus.All;
+        return ClassRoomRuntimeStatusFilter.All;
     }
 
     const now = new Date();
     const effectiveEnd = endDate ?? startDate;
 
     if (effectiveEnd && effectiveEnd.getTime() < now.getTime()) {
-        return ClassRoomRuntimeStatus.Past;
+        return ClassRoomRuntimeStatusFilter.Past;
     }
 
     if (startDate && startDate.getTime() <= now.getTime() && effectiveEnd && effectiveEnd.getTime() >= now.getTime()) {
-        return ClassRoomRuntimeStatus.Ongoing;
+        return ClassRoomRuntimeStatusFilter.Ongoing;
     }
 
     if (startDate) {
         if (isSameDay(startDate, now)) {
-            return ClassRoomRuntimeStatus.Today;
+            return ClassRoomRuntimeStatusFilter.Today;
         }
 
         if (startDate.getTime() > now.getTime()) {
-            return ClassRoomRuntimeStatus.Upcoming;
+            return ClassRoomRuntimeStatusFilter.Upcoming;
         }
     }
 
-    return ClassRoomRuntimeStatus.All;
+    return ClassRoomRuntimeStatusFilter.All;
 };
 
 const getRuntimeStatusDisplay = (
@@ -92,18 +92,18 @@ const getRuntimeStatusDisplay = (
     endAt?: string | null,
 ) => {
     const resolvedStatus = resolveRuntimeStatusByTime(startAt, endAt);
-    const palette = RUNTIME_STATUS_COLOR_MAP[resolvedStatus] ?? RUNTIME_STATUS_COLOR_MAP[ClassRoomRuntimeStatus.All];
-    const color = PALETTE_COLOR_TO_HEX[palette] ?? PALETTE_COLOR_TO_HEX.default;
+    const palette = RUNTIME_STATUS_COLOR_MAP[resolvedStatus] ?? RUNTIME_STATUS_COLOR_MAP[ClassRoomRuntimeStatusFilter.All];
+    const color = PALETTE_COLOR_TO_HEX[palette!] ?? PALETTE_COLOR_TO_HEX.default;
     const label =
-        CLASSROOM_RUNTIME_STATUS_LABEL[resolvedStatus] ?? CLASSROOM_RUNTIME_STATUS_LABEL[ClassRoomRuntimeStatus.All];
+        CLASSROOM_RUNTIME_STATUS_LABEL[resolvedStatus] ?? CLASSROOM_RUNTIME_STATUS_LABEL[ClassRoomRuntimeStatusFilter.All];
 
     return { color, label, resolvedStatus };
 };
 
-const JOINABLE_STATUSES: Set<ClassRoomRuntimeStatus> = new Set([
-    ClassRoomRuntimeStatus.Ongoing,
-    ClassRoomRuntimeStatus.Today,
-    ClassRoomRuntimeStatus.Upcoming,
+const JOINABLE_STATUSES: Set<ClassRoomRuntimeStatusFilter> = new Set([
+    ClassRoomRuntimeStatusFilter.Ongoing,
+    ClassRoomRuntimeStatusFilter.Today,
+    ClassRoomRuntimeStatusFilter.Upcoming,
 ]);
 
 const EnterClassRoomsDialog = ({

@@ -1,90 +1,90 @@
-import { ClassRoomRuntimeStatus, ClassRoomStatus, ClassRoomType } from "../types/types";
+import { ClassRoomRuntimeStatusFilter, ClassRoomStatusFilter, ClassRoomTypeFilter } from "../types/types";
 
 export const RUNTIME_STATUS_COLOR_MAP: Record<
-  ClassRoomRuntimeStatus,
+  ClassRoomRuntimeStatusFilter,
   "primary" | "error" | "secondary" | "default" | "info" | "success"
 > = {
-  [ClassRoomRuntimeStatus.All]: "default",
-  [ClassRoomRuntimeStatus.Ongoing]: "error",
-  [ClassRoomRuntimeStatus.Today]: "primary",
-  [ClassRoomRuntimeStatus.Upcoming]: "success",
-  [ClassRoomRuntimeStatus.Past]: "default",
-  [ClassRoomRuntimeStatus.Draft]: "info",
+  [ClassRoomRuntimeStatusFilter.All]: "default",
+  [ClassRoomRuntimeStatusFilter.Ongoing]: "error",
+  [ClassRoomRuntimeStatusFilter.Today]: "primary",
+  [ClassRoomRuntimeStatusFilter.Upcoming]: "success",
+  [ClassRoomRuntimeStatusFilter.Past]: "default",
+  [ClassRoomRuntimeStatusFilter.Draft]: "info",
 };
 
 const STATUS_COLOR_MAP: Record<
-  ClassRoomStatus,
+  ClassRoomStatusFilter,
   "primary" | "error" | "secondary" | "default" | "info" | "success"
 > = {
-  [ClassRoomStatus.All]: "default",
-  [ClassRoomStatus.Active]: "error",
-  [ClassRoomStatus.Daft]: "default",
-  [ClassRoomStatus.Deactive]: "success",
-  [ClassRoomStatus.Deleted]: "default",
-  [ClassRoomStatus.Pending]: "info",
-  [ClassRoomStatus.Publish]: "success",
+  [ClassRoomStatusFilter.All]: "default",
+  [ClassRoomStatusFilter.Active]: "error",
+  [ClassRoomStatusFilter.Daft]: "default",
+  [ClassRoomStatusFilter.Deactive]: "success",
+  [ClassRoomStatusFilter.Deleted]: "default",
+  [ClassRoomStatusFilter.Pending]: "info",
+  [ClassRoomStatusFilter.Publish]: "success",
 };
 
 
-export const STATUS_ORDER: ClassRoomRuntimeStatus[] = [
-  ClassRoomRuntimeStatus.All,
-  ClassRoomRuntimeStatus.Ongoing,
-  ClassRoomRuntimeStatus.Today,
-  ClassRoomRuntimeStatus.Upcoming,
-  ClassRoomRuntimeStatus.Past,
-  ClassRoomRuntimeStatus.Draft,
+export const STATUS_ORDER: ClassRoomRuntimeStatusFilter[] = [
+  ClassRoomRuntimeStatusFilter.All,
+  ClassRoomRuntimeStatusFilter.Ongoing,
+  ClassRoomRuntimeStatusFilter.Today,
+  ClassRoomRuntimeStatusFilter.Upcoming,
+  ClassRoomRuntimeStatusFilter.Past,
+  ClassRoomRuntimeStatusFilter.Draft,
 ];
 
-export const CLASSROOM_RUNTIME_STATUS_LABEL: Record<ClassRoomRuntimeStatus, string> = {
-  [ClassRoomRuntimeStatus.All]: "Tất cả",
-  [ClassRoomRuntimeStatus.Ongoing]: "Đang diễn ra",
-  [ClassRoomRuntimeStatus.Today]: "Diễn ra hôm nay",
-  [ClassRoomRuntimeStatus.Upcoming]: "Sắp diễn ra",
-  [ClassRoomRuntimeStatus.Past]: "Đã diễn ra",
-  [ClassRoomRuntimeStatus.Draft]: "Bản nháp",
+export const CLASSROOM_RUNTIME_STATUS_LABEL: Record<ClassRoomRuntimeStatusFilter, string> = {
+  [ClassRoomRuntimeStatusFilter.All]: "Tất cả",
+  [ClassRoomRuntimeStatusFilter.Ongoing]: "Đang diễn ra",
+  [ClassRoomRuntimeStatusFilter.Today]: "Diễn ra hôm nay",
+  [ClassRoomRuntimeStatusFilter.Upcoming]: "Sắp diễn ra",
+  [ClassRoomRuntimeStatusFilter.Past]: "Đã diễn ra",
+  [ClassRoomRuntimeStatusFilter.Draft]: "Bản nháp",
 };
 
-export const CLASSROOM_TYPE_LABEL: Record<ClassRoomType, string> = {
-  [ClassRoomType.All]: "Tất cả",
-  [ClassRoomType.Multiple]: "Chuỗi",
-  [ClassRoomType.Single]: "Đơn",
+export const CLASSROOM_TYPE_LABEL: Record<ClassRoomTypeFilter, string> = {
+  [ClassRoomTypeFilter.All]: "Tất cả",
+  [ClassRoomTypeFilter.Multiple]: "Chuỗi",
+  [ClassRoomTypeFilter.Single]: "Đơn",
 };
 
-export const CLASSROOM_STATUS_LABEL: Record<ClassRoomStatus, string> = {
-  [ClassRoomStatus.All]: "Tất cả",
-  [ClassRoomStatus.Active]: "Hoạt động",
-  [ClassRoomStatus.Daft]: "Bản nháp",
-  [ClassRoomStatus.Deactive]: "Vô hiệu hóa",
-  [ClassRoomStatus.Deleted]: "Đã xóa",
-  [ClassRoomStatus.Pending]: "Chờ kiểm duyệt",
-  [ClassRoomStatus.Publish]: "Xuất bản",
+export const CLASSROOM_STATUS_LABEL: Record<ClassRoomStatusFilter, string> = {
+  [ClassRoomStatusFilter.All]: "Tất cả",
+  [ClassRoomStatusFilter.Active]: "Hoạt động",
+  [ClassRoomStatusFilter.Daft]: "Bản nháp",
+  [ClassRoomStatusFilter.Deactive]: "Vô hiệu hóa",
+  [ClassRoomStatusFilter.Deleted]: "Đã xóa",
+  [ClassRoomStatusFilter.Pending]: "Chờ kiểm duyệt",
+  [ClassRoomStatusFilter.Publish]: "Xuất bản",
 };
 
-export const getClassRoomTypeLabel = (status: ClassRoomType) =>
-  CLASSROOM_TYPE_LABEL[status] ?? CLASSROOM_TYPE_LABEL[ClassRoomType.All];
+export const getClassRoomTypeLabel = (status: ClassRoomTypeFilter) =>
+  CLASSROOM_TYPE_LABEL[status] ?? CLASSROOM_TYPE_LABEL[ClassRoomTypeFilter.All];
 
-export const getClassRoomStatusLabel = (status: ClassRoomStatus) =>
-  CLASSROOM_STATUS_LABEL[status] ?? CLASSROOM_STATUS_LABEL[ClassRoomStatus.All];
+export const getClassRoomStatusLabel = (status: ClassRoomStatusFilter) =>
+  CLASSROOM_STATUS_LABEL[status] ?? CLASSROOM_STATUS_LABEL[ClassRoomStatusFilter.All];
 
-export const getColorClassRoomStatus = (status: ClassRoomStatus) =>
-  STATUS_COLOR_MAP[status] ?? STATUS_COLOR_MAP[ClassRoomStatus.All];
+export const getColorClassRoomStatus = (status: ClassRoomStatusFilter) =>
+  STATUS_COLOR_MAP[status] ?? STATUS_COLOR_MAP[ClassRoomStatusFilter.All];
 
-export const getClassRoomRuntimeStatusLabel = (status: ClassRoomRuntimeStatus) =>
-  CLASSROOM_RUNTIME_STATUS_LABEL[status] ?? CLASSROOM_RUNTIME_STATUS_LABEL[ClassRoomRuntimeStatus.All];
+export const getClassRoomRuntimeStatusLabel = (status: ClassRoomRuntimeStatusFilter) =>
+  CLASSROOM_RUNTIME_STATUS_LABEL[status] ?? CLASSROOM_RUNTIME_STATUS_LABEL[ClassRoomRuntimeStatusFilter.All];
 
-export const getColorClassRoomRuntimeStatus = (status: ClassRoomRuntimeStatus) =>
-  RUNTIME_STATUS_COLOR_MAP[status] ?? RUNTIME_STATUS_COLOR_MAP[ClassRoomRuntimeStatus.All];
+export const getColorClassRoomRuntimeStatus = (status: ClassRoomRuntimeStatusFilter) =>
+  RUNTIME_STATUS_COLOR_MAP[status] ?? RUNTIME_STATUS_COLOR_MAP[ClassRoomRuntimeStatusFilter.All];
 
-export const getStatusAndLabelBtnJoin = (status: ClassRoomRuntimeStatus, isOnline: boolean): { label: string, disabled: boolean } => {
+export const getStatusAndLabelBtnJoin = (status: ClassRoomRuntimeStatusFilter, isOnline: boolean): { label: string, disabled: boolean } => {
   switch (status) {
-    case ClassRoomRuntimeStatus.Draft:
+    case ClassRoomRuntimeStatusFilter.Draft:
       return {
         label: "Đăng tải",
         disabled: false,
       }
-    case ClassRoomRuntimeStatus.Upcoming:
-    case ClassRoomRuntimeStatus.Today:
-    case ClassRoomRuntimeStatus.Ongoing:
+    case ClassRoomRuntimeStatusFilter.Upcoming:
+    case ClassRoomRuntimeStatusFilter.Today:
+    case ClassRoomRuntimeStatusFilter.Ongoing:
       if (isOnline) {
         return {
           label: "Vào lớp học",
@@ -96,7 +96,7 @@ export const getStatusAndLabelBtnJoin = (status: ClassRoomRuntimeStatus, isOnlin
           disabled: false,
         }
       }
-    case ClassRoomRuntimeStatus.Past:
+    case ClassRoomRuntimeStatusFilter.Past:
       return {
         label: "Đã diễn ra",
         disabled: true,

@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { ClassRoomPriorityDto } from "@/types/dto/classRooms/classRoom.dto";
+import { ClassRoomPriorityDto, EmployeeWithProfileDto } from "@/types/dto/classRooms/classRoom.dto";
 import { fDate, FORMAT_DATE_TIME } from "@/lib";
 import { useDeleteClassRoomMutation } from "@/modules/class-room-management/operations/mutation";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
@@ -29,7 +29,7 @@ import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/shared/ui/custom-dialog";
 import { useState } from "react";
 import { TABLE_HEAD } from "../constants";
-import { ClassRoomRuntimeStatus, ClassRoomStatus, ClassRoomType, EmployeeWithProfile } from "../types/types";
+import { ClassRoomRuntimeStatusFilter, ClassRoomStatusFilter, ClassRoomTypeFilter } from "../types/types";
 import { getClassRoomRuntimeStatusLabel, getClassRoomStatusLabel, getClassRoomTypeLabel, getColorClassRoomRuntimeStatus, getColorClassRoomStatus } from "../utils/status";
 
 
@@ -54,12 +54,13 @@ export default function ClassRoomListTable({
   const [isAllowDelete, setIsAllowDelete] = useState(false);
   const [classRoomId, setClassRoomId] = useState<string>();
 
-  const handleOpenDeleteClassRoom = (room: ClassRoomPriorityDto, teachers: EmployeeWithProfile[]) => {
+  const handleOpenDeleteClassRoom = (room: ClassRoomPriorityDto) => {
     setClassRoomId(room.id as string);
-    setIsOpenDialogDelete(true)
-    if (room.status === ClassRoomStatus.Daft) {
+    setIsOpenDialogDelete(true);
+
+    if (room.status === ClassRoomStatusFilter.Daft) {
       setIsAllowDelete(true);
-    } else if (room.status === ClassRoomStatus.Publish && !room.assignees && !teachers) {
+    } else if (room.status === ClassRoomStatusFilter.Publish && room?.assignees?.length === 0) {
       setIsAllowDelete(true);
     } else {
       setIsAllowDelete(false);
@@ -137,7 +138,7 @@ export default function ClassRoomListTable({
                 const teacherAssignments =
                   room.class_sessions?.flatMap((session) => session.teacherAssignments ?? []) ?? [];
 
-                const teacherMap = new Map<string, EmployeeWithProfile>();
+                const teacherMap = new Map<string, EmployeeWithProfileDto>();
                 teacherAssignments.forEach((assignment) => {
                   const teacher = assignment.teacher;
                   if (!teacher?.id) {
@@ -167,7 +168,7 @@ export default function ClassRoomListTable({
                     <TableCell align="left">
                       <Stack direction="column" alignItems="flex-start">
                         <Chip
-                          label={getClassRoomTypeLabel(room?.room_type as ClassRoomType)}
+                          label={getClassRoomTypeLabel(room?.room_type as ClassRoomTypeFilter)}
                           color="warning"
                         />
                         <Typography variant="subtitle2" fontWeight={600} className="line-clamp-2">
@@ -197,18 +198,18 @@ export default function ClassRoomListTable({
                     </TableCell>
                     <TableCell align="center">
                       <Chip
-                        label={getClassRoomStatusLabel(room?.status as ClassRoomStatus)}
+                        label={getClassRoomStatusLabel(room?.status as ClassRoomStatusFilter)}
                         size="small"
-                        color={getColorClassRoomStatus(room?.status as ClassRoomStatus)}
+                        color={getColorClassRoomStatus(room?.status as ClassRoomStatusFilter)}
                         variant="outlined"
                         sx={{ fontWeight: 500 }}
                       />
                     </TableCell>
                     <TableCell align="center">
                       <Chip
-                        label={getClassRoomRuntimeStatusLabel(room?.runtime_status as ClassRoomRuntimeStatus)}
+                        label={getClassRoomRuntimeStatusLabel(room?.runtime_status as ClassRoomRuntimeStatusFilter)}
                         size="small"
-                        color={getColorClassRoomRuntimeStatus(room?.runtime_status as ClassRoomRuntimeStatus)}
+                        color={getColorClassRoomRuntimeStatus(room?.runtime_status as ClassRoomRuntimeStatusFilter)}
                         variant="filled"
                         sx={{ fontWeight: 500 }}
                       />
@@ -237,8 +238,8 @@ export default function ClassRoomListTable({
                             <Menu {...bindMenu(popupState)}>
                               <MenuItem onClick={() => { }}>Xem chi tiết lớp học</MenuItem>
                               <MenuItem onClick={() => { }}>Chỉnh sửa</MenuItem>
-                              <MenuItem onClick={() => handleOpenDeleteClassRoom(room, teachers)}>Xoá lớp học</MenuItem>
-                              <MenuItem onClick={() => { router.push(`students/${room.id}`) }}>Danh sách học viên</MenuItem>
+                              <MenuItem onClick={() => handleOpenDeleteClassRoom(room)}>Xoá lớp học</MenuItem>
+                              <MenuItem onClick={() => { router.push(`${room.id}/students`) }}>Danh sách học viên</MenuItem>
                             </Menu>
                           </>
                         )}

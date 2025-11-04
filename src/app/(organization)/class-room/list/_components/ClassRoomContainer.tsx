@@ -11,10 +11,10 @@ import {
 } from "@mui/material";
 import {
   ClassRoomFilters,
-  ClassRoomRuntimeStatus,
-  ClassRoomStatus,
-  ClassRoomType,
-  ClassSessionMode,
+  ClassRoomRuntimeStatusFilter,
+  ClassRoomStatusFilter,
+  ClassRoomTypeFilter,
+  ClassSessionModeFilter,
 } from "../types/types";
 import {
   GetClassRoomsQueryInput,
@@ -27,10 +27,10 @@ import ClassRoomListTable from "./ClassRoomListTable";
 import { redirect } from "next/navigation";
 
 const initialFilters: ClassRoomFilters = {
-  type: ClassRoomType.All,
-  sessionMode: ClassSessionMode.All,
-  runtimeStatus: ClassRoomRuntimeStatus.All,
-  status: ClassRoomStatus.All,
+  type: ClassRoomTypeFilter.All,
+  sessionMode: ClassSessionModeFilter.All,
+  runtimeStatus: ClassRoomRuntimeStatusFilter.All,
+  status: ClassRoomStatusFilter.All,
   search: "",
   startDate: null,
   endDate: null,
@@ -106,7 +106,7 @@ export default function ClassRoomContainer() {
     }));
   };
 
-  const handleRuntimeStatusChange = (runtimeStatus: ClassRoomRuntimeStatus) => {
+  const handleRuntimeStatusChange = (runtimeStatus: ClassRoomRuntimeStatusFilter) => {
     setPage(1);
     setFilters((prev) => ({
       ...prev,
@@ -114,7 +114,7 @@ export default function ClassRoomContainer() {
     }));
   }
 
-  const handleStausChange = (status: ClassRoomStatus) => {
+  const handleStausChange = (status: ClassRoomStatusFilter) => {
     setPage(1);
     setFilters((prev) => ({
       ...prev,
@@ -122,7 +122,7 @@ export default function ClassRoomContainer() {
     }));
   }
 
-  const handleTypeChange = (type: ClassRoomType) => {
+  const handleTypeChange = (type: ClassRoomTypeFilter) => {
     setPage(1);
     setFilters((prev) => ({
       ...prev,
@@ -130,7 +130,7 @@ export default function ClassRoomContainer() {
     }));
   }
 
-  const handleSessionModeChange = (mode: ClassSessionMode) => {
+  const handleSessionModeChange = (mode: ClassSessionModeFilter) => {
     setPage(1);
     setFilters((prev) => ({
       ...prev,

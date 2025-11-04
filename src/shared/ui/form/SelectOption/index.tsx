@@ -17,11 +17,12 @@ interface PropTypes {
         message?: string,
     },
     options?: OPTION[] | undefined,
-    className: string,
+    className?: string,
+    size?: "small" | "medium"
 }
 
 export const SelectOption: React.FC<PropTypes> = (props) => {
-    const { inputLabel, value = '', name, onChange, error, options = [], ...others } = props;
+    const { inputLabel, value = '', name, onChange, error, options = [], size, ...others } = props;
 
     const labelId = `${name}-select-option`;
 
@@ -52,6 +53,7 @@ export const SelectOption: React.FC<PropTypes> = (props) => {
                 value={value}
                 onChange={handleChange}
                 {...others}
+                size={size}
             >
                 {renderMoreItem}
             </Select>
