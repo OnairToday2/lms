@@ -75,6 +75,12 @@ const MAIN_MENU_LIST: MenuItemType[] = [
         key: "assignments/create",
         path: PATHS.ASSIGNMENTS.CREATE_ASSIGNMENT,
       },
+      {
+        title: "Danh sách bài kiểm tra",
+        icon: React.createElement(ClipboardIcon),
+        key: "assignments",
+        path: PATHS.ASSIGNMENTS.ROOT,
+      },
     ],
   },
   {
