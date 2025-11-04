@@ -14,10 +14,10 @@ interface TabAssignmentContentProps {}
 type QuestionType = Database["public"]["Enums"]["question_type"];
 
 const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
-  file: "File",
+  file: "Tệp tin",
   text: "Tự luận",
-  checkbox: "Trắc nghiệm",
-  radio: "Radio",
+  checkbox: "Trắc nghiệm (nhiều câu trả lời đúng)",
+  radio: "Trắc nghiệm (1 câu trả lời đúng)",
 };
 
 const getQuestionInitData = (): Question => {
@@ -28,7 +28,7 @@ const getQuestionInitData = (): Question => {
 };
 
 const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
-  const { control, trigger, setValue } = useFormContext<Assignment>();
+  const { control, setValue } = useFormContext<Assignment>();
 
   const {
     fields: questionFields,
@@ -42,20 +42,14 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
 
   const watchedQuestions = useWatch({ control, name: "questions" }) || [];
 
-  const handleAddQuestion = useCallback(async () => {
-    const questionCount = questionFields.length;
-
-    if (questionCount > 0) {
-      const isValidAllFields = await trigger("questions");
-      if (!isValidAllFields) return;
-    }
+  const handleAddQuestion = useCallback(() => {
     append(getQuestionInitData());
-  }, [questionFields, trigger, append]);
+  }, [append]);
 
   const handleQuestionTypeChange = useCallback((index: number, newType: QuestionType) => {
     setValue(`questions.${index}.type`, newType);
 
-    if (newType === "checkbox") {
+    if (newType === "checkbox" || newType === "radio") {
       setValue(`questions.${index}.options`, [
         { id: uuidv4(), label: "", correct: false }
       ]);
@@ -78,19 +72,17 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
     setValue(`questions.${questionIndex}.options`, newOptions);
   }, [setValue]);
 
-  const handleOptionLabelChange = useCallback((questionIndex: number, optionIndex: number, value: string, currentOptions: QuestionOption[] = []) => {
+  const handleOptionCorrectChange = useCallback((questionIndex: number, optionIndex: number, checked: boolean, currentOptions: QuestionOption[] = [], questionType?: QuestionType) => {
     const newOptions = [...currentOptions];
-    const currentOption = newOptions[optionIndex];
-    newOptions[optionIndex] = {
-      id: currentOption?.id || uuidv4(),
-      label: value,
-      correct: currentOption?.correct || false
-    };
-    setValue(`questions.${questionIndex}.options`, newOptions);
-  }, [setValue]);
 
-  const handleOptionCorrectChange = useCallback((questionIndex: number, optionIndex: number, checked: boolean, currentOptions: QuestionOption[] = []) => {
-    const newOptions = [...currentOptions];
+    if (questionType === "radio" && checked) {
+      newOptions.forEach((opt, idx) => {
+        if (idx !== optionIndex) {
+          newOptions[idx] = { ...opt, correct: false };
+        }
+      });
+    }
+
     const currentOption = newOptions[optionIndex];
     newOptions[optionIndex] = {
       id: currentOption?.id || uuidv4(),
@@ -145,6 +137,7 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
                         <MenuItem value="file">{QUESTION_TYPE_LABELS.file}</MenuItem>
                         <MenuItem value="text">{QUESTION_TYPE_LABELS.text}</MenuItem>
                         <MenuItem value="checkbox">{QUESTION_TYPE_LABELS.checkbox}</MenuItem>
+                        <MenuItem value="radio">{QUESTION_TYPE_LABELS.radio}</MenuItem>
                       </Select>
                     </FormControl>
 
@@ -156,7 +149,7 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
                       required
                     />
 
-                    {questionType === "checkbox" && (
+                    {(questionType === "checkbox" || questionType === "radio") && (
                       <div className="flex flex-col gap-3">
                         <FormLabel className="text-sm">
                           Các tùy chọn <span className="text-red-500">*</span>
@@ -165,12 +158,12 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
                         {questionOptions && questionOptions.length > 0 && (
                           <div className="flex flex-col gap-2">
                             {questionOptions.map((option, optionIndex) => (
-                              <div key={option.id} className="flex items-center gap-2">
+                              <div key={option.id} className="flex items-start gap-2">
                                 <FormControlLabel
                                   control={
                                     <Checkbox
                                       checked={option.correct}
-                                      onChange={(e) => handleOptionCorrectChange(index, optionIndex, e.target.checked, questionOptions)}
+                                      onChange={(e) => handleOptionCorrectChange(index, optionIndex, e.target.checked, questionOptions, questionType)}
                                       size="small"
                                     />
                                   }
@@ -179,19 +172,19 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
                                       Đáp án đúng
                                     </Typography>
                                   }
-                                  className="mr-2"
+                                  className="mr-2 mt-2"
                                 />
-                                <input
-                                  type="text"
-                                  value={option.label}
-                                  onChange={(e) => handleOptionLabelChange(index, optionIndex, e.target.value, questionOptions)}
+                                <RHFTextField
+                                  control={control}
+                                  name={`questions.${index}.options.${optionIndex}.label`}
                                   placeholder={`Tùy chọn ${optionIndex + 1}`}
-                                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="flex-1"
                                 />
                                 <IconButton
                                   size="small"
                                   onClick={() => handleRemoveOption(index, optionIndex, questionOptions)}
                                   disabled={questionOptions.length === 1}
+                                  className="mt-2"
                                 >
                                   <TrashIcon1 className="w-4 h-4" />
                                 </IconButton>

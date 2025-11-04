@@ -21,19 +21,8 @@ const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => 
   const { data: assignmentData, isPending: isLoading } = useGetAssignmentQuery(assignmentId);
 
   const handleUpdateAssignment: ManageAssignmentFormProps["onSubmit"] = (formData) => {
-    const processedQuestions = formData.questions.map((question) => {
-      if (question.type === "checkbox" && question.options) {
-        const correctAnswers = question.options.filter((opt) => opt.correct);
-        if (correctAnswers.length === 1) {
-          return { ...question, type: "radio" as const };
-        }
-      }
-      return question;
-    });
-
     const payload = {
       ...formData,
-      questions: processedQuestions,
       id: assignmentId,
       assignedEmployees: formData.assignedEmployees.map((emp) => emp.id),
     };

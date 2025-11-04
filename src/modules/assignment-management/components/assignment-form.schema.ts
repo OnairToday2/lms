@@ -25,12 +25,29 @@ const questionSchema = zod
         });
       } else {
         const correctAnswers = data.options.filter((opt) => opt.correct);
-        if (correctAnswers.length === 0) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Vui lòng chọn ít nhất một đáp án đúng.",
-            path: ["options"],
-          });
+
+        if (data.type === "radio") {
+          if (correctAnswers.length === 0) {
+            ctx.addIssue({
+              code: "custom",
+              message: "Vui lòng chọn đúng 1 đáp án đúng.",
+              path: ["options"],
+            });
+          } else if (correctAnswers.length > 1) {
+            ctx.addIssue({
+              code: "custom",
+              message: "Câu hỏi trắc nghiệm (1 câu trả lời đúng) chỉ được có 1 đáp án đúng.",
+              path: ["options"],
+            });
+          }
+        } else if (data.type === "checkbox") {
+          if (correctAnswers.length === 0) {
+            ctx.addIssue({
+              code: "custom",
+              message: "Vui lòng chọn ít nhất một đáp án đúng.",
+              path: ["options"],
+            });
+          }
         }
       }
     }

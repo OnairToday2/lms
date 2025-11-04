@@ -16,19 +16,8 @@ export default function CreateAssignmentPage() {
   const { mutate: createAssignment, isPending: isLoading } = useCreateAssignmentMutation();
 
   const handleCreateAssignment: ManageAssignmentFormProps["onSubmit"] = (formData) => {
-    const processedQuestions = formData.questions.map((question) => {
-      if (question.type === "checkbox" && question.options) {
-        const correctAnswers = question.options.filter((opt) => opt.correct);
-        if (correctAnswers.length === 1) {
-          return { ...question, type: "radio" as const };
-        }
-      }
-      return question;
-    });
-
     const payload = {
       ...formData,
-      questions: processedQuestions,
       assignedEmployees: formData.assignedEmployees.map((emp) => emp.id),
     };
 
