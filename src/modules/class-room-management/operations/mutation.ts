@@ -9,7 +9,7 @@ export const useDeleteClassRoomMutation = () => {
 
 export const useDeleteUserInClassRoomMutation = () => {
     return useTMutation({
-        mutationFn: (payload: { class_room_id: string, employeeIds: string[] }) => classRoomRepository.deletePivotClassRoomAndEmployee(payload),
+        mutationFn: (payload: { class_room_id: string, employeeIds: string[] }) => classRoomRepository.deletePivotClassRoomAndEmployeeByEmployeeId(payload),
     });
 };
 
