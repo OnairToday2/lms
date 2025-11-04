@@ -5,6 +5,7 @@ export interface AssignmentQuestionDto {
   assignment_id: string;
   label: string;
   type: Database["public"]["Enums"]["question_type"];
+  attachments?: string[] | null;
   created_at: string;
   updated_at: string;
   created_by: string;

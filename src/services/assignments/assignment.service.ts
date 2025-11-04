@@ -35,6 +35,7 @@ async function createAssignmentWithRelations(
         type: question.type,
         label: question.label,
         options: question.options || null,
+        attachments: question.attachments || null,
         created_by: createdBy,
       }));
 
@@ -107,6 +108,7 @@ async function updateAssignmentWithRelations(payload: UpdateAssignmentDto, updat
       type: question.type,
       label: question.label,
       options: question.options || null,
+      attachments: question.attachments || null,
       created_by: updatedBy,
     }));
 

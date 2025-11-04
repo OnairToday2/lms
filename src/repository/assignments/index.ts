@@ -92,6 +92,7 @@ const getAssignmentById = async (id: string): Promise<AssignmentDto> => {
         label,
         type,
         options,
+        attachments,
         created_at,
         updated_at
       ),
@@ -176,6 +177,7 @@ export async function createQuestions(
     type: Database["public"]["Enums"]["question_type"];
     label: string;
     options?: QuestionOption[] | null;
+    attachments?: string[] | null;
     created_by: string;
   }>
 ) {

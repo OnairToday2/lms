@@ -79,6 +79,7 @@ export type Database = {
         Row: {
           assignment_id: string
           created_at: string
+          data: Json | null
           employee_id: string
           grade: number
           id: string
@@ -86,6 +87,7 @@ export type Database = {
         Insert: {
           assignment_id: string
           created_at?: string
+          data?: Json | null
           employee_id: string
           grade: number
           id?: string
@@ -93,6 +95,7 @@ export type Database = {
         Update: {
           assignment_id?: string
           created_at?: string
+          data?: Json | null
           employee_id?: string
           grade?: number
           id?: string
@@ -1167,6 +1170,7 @@ export type Database = {
       questions: {
         Row: {
           assignment_id: string
+          attachments: string[] | null
           created_at: string
           created_by: string
           id: string
@@ -1177,6 +1181,7 @@ export type Database = {
         }
         Insert: {
           assignment_id: string
+          attachments?: string[] | null
           created_at?: string
           created_by: string
           id?: string
@@ -1187,6 +1192,7 @@ export type Database = {
         }
         Update: {
           assignment_id?: string
+          attachments?: string[] | null
           created_at?: string
           created_by?: string
           id?: string

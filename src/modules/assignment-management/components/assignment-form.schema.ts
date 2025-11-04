@@ -14,6 +14,7 @@ const questionSchema = zod
     type: zod.enum(questionTypeValues),
     label: zod.string().min(1, { message: "Câu hỏi không được bỏ trống." }),
     options: zod.array(optionSchema).optional(),
+    attachments: zod.array(zod.string()).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.type === "checkbox" || data.type === "radio") {

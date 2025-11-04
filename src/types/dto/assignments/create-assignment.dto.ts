@@ -9,6 +9,7 @@ export class CreateAssignmentDto {
     type: Database["public"]["Enums"]["question_type"];
     label: string;
     options?: QuestionOption[];
+    attachments?: string[];
   }>;
   assignedEmployees!: string[]; // employee IDs
 }

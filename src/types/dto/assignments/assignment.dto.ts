@@ -13,6 +13,7 @@ export class AssignmentDto {
     label: string;
     type: Database["public"]["Enums"]["question_type"];
     options?: QuestionOption[];
+    attachments?: string[];
     created_at: string;
     updated_at: string;
   }>;

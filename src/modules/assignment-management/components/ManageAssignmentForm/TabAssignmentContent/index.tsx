@@ -8,6 +8,7 @@ import PlusIcon from "@/shared/assets/icons/PlusIcon";
 import { TrashIcon1 } from "@/shared/assets/icons";
 import { v4 as uuidv4 } from "uuid";
 import { Database } from "@/types/supabase.types";
+import FileUpload from "@/shared/ui/form/FileUpload";
 
 interface TabAssignmentContentProps {}
 
@@ -147,6 +148,12 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
                       label="Nội dung câu hỏi"
                       placeholder="Nhập nội dung câu hỏi"
                       required
+                    />
+
+                    <FileUpload
+                      value={watchedQuestions[index]?.attachments}
+                      onChange={(urls) => setValue(`questions.${index}.attachments`, urls)}
+                      label="Đính kèm tệp tin (không bắt buộc)"
                     />
 
                     {(questionType === "checkbox" || questionType === "radio") && (
