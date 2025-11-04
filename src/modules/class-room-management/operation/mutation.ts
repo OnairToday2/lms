@@ -1,3 +1,11 @@
+export {
+  useCreateQRCodeMutation,
+  useActivateQRCodeMutation,
+  useDeactivateQRCodeMutation,
+  useUpdateQRCodeMutation,
+  useDeleteQRCodeMutation,
+  useCheckInWithQRMutation,
+} from "./qr-attendance/mutation";
 import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { useTMutation } from "@/lib";
 import { classFieldRepository } from "@/repository";

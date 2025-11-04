@@ -1,4 +1,5 @@
 "use client";
+import { ClassRoomPlatformType } from "@/constants/class-room.constant";
 import ManageClassRoomForm, {
   ManageClassRoomFormProps,
   ManageClassRoomFormRef,
@@ -6,8 +7,10 @@ import ManageClassRoomForm, {
 import { useCRUDClassRoom } from "@/modules/class-room-management/hooks/useCRUDClassRoom";
 import { useSnackbar } from "notistack";
 import { useRef } from "react";
-
-const CreateClassRoomForm = () => {
+interface CreateClassRoomFormProps {
+  platform: ClassRoomPlatformType;
+}
+const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform }) => {
   const { enqueueSnackbar } = useSnackbar();
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
   const { onCreate, isLoading } = useCRUDClassRoom();
@@ -23,6 +26,13 @@ const CreateClassRoomForm = () => {
       },
     );
   };
-  return <ManageClassRoomForm onSubmit={handleCreateClassRoom} ref={formClassRoomRef} isLoading={isLoading} />;
+  return (
+    <ManageClassRoomForm
+      onSubmit={handleCreateClassRoom}
+      platform={platform}
+      ref={formClassRoomRef}
+      isLoading={isLoading}
+    />
+  );
 };
 export default CreateClassRoomForm;

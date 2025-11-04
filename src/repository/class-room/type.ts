@@ -15,6 +15,7 @@ export type CreateClassRoomPayload = Pick<
   | "organization_id"
   | "resource_id"
   | "employee_id"
+  | "documents"
 >;
 export type UpdateClassRoomPayload = Pick<
   ClassRoom,
@@ -31,8 +32,17 @@ export type UpdateClassRoomPayload = Pick<
   | "resource_id"
   | "employee_id"
   | "id"
+  | "documents"
 >;
-export type UpSertClassRoomPayload = CreateClassRoomPayload | UpdateClassRoomPayload;
+export type UpSertClassRoomPayload =
+  | {
+      action: "create";
+      payload: CreateClassRoomPayload;
+    }
+  | {
+      action: "update";
+      payload: UpdateClassRoomPayload;
+    };
 
 export type CreatePivotClassRoomAndHashTagPayload = {
   class_room_id: string;

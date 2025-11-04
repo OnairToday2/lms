@@ -1,6 +1,13 @@
 import PageContainer from "@/shared/ui/PageContainer";
 import CreateClassRoomForm from "./_components/CreateClassRoomForm";
-const CreateClassRoomPage = () => {
+import { ClassRoomPlatformType } from "@/constants/class-room.constant";
+interface CreateClassRoomPageProps {
+  params: Promise<{
+    platform: ClassRoomPlatformType;
+  }>;
+}
+const CreateClassRoomPage: React.FC<CreateClassRoomPageProps> = async ({ params }) => {
+  const { platform } = await params;
   return (
     <PageContainer
       title="Tạo lớp học"
@@ -15,7 +22,7 @@ const CreateClassRoomPage = () => {
       ]}
     >
       <div className="max-w-[1200px]">
-        <CreateClassRoomForm />
+        <CreateClassRoomForm platform={platform} />
       </div>
     </PageContainer>
   );

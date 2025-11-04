@@ -10,6 +10,8 @@ import LogoOnairIcon from "./LogoOnairIcon";
 import LogoOnairShortIcon from "./LogoOnairShortIcon";
 import SettingIcon from "./SettingIcon";
 import BellIcon from "./BellIcon";
+import BookOpenIcon from "./BookOpenIcon";
+import BarChart10Icon from "./BarChart10Icon";
 import EyeIcon from "./EyeIcon";
 import EyeOffIcon from "./EyeOffIcon";
 import Loading from "./LoadingIcon";
@@ -35,47 +37,67 @@ import SearchIcon from "./SearchIcon";
 import FileIcon from "./FileIcon";
 import FilterFunnelIcon from "./FilterFunnelIcon";
 import MarkerPinIcon from "./MarkerPinIcon";
+import MarkerPin01Icon from "./MarkerPin01Icon";
 import CloudUploadIcon from "./CloudUploadIcon";
 import EmptyBoxIcon from "./EmptyBoxIcon";
+import MonitorIcon from "./MonitorIcon";
+import FileExcelIcon from "./FileExcelIcon";
+import FileWordIcon from "./FileWordIcon";
+import FilePdfIcon from "./FilePdfIcon";
+import FileZipIcon from "./FileZipIcon";
+import FileImageIcon from "./FileImageIcon";
+import FileVideoIcon from "./FileVideoIcon";
+import FileAdioIcon from "./FileAudioIcon";
 
 export {
-  FacebookIcon,
-  GoogleIcon,
-  GlobeIcon,
-  SquareFourIcon,
-  GitIcon,
-  UsersIcon,
-  UsersPlusIcon,
-  HelpIcon,
-  LogoOnairIcon,
-  LogoOnairShortIcon,
-  SettingIcon,
+  BarChart10Icon,
   BellIcon,
-  EyeIcon,
-  EyeOffIcon,
-  Loading,
-  ClassIcon,
-  YoutubeIcon,
-  ParagraphIcon,
-  ImageIcon,
-  InforCircleIcon,
+  BookOpenIcon,
   CalendarDateIcon,
-  UsersIcon2,
-  ClipboardIcon,
-  TrashIcon1,
-  CloseIcon,
   CalendarIcon2,
-  ChevronRightDoubleIcon,
-  ZaloIcon,
-  LinkIcon,
-  SearchIcon,
-  FileIcon,
-  MarkerPinIcon,
+  CalendarDateIcon2,
   ChevronDownIcon,
   ChevronUpIcon,
+  ChevronRightDoubleIcon,
   CloudUploadIcon,
-  CalendarDateIcon2,
   CheckCircleIcon,
+  CloseIcon,
+  ClipboardIcon,
+  ClassIcon,
   EmptyBoxIcon,
+  EyeIcon,
+  EyeOffIcon,
+  FacebookIcon,
+  FileIcon,
+  FileAdioIcon,
+  FileExcelIcon,
+  FileImageIcon,
+  FilePdfIcon,
+  FileVideoIcon,
+  FileWordIcon,
+  FileZipIcon,
   FilterFunnelIcon,
+  GoogleIcon,
+  GlobeIcon,
+  GitIcon,
+  HelpIcon,
+  ImageIcon,
+  InforCircleIcon,
+  LinkIcon,
+  Loading,
+  LogoOnairIcon,
+  LogoOnairShortIcon,
+  MarkerPinIcon,
+  MarkerPin01Icon,
+  MonitorIcon,
+  SearchIcon,
+  SquareFourIcon,
+  SettingIcon,
+  YoutubeIcon,
+  ParagraphIcon,
+  UsersIcon2,
+  UsersIcon,
+  UsersPlusIcon,
+  TrashIcon1,
+  ZaloIcon,
 };

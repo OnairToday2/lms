@@ -13,13 +13,13 @@ export const initClassSessionFormData = (init?: { isOnline?: boolean }): ClassRo
     channelInfo: { url: "", password: "", providerId: "" },
     channelProvider: "zoom",
     thumbnailUrl: "",
+    location: "",
     isOnline: init?.isOnline || false,
     agendas: [],
     limitPerson: 0,
     isUnlimited: false,
     resources: [],
-    isLimitTimeScanQrCode: false,
-    qrCode: { startDate: "", endDate: "" },
+    qrCode: { startDate: "", endDate: "", isLimitTimeScanQrCode: false },
   };
 };
 
