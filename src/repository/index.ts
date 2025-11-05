@@ -18,3 +18,5 @@ export * as assignmentsRepository from "./assignments";
 export * as assignmentResultsRepository from "./assignment-results";
 export * as classRoomSessionRepository from "./class-room-session";
 export * as classRoomMetaRepository from "./class-room-meta";
+export * as qrAttendanceRepository from "./qr-attendance";
+export * as classSessionAgendaRepository from "./class-session-agenda";

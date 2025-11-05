@@ -26,6 +26,7 @@ interface IClassRoomCard {
     slug?: string
     roomType?: ClassRoomType
     sessions?: ClassRoomPriorityDto["class_sessions"]
+    isOnline: boolean
 }
 
 const ClassRoomCard = ({
@@ -42,6 +43,7 @@ const ClassRoomCard = ({
     slug,
     roomType = ClassRoomType.Single,
     sessions = [],
+    isOnline,
 }: IClassRoomCard) => {
     const router = useRouter();
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -58,24 +60,37 @@ const ClassRoomCard = ({
             return;
         }
 
-        if (roomType === ClassRoomType.Multiple) {
-            setDialogOpen(true);
+        if (isOnline) {
+            if (roomType === ClassRoomType.Multiple) {
+                setDialogOpen(true);
+                return;
+            }
+
+            if (sessions?.[0]?.id) {
+                navigateToSession(sessions?.[0]?.id);
+            }
+        } else {
+            if (roomType === ClassRoomType.Multiple) {
+                setDialogOpen(true);
+                return;
+            }
+            // xử lý btn quét mã qr khi là lớp học offline đơn
             return;
         }
-
-        if (sessions?.[0]?.id) {
-            navigateToSession(sessions?.[0]?.id);
-        }
-    }, [actionDisabled, navigateToSession, roomType, sessions]);
+    }, [actionDisabled, isOnline, navigateToSession, roomType, sessions]);
 
     const handleCloseDialog = useCallback(() => {
         setDialogOpen(false);
     }, []);
 
     const handleSelectSession = useCallback((sessionId: string) => {
+        if (!isOnline) {
+            //  xử lý btn quét mã qr khi là lớp học offline chuỗi
+            return;
+        }
         setDialogOpen(false);
         navigateToSession(sessionId);
-    }, [navigateToSession]);
+    }, [isOnline, navigateToSession]);
 
     return (
         <>
@@ -145,6 +160,7 @@ const ClassRoomCard = ({
                 sessions={sessions}
                 thumbnail={thumbnail}
                 classTitle={title}
+                actionLabel={!isOnline ? "Quét mã QR" : undefined}
                 onSelectSession={handleSelectSession}
             />
         </>

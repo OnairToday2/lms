@@ -1,6 +1,7 @@
 interface MenuContentItemType {
   title: string;
-  icon: React.ReactNode;
+  subTitle?: string;
+  icon?: React.ReactNode;
   path: string;
   key: string;
   children?: (MenuContentItemType | MenuGroupItemType)[];
@@ -8,7 +9,8 @@ interface MenuContentItemType {
 }
 interface MenuGroupItemType {
   title: string;
-  icon: React.ReactNode;
+  subTitle?: string;
+  icon?: React.ReactNode;
   key: string;
   children: MenuContentItemType[];
   type: "group";

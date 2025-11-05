@@ -1,39 +1,18 @@
-import { EyeIcon, ImageIcon, TrashIcon1 } from "@/shared/assets/icons";
+import { EyeIcon, FileAdioIcon, FileExcelIcon, FileVideoIcon, ImageIcon, TrashIcon1 } from "@/shared/assets/icons";
 import { cn } from "@/utils";
 import { IconButton, Typography } from "@mui/material";
 import { isArray } from "lodash";
 import { ChangeEvent, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useId } from "react";
+import { FILE_TYPES, FileTypes, getTypeOfFile } from "@/constants/file.constant";
+import FileUnknownIcon from "@/shared/assets/icons/FileUnknownIcon";
 
-const ALL_FILE_TYPE = {
-  images: [".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp", ".bmp", ".tif", ".tiff"],
-  audios: [".mp3", ".wav", ".ogg", ".m4a", ".flac"],
-  docs: [
-    ".pdf",
-    ".doc",
-    ".docx",
-    ".xml",
-    ".xls",
-    ".xlsx",
-    ".ppt",
-    ".pptx",
-    ".txt",
-    ".md",
-    ".csv",
-    ".json",
-    ".xml",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ],
-  videos: [".mp4", ".webm", ".avi", ".mov", ".mkv"],
-} as const;
-type FileTypesAccept = typeof ALL_FILE_TYPE;
-type FileTypesAcceptKey = keyof FileTypesAccept;
+type FileTypesAcceptKey = keyof FileTypes;
 
 export interface UploaderProps {
   className?: string;
   variant?: "square" | "16/9";
-  accept?: Partial<Record<FileTypesAcceptKey, Partial<FileTypesAccept[FileTypesAcceptKey]>>>;
+  accept?: Partial<Record<FileTypesAcceptKey, Partial<FileTypes[FileTypesAcceptKey]>>>;
   onChange?: (files: File[] | File) => void;
   disabled?: boolean;
   multiple?: boolean;
@@ -49,7 +28,7 @@ const Uploader: React.FC<UploaderProps> = ({
   disabled,
   onChange,
   maxCount = -1, // Unlimited
-  accept = ALL_FILE_TYPE,
+  accept = FILE_TYPES,
   hideButtonWhenSingle = false,
   buttonUpload,
   hidePreviewThumbnail = false,
@@ -190,6 +169,8 @@ interface FileItemProps {
 const FileItem: React.FC<FileItemProps> = ({ file, index, onRemove }) => {
   const url = window.URL.createObjectURL(file);
 
+  const fileExt = file.name.split(".").pop()?.toLowerCase();
+  const fileType = fileExt ? getTypeOfFile(fileExt) : undefined;
   const removeItem = () => {
     if (onRemove) {
       window.URL.revokeObjectURL(url);
@@ -200,8 +181,18 @@ const FileItem: React.FC<FileItemProps> = ({ file, index, onRemove }) => {
     <div
       className={cn("file-item", "relative flex items-center rounded-lg overflow-hidden justify-center", "group/item")}
     >
-      <div className="file-item__thumbnail aspect-square w-28 bg-gray-100">
-        <img src={url} className="w-full h-full object-contain" />
+      <div className="file-item__thumbnail aspect-square w-28 bg-gray-100 flex items-center justify-center">
+        {fileType === "images" ? (
+          <img src={url} className="w-full h-full object-contain" />
+        ) : fileType === "docs" ? (
+          <FileExcelIcon className="w-12 h-12" />
+        ) : fileType === "audios" ? (
+          <FileAdioIcon className="w-12 h-12" />
+        ) : fileType === "videos" ? (
+          <FileVideoIcon className="w-12 h-12" />
+        ) : (
+          <FileUnknownIcon className="w-12 h-12" />
+        )}
       </div>
       <div
         className={cn(

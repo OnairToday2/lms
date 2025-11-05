@@ -10,24 +10,27 @@ import { getClassRoomMetaValue } from "@/modules/class-room-management/utils";
 import { useSnackbar } from "notistack";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
+import { ClassRoomPlatformType } from "@/constants/class-room.constant";
 interface UpdateClassRoomProps {
   data: Exclude<GetClassRoomByIdData, null>;
+  platform: ClassRoomPlatformType;
 }
 type UpdateClassRoomFormValue = Exclude<ManageClassRoomFormProps["initFormValue"], undefined>;
 type ClassRoomSession = UpdateClassRoomFormValue["classRoomSessions"][number];
 type SessionAgenda = UpdateClassRoomFormValue["classRoomSessions"][number]["agendas"][number];
+type QrCodeSession = UpdateClassRoomFormValue["classRoomSessions"][number]["qrCode"];
 
 type TeacherType = Exclude<ManageClassRoomFormProps["teachers"], undefined>;
 type StudentType = Exclude<ManageClassRoomFormProps["students"], undefined>;
 
-const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
+const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data, platform }) => {
   const router = useRouter();
   const { sessions, class_room_metadata, employees } = data;
   const { enqueueSnackbar } = useSnackbar();
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
   const { isLoading, onUpdate } = useCRUDClassRoom();
 
-  const updateClassRoomFormData = useMemo<UpdateClassRoomFormValue>(() => {
+  const initFormValue = useMemo<UpdateClassRoomFormValue>(() => {
     const hastTags = data?.class_hash_tag.reduce<string[]>((acc, ht) => {
       const hastTagId = ht.hash_tags?.id;
       return hastTagId ? [...acc, hastTagId] : acc;
@@ -50,6 +53,7 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       };
 
       const agendas = session.agendas.map<SessionAgenda>((agenda) => ({
+        id: agenda.id,
         endDate: agenda.end_at ? dayjs(session.end_at).toISOString() : "",
         startDate: agenda.start_at ? dayjs(session.start_at).toISOString() : "",
         title: agenda.title || "",
@@ -59,23 +63,27 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       return [
         ...acc,
         {
-          id: data.id,
+          id: session.id,
           title: session.title || "",
           description: session.description || "",
           thumbnailUrl: "",
+          location: session.location,
           endDate: session.end_at ? dayjs(session.end_at).toISOString() : "",
           startDate: session.start_at ? dayjs(session.start_at).toISOString() : "",
           isOnline: session.is_online || false,
           channelProvider: session.channel_provider || "zoom",
           channelInfo: channelInfo,
           resources: [],
-          limitPerson: session.limit_person || -1,
+          limitPerson: session.limit_person === -1 ? 0 : session.limit_person,
           isUnlimited: session.limit_person === -1 ? true : false,
           agendas: agendas,
-          isLimitTimeScanQrCode: false,
           qrCode: {
-            startDate: "",
-            endDate: "",
+            id: session.class_qr_codes[0]?.id,
+            isLimitTimeScanQrCode:
+              Boolean(session.class_qr_codes[0]?.checkin_start_time) &&
+              Boolean(session.class_qr_codes[0]?.checkin_end_time),
+            startDate: session.class_qr_codes[0]?.checkin_start_time || "",
+            endDate: session.class_qr_codes[0]?.checkin_end_time || "",
           },
         } as UpdateClassRoomFormValue["classRoomSessions"][number],
       ];
@@ -86,11 +94,11 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
     const whies = getClassRoomMetaValue(class_room_metadata, "why");
     const forWhom = getClassRoomMetaValue(class_room_metadata, "forWhom");
 
-    const platform = classRoomSessions.every((s) => s.isOnline)
-      ? "online"
-      : classRoomSessions.every((s) => !s.isOnline)
-      ? "offline"
-      : "hybrid";
+    // const platform = classRoomSessions.every((s) => s.isOnline)
+    //   ? "online"
+    //   : classRoomSessions.every((s) => !s.isOnline)
+    //   ? "offline"
+    //   : "hybrid";
 
     return {
       title: data.title || "",
@@ -100,7 +108,7 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       thumbnailUrl: data.thumbnail_url || "",
       hashTags: hastTags,
       classRoomField: classRoomFields,
-      docs: [],
+      docs: data.documents,
       faqs: faqs || [],
       whies: whies ? whies.map((item) => ({ description: item })) : [],
       forWhom: forWhom ? forWhom.map((item) => ({ description: item })) : [],
@@ -169,11 +177,12 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
 
   return (
     <ManageClassRoomForm
-      initFormValue={updateClassRoomFormData}
+      initFormValue={initFormValue}
       action="edit"
       students={studentList}
       teachers={teacherList}
       isLoading={isLoading}
+      platform={platform}
       onSubmit={handleUpdateClassRoom}
       ref={formClassRoomRef}
     />

@@ -19,6 +19,7 @@ import { CloudUpload } from "@mui/icons-material";
 import { useImportBranchesMutation } from "../operations/mutation";
 import type { BranchImportRow } from "@/types/dto/branches";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
+import * as XLSX from "xlsx";
 
 interface ImportBranchDialogProps {
   open: boolean;
@@ -72,16 +73,32 @@ export function ImportBranchDialog({
 
       reader.onload = (e) => {
         try {
-          const text = e.target?.result as string;
-          const lines = text.split("\n").filter((line) => line.trim());
+          const data = e.target?.result;
+          let workbook: XLSX.WorkBook;
 
-          if (lines.length < 2) {
+          if (file.name.endsWith(".csv")) {
+            const text = data as string;
+            workbook = XLSX.read(text, { type: "string" });
+          } else {
+            const arrayBuffer = data as ArrayBuffer;
+            workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: "array" });
+          }
+
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]!];
+          if (!firstSheet) {
+            reject(new Error("File không có dữ liệu"));
+            return;
+          }
+
+          const jsonData = XLSX.utils.sheet_to_json<any>(firstSheet, { header: 1 });
+
+          if (jsonData.length < 2) {
             reject(new Error("File phải có ít nhất 1 dòng dữ liệu"));
             return;
           }
 
           // Parse header to find columns
-          const headers = lines[0].split(",").map((h) => h.trim().replace(/"/g, ""));
+          const headers = (jsonData[0] as any[]).map((h) => String(h || "").trim());
           const nameIndex = headers.findIndex(
             (h) => h === "Tên chi nhánh" || h === "name" || h === "Name"
           );
@@ -121,15 +138,13 @@ export function ImportBranchDialog({
 
           // Parse data rows
           const rows: BranchImportRow[] = [];
-          for (let i = 1; i < lines.length; i++) {
-            const line = lines[i];
-            if (!line) continue;
-            const values = line.split(",").map((v) => v.trim().replace(/"/g, ""));
-            if (values[nameIndex] && values[codeIndex] && values[addressIndex]) {
+          for (let i = 1; i < jsonData.length; i++) {
+            const values = jsonData[i] as any[];
+            if (values && values[nameIndex] && values[codeIndex] && values[addressIndex]) {
               rows.push({
-                name: values[nameIndex],
-                code: values[codeIndex],
-                address: values[addressIndex],
+                name: String(values[nameIndex] || "").trim(),
+                code: String(values[codeIndex] || "").trim(),
+                address: String(values[addressIndex] || "").trim(),
               });
             }
           }
@@ -146,7 +161,11 @@ export function ImportBranchDialog({
         reject(new Error("Lỗi khi đọc file"));
       };
 
-      reader.readAsText(file);
+      if (file.name.endsWith(".csv")) {
+        reader.readAsText(file);
+      } else {
+        reader.readAsArrayBuffer(file);
+      }
     });
   };
 

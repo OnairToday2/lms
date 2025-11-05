@@ -1,11 +1,7 @@
 import dayjs from "dayjs";
 import * as zod from "zod";
 import { CLASS_ROOM_PLATFORM } from "@/constants/class-room.constant";
-
-const dateIsoSchema = zod.object({
-  startDate: zod.string().optional(),
-  endDate: zod.string().optional(),
-});
+import { FILE_TYPES, FileCategory, FileTypes } from "@/constants/file.constant";
 
 const classRoomSessionAgendaSchema = zod.object({
   id: zod.string().optional(),
@@ -29,32 +25,24 @@ const classRoomSessionSchema = zod
       }),
     ),
     isOnline: zod.boolean(),
-    channelProvider: zod.enum(["zoom", "google_meet", "microsoft_teams"]),
-    channelInfo: zod
-      .object({
-        providerId: zod.string(),
-        url: zod.string().min(1, { error: "Link tham dự không bỏ trống" }),
-        password: zod.string(),
-      })
-      .superRefine((value, ctx) => {
-        if (!value.url.startsWith("http://") && !value.url.startsWith("https://")) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Link tham dự không hợp lệ.",
-            path: ["url"],
-          });
-        }
-      }),
+    location: zod.string(), //only for offline class room
+    channelProvider: zod.enum(["zoom", "google_meet", "microsoft_teams"]), //only for online class room
+    channelInfo: zod.object({
+      providerId: zod.string(),
+      url: zod.string(),
+      password: zod.string(),
+    }),
     limitPerson: zod.number(),
     isUnlimited: zod.boolean(),
     agendas: zod.array(classRoomSessionAgendaSchema),
-    isLimitTimeScanQrCode: zod.boolean(),
     qrCode: zod.object({
+      id: zod.string().optional(),
+      isLimitTimeScanQrCode: zod.boolean(),
       startDate: zod.string(),
       endDate: zod.string(),
     }),
   })
-  .superRefine(({ limitPerson, isUnlimited, startDate, endDate, isLimitTimeScanQrCode, qrCode }, ctx) => {
+  .superRefine(({ limitPerson, isUnlimited, startDate, endDate, qrCode, isOnline, location, channelInfo }, ctx) => {
     if (!isUnlimited) {
       if (limitPerson <= 0) {
         ctx.addIssue({
@@ -78,45 +66,74 @@ const classRoomSessionSchema = zod
         path: ["startDate"],
       });
     }
-    if (isLimitTimeScanQrCode) {
-      if (!qrCode.startDate) {
+    /**
+     * Only Validate if event is offline
+     */
+
+    if (isOnline) {
+      if (!channelInfo.url.length) {
         ctx.addIssue({
           code: "custom",
-          message: "Thời gian bắt đầu không bỏ trống",
-          path: ["qrCode", "startDate"],
+          message: "Url không bỏ trống",
+          path: ["channelInfo", "url"],
         });
-      } else {
-        if (!dayjs(qrCode.startDate).isValid()) {
+      }
+      if (channelInfo.url.length) {
+        if (!channelInfo.url.startsWith("http://") && !channelInfo.url.startsWith("https://")) {
           ctx.addIssue({
             code: "custom",
-            message: "Thời gian bắt đầu không hợp lệ.",
+            message: "Link tham dự không hợp lệ.",
+            path: ["channelInfo", "url"],
+          });
+        }
+      }
+    } else {
+      if (!location.length) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Địa điểm tổ chức không bỏ trống.",
+          path: ["location"],
+        });
+      }
+      if (qrCode.isLimitTimeScanQrCode) {
+        if (!qrCode.startDate) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Thời gian bắt đầu không bỏ trống",
+            path: ["qrCode", "startDate"],
+          });
+        } else {
+          if (!dayjs(qrCode.startDate).isValid()) {
+            ctx.addIssue({
+              code: "custom",
+              message: "Thời gian bắt đầu không hợp lệ.",
+              path: ["qrCode", "startDate"],
+            });
+          }
+        }
+
+        if (!qrCode.endDate) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Thời gian kết thúc không bỏ trống",
+            path: ["qrCode", "endDate"],
+          });
+        } else {
+          if (!dayjs(qrCode.endDate).isValid()) {
+            ctx.addIssue({
+              code: "custom",
+              message: "Thời gian kết thúc không hợp lệ.",
+              path: ["qrCode", "endDate"],
+            });
+          }
+        }
+        if (qrCode.startDate && qrCode.endDate && dayjs(qrCode.startDate).isAfter(dayjs(qrCode.endDate))) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Thời gian bắt đầu phải nhỏ hơn hoặc bằng thời gian kết thúc.",
             path: ["qrCode", "startDate"],
           });
         }
-      }
-
-      if (!qrCode.endDate) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Thời gian kết thúc không bỏ trống",
-          path: ["qrCode", "endDate"],
-        });
-      } else {
-        if (!dayjs(qrCode.endDate).isValid()) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Thời gian kết thúc không hợp lệ.",
-            path: ["qrCode", "endDate"],
-          });
-        }
-      }
-
-      if (qrCode.startDate && qrCode.endDate && dayjs(qrCode.startDate).isAfter(dayjs(qrCode.endDate))) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Thời gian bắt đầu phải nhỏ hơn hoặc bằng thời gian kết thúc.",
-          path: ["qrCode", "startDate"],
-        });
       }
     }
   });
@@ -214,13 +231,19 @@ const classRoomSchema = zod
           });
         }
       }),
-    docs: zod.array(
-      zod.object({
-        type: zod.string(),
-        size: zod.number(),
-        url: zod.string(),
-      }),
-    ),
+    docs: zod
+      .array(
+        zod.object({
+          type: zod.string(),
+          fileExtension: zod.string(),
+          size: zod
+            .number()
+            .positive()
+            .max(5 * 1024 * 1024, "Dung lượng file không vượt quá 5mb"),
+          url: zod.string(),
+        }),
+      )
+      .optional(),
     whies: zod
       .array(
         zod.object({
@@ -257,6 +280,13 @@ const classRoomSchema = zod
   })
   .superRefine(({ roomType, classRoomSessions }, ctx) => {
     if (roomType === "multiple") {
+      // if (classRoomSessions.length < 2) {
+      //   ctx.addIssue({
+      //     code: "custom",
+      //     message: "Lớp học chuỗi tối thiểu 2 buổi học",
+      //     path: ["classRoomSessions", "length"],
+      //   });
+      // }
       classRoomSessions.forEach((clrs, _index) => {
         if (!clrs.title.length) {
           ctx.addIssue({
@@ -274,6 +304,15 @@ const classRoomSchema = zod
           });
         }
       });
+    }
+    if (roomType === "single") {
+      // if (classRoomSessions.length < 2) {
+      //   ctx.addIssue({
+      //     code: "custom",
+      //     message: "Lớp học chuỗi tối thiểu 1 buổi học",
+      //     path: ["classRoomSessions", "length"],
+      //   });
+      // }
     }
   });
 
