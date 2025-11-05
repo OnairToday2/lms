@@ -25,6 +25,7 @@ const getQuestionInitData = (): Question => {
   return {
     type: "file",
     label: "",
+    score: 1,
   };
 };
 
@@ -126,21 +127,34 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
                   </div>
 
                   <div className="flex flex-col gap-4">
-                    <FormControl fullWidth>
-                      <FormLabel className="text-sm mb-2">
-                        Loại câu hỏi <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <Select
-                        value={questionType || "file"}
-                        onChange={(e) => handleQuestionTypeChange(index, e.target.value as QuestionType)}
-                        size="small"
-                      >
-                        <MenuItem value="file">{QUESTION_TYPE_LABELS.file}</MenuItem>
-                        <MenuItem value="text">{QUESTION_TYPE_LABELS.text}</MenuItem>
-                        <MenuItem value="checkbox">{QUESTION_TYPE_LABELS.checkbox}</MenuItem>
-                        <MenuItem value="radio">{QUESTION_TYPE_LABELS.radio}</MenuItem>
-                      </Select>
-                    </FormControl>
+                    <div className="flex gap-3">
+                      <FormControl sx={{ width: '75%' }}>
+                        <FormLabel className="text-sm mb-2">
+                          Loại câu hỏi <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <Select
+                          value={questionType || "file"}
+                          onChange={(e) => handleQuestionTypeChange(index, e.target.value as QuestionType)}
+                          size="small"
+                        >
+                          <MenuItem value="file">{QUESTION_TYPE_LABELS.file}</MenuItem>
+                          <MenuItem value="text">{QUESTION_TYPE_LABELS.text}</MenuItem>
+                          <MenuItem value="checkbox">{QUESTION_TYPE_LABELS.checkbox}</MenuItem>
+                          <MenuItem value="radio">{QUESTION_TYPE_LABELS.radio}</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      <RHFTextField
+                        control={control}
+                        name={`questions.${index}.score`}
+                        label="Điểm"
+                        placeholder="0"
+                        type="number"
+                        required
+                        sx={{ width: '25%' }}
+                        inputProps={{ min: 0.1, step: 0.1 }}
+                      />
+                    </div>
 
                     <RHFTextField
                       control={control}

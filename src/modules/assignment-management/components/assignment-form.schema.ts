@@ -13,6 +13,10 @@ const questionSchema = zod
   .object({
     type: zod.enum(questionTypeValues),
     label: zod.string().min(1, { message: "Câu hỏi không được bỏ trống." }),
+    score: zod
+      .number({ message: "Điểm không được bỏ trống." })
+      .positive({ message: "Điểm phải là số dương." })
+      .min(0.1, { message: "Điểm phải lớn hơn 0." }),
     options: zod.array(optionSchema).optional(),
     attachments: zod.array(zod.string()).optional(),
   })

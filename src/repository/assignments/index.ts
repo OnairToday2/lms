@@ -21,6 +21,7 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
         id,
         label,
         type,
+        score,
         options,
         created_at,
         updated_at
@@ -91,6 +92,7 @@ const getAssignmentById = async (id: string): Promise<AssignmentDto> => {
         id,
         label,
         type,
+        score,
         options,
         attachments,
         created_at,
@@ -176,6 +178,7 @@ export async function createQuestions(
     assignment_id: string;
     type: Database["public"]["Enums"]["question_type"];
     label: string;
+    score: number;
     options?: QuestionOption[] | null;
     attachments?: string[] | null;
     created_by: string;
@@ -183,7 +186,13 @@ export async function createQuestions(
 ) {
   const supabase = await createSVClient();
 
-  const { error } = await supabase.from("questions").insert(questions);
+  // Convert options to Json type for database
+  const questionsToInsert = questions.map(q => ({
+    ...q,
+    options: q.options as any, // Cast to Json type
+  }));
+
+  const { error } = await supabase.from("questions").insert(questionsToInsert);
 
   if (error) {
     throw new Error(`Failed to create questions: ${error.message}`);

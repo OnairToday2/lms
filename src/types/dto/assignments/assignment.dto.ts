@@ -12,6 +12,7 @@ export class AssignmentDto {
     id: string;
     label: string;
     type: Database["public"]["Enums"]["question_type"];
+    score: number;
     options?: QuestionOption[];
     attachments?: string[];
     created_at: string;

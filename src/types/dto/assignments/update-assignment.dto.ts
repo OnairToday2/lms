@@ -9,6 +9,7 @@ export class UpdateAssignmentDto {
   questions!: Array<{
     type: Database["public"]["Enums"]["question_type"];
     label: string;
+    score: number;
     options?: QuestionOption[];
     attachments?: string[];
   }>;
