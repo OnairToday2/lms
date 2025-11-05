@@ -5,7 +5,45 @@ import { QuestionOption } from "@/types/dto/assignments";
 type AssignmentResultInsert = Database["public"]["Tables"]["assignment_results"]["Insert"];
 type AssignmentResultRow = Database["public"]["Tables"]["assignment_results"]["Row"];
 type QuestionType = Database["public"]["Enums"]["question_type"];
+type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
 
+// Answer format by question type
+export type FileAnswer = { fileUrl: string };
+export type TextAnswer = { text: string };
+export type RadioAnswer = { selectedOptionId: string };
+export type CheckboxAnswer = { selectedOptionIds: string[] };
+
+export type QuestionAnswer = FileAnswer | TextAnswer | RadioAnswer | CheckboxAnswer;
+
+// Question with answer and earned score
+export interface QuestionWithAnswer {
+  id: string;
+  label: string;
+  type: QuestionType;
+  score: number; // Points possible for this question
+  options?: QuestionOption[];
+  attachments?: string[];
+  created_at: string;
+  updated_at: string;
+  // Submission-specific fields
+  answer: QuestionAnswer;
+  earnedScore: number | null; // Points earned (auto-calculated for radio/checkbox, null for text/file)
+}
+
+// Complete submission data structure (stored in 'data' column)
+export interface SubmissionData {
+  assignment: {
+    id: string;
+    name: string;
+    description: string;
+    created_by: string;
+    created_at: string;
+    updated_at: string;
+  };
+  questions: QuestionWithAnswer[];
+}
+
+// Legacy answer data format (for backward compatibility)
 export interface AnswerData {
   questionId: string;
   questionLabel: string;
@@ -17,16 +55,20 @@ export interface AnswerData {
 export async function createAssignmentResult(data: {
   assignment_id: string;
   employee_id: string;
-  answers: AnswerData[];
-  grade?: number;
+  submissionData: SubmissionData;
+  score: number | null;
+  max_score: number;
+  status: AssignmentResultStatus;
 }): Promise<AssignmentResultRow> {
   const supabase = await createSVClient();
 
   const insertData: AssignmentResultInsert = {
     assignment_id: data.assignment_id,
     employee_id: data.employee_id,
-    data: data.answers as any, // Database uses 'data' field to store answers
-    grade: data.grade || 0,
+    data: data.submissionData as any, // Store complete submission snapshot
+    score: data.score ?? 0,
+    max_score: data.max_score,
+    status: data.status,
   };
 
   const { data: result, error } = await supabase
@@ -65,20 +107,30 @@ export async function getAssignmentResult(
 export async function updateAssignmentResult(
   id: string,
   data: {
-    answers?: AnswerData[];
-    grade?: number;
+    submissionData?: SubmissionData;
+    score?: number | null;
+    max_score?: number;
+    status?: AssignmentResultStatus;
   }
 ): Promise<void> {
   const supabase = await createSVClient();
 
   const updateData: Database["public"]["Tables"]["assignment_results"]["Update"] = {};
 
-  if (data.answers !== undefined) {
-    updateData.data = data.answers as any; // Database uses 'data' field to store answers
+  if (data.submissionData !== undefined) {
+    updateData.data = data.submissionData as any;
   }
 
-  if (data.grade !== undefined) {
-    updateData.grade = data.grade;
+  if (data.score !== undefined) {
+    updateData.score = data.score ?? 0;
+  }
+
+  if (data.max_score !== undefined) {
+    updateData.max_score = data.max_score;
+  }
+
+  if (data.status !== undefined) {
+    updateData.status = data.status;
   }
 
   const { error } = await supabase

@@ -81,24 +81,30 @@ export type Database = {
           created_at: string
           data: Json | null
           employee_id: string
-          grade: number
           id: string
+          max_score: number | null
+          score: number
+          status: Database["public"]["Enums"]["assignment_result_status"]
         }
         Insert: {
           assignment_id: string
           created_at?: string
           data?: Json | null
           employee_id: string
-          grade: number
           id?: string
+          max_score?: number | null
+          score: number
+          status?: Database["public"]["Enums"]["assignment_result_status"]
         }
         Update: {
           assignment_id?: string
           created_at?: string
           data?: Json | null
           employee_id?: string
-          grade?: number
           id?: string
+          max_score?: number | null
+          score?: number
+          status?: Database["public"]["Enums"]["assignment_result_status"]
         }
         Relationships: [
           {
@@ -1493,6 +1499,7 @@ export type Database = {
     }
     Enums: {
       action_code_enum: "create" | "read" | "update" | "delete"
+      assignment_result_status: "submitted" | "graded"
       attendance_status: "present" | "late" | "absent" | "rejected"
       channel_provider: "google_meet" | "zoom" | "microsoft_teams"
       class_room_status:
@@ -1640,6 +1647,7 @@ export const Constants = {
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
+      assignment_result_status: ["submitted", "graded"],
       attendance_status: ["present", "late", "absent", "rejected"],
       channel_provider: ["google_meet", "zoom", "microsoft_teams"],
       class_room_status: [

@@ -20,6 +20,8 @@ import { useGetEmployeeQuery } from "@/modules/employees/operations/query";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { uploadFileToS3 } from "@/utils/s3-upload";
+import { useQueryClient } from "@tanstack/react-query";
+import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";
 import AssignmentHeader from "./AssignmentHeader";
 import QuestionCard from "./QuestionCard";
 import SubmissionActions from "./SubmissionActions";
@@ -46,6 +48,7 @@ export default function AssignmentSubmission() {
   const router = useRouter();
   const { confirm } = useDialogs();
   const notifications = useNotifications();
+  const queryClient = useQueryClient();
 
   const assignmentId = params.id as string;
   const employeeId = params.employeeId as string;
@@ -331,6 +334,11 @@ export default function AssignmentSubmission() {
 
       notifications.show(result.message || "Nộp bài thành công!", {
         severity: "success",
+      });
+
+      // Invalidate assignment students query to refresh the list
+      queryClient.invalidateQueries({
+        queryKey: [GET_ASSIGNMENTS, assignmentId, "students"]
       });
 
       router.push(`/assignments/${assignmentId}/students`);

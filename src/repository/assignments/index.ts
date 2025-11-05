@@ -295,7 +295,7 @@ const getAssignmentStudents = async (assignmentId: string) => {
   // Get all submission results for this assignment
   const { data: results, error: resultsError } = await supabase
     .from("assignment_results")
-    .select("employee_id, created_at, grade")
+    .select("employee_id, created_at, score, max_score, status")
     .eq("assignment_id", assignmentId);
 
   if (resultsError) {
@@ -308,7 +308,9 @@ const getAssignmentStudents = async (assignmentId: string) => {
       result.employee_id,
       {
         submitted_at: result.created_at,
-        grade: result.grade,
+        score: result.score,
+        max_score: result.max_score,
+        status: result.status,
       },
     ])
   );
@@ -327,7 +329,9 @@ const getAssignmentStudents = async (assignmentId: string) => {
       avatar: profile?.avatar || null,
       has_submitted: !!submission,
       submitted_at: submission?.submitted_at || null,
-      grade: submission?.grade || null,
+      score: submission?.score ?? null,
+      max_score: submission?.max_score ?? null,
+      status: submission?.status ?? null,
     };
   });
 

@@ -139,7 +139,8 @@ export default function AssignmentStudentList() {
                       <TableCell>Mã học viên</TableCell>
                       <TableCell>Họ và tên</TableCell>
                       <TableCell>Email</TableCell>
-                      <TableCell>Trạng thái</TableCell>
+                      <TableCell>Trạng thái nộp</TableCell>
+                      <TableCell>Trạng thái chấm</TableCell>
                       <TableCell>Ngày nộp</TableCell>
                       <TableCell align="center">Điểm</TableCell>
                       <TableCell align="center">Thao tác</TableCell>
@@ -164,12 +165,24 @@ export default function AssignmentStudentList() {
                           />
                         </TableCell>
                         <TableCell>
+                          {student.status ? (
+                            <Chip
+                              label={student.status === "graded" ? "Đã chấm" : "Chờ chấm"}
+                              color={student.status === "graded" ? "primary" : "warning"}
+                              size="small"
+                              sx={{ minWidth: 80 }}
+                            />
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                        <TableCell>
                           {formatDate(student.submitted_at)}
                         </TableCell>
                         <TableCell align="center">
-                          {student.grade !== null ? (
+                          {student.score !== null && student.max_score !== null ? (
                             <Typography variant="body2" fontWeight={500}>
-                              {student.grade}
+                              {student.score}/{student.max_score}
                             </Typography>
                           ) : (
                             "-"

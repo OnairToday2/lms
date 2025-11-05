@@ -155,11 +155,19 @@ export async function POST(
       answers,
     });
 
+    // Prepare success message based on grading status
+    let message = "Nộp bài thành công!";
+    if (result.status === "graded") {
+      message = `Nộp bài thành công! Điểm: ${result.score}/${result.maxScore}`;
+    } else {
+      message = "Nộp bài thành công! Giáo viên sẽ chấm điểm sau.";
+    }
+
     return NextResponse.json(
       {
         success: true,
         data: result,
-        message: "Nộp bài thành công!",
+        message,
       },
       { status: 201 }
     );
