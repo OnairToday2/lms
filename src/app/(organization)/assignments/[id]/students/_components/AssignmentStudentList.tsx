@@ -67,7 +67,6 @@ export default function AssignmentStudentList() {
     });
   };
 
-  // Pagination logic
   const paginatedStudents = React.useMemo(() => {
     if (!students) return [];
     const startIndex = page * rowsPerPage;

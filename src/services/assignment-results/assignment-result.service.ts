@@ -19,7 +19,7 @@ export interface QuestionAnswerInput {
   questionLabel: string;
   questionType: QuestionType;
   options?: QuestionOption[];
-  answer: string | string[]; // Format depends on question type
+  answer: string | string[];
 }
 
 export interface SubmitAssignmentPayload {
@@ -38,9 +38,6 @@ export interface SubmitAssignmentResult {
   status: AssignmentResultStatus;
 }
 
-/**
- * Auto-grade a radio question
- */
 function gradeRadioQuestion(
   answer: RadioAnswer,
   options: QuestionOption[],
@@ -52,9 +49,6 @@ function gradeRadioQuestion(
   return answer.selectedOptionId === correctOption.id ? questionScore : 0;
 }
 
-/**
- * Auto-grade a checkbox question
- */
 function gradeCheckboxQuestion(
   answer: CheckboxAnswer,
   options: QuestionOption[],
@@ -63,23 +57,18 @@ function gradeCheckboxQuestion(
   const correctOptionIds = options.filter(opt => opt.correct).map(opt => opt.id);
   const selectedIds = answer.selectedOptionIds;
 
-  // Check if all correct options are selected and no incorrect ones
   const allCorrectSelected = correctOptionIds.every(id => selectedIds.includes(id));
   const noIncorrectSelected = selectedIds.every(id => correctOptionIds.includes(id));
 
   return (allCorrectSelected && noIncorrectSelected) ? questionScore : 0;
 }
 
-/**
- * Convert answer input to typed answer format
- */
 function convertAnswerToTypedFormat(
   questionType: QuestionType,
   answer: string | string[]
 ): QuestionAnswer {
   switch (questionType) {
     case "file":
-      // For file type, answer is array of URLs, take the first one
       const fileUrl = Array.isArray(answer) ? answer[0] : answer;
       return { fileUrl } as FileAnswer;
 
@@ -116,15 +105,12 @@ export async function submitAssignment(
   }
 
   try {
-    // Fetch the complete assignment data for snapshot
     const assignment: AssignmentDto = await assignmentsRepository.getAssignmentById(assignmentId);
 
-    // Create a map of answers by question ID for easy lookup
     const answerMap = new Map(
       answers.map(a => [a.questionId, a])
     );
 
-    // Build questions with answers and calculate scores
     const questionsWithAnswers: QuestionWithAnswer[] = assignment.questions.map(question => {
       const answerInput = answerMap.get(question.id);
 
@@ -132,10 +118,8 @@ export async function submitAssignment(
         throw new Error(`Thiếu câu trả lời cho câu hỏi: ${question.label}`);
       }
 
-      // Convert answer to typed format
       const typedAnswer = convertAnswerToTypedFormat(question.type, answerInput.answer);
 
-      // Calculate earned score based on question type
       let earnedScore: number | null = null;
 
       if (question.type === "radio" && question.options) {
@@ -151,7 +135,6 @@ export async function submitAssignment(
           question.score
         );
       }
-      // For "text" and "file" types, earnedScore remains null (manual grading required)
 
       return {
         id: question.id,
@@ -167,10 +150,8 @@ export async function submitAssignment(
       };
     });
 
-    // Calculate total score and max score
     const maxScore = questionsWithAnswers.reduce((sum, q) => sum + q.score, 0);
 
-    // Determine if all questions can be auto-graded
     const allAutoGradable = questionsWithAnswers.every(
       q => q.type === "radio" || q.type === "checkbox"
     );
@@ -179,7 +160,6 @@ export async function submitAssignment(
     let status: AssignmentResultStatus = "submitted";
 
     if (allAutoGradable) {
-      // All questions are auto-gradable, calculate total score
       totalScore = questionsWithAnswers.reduce(
         (sum, q) => sum + (q.earnedScore ?? 0),
         0
@@ -187,7 +167,6 @@ export async function submitAssignment(
       status = "graded";
     }
 
-    // Create submission data snapshot
     const submissionData: SubmissionData = {
       assignment: {
         id: assignment.id,
@@ -240,13 +219,11 @@ export async function getSubmissionStatus(
     return null;
   }
 
-  // Try to parse as new format, fall back to legacy format
   let submissionData: SubmissionData | null = null;
 
   try {
     const data = result.data as any;
 
-    // Check if it's the new format (has 'assignment' and 'questions' fields)
     if (data && typeof data === 'object' && 'assignment' in data && 'questions' in data) {
       submissionData = data as SubmissionData;
     }
@@ -262,7 +239,7 @@ export async function getSubmissionStatus(
     score: result.score,
     maxScore: result.max_score,
     status: result.status,
-    submissionData, // New format data (null for legacy submissions)
+    submissionData,
   };
 }
 

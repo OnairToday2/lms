@@ -29,13 +29,9 @@ import SubmissionActions from "./SubmissionActions";
 interface QuestionAnswer {
   questionId: string;
   questionType: "file" | "text" | "checkbox" | "radio";
-  // For file type
   files?: File[];
-  // For text type
   textAnswer?: string;
-  // For radio type
   radioAnswer?: string;
-  // For checkbox type
   checkboxAnswers?: string[];
 }
 
@@ -68,7 +64,6 @@ export default function AssignmentSubmission() {
   const isLoading = isLoadingAssignment || isLoadingQuestions || isLoadingEmployee;
   const answers = watch("answers");
 
-  // Initialize answers when questions are loaded
   React.useEffect(() => {
     if (questions && questions.length > 0) {
       const initialAnswers = questions.map((q) => ({
@@ -213,7 +208,6 @@ export default function AssignmentSubmission() {
     setUploadProgress(0);
 
     try {
-      // Validate that all questions have answers
       const unansweredQuestions = data.answers.filter((answer) => {
         switch (answer.questionType) {
           case "file":
@@ -233,12 +227,10 @@ export default function AssignmentSubmission() {
         throw new Error("Vui lòng trả lời tất cả các câu hỏi");
       }
 
-      // Count total files to upload (only for file type questions)
       const fileAnswers = data.answers.filter(a => a.questionType === "file" && a.files);
       const totalFiles = fileAnswers.reduce((sum, answer) => sum + (answer.files?.length || 0), 0);
       let completedFiles = 0;
 
-      // Process answers based on question type
       const processedAnswers = await Promise.all(
         data.answers.map(async (answer) => {
           const question = questions?.find(q => q.id === answer.questionId);
@@ -250,7 +242,6 @@ export default function AssignmentSubmission() {
 
           switch (answer.questionType) {
             case "file":
-              // Upload files to S3 and get URLs
               if (!answer.files || answer.files.length === 0) {
                 throw new Error(`Vui lòng tải lên file cho câu hỏi: ${question.label}`);
               }
@@ -336,7 +327,6 @@ export default function AssignmentSubmission() {
         severity: "success",
       });
 
-      // Invalidate assignment students query to refresh the list
       queryClient.invalidateQueries({
         queryKey: [GET_ASSIGNMENTS, assignmentId, "students"]
       });

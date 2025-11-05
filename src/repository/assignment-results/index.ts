@@ -7,7 +7,6 @@ type AssignmentResultRow = Database["public"]["Tables"]["assignment_results"]["R
 type QuestionType = Database["public"]["Enums"]["question_type"];
 type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
 
-// Answer format by question type
 export type FileAnswer = { fileUrl: string };
 export type TextAnswer = { text: string };
 export type RadioAnswer = { selectedOptionId: string };
@@ -15,22 +14,19 @@ export type CheckboxAnswer = { selectedOptionIds: string[] };
 
 export type QuestionAnswer = FileAnswer | TextAnswer | RadioAnswer | CheckboxAnswer;
 
-// Question with answer and earned score
 export interface QuestionWithAnswer {
   id: string;
   label: string;
   type: QuestionType;
-  score: number; // Points possible for this question
+  score: number;
   options?: QuestionOption[];
   attachments?: string[];
   created_at: string;
   updated_at: string;
-  // Submission-specific fields
   answer: QuestionAnswer;
-  earnedScore: number | null; // Points earned (auto-calculated for radio/checkbox, null for text/file)
+  earnedScore: number | null;
 }
 
-// Complete submission data structure (stored in 'data' column)
 export interface SubmissionData {
   assignment: {
     id: string;
@@ -43,13 +39,12 @@ export interface SubmissionData {
   questions: QuestionWithAnswer[];
 }
 
-// Legacy answer data format (for backward compatibility)
 export interface AnswerData {
   questionId: string;
   questionLabel: string;
   questionType: QuestionType;
   options?: QuestionOption[];
-  answer: string | string[]; // Format depends on question type
+  answer: string | string[];
 }
 
 export async function createAssignmentResult(data: {
@@ -65,7 +60,7 @@ export async function createAssignmentResult(data: {
   const insertData: AssignmentResultInsert = {
     assignment_id: data.assignment_id,
     employee_id: data.employee_id,
-    data: data.submissionData as any, // Store complete submission snapshot
+    data: data.submissionData as any,
     score: data.score ?? 0,
     max_score: data.max_score,
     status: data.status,

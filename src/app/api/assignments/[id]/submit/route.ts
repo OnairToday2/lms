@@ -13,7 +13,7 @@ interface SubmitAssignmentRequest {
     questionLabel: string;
     questionType: QuestionType;
     options?: QuestionOption[];
-    answer: string | string[]; // Format depends on question type
+    answer: string | string[];
   }>;
 }
 
@@ -52,7 +52,6 @@ export async function POST(
       );
     }
 
-    // Validate each answer based on question type
     for (const answer of answers) {
       if (!answer.questionId || !answer.questionType) {
         return NextResponse.json(
@@ -61,17 +60,14 @@ export async function POST(
         );
       }
 
-      // Validate answer format based on question type
       switch (answer.questionType) {
         case "file":
-          // For file type, answer should be array of URLs
           if (!Array.isArray(answer.answer) || answer.answer.length === 0) {
             return NextResponse.json(
               { error: `Vui lòng tải lên file cho câu hỏi: ${answer.questionLabel}` },
               { status: 400 }
             );
           }
-          // Validate S3 URLs
           for (const url of answer.answer) {
             if (typeof url !== "string") {
               return NextResponse.json(
@@ -90,7 +86,6 @@ export async function POST(
           break;
 
         case "text":
-          // For text type, answer should be a non-empty string
           if (typeof answer.answer !== "string" || answer.answer.trim() === "") {
             return NextResponse.json(
               { error: `Vui lòng nhập câu trả lời cho câu hỏi: ${answer.questionLabel}` },
@@ -100,14 +95,12 @@ export async function POST(
           break;
 
         case "checkbox":
-          // For checkbox type, answer should be array of option IDs
           if (!Array.isArray(answer.answer) || answer.answer.length === 0) {
             return NextResponse.json(
               { error: `Vui lòng chọn ít nhất một đáp án cho câu hỏi: ${answer.questionLabel}` },
               { status: 400 }
             );
           }
-          // Validate option IDs exist in question options
           if (answer.options) {
             const validOptionIds = answer.options.map(opt => opt.id);
             for (const optionId of answer.answer) {
@@ -122,14 +115,12 @@ export async function POST(
           break;
 
         case "radio":
-          // For radio type, answer should be a single option ID
           if (typeof answer.answer !== "string" || answer.answer.trim() === "") {
             return NextResponse.json(
               { error: `Vui lòng chọn đáp án cho câu hỏi: ${answer.questionLabel}` },
               { status: 400 }
             );
           }
-          // Validate option ID exists in question options
           if (answer.options) {
             const validOptionIds = answer.options.map(opt => opt.id);
             if (!validOptionIds.includes(answer.answer)) {
@@ -155,7 +146,6 @@ export async function POST(
       answers,
     });
 
-    // Prepare success message based on grading status
     let message = "Nộp bài thành công!";
     if (result.status === "graded") {
       message = `Nộp bài thành công! Điểm: ${result.score}/${result.maxScore}`;
