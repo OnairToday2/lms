@@ -46,7 +46,7 @@ const MAIN_MENU_LIST: MenuItemType[] = [
       {
         title: "Quản lý người dùng",
         key: "manage-employee",
-        path: PATHS.STUDENTS.ROOT,
+        path: PATHS.EMPLOYEES.ROOT,
         type: "item",
       },
       {
