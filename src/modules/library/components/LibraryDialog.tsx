@@ -34,6 +34,7 @@ import {
   renameResource,
   deleteResource,
 } from "@/services/libraries/library.service";
+import { uploadFileToS3 } from "@/utils/s3-upload";
 
 export function LibraryDialog() {
   const open = useLibraryStore((state) => state.open);
@@ -269,54 +270,10 @@ export function LibraryDialog() {
     setError(null);
 
     try {
-      const presignedResponse = await fetch("/api/libraries/upload/presigned-url", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const uploadResult = await uploadFileToS3(file, {
+        onProgress: (percent) => {
+          setUploadProgressPercent(percent);
         },
-        body: JSON.stringify({
-          fileName: file.name,
-          fileType: file.type,
-          fileSize: file.size,
-        }),
-      });
-
-      if (!presignedResponse.ok) {
-        const errorData = await presignedResponse.json();
-        throw new Error(errorData.error || "Failed to get presigned URL");
-      }
-
-      const { presignedUrl, publicUrl, thumbnailUrl } = await presignedResponse.json();
-
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-
-        xhr.upload.addEventListener("progress", (event) => {
-          if (event.lengthComputable) {
-            const percentComplete = Math.round((event.loaded / event.total) * 100);
-            setUploadProgressPercent(percentComplete);
-          }
-        });
-
-        xhr.addEventListener("load", () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve();
-          } else {
-            reject(new Error("Failed to upload file to S3"));
-          }
-        });
-
-        xhr.addEventListener("error", () => {
-          reject(new Error("Failed to upload file to S3"));
-        });
-
-        xhr.addEventListener("abort", () => {
-          reject(new Error("Upload aborted"));
-        });
-
-        xhr.open("PUT", presignedUrl);
-        xhr.setRequestHeader("Content-Type", file.type);
-        xhr.send(file);
       });
 
       const fileExtension = file.name.split('.').pop() || '';
@@ -326,14 +283,14 @@ export function LibraryDialog() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: file.name,
+          name: uploadResult.fileName,
           libraryId: config.libraryId,
           parentId: currentFolderId,
-          path: publicUrl,
-          size: file.size,
-          mimeType: file.type,
+          path: uploadResult.url,
+          size: uploadResult.fileSize,
+          mimeType: uploadResult.fileType,
           extension: fileExtension,
-          thumbnailUrl: thumbnailUrl,
+          thumbnailUrl: uploadResult.thumbnailUrl,
         }),
       });
 

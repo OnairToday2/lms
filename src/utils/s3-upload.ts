@@ -14,6 +14,7 @@ export interface UploadToS3Result {
   fileName: string;
   fileType: string;
   fileSize: number;
+  thumbnailUrl: string | null;
 }
 
 async function getPresignedUrl(
@@ -91,6 +92,7 @@ export async function uploadFileToS3(
     fileName: file.name,
     fileType: file.type,
     fileSize: file.size,
+    thumbnailUrl: presignedData.thumbnailUrl,
   };
 }
 
