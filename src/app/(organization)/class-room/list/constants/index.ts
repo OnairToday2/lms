@@ -3,11 +3,12 @@ import { ClassRoomRuntimeStatusFilter, ClassRoomStatusFilter, ClassRoomTypeFilte
 export const TABLE_HEAD = [
     { id: "stt", label: "STT", width: 72, align: "center" as const },
     { id: "name", label: "Tên lớp học", width: 300, align: "left" as const },
-    { id: "teachers", label: "Giảng viên", width: 180, align: "center" as const },
-    { id: "students", label: "Số lượng học viên", width: 160, align: "center" as const },
-    { id: "status", label: "Trạng thái xuất bản", width: 180, align: "center" as const },
+    { id: "type", label: "Loại lớp học", width: 200, align: "center" as const },
+    { id: "students", label: "Học viên", width: 50, align: "center" as const },
     { id: "runtimeStatus", label: "Trạng thái diễn ra", width: 180, align: "center" as const },
-    { id: "createdBy", label: "Người tạo", width: 240, align: "left" as const },
+    { id: "teachers", label: "Giảng viên", width: 100, align: "center" as const },
+    { id: "status", label: "Trạng thái xuất bản", width: 180, align: "center" as const },
+    { id: "time", label: "Thời gian", width: 150, align: "center" as const },
     { id: "action", label: "Hành động", width: 100, align: "center" as const },
 ];
 

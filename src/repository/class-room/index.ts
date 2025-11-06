@@ -306,22 +306,50 @@ const applyClassRoomFilters = <
 };
 
 const createClassRoomsQuery = (
-  filters: { organizationId?: string | null; employeeId?: string | null },
+  filters: {
+    organizationId?: string | null;
+    employeeId?: string | null;
+    teacherClassRoomIds?: string[];
+  },
   select: string,
   options?: { count?: "exact" | "planned" | "estimated"; head?: boolean },
 ) => {
-  const { organizationId, employeeId } = filters;
+  const { organizationId, employeeId, teacherClassRoomIds } = filters;
+  const trimmedEmployeeId = employeeId?.trim();
+  const uuidPattern =
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  const sanitizedTeacherClassRoomIds = Array.from(
+    new Set(
+      (teacherClassRoomIds ?? [])
+        .map((id) => id?.trim())
+        .filter(
+          (id): id is string =>
+            Boolean(id) && uuidPattern.test(id),
+        ),
+    ),
+  );
+
   let query = supabase
     .from("class_rooms_priority")
     .select(select, options)
-    .not("status", "in", "(deleted)")
+    .not("status", "in", "(deleted)");
 
   if (organizationId) {
     query = query.eq("organization_id", organizationId!);
   }
 
-  if (employeeId) {
-    query = query.eq("employee_id", employeeId);
+  const orConditions: string[] = [];
+
+  if (trimmedEmployeeId) {
+    orConditions.push(`employee_id.eq.${trimmedEmployeeId}`);
+  }
+
+  if (sanitizedTeacherClassRoomIds.length > 0) {
+    orConditions.push(`id.in.(${sanitizedTeacherClassRoomIds.join(",")})`);
+  }
+
+  if (orConditions.length > 0) {
+    query = query.or(orConditions.join(","));
   }
 
   return query;
@@ -347,12 +375,14 @@ const getClassRooms = async (
     sessionMode,
   } = input;
 
+  const trimmedEmployeeId = employeeId?.trim();
+
   const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
   const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 12;
   const rangeStart = (safePage - 1) * safeLimit;
   const rangeEnd = rangeStart + safeLimit - 1;
 
-  if (!organizationId && !employeeId) {
+  if (!organizationId && !trimmedEmployeeId) {
     return {
       data: [],
       total: 0,
@@ -361,8 +391,35 @@ const getClassRooms = async (
     };
   }
 
+  let teacherClassRoomIds: string[] | undefined;
+
+  if (trimmedEmployeeId) {
+    const { data: teacherAssignments, error: teacherError } = await supabase
+      .from("class_session_teacher")
+      .select(
+        `
+          class_sessions!inner (
+            class_room_id
+          )
+        `,
+      )
+      .eq("teacher_id", trimmedEmployeeId);
+
+    if (teacherError) {
+      throw teacherError;
+    }
+
+    teacherClassRoomIds = Array.from(
+      new Set(
+        (teacherAssignments ?? [])
+          .map((assignment) => assignment?.class_sessions?.class_room_id)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    );
+  }
+
   let query = createClassRoomsQuery(
-    { organizationId, employeeId },
+    { organizationId, employeeId: trimmedEmployeeId, teacherClassRoomIds },
     CLASS_ROOMS_SELECT,
     { count: "exact" },
   );

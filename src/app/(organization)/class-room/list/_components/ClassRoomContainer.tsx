@@ -1,242 +1,110 @@
 "use client";
-import { useMemo, useState } from "react";
-import dayjs from "dayjs";
+import { SyntheticEvent, useEffect, useMemo, useState } from "react";
+import TabContext from "@mui/lab/TabContext";
+import TabPanel from "@mui/lab/TabPanel";
 import {
-  Alert,
   Box,
-  Button,
-  CircularProgress,
-  Stack,
-  Typography,
+  Tab,
+  Tabs,
 } from "@mui/material";
-import {
-  ClassRoomFilters,
-  ClassRoomRuntimeStatusFilter,
-  ClassRoomStatusFilter,
-  ClassRoomTypeFilter,
-  ClassSessionModeFilter,
-} from "../types/types";
-import {
-  GetClassRoomsQueryInput,
-  useGetClassRoomsPriorityQuery,
-} from "@/modules/class-room-management/operations/query";
-import { Pagination } from "@/shared/ui/Pagination";
-import ClassRoomListFilters from "./ClassRoomCourseFilters";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import ClassRoomListTable from "./ClassRoomListTable";
-import { redirect } from "next/navigation";
+import { redirect, usePathname, useRouter, useSearchParams } from "next/navigation";
+import ClassRoomTab from "./ClassRoomTab";
+import ELearningTab from "./ELearningTab";
+import TvOutlinedIcon from '@mui/icons-material/TvOutlined';
+import AirplayOutlinedIcon from '@mui/icons-material/AirplayOutlined';
 
-const initialFilters: ClassRoomFilters = {
-  type: ClassRoomTypeFilter.All,
-  sessionMode: ClassSessionModeFilter.All,
-  runtimeStatus: ClassRoomRuntimeStatusFilter.All,
-  status: ClassRoomStatusFilter.All,
-  search: "",
-  startDate: null,
-  endDate: null,
-};
+type TabValue = "ClassRoomTab" | "ElearningTab";
 
-const PAGE_SIZE = 12;
+const DEFAULT_TAB: TabValue = "ClassRoomTab";
+const TAB_QUERY_KEY = "tab";
 
 export default function ClassRoomContainer() {
-  const [filters, setFilters] = useState<ClassRoomFilters>(initialFilters);
-  const [page, setPage] = useState(1);
-  const { organization, ...rest } = useUserOrganization((state) => state.data);
-  const isAdmin = rest.employeeType === "admin";
+  const { ...rest } = useUserOrganization((state) => state.data);
   const isHasAccess = rest.employeeType === "admin" || rest.employeeType === "teacher"
-  const organizationId = isAdmin ? organization?.id : undefined;
-  const employeeId = rest.employeeType === "teacher" ? rest.id : undefined;
-
-  const queryInput = useMemo<GetClassRoomsQueryInput>(() => {
-    const trimmedSearch = filters.search.trim();
-    return {
-      q: trimmedSearch ? trimmedSearch : undefined,
-      from: filters.startDate
-        ? dayjs(filters.startDate).startOf("day").toISOString()
-        : undefined,
-      to: filters.endDate
-        ? dayjs(filters.endDate).endOf("day").toISOString()
-        : undefined,
-      runtimeStatus: filters.runtimeStatus,
-      status: filters.status,
-      type: filters.type,
-      sessionMode: filters.sessionMode,
-      page,
-      limit: PAGE_SIZE,
-      organizationId,
-      employeeId,
-      orderField: "created_at",
-      orderBy: "desc"
-    };
-  }, [
-    filters.search,
-    filters.startDate,
-    filters.endDate,
-    filters.runtimeStatus,
-    filters.status,
-    filters.type,
-    filters.sessionMode,
-    page,
-    organizationId,
-    employeeId,
-  ]);
-
-  const { data: classRoomsResult, isLoading, isError, refetch } =
-    useGetClassRoomsPriorityQuery(queryInput);
-
-  const classRooms = classRoomsResult?.data ?? [];
-  const totalClassRooms = classRoomsResult?.total ?? 0;
-
-  const handleSearchChange = (value: string) => {
-    setPage(1);
-    setFilters((prev) => ({
-      ...prev,
-      search: value,
-    }));
-  };
-
-  const handleDateChange = (
-    field: "startDate" | "endDate",
-    value: string | null,
-  ) => {
-    setPage(1);
-    setFilters((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleRuntimeStatusChange = (runtimeStatus: ClassRoomRuntimeStatusFilter) => {
-    setPage(1);
-    setFilters((prev) => ({
-      ...prev,
-      runtimeStatus,
-    }));
-  }
-
-  const handleStausChange = (status: ClassRoomStatusFilter) => {
-    setPage(1);
-    setFilters((prev) => ({
-      ...prev,
-      status,
-    }));
-  }
-
-  const handleTypeChange = (type: ClassRoomTypeFilter) => {
-    setPage(1);
-    setFilters((prev) => ({
-      ...prev,
-      type,
-    }));
-  }
-
-  const handleSessionModeChange = (mode: ClassSessionModeFilter) => {
-    setPage(1);
-    setFilters((prev) => ({
-      ...prev,
-      sessionMode: mode,
-    }));
-  }
-
-  const handlePaginationChange = (nextPage: number) => {
-    setPage(nextPage);
-  };
 
   if (!isHasAccess) {
     redirect('/403');
   }
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const tabFromQuery = useMemo<TabValue>(() => {
+    const queryValue = searchParams.get(TAB_QUERY_KEY);
+    return queryValue === "ElearningTab" ? "ElearningTab" : DEFAULT_TAB;
+  }, [searchParams]);
+
+  const [value, setValue] = useState<TabValue>(tabFromQuery);
+
+  useEffect(() => {
+    if (tabFromQuery !== value) {
+      setValue(tabFromQuery);
+    }
+  }, [tabFromQuery, value]);
+
+  const syncQueryWithTab = (nextValue: TabValue) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (nextValue === DEFAULT_TAB) {
+      params.delete(TAB_QUERY_KEY);
+    } else {
+      params.set(TAB_QUERY_KEY, nextValue);
+    }
+
+    const queryString = params.toString();
+    const nextPath = queryString ? `${pathname}?${queryString}` : pathname;
+    router.replace(nextPath, { scroll: false });
+  };
+
+  const handleChange = (_event: SyntheticEvent, newValue: string) => {
+    const nextValue = newValue as TabValue;
+
+    if (nextValue === value) {
+      return;
+    }
+
+    setValue(nextValue);
+    syncQueryWithTab(nextValue);
+  };
+
+  const isClassRoomTabActive = value === "ClassRoomTab";
+  const isElearningTabActive = value === "ElearningTab";
+
   return (
-    <Box
-      px={2}
-      py={2.5}
-      bgcolor={"#fff"}
-      borderRadius={2}
-    >
-      <Stack spacing={3}>
-        <ClassRoomListFilters
-          type={filters.type}
-          sessionMode={filters.sessionMode}
-          search={filters.search}
-          startDate={filters.startDate}
-          endDate={filters.endDate}
-          runtimeStatus={filters.runtimeStatus}
-          status={filters.status}
-          onSearchChange={handleSearchChange}
-          onDateChange={handleDateChange}
-          onRuntimeStatusChange={handleRuntimeStatusChange}
-          onStausChange={handleStausChange}
-          onTypeChange={handleTypeChange}
-          onSessionModeChange={handleSessionModeChange}
+    <TabContext value={value}>
+      <Tabs
+        value={value}
+        onChange={handleChange}
+        variant="scrollable"
+        scrollButtons="auto"
+        allowScrollButtonsMobile
+        className="rounded-2xl bg-white px-4 py-3 mb-4"
+      >
+        <Tab
+          value="ClassRoomTab"
+          label="Lớp học tương tác"
+          iconPosition="start"
+          icon={<TvOutlinedIcon className="w-6 h-6" />}
+          className="text-xs font-semibold p-0 mr-6 min-h-12"
         />
+        <Tab
+          value="ElearningTab"
+          label="Môn học eLearning"
+          iconPosition="start"
+          icon={<AirplayOutlinedIcon className="w-6 h-6" />}
+          className="text-xs font-semibold p-0 min-h-12"
+        />
+      </Tabs>
 
-        {isLoading ? (
-          <Stack
-            alignItems="center"
-            justifyContent="center"
-            sx={{ py: 6 }}
-            spacing={2}
-          >
-            <CircularProgress />
-            <Typography variant="body2" color="text.secondary">
-              Đang tải danh sách lớp học...
-            </Typography>
-          </Stack>
-        ) : null}
+      <TabPanel value="ClassRoomTab" className="p-0">
+        <ClassRoomTab isActive={isClassRoomTabActive} />
+      </TabPanel>
 
-        {isError ? (
-          <Alert
-            severity="error"
-            action={
-              <Button color="inherit" size="small" onClick={() => refetch()}>
-                Thử lại
-              </Button>
-            }
-          >
-            Không thể tải danh sách lớp học. Vui lòng kiểm tra lại kết nối.
-          </Alert>
-        ) : null}
-
-        {!isLoading && !isError ? (
-          classRooms.length === 0 ? (
-            <Box
-              sx={{
-                py: 6,
-                px: 3,
-                border: "1px dashed",
-                borderColor: "divider",
-                borderRadius: 3,
-                textAlign: "center",
-                color: "text.secondary",
-              }}
-            >
-              <Typography variant="h6" gutterBottom>
-                Không có lớp học phù hợp
-              </Typography>
-              <Typography variant="body2">
-                Hãy thử điều chỉnh lại bộ lọc hoặc làm mới dữ liệu.
-              </Typography>
-            </Box>
-          ) : (
-            <ClassRoomListTable
-              classRooms={classRooms}
-              page={queryInput.page ?? 1}
-              pageSize={queryInput.limit ?? PAGE_SIZE}
-            />
-          )
-        ) : null}
-      </Stack>
-      {totalClassRooms > 0 ? (
-        <Box mt={2}>
-          <Pagination
-            onChange={handlePaginationChange}
-            total={totalClassRooms}
-            take={PAGE_SIZE}
-            value={page}
-            name="Lớp học"
-          />
-        </Box>
-      ) : null}
-    </Box>
+      <TabPanel value="ElearningTab" className="p-0">
+        <ELearningTab isActive={isElearningTabActive} />
+      </TabPanel>
+    </TabContext>
   );
 }

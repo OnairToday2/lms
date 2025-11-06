@@ -21,22 +21,26 @@ import {
 import { grey } from "@mui/material/colors";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { ClassRoomPriorityDto, EmployeeWithProfileDto } from "@/types/dto/classRooms/classRoom.dto";
-import { fDate, FORMAT_DATE_TIME } from "@/lib";
+import { fDate, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { useDeleteClassRoomMutation } from "@/modules/class-room-management/operations/mutation";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/shared/ui/custom-dialog";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { TABLE_HEAD } from "../constants";
-import { ClassRoomRuntimeStatusFilter, ClassRoomStatusFilter, ClassRoomTypeFilter } from "../types/types";
-import { getClassRoomRuntimeStatusLabel, getClassRoomStatusLabel, getClassRoomTypeLabel, getColorClassRoomRuntimeStatus, getColorClassRoomStatus } from "../utils/status";
-
+import { ClassRoomStatusFilter, ClassRoomTypeFilter } from "../types/types";
+import { getClassRoomStatusLabel, getClassRoomTypeLabel, getColorClassRoomStatus } from "../utils/status";
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import ClassRoomType from "./ClassRoomType";
+import ClassRoomRuntimeStatus from "./ClassRoomRuntimeStatus";
+import EnterClassRoomsDialog from "@/app/(organization)/my-class/_components/EnterClassRooms";
 
 interface ClassRoomListTableProps {
   classRooms: ClassRoomPriorityDto[];
   page: number;
   pageSize: number;
+  isAdmin: boolean;
 }
 const formatOrder = (index: number) => index.toString().padStart(2, "0");
 
@@ -44,10 +48,14 @@ export default function ClassRoomListTable({
   classRooms,
   page,
   pageSize,
+  isAdmin,
 }: ClassRoomListTableProps) {
   const startIndex = (page - 1) * pageSize;
   const queryClient = useQueryClient();
   const router = useRouter();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedClassRoom, setSelectedClassRoom] = useState<ClassRoomPriorityDto | null>(null);
+
 
   const { mutateAsync: deleteClassRoom, isPending } = useDeleteClassRoomMutation();
   const [isOpenDialogDelete, setIsOpenDialogDelete] = useState(false);
@@ -74,6 +82,54 @@ export default function ClassRoomListTable({
       setIsOpenDialogDelete(false);
     }
   }
+
+  const handleEditClassRoom = (isOnline: boolean, classRoomId: string) => {
+    if (isOnline) {
+      return router.push(`/class-room/manage/online/edit/${classRoomId}`)
+    }
+    return router.push(`/class-room/manage/offline/edit/${classRoomId}`)
+  }
+
+  const navigateToSession = useCallback((sessionId?: string, slug?: string | null) => {
+    if (!sessionId || !slug) {
+      return;
+    }
+    router.push(`/class-room/cd/${slug}/${sessionId}`);
+  }, [router]);
+
+  const handleCloseDialog = useCallback(() => {
+    setDialogOpen(false);
+    setSelectedClassRoom(null);
+  }, []);
+
+  const handleSelectSession = useCallback((sessionId: string) => {
+    if (!selectedClassRoom) {
+      return;
+    }
+
+    const isOnline = selectedClassRoom.class_sessions?.[0]?.is_online;
+    if (!isOnline) {
+      //  xử lý btn quét mã qr khi là lớp học offline chuỗi
+      return;
+    }
+
+    const slug = selectedClassRoom.slug ?? undefined;
+
+    setDialogOpen(false);
+    navigateToSession(sessionId, slug);
+    setSelectedClassRoom(null);
+  }, [navigateToSession, selectedClassRoom]);
+
+  const handleEnterClassRoom = useCallback((room: ClassRoomPriorityDto) => {
+    setSelectedClassRoom(room);
+    setDialogOpen(true);
+  }, []);
+
+  const selectedSessions = selectedClassRoom?.class_sessions ?? [];
+  const selectedThumbnail = selectedClassRoom?.thumbnail_url;
+  const selectedTitle = selectedClassRoom?.title;
+  const selectedIsOnline = selectedClassRoom?.class_sessions?.[0]?.is_online;
+  const selectedActionLabel = selectedIsOnline === false ? "Quét mã QR" : undefined;
 
   return (
     <>
@@ -150,8 +206,8 @@ export default function ClassRoomListTable({
                 });
 
                 const teachers = Array.from(teacherMap.values());
-                const creatorName =
-                  room.creator?.profile?.full_name ?? room.creator?.employee_code ?? "Chưa cập nhật";
+                const isOnline = room?.class_sessions?.[0]?.is_online
+
                 return (
                   <TableRow
                     key={room.id ?? `${room.title}-${index}`}
@@ -169,12 +225,28 @@ export default function ClassRoomListTable({
                       <Stack direction="column" alignItems="flex-start">
                         <Chip
                           label={getClassRoomTypeLabel(room?.room_type as ClassRoomTypeFilter)}
-                          color="warning"
+                          color={room?.room_type === "single" ? "warning" : "primary"}
                         />
-                        <Typography variant="subtitle2" fontWeight={600} className="line-clamp-2">
-                          {room.title || "--"}
+                        <Tooltip title={room.title}>
+                          <Typography variant="subtitle2" fontWeight={600} className="line-clamp-2">
+                            {room.title || "--"}
+                          </Typography>
+                        </Tooltip>
+                      </Stack>
+                    </TableCell>
+                    <TableCell align="center">
+                      <ClassRoomType isOnline={isOnline!} />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                        <PeopleAltOutlinedIcon className="w-4 h-4" />
+                        <Typography className="text-xs">
+                          {room?.studentCount?.[0].count}
                         </Typography>
                       </Stack>
+                    </TableCell>
+                    <TableCell align="center">
+                      <ClassRoomRuntimeStatus runtimeStatus={room?.runtime_status as any} />
                     </TableCell>
                     <TableCell align="center">
                       <AvatarGroup sx={{ justifyContent: "center" }} variant="circular" max={4}>
@@ -192,11 +264,6 @@ export default function ClassRoomListTable({
                       </AvatarGroup>
                     </TableCell>
                     <TableCell align="center">
-                      <Typography variant="subtitle2">
-                        {room?.studentCount?.[0].count}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
                       <Chip
                         label={getClassRoomStatusLabel(room?.status as ClassRoomStatusFilter)}
                         size="small"
@@ -206,27 +273,8 @@ export default function ClassRoomListTable({
                       />
                     </TableCell>
                     <TableCell align="center">
-                      <Chip
-                        label={getClassRoomRuntimeStatusLabel(room?.runtime_status as ClassRoomRuntimeStatusFilter)}
-                        size="small"
-                        color={getColorClassRoomRuntimeStatus(room?.runtime_status as ClassRoomRuntimeStatusFilter)}
-                        variant="filled"
-                        sx={{ fontWeight: 500 }}
-                      />
-                    </TableCell>
-                    <TableCell align="left">
-                      <Stack direction="row" alignItems="center" spacing={1}>
-                        <Avatar
-                          src={room.creator?.profile?.avatar as string}
-                          sx={{ width: 24, height: 24 }}
-                        />
-                        <Stack>
-                          <Typography variant="caption">{creatorName}</Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {fDate(room.created_at, FORMAT_DATE_TIME)}
-                          </Typography>
-                        </Stack>
-                      </Stack>
+                      {fDate(room.start_at, FORMAT_DATE_TIME_CLEANER)} <br />
+                      {fDate(room.end_at, FORMAT_DATE_TIME_CLEANER)}
                     </TableCell>
                     <TableCell align="center">
                       <PopupState variant="popover" popupId="demo-popup-menu">
@@ -237,8 +285,10 @@ export default function ClassRoomListTable({
                             </IconButton>
                             <Menu {...bindMenu(popupState)}>
                               <MenuItem onClick={() => { }}>Xem chi tiết lớp học</MenuItem>
-                              <MenuItem onClick={() => { }}>Chỉnh sửa</MenuItem>
-                              <MenuItem onClick={() => handleOpenDeleteClassRoom(room)}>Xoá lớp học</MenuItem>
+                              <MenuItem onClick={() => handleEnterClassRoom(room)} disabled={!isOnline!}>Vào lớp học</MenuItem>
+                              <MenuItem onClick={() => { }} disabled={isOnline!}>Qr điểm danh</MenuItem>
+                              <MenuItem onClick={() => handleEditClassRoom(isOnline!, room?.id as string)} disabled={!isAdmin}>Chỉnh sửa</MenuItem>
+                              <MenuItem onClick={() => handleOpenDeleteClassRoom(room)} disabled={!isAdmin}>Xoá lớp học</MenuItem>
                               <MenuItem onClick={() => { router.push(`${room.id}/students`) }}>Danh sách học viên</MenuItem>
                             </Menu>
                           </>
@@ -265,6 +315,16 @@ export default function ClassRoomListTable({
             </Button>
           </>
         }
+      />
+
+      <EnterClassRoomsDialog
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        sessions={selectedSessions}
+        thumbnail={selectedThumbnail}
+        classTitle={selectedTitle}
+        actionLabel={selectedActionLabel}
+        onSelectSession={handleSelectSession}
       />
     </>
   );
