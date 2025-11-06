@@ -1,5 +1,6 @@
 import {
   ClassIcon,
+  ClipboardIcon,
   GitIcon,
   HelpIcon,
   SquareFourIcon,
@@ -45,7 +46,7 @@ const MAIN_MENU_LIST: MenuItemType[] = [
       {
         title: "Quản lý người dùng",
         key: "manage-employee",
-        path: PATHS.STUDENTS.ROOT,
+        path: PATHS.EMPLOYEES.ROOT,
         type: "item",
       },
       {
@@ -76,6 +77,26 @@ const MAIN_MENU_LIST: MenuItemType[] = [
         key: "manage-department",
         path: PATHS.CLASSROOMS.LIST_CLASSROOM,
         type: "item",
+      },
+    ],
+  },
+  {
+    title: "Quản lý bài kiểm tra",
+    icon: React.createElement(ClipboardIcon),
+    key: "assignments",
+    path: PATHS.ASSIGNMENTS.ROOT,
+    children: [
+      {
+        title: "Tạo bài kiểm tra",
+        icon: React.createElement(ClipboardIcon),
+        key: "assignments/create",
+        path: PATHS.ASSIGNMENTS.CREATE_ASSIGNMENT,
+      },
+      {
+        title: "Danh sách bài kiểm tra",
+        icon: React.createElement(ClipboardIcon),
+        key: "assignments",
+        path: PATHS.ASSIGNMENTS.ROOT,
       },
     ],
   },
