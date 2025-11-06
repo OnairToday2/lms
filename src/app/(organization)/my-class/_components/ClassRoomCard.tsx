@@ -9,7 +9,7 @@ import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import { fDateTime } from "@/lib";
 import EnterClassRoomsDialog from "./EnterClassRooms";
 import { ClassRoomPriorityDto } from "@/types/dto/classRooms/classRoom.dto";
-import { ClassRoomType } from "../../class-room/list/types/types";
+import { ClassRoomTypeFilter } from "../../class-room/list/types/types";
 
 
 interface IClassRoomCard {
@@ -24,7 +24,7 @@ interface IClassRoomCard {
     thumbnail: string
     actionDisabled: boolean
     slug?: string
-    roomType?: ClassRoomType
+    roomType?: ClassRoomTypeFilter
     sessions?: ClassRoomPriorityDto["class_sessions"]
     isOnline: boolean
 }
@@ -41,7 +41,7 @@ const ClassRoomCard = ({
     title,
     actionDisabled,
     slug,
-    roomType = ClassRoomType.Single,
+    roomType = ClassRoomTypeFilter.Single,
     sessions = [],
     isOnline,
 }: IClassRoomCard) => {
@@ -52,7 +52,7 @@ const ClassRoomCard = ({
         if (!sessionId || !slug) {
             return;
         }
-        router.push(`/class-room/${slug}/${sessionId}`);
+        router.push(`/class-room/cd/${slug}/${sessionId}`);
     }, [router, slug]);
 
     const handleJoinClass = useCallback(() => {
@@ -61,7 +61,7 @@ const ClassRoomCard = ({
         }
 
         if (isOnline) {
-            if (roomType === ClassRoomType.Multiple) {
+            if (roomType === ClassRoomTypeFilter.Multiple) {
                 setDialogOpen(true);
                 return;
             }
@@ -70,7 +70,7 @@ const ClassRoomCard = ({
                 navigateToSession(sessions?.[0]?.id);
             }
         } else {
-            if (roomType === ClassRoomType.Multiple) {
+            if (roomType === ClassRoomTypeFilter.Multiple) {
                 setDialogOpen(true);
                 return;
             }
@@ -114,7 +114,7 @@ const ClassRoomCard = ({
                     </Stack>
 
                     <Box mt={2}>
-                        <Typography className="font-semibold text-[14px] text-[#212B36]">
+                        <Typography className="font-semibold text-[14px] text-[#212B36] line-clamp-2 h-[42px]">
                             {title ?? "Không có tiêu đề"}
                         </Typography>
                     </Box>
@@ -125,7 +125,7 @@ const ClassRoomCard = ({
                         <Stack direction="row" spacing={1} alignItems="center">
                             <AccessTimeIcon className="w-5" />
                             <Typography className="font-normal text-[12px] text-[#212B36]">
-                                {fDateTime(start_at)} -  {fDateTime(end_at)}
+                                {fDateTime(start_at)} - {fDateTime(end_at)}
                             </Typography>
                         </Stack>
 

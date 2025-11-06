@@ -6,7 +6,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { viVN } from "@mui/x-date-pickers/locales";
 import { SelectOption } from "@/shared/ui/form/SelectOption";
-import { ClassRoomRuntimeStatus, ClassRoomStatus, ClassRoomType, ClassSessionMode } from "../types/types";
+import { ClassRoomRuntimeStatusFilter, ClassRoomStatusFilter, ClassRoomTypeFilter, ClassSessionModeFilter } from "../types/types";
 import { PUBLICATION_STATUS_OPTIONS, RUNTIME_STATUS_OPTIONS, SESSION_MODE_OPTIONS, TYPE_OPTIONS } from "../constants";
 import Link from "next/link";
 import { SearchIcon } from "@/shared/assets/icons";
@@ -14,16 +14,16 @@ interface ClassRoomFiltersProps {
   search: string;
   startDate?: string | null;
   endDate?: string | null;
-  runtimeStatus: ClassRoomRuntimeStatus;
-  status: ClassRoomStatus;
-  type: ClassRoomType;
-  sessionMode: ClassSessionMode;
+  runtimeStatus: ClassRoomRuntimeStatusFilter;
+  status: ClassRoomStatusFilter;
+  type: ClassRoomTypeFilter;
+  sessionMode: ClassSessionModeFilter;
   onSearchChange: (value: string) => void;
   onDateChange: (field: "startDate" | "endDate", value: string | null) => void;
-  onRuntimeStatusChange: (runtimeStatus: ClassRoomRuntimeStatus) => void;
-  onStausChange: (status: ClassRoomStatus) => void;
-  onTypeChange: (status: ClassRoomType) => void;
-  onSessionModeChange: (mode: ClassSessionMode) => void;
+  onRuntimeStatusChange: (runtimeStatus: ClassRoomRuntimeStatusFilter) => void;
+  onStausChange: (status: ClassRoomStatusFilter) => void;
+  onTypeChange: (status: ClassRoomTypeFilter) => void;
+  onSessionModeChange: (mode: ClassSessionModeFilter) => void;
 }
 
 const parseDate = (value?: string | null): Dayjs | null => {
@@ -144,7 +144,7 @@ export default function ClassRoomFilters({
             size="small"
           />
         </Box>
-        <Link href="/class-room/create">
+        <Link href="/class-room">
           <Button
             variant="contained"
             color="primary"
