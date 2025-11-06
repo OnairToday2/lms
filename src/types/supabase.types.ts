@@ -7,191 +7,33 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
-      assignment_categories: {
-        Row: {
-          assignment_id: string
-          category_id: string
-          created_at: string
-        }
-        Insert: {
-          assignment_id: string
-          category_id: string
-          created_at?: string
-        }
-        Update: {
-          assignment_id?: string
-          category_id?: string
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "assignment_categories_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "assignments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assignment_categories_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      assignment_employees: {
-        Row: {
-          assignment_id: string
-          created_at: string
-          employee_id: string
-        }
-        Insert: {
-          assignment_id: string
-          created_at?: string
-          employee_id: string
-        }
-        Update: {
-          assignment_id?: string
-          created_at?: string
-          employee_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "assignment_employees_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "assignments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assignment_employees_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      assignment_results: {
-        Row: {
-          assignment_id: string
-          created_at: string
-          data: Json | null
-          employee_id: string
-          id: string
-          max_score: number | null
-          score: number
-          status: Database["public"]["Enums"]["assignment_result_status"]
-        }
-        Insert: {
-          assignment_id: string
-          created_at?: string
-          data?: Json | null
-          employee_id: string
-          id?: string
-          max_score?: number | null
-          score: number
-          status?: Database["public"]["Enums"]["assignment_result_status"]
-        }
-        Update: {
-          assignment_id?: string
-          created_at?: string
-          data?: Json | null
-          employee_id?: string
-          id?: string
-          max_score?: number | null
-          score?: number
-          status?: Database["public"]["Enums"]["assignment_result_status"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "assignment_results_assignment_id_employee_id_fkey"
-            columns: ["assignment_id", "employee_id"]
-            isOneToOne: true
-            referencedRelation: "assignment_results"
-            referencedColumns: ["assignment_id", "employee_id"]
-          },
-          {
-            foreignKeyName: "assignment_results_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "assignments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assignment_results_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      assignments: {
-        Row: {
-          created_at: string
-          created_by: string
-          description: string
-          id: string
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          description: string
-          id?: string
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          description?: string
-          id?: string
-          name?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "assignments_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      categories: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          name: string | null
-          slug: string | null
-          thumbnail_url: string | null
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string | null
-          slug?: string | null
-          thumbnail_url?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string | null
-          slug?: string | null
-          thumbnail_url?: string | null
-        }
-        Relationships: []
-      }
       class_attendances: {
         Row: {
           attendance_status:
@@ -281,6 +123,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      class_fields: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string | null
+          slug: string | null
+          thumbnail_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string | null
+          slug?: string | null
+          thumbnail_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string | null
+          slug?: string | null
+          thumbnail_url?: string | null
+        }
+        Relationships: []
       }
       class_hash_tag: {
         Row: {
@@ -519,7 +388,7 @@ export type Database = {
             foreignKeyName: "class_room_field_class_field_id_fkey"
             columns: ["class_field_id"]
             isOneToOne: false
-            referencedRelation: "categories"
+            referencedRelation: "class_fields"
             referencedColumns: ["id"]
           },
           {
@@ -968,7 +837,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          id?: string
+          id: string
           organization_id: string
           owner_id: string
         }
@@ -989,7 +858,7 @@ export type Database = {
           {
             foreignKeyName: "libraries_owner_id_fkey"
             columns: ["owner_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -1176,64 +1045,9 @@ export type Database = {
           },
         ]
       }
-      questions: {
-        Row: {
-          assignment_id: string
-          attachments: string[] | null
-          created_at: string
-          created_by: string
-          id: string
-          label: string
-          options: Json | null
-          score: number
-          type: Database["public"]["Enums"]["question_type"]
-          updated_at: string
-        }
-        Insert: {
-          assignment_id: string
-          attachments?: string[] | null
-          created_at?: string
-          created_by: string
-          id?: string
-          label: string
-          options?: Json | null
-          score: number
-          type: Database["public"]["Enums"]["question_type"]
-          updated_at?: string
-        }
-        Update: {
-          assignment_id?: string
-          attachments?: string[] | null
-          created_at?: string
-          created_by?: string
-          id?: string
-          label?: string
-          options?: Json | null
-          score?: number
-          type?: Database["public"]["Enums"]["question_type"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "questions_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "assignments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "questions_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       resources: {
         Row: {
           created_at: string
-          created_by: string
           deleted_at: string | null
           extension: string | null
           id: string
@@ -1244,13 +1058,12 @@ export type Database = {
           organization_id: string
           parent_id: string | null
           path: string | null
-          size: number | null
+          size: string | null
           thumbnail_url: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
-          created_by: string
           deleted_at?: string | null
           extension?: string | null
           id?: string
@@ -1261,13 +1074,12 @@ export type Database = {
           organization_id: string
           parent_id?: string | null
           path?: string | null
-          size?: number | null
+          size?: string | null
           thumbnail_url?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
-          created_by?: string
           deleted_at?: string | null
           extension?: string | null
           id?: string
@@ -1278,23 +1090,16 @@ export type Database = {
           organization_id?: string
           parent_id?: string | null
           path?: string | null
-          size?: number | null
+          size?: string | null
           thumbnail_url?: string | null
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "resources_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "resources_library_id_fkey"
             columns: ["library_id"]
             isOneToOne: false
-            referencedRelation: "libraries"
+            referencedRelation: "resources"
             referencedColumns: ["id"]
           },
           {
@@ -1383,6 +1188,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      supersemar_masters: {
+        Row: {
+          data: string | null
+          id: number
+        }
+        Insert: {
+          data?: string | null
+          id?: number
+        }
+        Update: {
+          data?: string | null
+          id?: number
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -1484,10 +1304,7 @@ export type Database = {
         Args: { action_code: string; resource_code: string }
         Returns: boolean
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
       is_qr_code_valid: {
         Args: { p_current_time?: string; p_qr_code: string }
         Returns: {
@@ -1499,7 +1316,6 @@ export type Database = {
     }
     Enums: {
       action_code_enum: "create" | "read" | "update" | "delete"
-      assignment_result_status: "submitted" | "graded"
       attendance_status: "present" | "late" | "absent" | "rejected"
       channel_provider: "google_meet" | "zoom" | "microsoft_teams"
       class_room_status:
@@ -1517,7 +1333,6 @@ export type Database = {
       hashtag_type: "class_room"
       organization_unit_type: "branch" | "department"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
-      question_type: "file" | "text" | "checkbox" | "radio"
       resource_kind: "folder" | "file"
     }
     CompositeTypes: {
@@ -1644,10 +1459,12 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
-      assignment_result_status: ["submitted", "graded"],
       attendance_status: ["present", "late", "absent", "rejected"],
       channel_provider: ["google_meet", "zoom", "microsoft_teams"],
       class_room_status: [
@@ -1666,7 +1483,6 @@ export const Constants = {
       hashtag_type: ["class_room"],
       organization_unit_type: ["branch", "department"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],
-      question_type: ["file", "text", "checkbox", "radio"],
       resource_kind: ["folder", "file"],
     },
   },
