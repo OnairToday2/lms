@@ -3,16 +3,14 @@ import * as React from "react";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Drawer from "@mui/material/Drawer";
-import type { } from "@mui/material/themeCssVarsAugmentation";
+import type {} from "@mui/material/themeCssVarsAugmentation";
 import { DRAWER_WIDTH, MINI_DRAWER_WIDTH } from "./constants";
 import { getDrawerWidthTransitionMixin } from "./mixins";
-import MenuList from "../MenuList";
+import MenuList, { MenuListProps } from "../MenuList";
 import { LogoOnairIcon, LogoOnairShortIcon } from "@/shared/assets/icons";
 import Link from "next/link";
 import SignOutButton from "@/modules/auth/components/SignOutButton";
 import CardAlert from "@/shared/ui/CardAlert";
-
-import { MAIN_MENU_LIST } from "@/constants/menu-config.constant";
 import { cn } from "@/utils";
 export interface DashboardSidebarProps {
   expanded?: boolean;
@@ -20,15 +18,18 @@ export interface DashboardSidebarProps {
   disableCollapsibleSidebar?: boolean;
   container?: Element;
   className?: string;
+  menuItems: MenuListProps["items"];
 }
 
-const Sidebar: React.FC<DashboardSidebarProps> = ({
+const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   expanded = true,
   setExpanded,
   disableCollapsibleSidebar = false,
   container,
   className,
+  menuItems,
 }) => {
+  console.log(menuItems);
   const theme = useTheme();
 
   const isOverSmViewport = useMediaQuery(theme.breakpoints.up("sm"));
@@ -48,7 +49,7 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({
 
     setIsFullyExpanded(false);
 
-    return () => { };
+    return () => {};
   }, [expanded, theme.transitions.duration.enteringScreen]);
 
   React.useEffect(() => {
@@ -62,7 +63,7 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({
 
     setIsFullyCollapsed(false);
 
-    return () => { };
+    return () => {};
   }, [expanded, theme.transitions.duration.leavingScreen]);
 
   const mini = !disableCollapsibleSidebar && !expanded;
@@ -115,7 +116,7 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({
               )}
             </Link>
           </div>
-          <MenuList items={MAIN_MENU_LIST} mini={mini} isFullyExpanded={isFullyExpanded} />
+          <MenuList items={menuItems} mini={mini} isFullyExpanded={isFullyExpanded} />
           {/* {!mini ? <CardAlert /> : null} */}
           <div className="p-3">
             <SignOutButton className="w-full" type={mini ? "icon" : undefined} />
@@ -123,7 +124,7 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({
         </>
       );
     },
-    [mini, isFullyExpanded],
+    [mini, isFullyExpanded, menuItems],
   );
   return (
     <React.Fragment>
@@ -166,4 +167,4 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({
     </React.Fragment>
   );
 };
-export default React.memo(Sidebar);
+export default React.memo(DashboardSidebar);
