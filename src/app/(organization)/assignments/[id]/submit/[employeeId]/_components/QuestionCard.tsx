@@ -19,6 +19,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import type { AssignmentQuestionDto } from "@/types/dto/assignments";
 import FileUploadButton from "./FileUploadButton";
 import FileListItem from "./FileListItem";
+import AttachmentSection from "./AttachmentSection";
 
 interface QuestionCardProps {
   question: AssignmentQuestionDto;
@@ -36,6 +37,10 @@ interface QuestionCardProps {
   // For checkbox type questions
   checkboxAnswers?: string[];
   onCheckboxChange?: (optionIds: string[]) => void;
+  // For optional attachments (text, radio, checkbox)
+  attachments?: File[];
+  onAttachmentSelect?: (files: FileList | null) => void;
+  onRemoveAttachment?: (fileIndex: number) => void;
 }
 
 const getFileIcon = (url: string) => {
@@ -51,7 +56,7 @@ const isImageFile = (url: string) => {
   return ["jpg", "jpeg", "png", "gif"].includes(extension || "");
 };
 
-export default function QuestionCard({
+function QuestionCard({
   question,
   questionNumber,
   files = [],
@@ -63,6 +68,9 @@ export default function QuestionCard({
   onRadioChange,
   checkboxAnswers = [],
   onCheckboxChange,
+  attachments = [],
+  onAttachmentSelect,
+  onRemoveAttachment,
 }: QuestionCardProps) {
   const handleCheckboxToggle = (optionId: string) => {
     if (!onCheckboxChange) return;
@@ -164,6 +172,12 @@ export default function QuestionCard({
             onChange={(e) => onTextChange?.(e.target.value)}
             variant="outlined"
           />
+
+          <AttachmentSection
+            attachments={attachments}
+            onAttachmentSelect={onAttachmentSelect}
+            onRemoveAttachment={onRemoveAttachment}
+          />
         </>
       )}
 
@@ -185,6 +199,12 @@ export default function QuestionCard({
               />
             ))}
           </RadioGroup>
+
+          <AttachmentSection
+            attachments={attachments}
+            onAttachmentSelect={onAttachmentSelect}
+            onRemoveAttachment={onRemoveAttachment}
+          />
         </>
       )}
 
@@ -207,9 +227,16 @@ export default function QuestionCard({
               />
             ))}
           </FormGroup>
+
+          <AttachmentSection
+            attachments={attachments}
+            onAttachmentSelect={onAttachmentSelect}
+            onRemoveAttachment={onRemoveAttachment}
+          />
         </>
       )}
     </Card>
   );
 }
 
+export default React.memo(QuestionCard);

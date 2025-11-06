@@ -20,6 +20,7 @@ export interface QuestionAnswerInput {
   questionType: QuestionType;
   options?: QuestionOption[];
   answer: string | string[];
+  attachments?: string[];
 }
 
 export interface SubmitAssignmentPayload {
@@ -146,6 +147,7 @@ export async function submitAssignment(
         created_at: question.created_at,
         updated_at: question.updated_at,
         answer: typedAnswer,
+        answerAttachments: answerInput.attachments,
         earnedScore,
       };
     });

@@ -14,6 +14,7 @@ interface SubmitAssignmentRequest {
     questionType: QuestionType;
     options?: QuestionOption[];
     answer: string | string[];
+    attachments?: string[];
   }>;
 }
 
@@ -58,6 +59,24 @@ export async function POST(
           { error: "Thiếu thông tin câu hỏi" },
           { status: 400 }
         );
+      }
+
+      if (answer.attachments && Array.isArray(answer.attachments)) {
+        for (const url of answer.attachments) {
+          if (typeof url !== "string") {
+            return NextResponse.json(
+              { error: "Định dạng URL tệp đính kèm không hợp lệ" },
+              { status: 400 }
+            );
+          }
+          const isValidS3Url = url.includes('.s3.') && url.includes('amazonaws.com');
+          if (!isValidS3Url) {
+            return NextResponse.json(
+              { error: "URL tệp đính kèm không hợp lệ" },
+              { status: 400 }
+            );
+          }
+        }
       }
 
       switch (answer.questionType) {
