@@ -1,7 +1,7 @@
 "use client";
 import React, { useId } from "react";
 
-import { FormControl, FormHelperText, FormLabel, OutlinedInput } from "@mui/material";
+import { FormControl, FormHelperText, FormLabel, OutlinedInput, SxProps, Theme } from "@mui/material";
 import type { Control, FieldValues, Path } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import InputNumber from "../InputNumber";
@@ -18,6 +18,8 @@ export interface RHFTextFieldProps<T extends FieldValues> {
   endAdornment?: React.ReactNode;
   type?: "number" | "text";
   helpText?: React.ReactNode;
+  sx?: SxProps<Theme>;
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 const RHFTextField = <T extends FieldValues>({
   className,
@@ -31,6 +33,8 @@ const RHFTextField = <T extends FieldValues>({
   endAdornment,
   startAdornment,
   helpText,
+  sx,
+  inputProps,
 }: RHFTextFieldProps<T>) => {
   const fieldId = useId();
   return (
@@ -38,7 +42,7 @@ const RHFTextField = <T extends FieldValues>({
       name={name}
       control={control}
       render={({ field, fieldState: { error } }) => (
-        <FormControl className={className} error={!!error}>
+        <FormControl className={className} error={!!error} sx={sx}>
           {label ? (
             <FormLabel htmlFor={fieldId}>
               {label}
@@ -59,6 +63,7 @@ const RHFTextField = <T extends FieldValues>({
             }}
             startAdornment={startAdornment}
             endAdornment={endAdornment}
+            inputProps={inputProps}
           />
           {error?.message ? <FormHelperText>{error.message}</FormHelperText> : null}
           {helpText ? <div className="mt-2">{helpText}</div> : null}

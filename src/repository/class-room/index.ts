@@ -47,7 +47,7 @@ const getClassRoomById = async (classRoomId: string) => {
           ),
           class_room_field(
             id,
-            class_fields(
+            categories(
               id, name, slug
             )
           ),
