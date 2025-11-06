@@ -33,6 +33,7 @@ interface QuestionAnswer {
   textAnswer?: string;
   radioAnswer?: string;
   checkboxAnswers?: string[];
+  attachments?: File[];
 }
 
 interface SubmissionFormData {
@@ -73,16 +74,17 @@ export default function AssignmentSubmission() {
         textAnswer: q.type === "text" ? "" : undefined,
         radioAnswer: q.type === "radio" ? "" : undefined,
         checkboxAnswers: q.type === "checkbox" ? [] : undefined,
+        attachments: q.type !== "file" ? [] : undefined,
       }));
       setValue("answers", initialAnswers);
     }
   }, [questions, setValue]);
 
-  const handleBack = () => {
+  const handleBack = React.useCallback(() => {
     router.push(`/assignments/${assignmentId}/students`);
-  };
+  }, [router, assignmentId]);
 
-  const handleFileSelect = (questionId: string, files: FileList | null) => {
+  const handleFileSelect = React.useCallback((questionId: string, files: FileList | null) => {
     if (!files || files.length === 0) return;
 
     const currentAnswers = answers || [];
@@ -100,9 +102,9 @@ export default function AssignmentSubmission() {
       };
       setValue("answers", updatedAnswers);
     }
-  };
+  }, [answers, setValue]);
 
-  const handleRemoveFile = (questionId: string, fileIndex: number) => {
+  const handleRemoveFile = React.useCallback((questionId: string, fileIndex: number) => {
     const currentAnswers = answers || [];
     const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
 
@@ -119,9 +121,9 @@ export default function AssignmentSubmission() {
       };
       setValue("answers", updatedAnswers);
     }
-  };
+  }, [answers, setValue]);
 
-  const handleTextChange = (questionId: string, text: string) => {
+  const handleTextChange = React.useCallback((questionId: string, text: string) => {
     const currentAnswers = answers || [];
     const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
 
@@ -131,15 +133,14 @@ export default function AssignmentSubmission() {
 
       const updatedAnswers = [...currentAnswers];
       updatedAnswers[answerIndex] = {
-        questionId: currentAnswer.questionId,
-        questionType: currentAnswer.questionType,
+        ...currentAnswer,
         textAnswer: text,
       };
       setValue("answers", updatedAnswers);
     }
-  };
+  }, [answers, setValue]);
 
-  const handleRadioChange = (questionId: string, optionId: string) => {
+  const handleRadioChange = React.useCallback((questionId: string, optionId: string) => {
     const currentAnswers = answers || [];
     const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
 
@@ -149,15 +150,14 @@ export default function AssignmentSubmission() {
 
       const updatedAnswers = [...currentAnswers];
       updatedAnswers[answerIndex] = {
-        questionId: currentAnswer.questionId,
-        questionType: currentAnswer.questionType,
+        ...currentAnswer,
         radioAnswer: optionId,
       };
       setValue("answers", updatedAnswers);
     }
-  };
+  }, [answers, setValue]);
 
-  const handleCheckboxChange = (questionId: string, optionIds: string[]) => {
+  const handleCheckboxChange = React.useCallback((questionId: string, optionIds: string[]) => {
     const currentAnswers = answers || [];
     const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
 
@@ -167,13 +167,51 @@ export default function AssignmentSubmission() {
 
       const updatedAnswers = [...currentAnswers];
       updatedAnswers[answerIndex] = {
-        questionId: currentAnswer.questionId,
-        questionType: currentAnswer.questionType,
+        ...currentAnswer,
         checkboxAnswers: optionIds,
       };
       setValue("answers", updatedAnswers);
     }
-  };
+  }, [answers, setValue]);
+
+  const handleAttachmentSelect = React.useCallback((questionId: string, files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    const currentAnswers = answers || [];
+    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+
+    if (answerIndex >= 0) {
+      const currentAnswer = currentAnswers[answerIndex];
+      if (!currentAnswer) return;
+
+      const newFile = files[0];
+      const updatedAnswers = [...currentAnswers];
+      updatedAnswers[answerIndex] = {
+        ...currentAnswer,
+        attachments: [newFile],
+      };
+      setValue("answers", updatedAnswers);
+    }
+  }, [answers, setValue]);
+
+  const handleRemoveAttachment = React.useCallback((questionId: string, fileIndex: number) => {
+    const currentAnswers = answers || [];
+    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+
+    if (answerIndex >= 0) {
+      const currentAnswer = currentAnswers[answerIndex];
+      if (!currentAnswer || !currentAnswer.attachments) return;
+
+      const updatedAnswers = [...currentAnswers];
+      const updatedAttachments = [...currentAnswer.attachments];
+      updatedAttachments.splice(fileIndex, 1);
+      updatedAnswers[answerIndex] = {
+        ...currentAnswer,
+        attachments: updatedAttachments,
+      };
+      setValue("answers", updatedAnswers);
+    }
+  }, [answers, setValue]);
 
   const hasAnyAnswers = () => {
     return answers?.some((answer) => {
@@ -228,7 +266,9 @@ export default function AssignmentSubmission() {
       }
 
       const fileAnswers = data.answers.filter(a => a.questionType === "file" && a.files);
-      const totalFiles = fileAnswers.reduce((sum, answer) => sum + (answer.files?.length || 0), 0);
+      const answersWithAttachments = data.answers.filter(a => a.attachments && a.attachments.length > 0);
+      const totalFiles = fileAnswers.reduce((sum, answer) => sum + (answer.files?.length || 0), 0) +
+        answersWithAttachments.reduce((sum, answer) => sum + (answer.attachments?.length || 0), 0);
       let completedFiles = 0;
 
       const processedAnswers = await Promise.all(
@@ -296,12 +336,39 @@ export default function AssignmentSubmission() {
               throw new Error(`Loại câu hỏi không hợp lệ: ${answer.questionType}`);
           }
 
+          let attachmentUrls: string[] | undefined = undefined;
+          if (answer.attachments && answer.attachments.length > 0) {
+            attachmentUrls = await Promise.all(
+              answer.attachments.map(async (file) => {
+                const result = await uploadFileToS3(file, {
+                  onProgress: (percent) => {
+                    if (totalFiles > 0) {
+                      const currentFileProgress = percent / 100;
+                      const overallProgress = Math.round(
+                        ((completedFiles + currentFileProgress) / totalFiles) * 100
+                      );
+                      setUploadProgress(overallProgress);
+                    }
+                  },
+                });
+
+                completedFiles++;
+                if (totalFiles > 0) {
+                  setUploadProgress(Math.round((completedFiles / totalFiles) * 100));
+                }
+
+                return result.url;
+              })
+            );
+          }
+
           return {
             questionId: answer.questionId,
             questionLabel: question.label,
             questionType: answer.questionType,
             options: question.options,
             answer: answerData,
+            attachments: attachmentUrls,
           };
         })
       );
@@ -434,6 +501,10 @@ export default function AssignmentSubmission() {
                       // Checkbox type props
                       checkboxAnswers={answer?.checkboxAnswers}
                       onCheckboxChange={(optionIds) => handleCheckboxChange(question.id, optionIds)}
+                      // Attachment props
+                      attachments={answer?.attachments}
+                      onAttachmentSelect={(files) => handleAttachmentSelect(question.id, files)}
+                      onRemoveAttachment={(fileIndex) => handleRemoveAttachment(question.id, fileIndex)}
                     />
                   );
                 })}

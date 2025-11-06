@@ -24,6 +24,7 @@ export interface QuestionWithAnswer {
   created_at: string;
   updated_at: string;
   answer: QuestionAnswer;
+  answerAttachments?: string[];
   earnedScore: number | null;
 }
 

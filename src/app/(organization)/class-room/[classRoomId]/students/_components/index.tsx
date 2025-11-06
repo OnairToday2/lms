@@ -202,6 +202,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
     }
     await deleteUserInClassRoom(payload);
     queryClient.invalidateQueries({ queryKey: ["class-room-students"] })
+    queryClient.invalidateQueries({ queryKey: ["class-rooms-priority"] })
     setDeleteConfirm(false);
   }
 
