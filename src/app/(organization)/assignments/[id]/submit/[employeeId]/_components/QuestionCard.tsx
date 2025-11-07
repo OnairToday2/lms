@@ -83,19 +83,22 @@ function QuestionCard({
   };
 
   return (
-    <Card variant="outlined" sx={{ p: 3 }}>
-      <Typography variant="h6" sx={{ mb: 2 }}>
+    <Card variant="outlined" sx={{ p: 2.5 }}>
+      <Typography variant="subtitle1" sx={{ mb: 1.5, fontWeight: 600 }}>
         Câu {questionNumber}
+        <Typography className="ml-2" variant="caption">
+          ({question.score} điểm)
+        </Typography>
       </Typography>
 
-      <Typography variant="body1" sx={{ mb: 3 }}>
+      <Typography variant="body1" sx={{ mb: 2 }}>
         {question.label}
       </Typography>
 
       {/* Display question attachments */}
       {question.attachments && question.attachments.length > 0 && (
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1, color: "text.secondary" }}>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1, color: "text.secondary", fontSize: "0.875rem" }}>
             Tài liệu đính kèm:
           </Typography>
           <Stack spacing={1}>
@@ -109,7 +112,7 @@ function QuestionCard({
                     alt={`Attachment ${index + 1}`}
                     sx={{
                       maxWidth: "100%",
-                      maxHeight: 400,
+                      maxHeight: 300,
                       borderRadius: 1,
                       border: "1px solid",
                       borderColor: "divider",
@@ -137,7 +140,7 @@ function QuestionCard({
       {/* Render input based on question type */}
       {question.type === "file" && (
         <>
-          <FormLabel sx={{ mb: 2, display: "block" }}>
+          <FormLabel sx={{ mb: 1.5, display: "block", fontSize: "0.875rem" }}>
             Tải lên file trả lời <span style={{ color: "red" }}>*</span>
           </FormLabel>
 
@@ -145,7 +148,7 @@ function QuestionCard({
 
           {/* File List */}
           {files.length > 0 && (
-            <Stack spacing={2} sx={{ mt: 2 }}>
+            <Stack spacing={1.5} sx={{ mt: 1.5 }}>
               {files.map((file, fileIndex) => (
                 <FileListItem
                   key={fileIndex}
@@ -160,17 +163,18 @@ function QuestionCard({
 
       {question.type === "text" && (
         <>
-          <FormLabel sx={{ mb: 2, display: "block" }}>
+          <FormLabel sx={{ mb: 1.5, display: "block", fontSize: "0.875rem" }}>
             Câu trả lời <span style={{ color: "red" }}>*</span>
           </FormLabel>
           <TextField
             multiline
-            rows={6}
+            rows={5}
             fullWidth
             placeholder="Nhập câu trả lời của bạn..."
             value={textAnswer}
             onChange={(e) => onTextChange?.(e.target.value)}
             variant="outlined"
+            size="small"
           />
 
           <AttachmentSection
@@ -183,19 +187,21 @@ function QuestionCard({
 
       {question.type === "radio" && question.options && (
         <>
-          <FormLabel sx={{ mb: 2, display: "block" }}>
+          <FormLabel sx={{ mb: 1.5, display: "block", fontSize: "0.875rem" }}>
             Chọn đáp án <span style={{ color: "red" }}>*</span>
           </FormLabel>
           <RadioGroup
             value={radioAnswer}
             onChange={(e) => onRadioChange?.(e.target.value)}
+            sx={{ gap: 0.5 }}
           >
             {question.options.map((option) => (
               <FormControlLabel
                 key={option.id}
                 value={option.id}
-                control={<Radio />}
+                control={<Radio size="small" />}
                 label={option.label}
+                sx={{ mb: 0 }}
               />
             ))}
           </RadioGroup>
@@ -210,20 +216,22 @@ function QuestionCard({
 
       {question.type === "checkbox" && question.options && (
         <>
-          <FormLabel sx={{ mb: 2, display: "block" }}>
+          <FormLabel sx={{ mb: 1.5, display: "block", fontSize: "0.875rem" }}>
             Chọn đáp án (có thể chọn nhiều) <span style={{ color: "red" }}>*</span>
           </FormLabel>
-          <FormGroup>
+          <FormGroup sx={{ gap: 0.5 }}>
             {question.options.map((option) => (
               <FormControlLabel
                 key={option.id}
                 control={
                   <Checkbox
+                    size="small"
                     checked={checkboxAnswers.includes(option.id)}
                     onChange={() => handleCheckboxToggle(option.id)}
                   />
                 }
                 label={option.label}
+                sx={{ mb: 0 }}
               />
             ))}
           </FormGroup>

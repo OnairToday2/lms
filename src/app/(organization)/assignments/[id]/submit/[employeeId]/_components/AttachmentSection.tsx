@@ -18,15 +18,14 @@ function AttachmentSection({
   accept = "image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx",
 }: AttachmentSectionProps) {
   return (
-    <Box sx={{ mt: 3 }}>
-      <FormLabel sx={{ mb: 1, display: "block", color: "text.secondary" }}>
+    <Box sx={{ mt: 2 }}>
+      <FormLabel sx={{ mb: 1, display: "block", color: "text.secondary", fontSize: "0.875rem" }}>
         {label}
       </FormLabel>
       <Button
         variant="outlined"
         component="label"
         size="small"
-        sx={{ mb: 1 }}
       >
         Chọn tệp
         <input
@@ -37,7 +36,7 @@ function AttachmentSection({
         />
       </Button>
       {attachments.length > 0 && attachments[0] && (
-        <Box sx={{ mt: 2 }}>
+        <Box sx={{ mt: 1.5 }}>
           <FileListItem
             file={attachments[0]}
             onRemove={() => onRemoveAttachment?.(0)}
