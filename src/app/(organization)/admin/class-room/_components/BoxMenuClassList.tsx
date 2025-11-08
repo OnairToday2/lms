@@ -30,12 +30,12 @@ const BoxMenuClassList: React.FC<BoxMenuClassListProps> = ({ items }) => {
   };
 
   const handleClickOk = () => {
-    if (!roomType) return;
+    if (manageType === "classRoom" && !roomType) return;
     startTransition(() => {
       const path =
         manageType === "classRoom"
           ? `${PATHS.CLASSROOMS.CREATE_CLASSROOM}?platform=${platform}&roomtype=${roomType}`
-          : PATHS.CLASSROOMS.CREATE_CLASSROOM;
+          : PATHS.COURSES.CREATE;
       router.push(path);
     });
   };

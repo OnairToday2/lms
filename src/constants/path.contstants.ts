@@ -26,9 +26,14 @@ export const PATHS = {
   },
   CLASSROOMS: {
     ROOT: "/admin/class-room",
-    CREATE_CLASSROOM: "/class-room/create",
-    EDIT_CLASSROOM: (id: string = ":id") => `/class-room/${id}/cedit`,
+    CREATE_CLASSROOM: "/admin/class-room/create",
+    EDIT_CLASSROOM: (id: string = ":id") => `/admin/class-room/${id}/cedit`,
     LIST_CLASSROOM: "/class-room/list",
+  },
+  COURSES: {
+    ROOT: "/admin/online-course",
+    CREATE: "/admin/online-course/create",
+    EDIT: (id: string = ":id") => `/admin/online-course/${id}/cedit`,
   },
   STUDENTS: {
     ROOT: "/my-class",
