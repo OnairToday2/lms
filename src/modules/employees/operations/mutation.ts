@@ -1,7 +1,11 @@
 import { useTMutation } from "@/lib/queryClient";
+import { useQueryClient } from "@tanstack/react-query";
 import type { CreateEmployeeDto, UpdateEmployeeDto } from "@/types/dto/employees";
+import { GET_EMPLOYEES } from "./key";
 
 export const useCreateEmployeeMutation = () => {
+  const queryClient = useQueryClient();
+
   return useTMutation({
     mutationFn: async (payload: CreateEmployeeDto) => {
       const response = await fetch("/api/employees", {
@@ -19,10 +23,15 @@ export const useCreateEmployeeMutation = () => {
 
       return response.json();
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [GET_EMPLOYEES] });
+    },
   });
 };
 
 export const useUpdateEmployeeMutation = () => {
+  const queryClient = useQueryClient();
+
   return useTMutation({
     mutationFn: async (payload: UpdateEmployeeDto) => {
       const response = await fetch(`/api/employees/${payload.id}`, {
@@ -40,10 +49,15 @@ export const useUpdateEmployeeMutation = () => {
 
       return response.json();
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [GET_EMPLOYEES] });
+    },
   });
 };
 
 export const useDeleteEmployeeMutation = () => {
+  const queryClient = useQueryClient();
+
   return useTMutation({
     mutationFn: async (employeeId: string) => {
       const response = await fetch(`/api/employees/${employeeId}`, {
@@ -56,6 +70,9 @@ export const useDeleteEmployeeMutation = () => {
       }
 
       return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [GET_EMPLOYEES] });
     },
   });
 };

@@ -241,6 +241,7 @@ export async function createEmployee(data: {
   employee_type?: Database["public"]["Enums"]["employee_type"] | null;
   organization_id: string;
   status: Database["public"]["Enums"]["employee_status"];
+  organization_id: string;
 }) {
   const supabase = await createSVClient();
 
@@ -276,6 +277,26 @@ export async function updateEmployeeById(
   if (error) {
     throw new Error(`Failed to update employee: ${error.message}`);
   }
+}
+
+export async function getEmployeeByUserId(userId: string) {
+  const supabase = await createSVClient();
+
+  const { data: employee, error } = await supabase
+    .from("employees")
+    .select("id, organization_id")
+    .eq("user_id", userId)
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to fetch employee: ${error.message}`);
+  }
+
+  if (!employee) {
+    throw new Error("Employee not found");
+  }
+
+  return employee;
 }
 
 export async function getEmployeeUserId(employeeId: string) {

@@ -1,20 +1,20 @@
 "use client";
 import { Tabs, Tab, Stack, Box } from "@mui/material";
 import { CLASSROOM_RUNTIME_STATUS_LABEL, STATUS_ORDER } from "../../class-room/list/utils/status";
-import { ClassRoomRuntimeStatus } from "../../class-room/list/types/types";
+import { ClassRoomRuntimeStatusFilter } from "../../class-room/list/types/types";
 import { ClassRoomStatusCountDto } from "@/types/dto/classRooms/classRoom.dto";
 
 interface ClassRoomStatusTabsProps {
-  value: ClassRoomRuntimeStatus;
+  value: ClassRoomRuntimeStatusFilter;
   counts?: ClassRoomStatusCountDto[];
-  onChange: (status: ClassRoomRuntimeStatus) => void;
+  onChange: (status: ClassRoomRuntimeStatusFilter) => void;
 }
-const STATUS_LABEL_OVERRIDE: Partial<Record<ClassRoomRuntimeStatus, string>> = {
-  [ClassRoomRuntimeStatus.Past]: "Đã kết thúc",
+const STATUS_LABEL_OVERRIDE: Partial<Record<ClassRoomRuntimeStatusFilter, string>> = {
+  [ClassRoomRuntimeStatusFilter.Past]: "Đã kết thúc",
 };
 
 const RUNTIME_STATUS_PRESENTATION: Record<
-  ClassRoomRuntimeStatus,
+  ClassRoomRuntimeStatusFilter,
   {
     chipBg: string;
     chipColor: string;
@@ -22,37 +22,37 @@ const RUNTIME_STATUS_PRESENTATION: Record<
     activeChipColor?: string;
   }
 > = {
-  [ClassRoomRuntimeStatus.All]: {
+  [ClassRoomRuntimeStatusFilter.All]: {
     chipBg: "#F4F6F8",
     chipColor: "#1D2433",
     activeChipBg: "#1D2433",
     activeChipColor: "#FFFFFF",
   },
-  [ClassRoomRuntimeStatus.Ongoing]: {
+  [ClassRoomRuntimeStatusFilter.Ongoing]: {
     chipBg: "#FFECE8",
     chipColor: "#E64A19",
     activeChipBg: "#B71D18",
     activeChipColor: "#FFFFFF",
   },
-  [ClassRoomRuntimeStatus.Today]: {
+  [ClassRoomRuntimeStatusFilter.Today]: {
     chipBg: "#FFF3D6",
     chipColor: "#C26D00",
     activeChipBg: "#B76E00",
     activeChipColor: "#FFFFFF",
   },
-  [ClassRoomRuntimeStatus.Upcoming]: {
+  [ClassRoomRuntimeStatusFilter.Upcoming]: {
     chipBg: "#E9F7EE",
     chipColor: "#198754",
     activeChipBg: "#118D57",
     activeChipColor: "#FFFFFF",
   },
-  [ClassRoomRuntimeStatus.Past]: {
+  [ClassRoomRuntimeStatusFilter.Past]: {
     chipBg: "#ECEFF4",
     chipColor: "#637381",
     activeChipBg: "#637381",
     activeChipColor: "#FFFFFF",
   },
-  [ClassRoomRuntimeStatus.Draft]: {
+  [ClassRoomRuntimeStatusFilter.Draft]: {
     chipBg: "#EBE4FF",
     chipColor: "#5E35B1",
     activeChipBg: "#B71D18",
@@ -60,8 +60,8 @@ const RUNTIME_STATUS_PRESENTATION: Record<
   },
 };
 
-const VISIBLE_STATUS: ClassRoomRuntimeStatus[] = STATUS_ORDER.filter(
-  (status) => status !== ClassRoomRuntimeStatus.Draft,
+const VISIBLE_STATUS: ClassRoomRuntimeStatusFilter[] = STATUS_ORDER.filter(
+  (status) => status !== ClassRoomRuntimeStatusFilter.Draft,
 );
 
 export default function ClassRoomStatusTabs({
@@ -81,7 +81,7 @@ export default function ClassRoomStatusTabs({
   return (
     <Tabs
       value={value}
-      onChange={(_, newValue) => onChange(newValue as ClassRoomRuntimeStatus)}
+      onChange={(_, newValue) => onChange(newValue as ClassRoomRuntimeStatusFilter)}
       variant="scrollable"
       scrollButtons="auto"
       allowScrollButtonsMobile

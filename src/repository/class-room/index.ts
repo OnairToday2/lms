@@ -5,10 +5,6 @@ import {
   CreatePivotClassRoomAndFieldPayload,
   CreatePivotClassRoomAndEmployeePayload,
   UpSertClassRoomPayload,
-  ClassRoomStatus,
-  ClassRoomType,
-  ClassRoomRuntimeStatus,
-  ClassSessionMode,
 } from "./type";
 import { ClassRoomMetaKey, ClassRoomMetaValue } from "@/constants/class-room-meta.constant";
 import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
@@ -33,6 +29,12 @@ import {
 } from "./constants";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/types/supabase.types";
+import {
+  ClassRoomRuntimeStatusFilter,
+  ClassRoomStatusFilter,
+  ClassRoomTypeFilter,
+  ClassSessionModeFilter,
+} from "@/app/(organization)/class-room/list/types/types";
 export * from "./type";
 
 const getClassRoomById = async (classRoomId: string) => {
@@ -62,6 +64,7 @@ const getClassRoomById = async (classRoomId: string) => {
           ),
           class_room_field(
             id,
+            categories(
             categories(
               id, name, slug
             )
@@ -280,20 +283,20 @@ const applyClassRoomFilters = <T extends PostgrestFilterBuilder<any, any, any, a
   const { status, runtimeStatus, from, to, q, type, sessionMode } = filters;
   let builder = query;
 
-  if (status && status !== ClassRoomStatus.All) {
+  if (status && status !== ClassRoomStatusFilter.All) {
     builder = builder.eq("status", status);
   }
 
-  if (type && type !== ClassRoomType.All) {
+  if (type && type !== ClassRoomTypeFilter.All) {
     builder = builder.eq("room_type", type);
   }
 
-  if (runtimeStatus && runtimeStatus !== ClassRoomRuntimeStatus.All) {
+  if (runtimeStatus && runtimeStatus !== ClassRoomRuntimeStatusFilter.All) {
     builder = builder.eq("runtime_status", runtimeStatus);
   }
 
-  if (sessionMode && sessionMode !== ClassSessionMode.All) {
-    const isOnline = sessionMode === ClassSessionMode.Online;
+  if (sessionMode && sessionMode !== ClassSessionModeFilter.All) {
+    const isOnline = sessionMode === ClassSessionModeFilter.Online;
     builder = builder.eq("class_sessions.is_online", isOnline);
   }
 
@@ -317,7 +320,11 @@ const applyClassRoomFilters = <T extends PostgrestFilterBuilder<any, any, any, a
 };
 
 const createClassRoomsQuery = (
-  filters: { organizationId?: string | null; employeeId?: string | null },
+  filters: {
+    organizationId?: string | null;
+    employeeId?: string | null;
+    teacherClassRoomIds?: string[];
+  },
   select: string,
   options?: { count?: "exact" | "planned" | "estimated"; head?: boolean },
 ) => {
@@ -328,8 +335,18 @@ const createClassRoomsQuery = (
     query = query.eq("organization_id", organizationId!);
   }
 
-  if (employeeId) {
-    query = query.eq("employee_id", employeeId);
+  const orConditions: string[] = [];
+
+  if (trimmedEmployeeId) {
+    orConditions.push(`employee_id.eq.${trimmedEmployeeId}`);
+  }
+
+  if (sanitizedTeacherClassRoomIds.length > 0) {
+    orConditions.push(`id.in.(${sanitizedTeacherClassRoomIds.join(",")})`);
+  }
+
+  if (orConditions.length > 0) {
+    query = query.or(orConditions.join(","));
   }
 
   return query;
@@ -352,12 +369,14 @@ const getClassRooms = async (input: GetClassRoomsQueryInput = {}): Promise<Pagin
     sessionMode,
   } = input;
 
+  const trimmedEmployeeId = employeeId?.trim();
+
   const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
   const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 12;
   const rangeStart = (safePage - 1) * safeLimit;
   const rangeEnd = rangeStart + safeLimit - 1;
 
-  if (!organizationId && !employeeId) {
+  if (!organizationId && !trimmedEmployeeId) {
     return {
       data: [],
       total: 0,
@@ -366,7 +385,38 @@ const getClassRooms = async (input: GetClassRoomsQueryInput = {}): Promise<Pagin
     };
   }
 
-  let query = createClassRoomsQuery({ organizationId, employeeId }, CLASS_ROOMS_SELECT, { count: "exact" });
+  let teacherClassRoomIds: string[] | undefined;
+
+  if (trimmedEmployeeId) {
+    const { data: teacherAssignments, error: teacherError } = await supabase
+      .from("class_session_teacher")
+      .select(
+        `
+          class_sessions!inner (
+            class_room_id
+          )
+        `,
+      )
+      .eq("teacher_id", trimmedEmployeeId);
+
+    if (teacherError) {
+      throw teacherError;
+    }
+
+    teacherClassRoomIds = Array.from(
+      new Set(
+        (teacherAssignments ?? [])
+          .map((assignment) => assignment?.class_sessions?.class_room_id)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    );
+  }
+
+  let query = createClassRoomsQuery(
+    { organizationId, employeeId: trimmedEmployeeId, teacherClassRoomIds },
+    CLASS_ROOMS_SELECT,
+    { count: "exact" },
+  );
 
   query = applyClassRoomFilters(query, {
     runtimeStatus: statusFilter,
@@ -504,12 +554,12 @@ const getClassRoomStatusCounts = async (input: GetClassRoomStatusCountsInput): P
   const fromValue = normalizeString(input.from);
   const toValue = normalizeString(input.to);
 
-  const statusFilter = input.status && input.status !== ClassRoomStatus.All ? input.status : undefined;
+  const statusFilter = input.status && input.status !== ClassRoomStatusFilter.All ? input.status : undefined;
 
-  const typeFilter = input.type && input.type !== ClassRoomType.All ? input.type : undefined;
+  const typeFilter = input.type && input.type !== ClassRoomTypeFilter.All ? input.type : undefined;
 
   const sessionModeFilter =
-    input.sessionMode && input.sessionMode !== ClassSessionMode.All ? input.sessionMode : undefined;
+    input.sessionMode && input.sessionMode !== ClassSessionModeFilter.All ? input.sessionMode : undefined;
 
   const { data, error } = await supabase.rpc("count_class_room_runtime_status_by_employee", {
     p_employee_id: trimmedEmployeeId,

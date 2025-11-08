@@ -13,7 +13,7 @@ export const PATHS = {
     CREATE_BRANCH: "/department/branches/create",
     IMPORT_BRANCHES: "/department/branches/import",
   },
-  EMPLOYEE: {
+  EMPLOYEES: {
     ROOT: "/employees",
     EMPLOYEES_ID: (id: string = ":id") => `/employees/${id}`,
     CREATE_EMPLOYEE: "/employees/create",
@@ -33,6 +33,11 @@ export const PATHS = {
   },
   STUDENTS: {
     ROOT: "/my-class",
+  },
+  ASSIGNMENTS: {
+    ROOT: '/assignments',
+    CREATE_ASSIGNMENT: '/assignments/create',
+    EDIT_ASSIGNMENT: (id: string = ':id') => `/assignments/edit/${id}`,
   },
   REPORTS: {
     ROOT: "/report",
