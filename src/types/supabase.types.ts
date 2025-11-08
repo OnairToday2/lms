@@ -5,24 +5,13 @@ export type Json =
   | null
   | { [key: string]: Json | undefined }
   | Json[]
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
 
 export type Database = {
   graphql_public: {
     Tables: {
       [_ in never]: never
     }
-      [_ in never]: never
-    }
     Views: {
-      [_ in never]: never
-    }
       [_ in never]: never
     }
     Functions: {
@@ -36,35 +25,17 @@ export type Database = {
         Returns: Json
       }
     }
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
     Enums: {
-      [_ in never]: never
-    }
       [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
     }
   }
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       assignment_categories: {
-      assignment_categories: {
         Row: {
-          assignment_id: string
-          category_id: string
-          created_at: string
-        }
           assignment_id: string
           category_id: string
           created_at: string
@@ -74,15 +45,7 @@ export type Database = {
           category_id: string
           created_at?: string
         }
-          assignment_id: string
-          category_id: string
-          created_at?: string
-        }
         Update: {
-          assignment_id?: string
-          category_id?: string
-          created_at?: string
-        }
           assignment_id?: string
           category_id?: string
           created_at?: string
@@ -94,44 +57,8 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "assignments"
             referencedColumns: ["id"]
-            foreignKeyName: "assignment_categories_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "assignments"
-            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "assignment_categories_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      assignment_employees: {
-        Row: {
-          assignment_id: string
-          created_at: string
-          employee_id: string
-        }
-        Insert: {
-          assignment_id: string
-          created_at?: string
-          employee_id: string
-        }
-        Update: {
-          assignment_id?: string
-          created_at?: string
-          employee_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "assignment_employees_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "assignments"
-            referencedColumns: ["id"]
             foreignKeyName: "assignment_categories_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
@@ -225,81 +152,11 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
-            foreignKeyName: "assignment_employees_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      assignment_results: {
-        Row: {
-          assignment_id: string
-          created_at: string
-          data: Json | null
-          employee_id: string
-          id: string
-          max_score: number
-          score: number
-          status: Database["public"]["Enums"]["assignment_result_status"]
-        }
-        Insert: {
-          assignment_id: string
-          created_at?: string
-          data?: Json | null
-          employee_id: string
-          id?: string
-          max_score: number
-          score: number
-          status?: Database["public"]["Enums"]["assignment_result_status"]
-        }
-        Update: {
-          assignment_id?: string
-          created_at?: string
-          data?: Json | null
-          employee_id?: string
-          id?: string
-          max_score?: number
-          score?: number
-          status?: Database["public"]["Enums"]["assignment_result_status"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "assignment_results_assignment_id_employee_id_fkey"
-            columns: ["assignment_id", "employee_id"]
-            isOneToOne: true
-            referencedRelation: "assignment_results"
-            referencedColumns: ["assignment_id", "employee_id"]
-          },
-          {
-            foreignKeyName: "assignment_results_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "assignments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assignment_results_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
           },
         ]
       }
       assignments: {
-        ]
-      }
-      assignments: {
         Row: {
-          created_at: string
-          created_by: string
-          description: string
-          id: string
-          name: string
-          updated_at: string
-        }
           created_at: string
           created_by: string
           description: string
@@ -315,148 +172,7 @@ export type Database = {
           name: string
           updated_at?: string
         }
-          created_at?: string
-          created_by: string
-          description: string
-          id?: string
-          name: string
-          updated_at?: string
-        }
         Update: {
-          created_at?: string
-          created_by?: string
-          description?: string
-          id?: string
-          name?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "assignments_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      categories: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          name: string | null
-          slug: string | null
-          thumbnail_url: string | null
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string | null
-          slug?: string | null
-          thumbnail_url?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string | null
-          slug?: string | null
-          thumbnail_url?: string | null
-        }
-        Relationships: []
-      }
-      class_attendances: {
-        Row: {
-          attendance_status:
-            | Database["public"]["Enums"]["attendance_status"]
-            | null
-          attended_at: string | null
-          class_room_id: string | null
-          class_session_id: string | null
-          created_at: string | null
-          device_info: Json | null
-          distance_from_class: number | null
-          employee_id: string
-          id: string
-          qr_code_id: string
-          rejection_reason: string | null
-          scan_location_lat: number | null
-          scan_location_lng: number | null
-        }
-        Insert: {
-          attendance_status?:
-            | Database["public"]["Enums"]["attendance_status"]
-            | null
-          attended_at?: string | null
-          class_room_id?: string | null
-          class_session_id?: string | null
-          created_at?: string | null
-          device_info?: Json | null
-          distance_from_class?: number | null
-          employee_id: string
-          id?: string
-          qr_code_id: string
-          rejection_reason?: string | null
-          scan_location_lat?: number | null
-          scan_location_lng?: number | null
-        }
-        Update: {
-          attendance_status?:
-            | Database["public"]["Enums"]["attendance_status"]
-            | null
-          attended_at?: string | null
-          class_room_id?: string | null
-          class_session_id?: string | null
-          created_at?: string | null
-          device_info?: Json | null
-          distance_from_class?: number | null
-          employee_id?: string
-          id?: string
-          qr_code_id?: string
-          rejection_reason?: string | null
-          scan_location_lat?: number | null
-          scan_location_lng?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "class_attendances_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "class_attendances_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms_priority"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "class_attendances_class_session_id_fkey"
-            columns: ["class_session_id"]
-            isOneToOne: false
-            referencedRelation: "class_sessions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "class_attendances_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "class_attendances_qr_code_id_fkey"
-            columns: ["qr_code_id"]
-            isOneToOne: false
-            referencedRelation: "class_qr_codes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
           created_at?: string
           created_by?: string
           description?: string
@@ -598,28 +314,13 @@ export type Database = {
           hash_tag_id: string | null
           id: string
         }
-          class_room_id: string | null
-          created_at: string
-          hash_tag_id: string | null
-          id: string
-        }
         Insert: {
           class_room_id?: string | null
           created_at?: string
           hash_tag_id?: string | null
           id?: string
         }
-          class_room_id?: string | null
-          created_at?: string
-          hash_tag_id?: string | null
-          id?: string
-        }
         Update: {
-          class_room_id?: string | null
-          created_at?: string
-          hash_tag_id?: string | null
-          id?: string
-        }
           class_room_id?: string | null
           created_at?: string
           hash_tag_id?: string | null
@@ -632,18 +333,8 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_rooms"
             referencedColumns: ["id"]
-            foreignKeyName: "class_hash_tag_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms"
-            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "class_hash_tag_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms_priority"
-            referencedColumns: ["id"]
             foreignKeyName: "class_hash_tag_class_room_id_fkey"
             columns: ["class_room_id"]
             isOneToOne: false
@@ -656,14 +347,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "hash_tags"
             referencedColumns: ["id"]
-            foreignKeyName: "class_hash_tag_hash_tag_id_fkey"
-            columns: ["hash_tag_id"]
-            isOneToOne: false
-            referencedRelation: "hash_tags"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       class_qr_codes: {
@@ -686,43 +370,7 @@ export type Database = {
           title: string
           updated_at: string | null
         }
-          allowed_radius_meters: number | null
-          checkin_end_time: string | null
-          checkin_start_time: string | null
-          class_room_id: string | null
-          class_session_id: string | null
-          created_at: string | null
-          created_by: string | null
-          description: string | null
-          id: string
-          is_enabled: boolean | null
-          location_lat: number | null
-          location_lng: number | null
-          qr_code: string
-          qr_secret: string
-          status: Database["public"]["Enums"]["qr_code_status"] | null
-          title: string
-          updated_at: string | null
-        }
         Insert: {
-          allowed_radius_meters?: number | null
-          checkin_end_time?: string | null
-          checkin_start_time?: string | null
-          class_room_id?: string | null
-          class_session_id?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          id?: string
-          is_enabled?: boolean | null
-          location_lat?: number | null
-          location_lng?: number | null
-          qr_code: string
-          qr_secret: string
-          status?: Database["public"]["Enums"]["qr_code_status"] | null
-          title: string
-          updated_at?: string | null
-        }
           allowed_radius_meters?: number | null
           checkin_end_time?: string | null
           checkin_start_time?: string | null
@@ -760,24 +408,6 @@ export type Database = {
           title?: string
           updated_at?: string | null
         }
-          allowed_radius_meters?: number | null
-          checkin_end_time?: string | null
-          checkin_start_time?: string | null
-          class_room_id?: string | null
-          class_session_id?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          id?: string
-          is_enabled?: boolean | null
-          location_lat?: number | null
-          location_lng?: number | null
-          qr_code?: string
-          qr_secret?: string
-          status?: Database["public"]["Enums"]["qr_code_status"] | null
-          title?: string
-          updated_at?: string | null
-        }
         Relationships: [
           {
             foreignKeyName: "class_qr_codes_class_room_id_fkey"
@@ -785,18 +415,8 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_rooms"
             referencedColumns: ["id"]
-            foreignKeyName: "class_qr_codes_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms"
-            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "class_qr_codes_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms_priority"
-            referencedColumns: ["id"]
             foreignKeyName: "class_qr_codes_class_room_id_fkey"
             columns: ["class_room_id"]
             isOneToOne: false
@@ -809,11 +429,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_sessions"
             referencedColumns: ["id"]
-            foreignKeyName: "class_qr_codes_class_session_id_fkey"
-            columns: ["class_session_id"]
-            isOneToOne: false
-            referencedRelation: "class_sessions"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "class_qr_codes_created_by_fkey"
@@ -821,14 +436,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
-            foreignKeyName: "class_qr_codes_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       class_room_attendance: {
@@ -841,23 +449,7 @@ export type Database = {
           id: string
           updated_at: string
         }
-          check_in_at: string | null
-          check_out_at: string | null
-          class_room_employee_id: number
-          created_at: string
-          deleted_at: string | null
-          id: string
-          updated_at: string
-        }
         Insert: {
-          check_in_at?: string | null
-          check_out_at?: string | null
-          class_room_employee_id: number
-          created_at?: string
-          deleted_at?: string | null
-          id?: string
-          updated_at?: string
-        }
           check_in_at?: string | null
           check_out_at?: string | null
           class_room_employee_id: number
@@ -875,14 +467,6 @@ export type Database = {
           id?: string
           updated_at?: string
         }
-          check_in_at?: string | null
-          check_out_at?: string | null
-          class_room_employee_id?: number
-          created_at?: string
-          deleted_at?: string | null
-          id?: string
-          updated_at?: string
-        }
         Relationships: [
           {
             foreignKeyName: "class_room_attendance_class_room_employee_id_fkey"
@@ -890,14 +474,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_room_employee"
             referencedColumns: ["id"]
-            foreignKeyName: "class_room_attendance_class_room_employee_id_fkey"
-            columns: ["class_room_employee_id"]
-            isOneToOne: false
-            referencedRelation: "class_room_employee"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       class_room_employee: {
@@ -907,28 +484,13 @@ export type Database = {
           employee_id: string | null
           id: number
         }
-          class_room_id: string | null
-          created_at: string
-          employee_id: string | null
-          id: number
-        }
         Insert: {
           class_room_id?: string | null
           created_at?: string
           employee_id?: string | null
           id?: number
         }
-          class_room_id?: string | null
-          created_at?: string
-          employee_id?: string | null
-          id?: number
-        }
         Update: {
-          class_room_id?: string | null
-          created_at?: string
-          employee_id?: string | null
-          id?: number
-        }
           class_room_id?: string | null
           created_at?: string
           employee_id?: string | null
@@ -941,18 +503,8 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_rooms"
             referencedColumns: ["id"]
-            foreignKeyName: "class_room_employee_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms"
-            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "class_room_employee_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms_priority"
-            referencedColumns: ["id"]
             foreignKeyName: "class_room_employee_class_room_id_fkey"
             columns: ["class_room_id"]
             isOneToOne: false
@@ -965,14 +517,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
-            foreignKeyName: "class_room_employee_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       class_room_field: {
@@ -982,28 +527,13 @@ export type Database = {
           created_at: string
           id: string
         }
-          class_field_id: string | null
-          class_room_id: string | null
-          created_at: string
-          id: string
-        }
         Insert: {
           class_field_id?: string | null
           class_room_id?: string | null
           created_at?: string
           id?: string
         }
-          class_field_id?: string | null
-          class_room_id?: string | null
-          created_at?: string
-          id?: string
-        }
         Update: {
-          class_field_id?: string | null
-          class_room_id?: string | null
-          created_at?: string
-          id?: string
-        }
           class_field_id?: string | null
           class_room_id?: string | null
           created_at?: string
@@ -1016,18 +546,8 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "categories"
             referencedColumns: ["id"]
-            foreignKeyName: "class_room_field_class_field_id_fkey"
-            columns: ["class_field_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "class_room_field_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms"
-            referencedColumns: ["id"]
             foreignKeyName: "class_room_field_class_room_id_fkey"
             columns: ["class_room_id"]
             isOneToOne: false
@@ -1040,14 +560,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_rooms_priority"
             referencedColumns: ["id"]
-            foreignKeyName: "class_room_field_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms_priority"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       class_room_metadata: {
@@ -1058,19 +571,7 @@ export type Database = {
           key: string | null
           value: Json | null
         }
-          class_room_id: string | null
-          created_at: string
-          id: string
-          key: string | null
-          value: Json | null
-        }
         Insert: {
-          class_room_id?: string | null
-          created_at?: string
-          id?: string
-          key?: string | null
-          value?: Json | null
-        }
           class_room_id?: string | null
           created_at?: string
           id?: string
@@ -1084,12 +585,6 @@ export type Database = {
           key?: string | null
           value?: Json | null
         }
-          class_room_id?: string | null
-          created_at?: string
-          id?: string
-          key?: string | null
-          value?: Json | null
-        }
         Relationships: [
           {
             foreignKeyName: "class_room_metadata_class_room_id_fkey"
@@ -1097,11 +592,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_rooms"
             referencedColumns: ["id"]
-            foreignKeyName: "class_room_metadata_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "class_room_metadata_class_room_id_fkey"
@@ -1109,14 +599,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_rooms_priority"
             referencedColumns: ["id"]
-            foreignKeyName: "class_room_metadata_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms_priority"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       class_rooms: {
@@ -1137,39 +620,7 @@ export type Database = {
           thumbnail_url: string | null
           title: string | null
         }
-          comunity_info: Json | null
-          created_at: string
-          description: string | null
-          documents: Json | null
-          employee_id: string | null
-          end_at: string | null
-          id: string
-          organization_id: string | null
-          resource_id: string | null
-          room_type: Database["public"]["Enums"]["class_room_type"]
-          slug: string | null
-          start_at: string | null
-          status: Database["public"]["Enums"]["class_room_status"]
-          thumbnail_url: string | null
-          title: string | null
-        }
         Insert: {
-          comunity_info?: Json | null
-          created_at?: string
-          description?: string | null
-          documents?: Json | null
-          employee_id?: string | null
-          end_at?: string | null
-          id?: string
-          organization_id?: string | null
-          resource_id?: string | null
-          room_type: Database["public"]["Enums"]["class_room_type"]
-          slug?: string | null
-          start_at?: string | null
-          status?: Database["public"]["Enums"]["class_room_status"]
-          thumbnail_url?: string | null
-          title?: string | null
-        }
           comunity_info?: Json | null
           created_at?: string
           description?: string | null
@@ -1203,22 +654,6 @@ export type Database = {
           thumbnail_url?: string | null
           title?: string | null
         }
-          comunity_info?: Json | null
-          created_at?: string
-          description?: string | null
-          documents?: Json | null
-          employee_id?: string | null
-          end_at?: string | null
-          id?: string
-          organization_id?: string | null
-          resource_id?: string | null
-          room_type?: Database["public"]["Enums"]["class_room_type"]
-          slug?: string | null
-          start_at?: string | null
-          status?: Database["public"]["Enums"]["class_room_status"]
-          thumbnail_url?: string | null
-          title?: string | null
-        }
         Relationships: [
           {
             foreignKeyName: "class_rooms_employee_id_fkey"
@@ -1226,11 +661,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
-            foreignKeyName: "class_rooms_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "class_rooms_organization_id_fkey"
@@ -1238,14 +668,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
-            foreignKeyName: "class_rooms_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       class_session_metadata: {
@@ -1255,28 +678,13 @@ export type Database = {
           key: string | null
           value: Json | null
         }
-          class_session_id: string
-          id: string
-          key: string | null
-          value: Json | null
-        }
         Insert: {
           class_session_id?: string
           id?: string
           key?: string | null
           value?: Json | null
         }
-          class_session_id?: string
-          id?: string
-          key?: string | null
-          value?: Json | null
-        }
         Update: {
-          class_session_id?: string
-          id?: string
-          key?: string | null
-          value?: Json | null
-        }
           class_session_id?: string
           id?: string
           key?: string | null
@@ -1289,14 +697,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_sessions"
             referencedColumns: ["id"]
-            foreignKeyName: "class_session_metadata_class_session_id_fkey"
-            columns: ["class_session_id"]
-            isOneToOne: false
-            referencedRelation: "class_sessions"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       class_session_teacher: {
@@ -1306,28 +707,13 @@ export type Database = {
           id: string
           teacher_id: string | null
         }
-          class_session_id: string | null
-          created_at: string
-          id: string
-          teacher_id: string | null
-        }
         Insert: {
           class_session_id?: string | null
           created_at?: string
           id?: string
           teacher_id?: string | null
         }
-          class_session_id?: string | null
-          created_at?: string
-          id?: string
-          teacher_id?: string | null
-        }
         Update: {
-          class_session_id?: string | null
-          created_at?: string
-          id?: string
-          teacher_id?: string | null
-        }
           class_session_id?: string | null
           created_at?: string
           id?: string
@@ -1340,11 +726,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_sessions"
             referencedColumns: ["id"]
-            foreignKeyName: "class_session_teacher_class_session_id_fkey"
-            columns: ["class_session_id"]
-            isOneToOne: false
-            referencedRelation: "class_sessions"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "class_session_teacher_teacher_id_fkey"
@@ -1352,14 +733,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
-            foreignKeyName: "class_session_teacher_teacher_id_fkey"
-            columns: ["teacher_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       class_sessions: {
@@ -1424,11 +798,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_rooms"
             referencedColumns: ["id"]
-            foreignKeyName: "class_session_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "class_session_class_room_id_fkey"
@@ -1436,14 +805,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_rooms_priority"
             referencedColumns: ["id"]
-            foreignKeyName: "class_session_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms_priority"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       class_sessions_agendas: {
@@ -1458,16 +820,6 @@ export type Database = {
           title: string | null
           updated_at: string | null
         }
-          class_session_id: string | null
-          created_at: string
-          description: string | null
-          end_at: string | null
-          id: string
-          start_at: string | null
-          thumbnail_url: string | null
-          title: string | null
-          updated_at: string | null
-        }
         Insert: {
           class_session_id?: string | null
           created_at?: string
@@ -1479,27 +831,7 @@ export type Database = {
           title?: string | null
           updated_at?: string | null
         }
-          class_session_id?: string | null
-          created_at?: string
-          description?: string | null
-          end_at?: string | null
-          id?: string
-          start_at?: string | null
-          thumbnail_url?: string | null
-          title?: string | null
-          updated_at?: string | null
-        }
         Update: {
-          class_session_id?: string | null
-          created_at?: string
-          description?: string | null
-          end_at?: string | null
-          id?: string
-          start_at?: string | null
-          thumbnail_url?: string | null
-          title?: string | null
-          updated_at?: string | null
-        }
           class_session_id?: string | null
           created_at?: string
           description?: string | null
@@ -1517,220 +849,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_sessions"
             referencedColumns: ["id"]
-            foreignKeyName: "class_sessions_agendas_class_session_id_fkey"
-            columns: ["class_session_id"]
-            isOneToOne: false
-            referencedRelation: "class_sessions"
-            referencedColumns: ["id"]
           },
-        ]
-      }
-      courses: {
-        Row: {
-          community_info: Json | null
-          created_at: string
-          description: string | null
-          end_at: string | null
-          id: string
-          start_at: string | null
-          status: Database["public"]["Enums"]["course_status"]
-          thumbnail_url: string | null
-          title: string | null
-        }
-        Insert: {
-          community_info?: Json | null
-          created_at?: string
-          description?: string | null
-          end_at?: string | null
-          id?: string
-          start_at?: string | null
-          status?: Database["public"]["Enums"]["course_status"]
-          thumbnail_url?: string | null
-          title?: string | null
-        }
-        Update: {
-          community_info?: Json | null
-          created_at?: string
-          description?: string | null
-          end_at?: string | null
-          id?: string
-          start_at?: string | null
-          status?: Database["public"]["Enums"]["course_status"]
-          thumbnail_url?: string | null
-          title?: string | null
-        }
-        Relationships: []
-      }
-      courses_categories: {
-        Row: {
-          category_id: string
-          course_id: string
-          created_at: string
-          id: number
-        }
-        Insert: {
-          category_id?: string
-          course_id?: string
-          created_at?: string
-          id?: number
-        }
-        Update: {
-          category_id?: string
-          course_id?: string
-          created_at?: string
-          id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "courses_categories_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "courses_categories_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      courses_metadatas: {
-        Row: {
-          created_at: string
-          id: number
-          key: string
-          online_course_id: string
-          value: Json
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          key: string
-          online_course_id?: string
-          value: Json
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          key?: string
-          online_course_id?: string
-          value?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "online_courses_metadatas_online_course_id_fkey"
-            columns: ["online_course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      courses_resources: {
-        Row: {
-          course_id: string
-          id: number
-          resource_id: string
-        }
-        Insert: {
-          course_id?: string
-          id?: number
-          resource_id?: string
-        }
-        Update: {
-          course_id?: string
-          id?: number
-          resource_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "courses_resources_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "courses_resources_resource_id_fkey"
-            columns: ["resource_id"]
-            isOneToOne: false
-            referencedRelation: "resources"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      courses_students: {
-        Row: {
-          course_id: string
-          id: number
-          student_id: string
-        }
-        Insert: {
-          course_id?: string
-          id?: number
-          student_id?: string
-        }
-        Update: {
-          course_id?: string
-          id?: number
-          student_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "courses_students_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "courses_students_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      courses_teachers: {
-        Row: {
-          created_at: string
-          id: number
-          online_course_id: string
-          teacher_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          online_course_id?: string
-          teacher_id?: string
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          online_course_id?: string
-          teacher_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "online_courses_teachers_online_course_id_fkey"
-            columns: ["online_course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "online_courses_teachers_teacher_id_fkey"
-            columns: ["teacher_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
         ]
       }
       courses: {
@@ -1952,29 +1071,7 @@ export type Database = {
           status: Database["public"]["Enums"]["employee_status"]
           user_id: string
         }
-          created_at: string
-          employee_code: string
-          employee_order: number | null
-          employee_type: Database["public"]["Enums"]["employee_type"] | null
-          id: string
-          organization_id: string | null
-          position_id: string | null
-          start_date: string | null
-          status: Database["public"]["Enums"]["employee_status"]
-          user_id: string
-        }
         Insert: {
-          created_at?: string
-          employee_code: string
-          employee_order?: number | null
-          employee_type?: Database["public"]["Enums"]["employee_type"] | null
-          id?: string
-          organization_id?: string | null
-          position_id?: string | null
-          start_date?: string | null
-          status: Database["public"]["Enums"]["employee_status"]
-          user_id: string
-        }
           created_at?: string
           employee_code: string
           employee_order?: number | null
@@ -1998,17 +1095,6 @@ export type Database = {
           status?: Database["public"]["Enums"]["employee_status"]
           user_id?: string
         }
-          created_at?: string
-          employee_code?: string
-          employee_order?: number | null
-          employee_type?: Database["public"]["Enums"]["employee_type"] | null
-          id?: string
-          organization_id?: string | null
-          position_id?: string | null
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["employee_status"]
-          user_id?: string
-        }
         Relationships: [
           {
             foreignKeyName: "employees_organization_id_fkey"
@@ -2016,11 +1102,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
-            foreignKeyName: "employees_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "employees_position_id_fkey"
@@ -2028,14 +1109,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
-            foreignKeyName: "employees_position_id_fkey"
-            columns: ["position_id"]
-            isOneToOne: false
-            referencedRelation: "positions"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       employments: {
@@ -2045,28 +1119,13 @@ export type Database = {
           id: string
           organization_unit_id: string
         }
-          created_at: string
-          employee_id: string
-          id: string
-          organization_unit_id: string
-        }
         Insert: {
           created_at?: string
           employee_id: string
           id?: string
           organization_unit_id: string
         }
-          created_at?: string
-          employee_id: string
-          id?: string
-          organization_unit_id: string
-        }
         Update: {
-          created_at?: string
-          employee_id?: string
-          id?: string
-          organization_unit_id?: string
-        }
           created_at?: string
           employee_id?: string
           id?: string
@@ -2079,11 +1138,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
-            foreignKeyName: "employments_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "employments_organization_unit_id_fkey"
@@ -2091,22 +1145,11 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organization_units"
             referencedColumns: ["id"]
-            foreignKeyName: "employments_organization_unit_id_fkey"
-            columns: ["organization_unit_id"]
-            isOneToOne: false
-            referencedRelation: "organization_units"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       group_permission: {
         Row: {
-          id: string
-          resource_code: string
-          title: string | null
-        }
           id: string
           resource_code: string
           title: string | null
@@ -2116,17 +1159,7 @@ export type Database = {
           resource_code: string
           title?: string | null
         }
-          id?: string
-          resource_code: string
-          title?: string | null
-        }
         Update: {
-          id?: string
-          resource_code?: string
-          title?: string | null
-        }
-        Relationships: []
-      }
           id?: string
           resource_code?: string
           title?: string | null
@@ -2141,12 +1174,6 @@ export type Database = {
           slug: string | null
           type: Database["public"]["Enums"]["hashtag_type"] | null
         }
-          created_at: string
-          id: string
-          name: string | null
-          slug: string | null
-          type: Database["public"]["Enums"]["hashtag_type"] | null
-        }
         Insert: {
           created_at?: string
           id?: string
@@ -2154,101 +1181,7 @@ export type Database = {
           slug?: string | null
           type?: Database["public"]["Enums"]["hashtag_type"] | null
         }
-          created_at?: string
-          id?: string
-          name?: string | null
-          slug?: string | null
-          type?: Database["public"]["Enums"]["hashtag_type"] | null
-        }
         Update: {
-          created_at?: string
-          id?: string
-          name?: string | null
-          slug?: string | null
-          type?: Database["public"]["Enums"]["hashtag_type"] | null
-        }
-        Relationships: []
-      }
-      lessions: {
-        Row: {
-          content: string | null
-          created_at: string
-          id: string
-          lesstion_type: Database["public"]["Enums"]["lession_type"]
-          main_resource: string | null
-          order: number
-          section_id: string
-          status: Database["public"]["Enums"]["status"]
-          title: string | null
-        }
-        Insert: {
-          content?: string | null
-          created_at?: string
-          id?: string
-          lesstion_type: Database["public"]["Enums"]["lession_type"]
-          main_resource?: string | null
-          order?: number
-          section_id?: string
-          status?: Database["public"]["Enums"]["status"]
-          title?: string | null
-        }
-        Update: {
-          content?: string | null
-          created_at?: string
-          id?: string
-          lesstion_type?: Database["public"]["Enums"]["lession_type"]
-          main_resource?: string | null
-          order?: number
-          section_id?: string
-          status?: Database["public"]["Enums"]["status"]
-          title?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "online_courses_lessions_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "sections"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lessions_resources: {
-        Row: {
-          courses_lession_id: string
-          created_at: string
-          id: number
-          resource_id: string
-        }
-        Insert: {
-          courses_lession_id?: string
-          created_at?: string
-          id?: number
-          resource_id?: string
-        }
-        Update: {
-          courses_lession_id?: string
-          created_at?: string
-          id?: number
-          resource_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_lessions_resources_course_lession_id_fkey"
-            columns: ["courses_lession_id"]
-            isOneToOne: false
-            referencedRelation: "lessions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_lessions_resources_resource_id_fkey"
-            columns: ["resource_id"]
-            isOneToOne: false
-            referencedRelation: "resources"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
           created_at?: string
           id?: string
           name?: string | null
@@ -2344,28 +1277,13 @@ export type Database = {
           organization_id: string
           owner_id: string
         }
-          created_at: string
-          id: string
-          organization_id: string
-          owner_id: string
-        }
         Insert: {
           created_at?: string
           id?: string
           organization_id: string
           owner_id: string
         }
-          created_at?: string
-          id?: string
-          organization_id: string
-          owner_id: string
-        }
         Update: {
-          created_at?: string
-          id?: string
-          organization_id?: string
-          owner_id?: string
-        }
           created_at?: string
           id?: string
           organization_id?: string
@@ -2378,11 +1296,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
-            foreignKeyName: "libraries_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "libraries_owner_id_fkey"
@@ -2390,14 +1303,7 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "employees"
             referencedColumns: ["id"]
-            foreignKeyName: "libraries_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: true
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       managers_employees: {
@@ -2405,20 +1311,11 @@ export type Database = {
           employee_id: string
           manager_id: string
         }
-          employee_id: string
-          manager_id: string
-        }
         Insert: {
           employee_id: string
           manager_id: string
         }
-          employee_id: string
-          manager_id: string
-        }
         Update: {
-          employee_id?: string
-          manager_id?: string
-        }
           employee_id?: string
           manager_id?: string
         }
@@ -2429,11 +1326,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
-            foreignKeyName: "managers_employees_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "managers_employees_manager_id_fkey"
@@ -2441,14 +1333,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
-            foreignKeyName: "managers_employees_manager_id_fkey"
-            columns: ["manager_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       organization_units: {
@@ -2462,15 +1347,6 @@ export type Database = {
           parent_id: string | null
           type: Database["public"]["Enums"]["organization_unit_type"]
         }
-          address: string
-          code: string
-          created_at: string
-          id: string
-          name: string
-          organization_id: string
-          parent_id: string | null
-          type: Database["public"]["Enums"]["organization_unit_type"]
-        }
         Insert: {
           address?: string
           code?: string
@@ -2481,25 +1357,7 @@ export type Database = {
           parent_id?: string | null
           type: Database["public"]["Enums"]["organization_unit_type"]
         }
-          address?: string
-          code?: string
-          created_at?: string
-          id?: string
-          name: string
-          organization_id: string
-          parent_id?: string | null
-          type: Database["public"]["Enums"]["organization_unit_type"]
-        }
         Update: {
-          address?: string
-          code?: string
-          created_at?: string
-          id?: string
-          name?: string
-          organization_id?: string
-          parent_id?: string | null
-          type?: Database["public"]["Enums"]["organization_unit_type"]
-        }
           address?: string
           code?: string
           created_at?: string
@@ -2516,11 +1374,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
-            foreignKeyName: "organization_units_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "organization_units_parent_id_fkey"
@@ -2528,26 +1381,11 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organization_units"
             referencedColumns: ["id"]
-            foreignKeyName: "organization_units_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "organization_units"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       organizations: {
         Row: {
-          created_at: string
-          employee_limit: number | null
-          id: string
-          is_active: boolean
-          logo: string
-          name: string
-          subdomain: string
-        }
           created_at: string
           employee_limit: number | null
           id: string
@@ -2565,25 +1403,7 @@ export type Database = {
           name: string
           subdomain: string
         }
-          created_at?: string
-          employee_limit?: number | null
-          id?: string
-          is_active?: boolean
-          logo: string
-          name: string
-          subdomain: string
-        }
         Update: {
-          created_at?: string
-          employee_limit?: number | null
-          id?: string
-          is_active?: boolean
-          logo?: string
-          name?: string
-          subdomain?: string
-        }
-        Relationships: []
-      }
           created_at?: string
           employee_limit?: number | null
           id?: string
@@ -2601,28 +1421,13 @@ export type Database = {
           organization_id: string
           title: string
         }
-          created_at: string
-          id: string
-          organization_id: string
-          title: string
-        }
         Insert: {
           created_at?: string
           id?: string
           organization_id: string
           title: string
         }
-          created_at?: string
-          id?: string
-          organization_id: string
-          title: string
-        }
         Update: {
-          created_at?: string
-          id?: string
-          organization_id?: string
-          title?: string
-        }
           created_at?: string
           id?: string
           organization_id?: string
@@ -2635,14 +1440,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
-            foreignKeyName: "positions_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       profiles: {
@@ -2657,27 +1455,7 @@ export type Database = {
           id: string
           phone_number: string
         }
-          avatar: string | null
-          birthday: string | null
-          created_at: string
-          email: string
-          employee_id: string
-          full_name: string
-          gender: Database["public"]["Enums"]["gender"]
-          id: string
-          phone_number: string
-        }
         Insert: {
-          avatar?: string | null
-          birthday?: string | null
-          created_at?: string
-          email: string
-          employee_id: string
-          full_name: string
-          gender: Database["public"]["Enums"]["gender"]
-          id?: string
-          phone_number: string
-        }
           avatar?: string | null
           birthday?: string | null
           created_at?: string
@@ -2699,16 +1477,6 @@ export type Database = {
           id?: string
           phone_number?: string
         }
-          avatar?: string | null
-          birthday?: string | null
-          created_at?: string
-          email?: string
-          employee_id?: string
-          full_name?: string
-          gender?: Database["public"]["Enums"]["gender"]
-          id?: string
-          phone_number?: string
-        }
         Relationships: [
           {
             foreignKeyName: "profiles_employee_id_fkey"
@@ -2716,68 +1484,7 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "employees"
             referencedColumns: ["id"]
-            foreignKeyName: "profiles_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: true
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
           },
-        ]
-      }
-      questions: {
-        Row: {
-          assignment_id: string
-          attachments: string[] | null
-          created_at: string
-          created_by: string
-          id: string
-          label: string
-          options: Json | null
-          score: number
-          type: Database["public"]["Enums"]["question_type"]
-          updated_at: string
-        }
-        Insert: {
-          assignment_id: string
-          attachments?: string[] | null
-          created_at?: string
-          created_by: string
-          id?: string
-          label: string
-          options?: Json | null
-          score: number
-          type: Database["public"]["Enums"]["question_type"]
-          updated_at?: string
-        }
-        Update: {
-          assignment_id?: string
-          attachments?: string[] | null
-          created_at?: string
-          created_by?: string
-          id?: string
-          label?: string
-          options?: Json | null
-          score?: number
-          type?: Database["public"]["Enums"]["question_type"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "questions_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "assignments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "questions_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
         ]
       }
       questions: {
@@ -2852,39 +1559,7 @@ export type Database = {
           thumbnail_url: string | null
           updated_at: string
         }
-          created_at: string
-          created_by: string
-          deleted_at: string | null
-          extension: string | null
-          id: string
-          kind: Database["public"]["Enums"]["resource_kind"]
-          library_id: string
-          mime_type: string | null
-          name: string
-          organization_id: string
-          parent_id: string | null
-          path: string | null
-          size: number | null
-          thumbnail_url: string | null
-          updated_at: string
-        }
         Insert: {
-          created_at?: string
-          created_by: string
-          deleted_at?: string | null
-          extension?: string | null
-          id?: string
-          kind: Database["public"]["Enums"]["resource_kind"]
-          library_id: string
-          mime_type?: string | null
-          name: string
-          organization_id: string
-          parent_id?: string | null
-          path?: string | null
-          size?: number | null
-          thumbnail_url?: string | null
-          updated_at?: string
-        }
           created_at?: string
           created_by: string
           deleted_at?: string | null
@@ -2918,22 +1593,6 @@ export type Database = {
           thumbnail_url?: string | null
           updated_at?: string
         }
-          created_at?: string
-          created_by?: string
-          deleted_at?: string | null
-          extension?: string | null
-          id?: string
-          kind?: Database["public"]["Enums"]["resource_kind"]
-          library_id?: string
-          mime_type?: string | null
-          name?: string
-          organization_id?: string
-          parent_id?: string | null
-          path?: string | null
-          size?: number | null
-          thumbnail_url?: string | null
-          updated_at?: string
-        }
         Relationships: [
           {
             foreignKeyName: "resources_created_by_fkey"
@@ -2948,25 +1607,8 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "libraries"
             referencedColumns: ["id"]
-            foreignKeyName: "resources_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "resources_library_id_fkey"
-            columns: ["library_id"]
-            isOneToOne: false
-            referencedRelation: "libraries"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "resources_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
             foreignKeyName: "resources_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -2979,14 +1621,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "resources"
             referencedColumns: ["id"]
-            foreignKeyName: "resources_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "resources"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       role_permissions: {
@@ -2996,28 +1631,13 @@ export type Database = {
           group_permission_id: string
           role_id: string
         }
-          action_code: Database["public"]["Enums"]["action_code_enum"]
-          assigned_at: string | null
-          group_permission_id: string
-          role_id: string
-        }
         Insert: {
           action_code: Database["public"]["Enums"]["action_code_enum"]
           assigned_at?: string | null
           group_permission_id: string
           role_id: string
         }
-          action_code: Database["public"]["Enums"]["action_code_enum"]
-          assigned_at?: string | null
-          group_permission_id: string
-          role_id: string
-        }
         Update: {
-          action_code?: Database["public"]["Enums"]["action_code_enum"]
-          assigned_at?: string | null
-          group_permission_id?: string
-          role_id?: string
-        }
           action_code?: Database["public"]["Enums"]["action_code_enum"]
           assigned_at?: string | null
           group_permission_id?: string
@@ -3030,11 +1650,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "group_permission"
             referencedColumns: ["id"]
-            foreignKeyName: "role_permissions_group_permission_id_fkey"
-            columns: ["group_permission_id"]
-            isOneToOne: false
-            referencedRelation: "group_permission"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "role_permissions_role_id_fkey"
@@ -3042,14 +1657,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "roles"
             referencedColumns: ["id"]
-            foreignKeyName: "role_permissions_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "roles"
-            referencedColumns: ["id"]
           },
-        ]
-      }
         ]
       }
       roles: {
@@ -3061,21 +1669,7 @@ export type Database = {
           organization_id: string | null
           title: string
         }
-          code: string
-          created_at: string | null
-          description: string | null
-          id: string
-          organization_id: string | null
-          title: string
-        }
         Insert: {
-          code: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          organization_id?: string | null
-          title: string
-        }
           code: string
           created_at?: string | null
           description?: string | null
@@ -3091,20 +1685,8 @@ export type Database = {
           organization_id?: string | null
           title?: string
         }
-          code?: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          organization_id?: string | null
-          title?: string
-        }
         Relationships: [
           {
-            foreignKeyName: "roles_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
             foreignKeyName: "roles_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -3157,24 +1739,12 @@ export type Database = {
           role_id: string
           user_id: string
         }
-          assigned_at: string | null
-          role_id: string
-          user_id: string
-        }
         Insert: {
           assigned_at?: string | null
           role_id: string
           user_id: string
         }
-          assigned_at?: string | null
-          role_id: string
-          user_id: string
-        }
         Update: {
-          assigned_at?: string | null
-          role_id?: string
-          user_id?: string
-        }
           assigned_at?: string | null
           role_id?: string
           user_id?: string
@@ -3186,15 +1756,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "roles"
             referencedColumns: ["id"]
-            foreignKeyName: "user_roles_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "roles"
-            referencedColumns: ["id"]
           },
-        ]
-      }
-    }
         ]
       }
     }
@@ -3220,25 +1782,6 @@ export type Database = {
           thumbnail_url: string | null
           title: string | null
         }
-          computed_end_at: string | null
-          computed_start_at: string | null
-          created_at: string | null
-          description: string | null
-          employee_id: string | null
-          end_at: string | null
-          id: string | null
-          organization_id: string | null
-          resource_id: string | null
-          room_type: Database["public"]["Enums"]["class_room_type"] | null
-          runtime_status: string | null
-          slug: string | null
-          sort_rank_primary: number | null
-          sort_rank_secondary: number | null
-          start_at: string | null
-          status: Database["public"]["Enums"]["class_room_status"] | null
-          thumbnail_url: string | null
-          title: string | null
-        }
         Relationships: [
           {
             foreignKeyName: "class_rooms_employee_id_fkey"
@@ -3246,11 +1789,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
-            foreignKeyName: "class_rooms_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "class_rooms_organization_id_fkey"
@@ -3258,15 +1796,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
-            foreignKeyName: "class_rooms_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
           },
-        ]
-      }
-    }
         ]
       }
     }
@@ -3281,19 +1811,7 @@ export type Database = {
           p_to?: string
           p_type?: string
         }
-          p_employee_id: string
-          p_from?: string
-          p_search?: string
-          p_session_mode?: string
-          p_status?: string
-          p_to?: string
-          p_type?: string
-        }
         Returns: {
-          runtime_status: string
-          total: number
-        }[]
-      }
           runtime_status: string
           total: number
         }[]
@@ -3306,17 +1824,7 @@ export type Database = {
           p_page?: number
           p_search?: string
         }
-          p_branch_id?: string
-          p_department_id?: string
-          p_limit?: number
-          p_page?: number
-          p_search?: string
-        }
         Returns: {
-          employee_id: string
-          total_count: number
-        }[]
-      }
           employee_id: string
           total_count: number
         }[]
@@ -3331,7 +1839,6 @@ export type Database = {
       }
       is_qr_code_valid: {
         Args: { p_current_time?: string; p_qr_code: string }
-        Args: { p_current_time?: string; p_qr_code: string }
         Returns: {
           is_valid: boolean
           message: string
@@ -3339,42 +1846,7 @@ export type Database = {
         }[]
       }
     }
-          is_valid: boolean
-          message: string
-          qr_code_id: string
-        }[]
-      }
-    }
     Enums: {
-      action_code_enum: "create" | "read" | "update" | "delete"
-      assignment_result_status: "submitted" | "graded"
-      attendance_status: "present" | "late" | "absent" | "rejected"
-      channel_provider: "google_meet" | "zoom" | "microsoft_teams"
-      class_room_status:
-        | "publish"
-        | "active"
-        | "deactive"
-        | "pending"
-        | "deleted"
-        | "draft"
-      class_room_type: "single" | "multiple"
-      course_status:
-        | "published"
-        | "pending"
-        | "draft"
-        | "deleted"
-        | "unpublished"
-      employee_status: "active" | "inactive"
-      employee_type: "admin" | "student" | "teacher"
-      gender: "male" | "female" | "other"
-      hashtag_type: "class_room"
-      lession_type: "video" | "file" | "assessment"
-      organization_unit_type: "branch" | "department"
-      qr_code_status: "inactive" | "active" | "expired" | "disabled"
-      question_type: "file" | "text" | "checkbox" | "radio"
-      resource_kind: "folder" | "file"
-      status: "active" | "deactive"
-    }
       action_code_enum: "create" | "read" | "update" | "delete"
       assignment_result_status: "submitted" | "graded"
       attendance_status: "present" | "late" | "absent" | "rejected"
@@ -3409,15 +1881,9 @@ export type Database = {
     }
   }
 }
-      [_ in never]: never
-    }
-  }
-}
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
@@ -3426,30 +1892,18 @@ export type Tables<
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
-    schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
-  schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
-      Row: infer R
     }
     ? R
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
     : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
         DefaultSchema["Views"])
@@ -3465,21 +1919,15 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
-  schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
       Insert: infer I
     }
     ? I
@@ -3491,32 +1939,20 @@ export type TablesInsert<
       ? I
       : never
     : never
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
-  schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
       Update: infer U
     }
     ? U
@@ -3528,34 +1964,21 @@ export type TablesUpdate<
       ? U
       : never
     : never
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
-  schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
@@ -3565,18 +1988,14 @@ export type CompositeTypes<
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
-    schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
-  schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
@@ -3588,17 +2007,8 @@ export const Constants = {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
       assignment_result_status: ["submitted", "graded"],
-      assignment_result_status: ["submitted", "graded"],
       attendance_status: ["present", "late", "absent", "rejected"],
       channel_provider: ["google_meet", "zoom", "microsoft_teams"],
-      class_room_status: [
-        "publish",
-        "active",
-        "deactive",
-        "pending",
-        "deleted",
-        "draft",
-      ],
       class_room_status: [
         "publish",
         "active",
@@ -3615,29 +2025,17 @@ export const Constants = {
         "deleted",
         "unpublished",
       ],
-      course_status: [
-        "published",
-        "pending",
-        "draft",
-        "deleted",
-        "unpublished",
-      ],
       employee_status: ["active", "inactive"],
       employee_type: ["admin", "student", "teacher"],
       gender: ["male", "female", "other"],
       hashtag_type: ["class_room"],
       lession_type: ["video", "file", "assessment"],
-      lession_type: ["video", "file", "assessment"],
       organization_unit_type: ["branch", "department"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],
       question_type: ["file", "text", "checkbox", "radio"],
-      question_type: ["file", "text", "checkbox", "radio"],
       resource_kind: ["folder", "file"],
-      status: ["active", "deactive"],
       status: ["active", "deactive"],
     },
   },
-} as const
-
 } as const
 
