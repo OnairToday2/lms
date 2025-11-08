@@ -327,7 +327,17 @@ const createClassRoomsQuery = (
   select: string,
   options?: { count?: "exact" | "planned" | "estimated"; head?: boolean },
 ) => {
-  const { organizationId, employeeId } = filters;
+  const { organizationId, employeeId, teacherClassRoomIds } = filters;
+  const trimmedEmployeeId = employeeId?.trim();
+  const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  const sanitizedTeacherClassRoomIds = Array.from(
+    new Set(
+      (teacherClassRoomIds ?? [])
+        .map((id) => id?.trim())
+        .filter((id): id is string => Boolean(id) && uuidPattern.test(id)),
+    ),
+  );
+
   let query = supabase.from("class_rooms_priority").select(select, options).not("status", "in", "(deleted)");
 
   if (organizationId) {
