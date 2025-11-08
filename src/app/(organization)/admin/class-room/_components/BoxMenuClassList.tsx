@@ -9,6 +9,7 @@ import { useTransition } from "react";
 import { ClassRoomType } from "@/model/class-room.model";
 import BoxItem from "./BoxItem";
 import Image from "next/image";
+import { PATHS } from "@/constants/path.contstants";
 
 interface BoxMenuClassListProps {
   items?: { path: string; title: string }[];
@@ -29,11 +30,12 @@ const BoxMenuClassList: React.FC<BoxMenuClassListProps> = ({ items }) => {
   };
 
   const handleClickOk = () => {
+    if (!roomType) return;
     startTransition(() => {
       const path =
         manageType === "classRoom"
-          ? `/admin/class-room/create?platform=${platform}&roomtype=${roomType}`
-          : `/admin/online-course/create`;
+          ? `${PATHS.CLASSROOMS.CREATE_CLASSROOM}?platform=${platform}&roomtype=${roomType}`
+          : PATHS.CLASSROOMS.CREATE_CLASSROOM;
       router.push(path);
     });
   };

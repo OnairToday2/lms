@@ -26,18 +26,17 @@ export const PATHS = {
   },
   CLASSROOMS: {
     ROOT: "/admin/class-room",
-    CREATE_CLASSROOM_OFFLINE: "/admin/class-room/offline/create",
-    CREATE_CLASSROOM_ONLINE: "/admin/class-room/online/create",
     CREATE_CLASSROOM: "/class-room/create",
+    EDIT_CLASSROOM: (id: string = ":id") => `/class-room/${id}/cedit`,
     LIST_CLASSROOM: "/class-room/list",
   },
   STUDENTS: {
     ROOT: "/my-class",
   },
   ASSIGNMENTS: {
-    ROOT: '/assignments',
-    CREATE_ASSIGNMENT: '/assignments/create',
-    EDIT_ASSIGNMENT: (id: string = ':id') => `/assignments/edit/${id}`,
+    ROOT: "/assignments",
+    CREATE_ASSIGNMENT: "/assignments/create",
+    EDIT_ASSIGNMENT: (id: string = ":id") => `/assignments/edit/${id}`,
   },
   REPORTS: {
     ROOT: "/report",
