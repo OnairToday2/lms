@@ -11,20 +11,7 @@ export const getKeyFieldByTab = (tabKey: keyof typeof TAB_KEYS_CLASS_ROOM) => {
 
   switch (tabKey) {
     case "clsTab-information": {
-      keyListByTab = [
-        "title",
-        "thumbnailUrl",
-        "hashTags",
-        "slug",
-        "description",
-        "communityInfo",
-        "classRoomField",
-        "roomType",
-      ];
-      break;
-    }
-    case "clsTab-resource": {
-      keyListByTab = ["docs", "faqs", "forWhom", "whies"];
+      keyListByTab = ["title", "thumbnailUrl", "slug", "description", "categories", "roomType", "docs", "forWhom"];
       break;
     }
 
@@ -33,7 +20,6 @@ export const getKeyFieldByTab = (tabKey: keyof typeof TAB_KEYS_CLASS_ROOM) => {
       break;
     }
     case "clsTab-setting": {
-      keyListByTab = ["classRoomSessions"];
       break;
     }
   }
@@ -46,32 +32,34 @@ export const getStatusTabClassRoom = (
 ): "invalid" | "valid" => {
   const keyListByTab = getKeyFieldByTab(tabKey);
 
-  const isValid = keyListByTab.every((key) => {
-    if (key === "classRoomSessions") {
-      const sessionsErrors = errors["classRoomSessions"] as FieldErrors<ClassRoomSession>[] | undefined;
+  // const isValid = keyListByTab.every((key) => {
+  //   if (key === "classRoomSessions") {
+  //     const sessionsErrors = errors["classRoomSessions"] as FieldErrors<ClassRoomSession>[] | undefined;
 
-      if (!sessionsErrors || !sessionsErrors.length) return true;
+  //     if (!sessionsErrors || !sessionsErrors.length) return true;
 
-      return sessionsErrors.every((session) => {
-        if (!session) return true;
-        /**
-         * remove Qrcode
-         */
-        const { qrCode, ...restKeys } = session;
+  //     return sessionsErrors.every((session) => {
+  //       if (!session) return true;
+  //       /**
+  //        * remove Qrcode
+  //        */
+  //       const { qrCode, ...restKeys } = session;
 
-        if (tabKey === "clsTab-setting" && qrCode) {
-          return false;
-        }
-        if (tabKey === "clsTab-session" && Object.keys(restKeys).length) {
-          return false;
-        }
+  //       if (tabKey === "clsTab-setting" && qrCode) {
+  //         return false;
+  //       }
+  //       if (tabKey === "clsTab-session" && Object.keys(restKeys).length) {
+  //         return false;
+  //       }
 
-        return true;
-      });
-    } else {
-      return !errors[key];
-    }
-  });
+  //       return true;
+  //     });
+  //   } else {
+  //     return !errors[key];
+  //   }
+  // });
+
+  const isValid = keyListByTab.every((key) => !errors[key]);
 
   return isValid ? "valid" : "invalid";
 };

@@ -4,15 +4,15 @@ import Image from "next/image";
 import { cn } from "@/utils";
 import { Box, Typography } from "@mui/material";
 import { ClassRoomType } from "@/model/class-room.model";
-export interface RoomTypeSelectorProps {
+export interface RoomTypeItemsProps {
   className?: string;
   value: NonNullable<ClassRoomType> | undefined;
   setRoomType: Dispatch<SetStateAction<NonNullable<ClassRoomType> | undefined>>;
 }
-const RoomTypeSelector: React.FC<RoomTypeSelectorProps> = ({ className, value, setRoomType }) => {
+const RoomTypeItems: React.FC<RoomTypeItemsProps> = ({ className, value, setRoomType }) => {
   return (
     <div className="class-room-type-selector grid grid-cols-2 gap-6">
-      <SelectItem
+      <BoxItem
         thumbnail={
           <Image src="/assets/icons/calendar-1.svg" alt="icon calendar" width={56} height={56} className="mb-3" />
         }
@@ -21,7 +21,7 @@ const RoomTypeSelector: React.FC<RoomTypeSelectorProps> = ({ className, value, s
         isActive={value === "single"}
         onClick={() => setRoomType("single")}
       />
-      <SelectItem
+      <BoxItem
         thumbnail={
           <Image src="/assets/icons/calendar-2.svg" alt="icon calendar" width={56} height={56} className="mb-3" />
         }
@@ -33,16 +33,16 @@ const RoomTypeSelector: React.FC<RoomTypeSelectorProps> = ({ className, value, s
     </div>
   );
 };
-export default memo(RoomTypeSelector);
+export default memo(RoomTypeItems);
 
-interface SelectItemProps {
+interface BoxItemProps {
   isActive?: boolean;
   title?: string;
   description?: string;
   thumbnail: React.ReactNode;
   onClick?: () => void;
 }
-const SelectItem: React.FC<SelectItemProps> = memo(({ isActive, title, description, onClick, thumbnail }) => {
+const BoxItem: React.FC<BoxItemProps> = memo(({ isActive, title, description, onClick, thumbnail }) => {
   return (
     <Box
       className={cn("bg-white rounded-xl p-4 border cursor-pointer", {

@@ -1,7 +1,6 @@
-import { useGetClassFieldQuery } from "@/modules/class-room-management/operation/query";
 import { Control, useController } from "react-hook-form";
-import { ClassRoom } from "../../classroom-form.schema";
-import { useCreateClassFieldMutation } from "@/modules/class-room-management/operation/mutation";
+import { ClassRoom } from "../../../classroom-form.schema";
+import { useCreateCategoriesMutation, useGetCategoriesQuery } from "@/modules/categories/operations";
 import { slugify } from "@/utils/slugify";
 import RHFMultipleSelectField from "@/shared/ui/form/RHFMultipleSelectField";
 interface ClassFieldSelectorProps {
@@ -10,10 +9,10 @@ interface ClassFieldSelectorProps {
 const ClassFieldSelector: React.FC<ClassFieldSelectorProps> = ({ control }) => {
   const {
     field: { onChange, value: classFieldList },
-  } = useController({ control, name: "classRoomField" });
+  } = useController({ control, name: "categories" });
 
-  const { data: fieldListData, isPending } = useGetClassFieldQuery();
-  const { mutate: createClassField, isPending: isCreateLoading } = useCreateClassFieldMutation();
+  const { data: fieldListData, isPending } = useGetCategoriesQuery();
+  const { mutate: createClassField, isPending: isCreateLoading } = useCreateCategoriesMutation();
 
   const handleEnter = (value: string) => {
     createClassField({
@@ -30,11 +29,11 @@ const ClassFieldSelector: React.FC<ClassFieldSelectorProps> = ({ control }) => {
   };
   return (
     <RHFMultipleSelectField
-      label="Lĩnh vực"
+      label="Chủ đề"
       control={control}
-      name="classRoomField"
+      name="categories"
       required
-      placeholder="Chọn lĩnh vực"
+      placeholder="Chọn chủ đề"
       onInputEnter={handleEnter}
       onRemove={handleRemoveItem}
       isLoading={isCreateLoading}

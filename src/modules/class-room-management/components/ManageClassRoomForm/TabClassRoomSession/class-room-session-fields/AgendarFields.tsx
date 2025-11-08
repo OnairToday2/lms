@@ -44,7 +44,7 @@ const AgendarFields: React.FC<AgendarFieldsProps> = ({ sessionIndex, className }
   return (
     <div className={cn(className)}>
       <div className="flex items-center">
-        <div className="pr-6">
+        <div className="pr-6 flex-1">
           <FormLabel component="div">
             Agenda <span className="text-xs text-gray-500 font-normal">(Lịch trình lớp học)</span>
           </FormLabel>

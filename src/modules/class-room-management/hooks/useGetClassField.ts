@@ -15,4 +15,3 @@ const useGetClassHashTagQuery = () => {
   });
 };
 export { useGetClassFieldQuery, useGetClassHashTagQuery };
-

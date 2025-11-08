@@ -1,13 +1,14 @@
 "use client";
 import { ChevronRightDoubleIcon } from "@/shared/assets/icons";
 import { Button, Typography } from "@mui/material";
-import RoomTypeItems from "./RoomTypeItems";
 import { ClassRoomPlatformType } from "@/constants/class-room.constant";
 import { useState } from "react";
 import { cn } from "@/utils";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { ClassRoomType } from "@/model/class-room.model";
+import BoxItem from "./BoxItem";
+import Image from "next/image";
 
 interface BoxMenuClassListProps {
   items?: { path: string; title: string }[];
@@ -21,12 +22,19 @@ const BoxMenuClassList: React.FC<BoxMenuClassListProps> = ({ items }) => {
 
   const handleSelectManageType = (type: "classRoom" | "course", platform?: ClassRoomPlatformType) => () => {
     setManageType(type);
+    if (type === "course") {
+      setRoomType(undefined);
+    }
     if (platform) setPlatform(platform);
   };
 
   const handleClickOk = () => {
     startTransition(() => {
-      router.push(`/admin/class-room/${platform}/create`);
+      const path =
+        manageType === "classRoom"
+          ? `/admin/class-room/create?platform=${platform}&roomtype=${roomType}`
+          : `/admin/online-course/create`;
+      router.push(path);
     });
   };
   return (
@@ -55,7 +63,40 @@ const BoxMenuClassList: React.FC<BoxMenuClassListProps> = ({ items }) => {
         />
       </div>
       <div className="h-6"></div>
-      <RoomTypeItems value={roomType} setRoomType={setRoomType} />
+      {manageType === "classRoom" && (
+        <div className="class-room-type-selector grid grid-cols-2 gap-4">
+          <BoxItem
+            thumbnail={
+              <Image src="/assets/icons/calendar-1.svg" alt="icon calendar" width={56} height={56} className="mb-3" />
+            }
+            title="Lớp đơn"
+            description="Diễn ra trong một buổi duy nhất với thời gian cố định."
+            isActive={roomType === "single"}
+            onClick={() => setRoomType("single")}
+          />
+          <BoxItem
+            thumbnail={
+              <Image src="/assets/icons/calendar-2.svg" alt="icon calendar" width={56} height={56} className="mb-3" />
+            }
+            title="Lớp chuỗi"
+            description="Gồm nhiều lớp học diễn ra vào các khung giờ khác nhau."
+            isActive={roomType === "multiple"}
+            onClick={() => setRoomType("multiple")}
+          />
+        </div>
+      )}
+      {manageType === "course" && (
+        <div className="max-w-1/2 mx-auto">
+          <BoxItem
+            thumbnail={
+              <Image src="/assets/icons/calendar-2.svg" alt="icon calendar" width={56} height={56} className="mb-3" />
+            }
+            title="Môn học eLearning"
+            description="Khóa học học qua video và tài liệu số. Học viên có thể học bất cứ lúc nào, theo tiến độ riêng của mình."
+            isActive={true}
+          />
+        </div>
+      )}
       <div className="h-6"></div>
       <div className="py-2 text-center">
         <Button

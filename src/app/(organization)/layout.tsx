@@ -1,4 +1,4 @@
-import Authorized from "@/modules/authWrapper/Authorized";
+import Authorized from "@/modules/auth-wrapper/Authorized";
 import UserOrganizationWraper from "@/modules/organization/container/UserOrganizationWraper";
 import PermissionsWrapper from "@/modules/roles/store/PermissionsWrapper";
 import LayoutWraper from "@/modules/layout-wraper/LayoutWraper";

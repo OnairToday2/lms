@@ -22,6 +22,14 @@ const UserOrganizationWraper = async ({ children }: { readonly children: React.R
           name: employeeDetail.organizations?.name,
           subdomain: employeeDetail.organizations?.subdomain,
         },
+        profile: employeeDetail.profiles
+          ? {
+              fullName: employeeDetail.profiles.full_name,
+              avatarUrl: employeeDetail.profiles.avatar || "",
+              email: employeeDetail.profiles.email,
+              gender: employeeDetail.profiles.gender,
+            }
+          : null,
       }}
     >
       {children}

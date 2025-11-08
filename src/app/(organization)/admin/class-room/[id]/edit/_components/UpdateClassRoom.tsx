@@ -5,16 +5,14 @@ import ManageClassRoomForm, {
 } from "@/modules/class-room-management/components/ManageClassRoomForm";
 import { useCRUDClassRoom } from "@/modules/class-room-management/hooks/useCRUDClassRoom";
 import { useMemo, useRef } from "react";
-import { GetClassRoomByIdData } from "../page";
+
 import { getClassRoomMetaValue } from "@/modules/class-room-management/utils";
 import { useSnackbar } from "notistack";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
-import { ClassRoomPlatformType } from "@/constants/class-room.constant";
-interface UpdateClassRoomProps {
-  data: Exclude<GetClassRoomByIdData, null>;
-  platform: ClassRoomPlatformType;
-}
+import { useTransition } from "react";
+import type { GetClassRoomByIdData } from "../page";
+import { PATHS } from "@/constants/path.contstants";
 type UpdateClassRoomFormValue = Exclude<ManageClassRoomFormProps["initFormValue"], undefined>;
 type ClassRoomSession = UpdateClassRoomFormValue["classRoomSessions"][number];
 type SessionAgenda = UpdateClassRoomFormValue["classRoomSessions"][number]["agendas"][number];
@@ -23,28 +21,39 @@ type QrCodeSession = UpdateClassRoomFormValue["classRoomSessions"][number]["qrCo
 type TeacherType = Exclude<ManageClassRoomFormProps["teachers"], undefined>;
 type StudentType = Exclude<ManageClassRoomFormProps["students"], undefined>;
 
-const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data, platform }) => {
+interface UpdateClassRoomProps {
+  data: Exclude<GetClassRoomByIdData, null>;
+}
+const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
   const router = useRouter();
   const { sessions, class_room_metadata, employees } = data;
+  const [isTransition, startTransition] = useTransition();
   const { enqueueSnackbar } = useSnackbar();
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
   const { isLoading, onUpdate } = useCRUDClassRoom();
+  const handleCancelUpdate = () => {
+    startTransition(() => {
+      router.push(PATHS.CLASSROOMS.ROOT);
+    });
+  };
 
-  const initFormValue = useMemo<UpdateClassRoomFormValue>(() => {
-    const hastTags = data?.class_hash_tag.reduce<string[]>((acc, ht) => {
-      const hastTagId = ht.hash_tags?.id;
-      return hastTagId ? [...acc, hastTagId] : acc;
-    }, []);
+  const platform = sessions.every((s) => s.is_online)
+    ? "online"
+    : sessions.every((s) => !s.is_online)
+    ? "offline"
+    : "hybrid";
 
-    const classRoomFields = data?.class_room_field.reduce<string[]>((acc, item) => {
-      const fieldId = item.class_fields?.id;
+  const initFormValue = useMemo((): UpdateClassRoomFormValue => {
+    // const hastTags = data?.class_hash_tag.reduce<string[]>((acc, ht) => {
+    //   const hastTagId = ht.hash_tags?.id;
+    //   return hastTagId ? [...acc, hastTagId] : acc;
+    // }, []);
+
+    const categories = data?.class_room_field.reduce<string[]>((acc, item) => {
+      const fieldId = item.categories?.id;
       return fieldId ? [...acc, fieldId] : acc;
     }, []);
 
-    const communityInfo: UpdateClassRoomFormValue["communityInfo"] = {
-      name: data.comunity_info?.name || "",
-      url: data.comunity_info?.url || "",
-    };
     const classRoomSessions = sessions.reduce<ClassRoomSession[]>((acc, session) => {
       const channelInfo = {
         providerId: session.channel_info?.providerId || "",
@@ -70,12 +79,9 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data, platform }) => 
           location: session.location,
           endDate: session.end_at ? dayjs(session.end_at).toISOString() : "",
           startDate: session.start_at ? dayjs(session.start_at).toISOString() : "",
-          isOnline: session.is_online || false,
+          isOnline: session.is_online,
           channelProvider: session.channel_provider || "zoom",
           channelInfo: channelInfo,
-          resources: [],
-          limitPerson: session.limit_person === -1 ? 0 : session.limit_person,
-          isUnlimited: session.limit_person === -1 ? true : false,
           agendas: agendas,
           qrCode: {
             id: session.class_qr_codes[0]?.id,
@@ -89,16 +95,10 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data, platform }) => 
       ];
     }, []);
 
-    const faqs = getClassRoomMetaValue(class_room_metadata, "faqs");
-    const galleries = getClassRoomMetaValue(class_room_metadata, "galleries");
-    const whies = getClassRoomMetaValue(class_room_metadata, "why");
+    // const faqs = getClassRoomMetaValue(class_room_metadata, "faqs");
+    // const galleries = getClassRoomMetaValue(class_room_metadata, "galleries");
+    // const whies = getClassRoomMetaValue(class_room_metadata, "why");
     const forWhom = getClassRoomMetaValue(class_room_metadata, "forWhom");
-
-    // const platform = classRoomSessions.every((s) => s.isOnline)
-    //   ? "online"
-    //   : classRoomSessions.every((s) => !s.isOnline)
-    //   ? "offline"
-    //   : "hybrid";
 
     return {
       title: data.title || "",
@@ -106,14 +106,9 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data, platform }) => 
       description: data.description || "",
       classRoomSessions: classRoomSessions,
       thumbnailUrl: data.thumbnail_url || "",
-      hashTags: hastTags,
-      classRoomField: classRoomFields,
+      categories: categories,
       docs: data.documents,
-      faqs: faqs || [],
-      whies: whies ? whies.map((item) => ({ description: item })) : [],
       forWhom: forWhom ? forWhom.map((item) => ({ description: item })) : [],
-      galleries: galleries || [],
-      communityInfo: communityInfo,
       status: data.status,
       roomType: data.room_type || "single",
       classRoomId: data.id,
@@ -181,9 +176,10 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data, platform }) => 
       action="edit"
       students={studentList}
       teachers={teacherList}
-      isLoading={isLoading}
+      isLoading={isLoading || isTransition}
       platform={platform}
       onSubmit={handleUpdateClassRoom}
+      onCancel={handleCancelUpdate}
       ref={formClassRoomRef}
     />
   );

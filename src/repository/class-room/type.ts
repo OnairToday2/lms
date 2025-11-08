@@ -4,7 +4,7 @@ import { ClassSessionAgenda } from "@/model/class-session-agenda.model";
 export type CreateClassRoomPayload = Pick<
   ClassRoom,
   | "description"
-  | "comunity_info"
+  // | "comunity_info"
   | "room_type"
   | "slug"
   | "start_at"
@@ -20,7 +20,7 @@ export type CreateClassRoomPayload = Pick<
 export type UpdateClassRoomPayload = Pick<
   ClassRoom,
   | "description"
-  | "comunity_info"
+  // | "comunity_info"
   | "room_type"
   | "slug"
   | "start_at"
@@ -58,7 +58,6 @@ export type CreatePivotClassRoomAndEmployeePayload = {
   employee_id: string;
 };
 
-
 export enum ClassRoomRuntimeStatus {
   All = "all",
   Ongoing = "ongoing",
@@ -71,7 +70,7 @@ export enum ClassRoomRuntimeStatus {
 export enum ClassRoomType {
   All = "all",
   Single = "single",
-  Multiple = "multiple"
+  Multiple = "multiple",
 }
 
 export enum ClassSessionMode {
@@ -88,7 +87,7 @@ export enum ClassRoomStatus {
   Pending = "pending",
   Deactive = "deactive",
   Deleted = "deleted",
-};
+}
 
 export interface ClassRoomFilters {
   type: ClassRoomType;

@@ -34,6 +34,162 @@ export type Database = {
   }
   public: {
     Tables: {
+      assignment_categories: {
+        Row: {
+          assignment_id: string
+          category_id: string
+          created_at: string
+        }
+        Insert: {
+          assignment_id: string
+          category_id: string
+          created_at?: string
+        }
+        Update: {
+          assignment_id?: string
+          category_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_categories_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignment_employees: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          employee_id: string
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          employee_id: string
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          employee_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_employees_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_employees_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignment_results: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          data: Json | null
+          employee_id: string
+          id: string
+          max_score: number
+          score: number
+          status: Database["public"]["Enums"]["assignment_result_status"]
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          data?: Json | null
+          employee_id: string
+          id?: string
+          max_score: number
+          score: number
+          status?: Database["public"]["Enums"]["assignment_result_status"]
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          data?: Json | null
+          employee_id?: string
+          id?: string
+          max_score?: number
+          score?: number
+          status?: Database["public"]["Enums"]["assignment_result_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_results_assignment_id_employee_id_fkey"
+            columns: ["assignment_id", "employee_id"]
+            isOneToOne: true
+            referencedRelation: "assignment_results"
+            referencedColumns: ["assignment_id", "employee_id"]
+          },
+          {
+            foreignKeyName: "assignment_results_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_results_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignments: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -586,15 +742,15 @@ export type Database = {
           channel_provider:
             | Database["public"]["Enums"]["channel_provider"]
             | null
-          class_room_id: string | null
+          class_room_id: string
           created_at: string
           description: string | null
           end_at: string | null
           id: string
-          is_online: boolean | null
+          is_online: boolean
           limit_person: number | null
           location: string | null
-          resource_ids: string | null
+          priority: number
           start_at: string | null
           title: string | null
           updated_at: string | null
@@ -604,15 +760,15 @@ export type Database = {
           channel_provider?:
             | Database["public"]["Enums"]["channel_provider"]
             | null
-          class_room_id?: string | null
+          class_room_id?: string
           created_at?: string
           description?: string | null
           end_at?: string | null
           id?: string
-          is_online?: boolean | null
+          is_online?: boolean
           limit_person?: number | null
           location?: string | null
-          resource_ids?: string | null
+          priority?: number
           start_at?: string | null
           title?: string | null
           updated_at?: string | null
@@ -622,15 +778,15 @@ export type Database = {
           channel_provider?:
             | Database["public"]["Enums"]["channel_provider"]
             | null
-          class_room_id?: string | null
+          class_room_id?: string
           created_at?: string
           description?: string | null
           end_at?: string | null
           id?: string
-          is_online?: boolean | null
+          is_online?: boolean
           limit_person?: number | null
           location?: string | null
-          resource_ids?: string | null
+          priority?: number
           start_at?: string | null
           title?: string | null
           updated_at?: string | null
@@ -701,62 +857,69 @@ export type Database = {
           community_info: Json | null
           created_at: string
           description: string | null
+          end_at: string | null
           id: string
-          thumbnailUrl: string | null
-          title: string | null
-        }
-        Insert: {
-          community_info?: Json | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          thumbnailUrl?: string | null
-          title?: string | null
-        }
-        Update: {
-          community_info?: Json | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          thumbnailUrl?: string | null
-          title?: string | null
-        }
-        Relationships: []
-      }
-      courses_lessions: {
-        Row: {
-          content: string | null
-          created_at: string
-          id: string
-          order: number
-          section_id: string
+          start_at: string | null
+          status: Database["public"]["Enums"]["course_status"]
           thumbnail_url: string | null
           title: string | null
         }
         Insert: {
-          content?: string | null
+          community_info?: Json | null
           created_at?: string
+          description?: string | null
+          end_at?: string | null
           id?: string
-          order?: number
-          section_id?: string
+          start_at?: string | null
+          status?: Database["public"]["Enums"]["course_status"]
           thumbnail_url?: string | null
           title?: string | null
         }
         Update: {
-          content?: string | null
+          community_info?: Json | null
           created_at?: string
+          description?: string | null
+          end_at?: string | null
           id?: string
-          order?: number
-          section_id?: string
+          start_at?: string | null
+          status?: Database["public"]["Enums"]["course_status"]
           thumbnail_url?: string | null
           title?: string | null
         }
+        Relationships: []
+      }
+      courses_categories: {
+        Row: {
+          category_id: string
+          course_id: string
+          created_at: string
+          id: number
+        }
+        Insert: {
+          category_id?: string
+          course_id?: string
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          category_id?: string
+          course_id?: string
+          created_at?: string
+          id?: number
+        }
         Relationships: [
           {
-            foreignKeyName: "online_courses_lessions_section_id_fkey"
-            columns: ["section_id"]
+            foreignKeyName: "courses_categories_category_id_fkey"
+            columns: ["category_id"]
             isOneToOne: false
-            referencedRelation: "courses_sections"
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_categories_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
         ]
@@ -793,40 +956,68 @@ export type Database = {
           },
         ]
       }
-      courses_sections: {
+      courses_resources: {
         Row: {
-          created_at: string
-          description: string | null
-          id: string
-          online_course_id: string | null
-          order: number
-          thumbnail_url: string | null
-          title: string | null
+          course_id: string
+          id: number
+          resource_id: string
         }
         Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          online_course_id?: string | null
-          order?: number
-          thumbnail_url?: string | null
-          title?: string | null
+          course_id?: string
+          id?: number
+          resource_id?: string
         }
         Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          online_course_id?: string | null
-          order?: number
-          thumbnail_url?: string | null
-          title?: string | null
+          course_id?: string
+          id?: number
+          resource_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "online_courses_sections_online_course_id_fkey"
-            columns: ["online_course_id"]
+            foreignKeyName: "courses_resources_course_id_fkey"
+            columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_resources_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses_students: {
+        Row: {
+          course_id: string
+          id: number
+          student_id: string
+        }
+        Insert: {
+          course_id?: string
+          id?: number
+          student_id?: string
+        }
+        Update: {
+          course_id?: string
+          id?: number
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_students_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_students_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -998,6 +1189,86 @@ export type Database = {
           type?: Database["public"]["Enums"]["hashtag_type"] | null
         }
         Relationships: []
+      }
+      lessions: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          lesstion_type: Database["public"]["Enums"]["lession_type"]
+          main_resource: string | null
+          order: number
+          section_id: string
+          status: Database["public"]["Enums"]["status"]
+          title: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          lesstion_type: Database["public"]["Enums"]["lession_type"]
+          main_resource?: string | null
+          order?: number
+          section_id?: string
+          status?: Database["public"]["Enums"]["status"]
+          title?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          lesstion_type?: Database["public"]["Enums"]["lession_type"]
+          main_resource?: string | null
+          order?: number
+          section_id?: string
+          status?: Database["public"]["Enums"]["status"]
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "online_courses_lessions_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessions_resources: {
+        Row: {
+          courses_lession_id: string
+          created_at: string
+          id: number
+          resource_id: string
+        }
+        Insert: {
+          courses_lession_id?: string
+          created_at?: string
+          id?: number
+          resource_id?: string
+        }
+        Update: {
+          courses_lession_id?: string
+          created_at?: string
+          id?: number
+          resource_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_lessions_resources_course_lession_id_fkey"
+            columns: ["courses_lession_id"]
+            isOneToOne: false
+            referencedRelation: "lessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_lessions_resources_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       libraries: {
         Row: {
@@ -1216,6 +1487,60 @@ export type Database = {
           },
         ]
       }
+      questions: {
+        Row: {
+          assignment_id: string
+          attachments: string[] | null
+          created_at: string
+          created_by: string
+          id: string
+          label: string
+          options: Json | null
+          score: number
+          type: Database["public"]["Enums"]["question_type"]
+          updated_at: string
+        }
+        Insert: {
+          assignment_id: string
+          attachments?: string[] | null
+          created_at?: string
+          created_by: string
+          id?: string
+          label: string
+          options?: Json | null
+          score: number
+          type: Database["public"]["Enums"]["question_type"]
+          updated_at?: string
+        }
+        Update: {
+          assignment_id?: string
+          attachments?: string[] | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          label?: string
+          options?: Json | null
+          score?: number
+          type?: Database["public"]["Enums"]["question_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resources: {
         Row: {
           created_at: string
@@ -1370,6 +1695,44 @@ export type Database = {
           },
         ]
       }
+      sections: {
+        Row: {
+          course_id: string
+          created_at: string
+          description: string | null
+          id: string
+          order: number
+          status: Database["public"]["Enums"]["status"]
+          title: string | null
+        }
+        Insert: {
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          order?: number
+          status?: Database["public"]["Enums"]["status"]
+          title?: string | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          order?: number
+          status?: Database["public"]["Enums"]["status"]
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "online_courses_sections_online_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           assigned_at: string | null
@@ -1485,6 +1848,7 @@ export type Database = {
     }
     Enums: {
       action_code_enum: "create" | "read" | "update" | "delete"
+      assignment_result_status: "submitted" | "graded"
       attendance_status: "present" | "late" | "absent" | "rejected"
       channel_provider: "google_meet" | "zoom" | "microsoft_teams"
       class_room_status:
@@ -1494,15 +1858,23 @@ export type Database = {
         | "pending"
         | "deleted"
         | "draft"
-      class_room_statuss: "draft" | "published" | "archived"
       class_room_type: "single" | "multiple"
+      course_status:
+        | "published"
+        | "pending"
+        | "draft"
+        | "deleted"
+        | "unpublished"
       employee_status: "active" | "inactive"
       employee_type: "admin" | "student" | "teacher"
       gender: "male" | "female" | "other"
       hashtag_type: "class_room"
+      lession_type: "video" | "file" | "assessment"
       organization_unit_type: "branch" | "department"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
+      question_type: "file" | "text" | "checkbox" | "radio"
       resource_kind: "folder" | "file"
+      status: "active" | "deactive"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1634,6 +2006,7 @@ export const Constants = {
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
+      assignment_result_status: ["submitted", "graded"],
       attendance_status: ["present", "late", "absent", "rejected"],
       channel_provider: ["google_meet", "zoom", "microsoft_teams"],
       class_room_status: [
@@ -1644,15 +2017,24 @@ export const Constants = {
         "deleted",
         "draft",
       ],
-      class_room_statuss: ["draft", "published", "archived"],
       class_room_type: ["single", "multiple"],
+      course_status: [
+        "published",
+        "pending",
+        "draft",
+        "deleted",
+        "unpublished",
+      ],
       employee_status: ["active", "inactive"],
       employee_type: ["admin", "student", "teacher"],
       gender: ["male", "female", "other"],
       hashtag_type: ["class_room"],
+      lession_type: ["video", "file", "assessment"],
       organization_unit_type: ["branch", "department"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],
+      question_type: ["file", "text", "checkbox", "radio"],
       resource_kind: ["folder", "file"],
+      status: ["active", "deactive"],
     },
   },
 } as const

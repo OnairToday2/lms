@@ -5,6 +5,7 @@ import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 import dayjs from "dayjs";
 
 import { memo, useMemo } from "react";
+import { FormLabel } from "@mui/material";
 interface ClassRoomSessionFromToDateProps {
   control: Control<ClassRoom>;
   index: number;
@@ -73,23 +74,28 @@ const ClassRoomSessionFromToDate: React.FC<ClassRoomSessionFromToDateProps> = ({
   const { field: endDateField } = useController({ control: control, name: `classRoomSessions.${index}.endDate` });
 
   return (
-    <div className="flex gap-4">
-      <RHFDateTimePicker
-        control={control}
-        name={`classRoomSessions.${index}.startDate`}
-        label="Thời gian bắt đầu"
-        minDateTime={maxDateLeft ? dayjs(maxDateLeft) : dayjs()}
-        maxDateTime={endDateField?.value ? dayjs(endDateField.value) : undefined}
-        required
-      />
-      <RHFDateTimePicker
-        control={control}
-        name={`classRoomSessions.${index}.endDate`}
-        label="Thời gian kết thúc"
-        minDateTime={startDateField.value ? dayjs(startDateField.value) : undefined}
-        maxDateTime={minDateRight ? dayjs(minDateRight) : undefined}
-        required
-      />
+    <div className="date">
+      <FormLabel component="div">
+        Thời gian diễn ra <span className="text-red-600">*</span>
+      </FormLabel>
+      <div className="flex gap-4 max-w-[680px]">
+        <RHFDateTimePicker
+          control={control}
+          name={`classRoomSessions.${index}.startDate`}
+          // label="Thời gian bắt đầu"
+          minDateTime={maxDateLeft ? dayjs(maxDateLeft) : dayjs()}
+          maxDateTime={endDateField?.value ? dayjs(endDateField.value) : undefined}
+          // required
+        />
+        <RHFDateTimePicker
+          control={control}
+          name={`classRoomSessions.${index}.endDate`}
+          // label="Thời gian kết thúc"
+          minDateTime={startDateField.value ? dayjs(startDateField.value) : undefined}
+          maxDateTime={minDateRight ? dayjs(minDateRight) : undefined}
+          // required
+        />
+      </div>
     </div>
   );
 };
