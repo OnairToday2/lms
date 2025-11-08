@@ -1,6 +1,7 @@
 import PageContainer from "@/shared/ui/PageContainer";
 import * as React from "react";
 import { Metadata, ResolvingMetadata } from "next";
+import CreateCourseForm from "./_components/CreateCourseForm";
 interface ManageClassRoomPageProps {}
 
 type Props = {
@@ -17,6 +18,8 @@ export async function generateMetadata({ params, searchParams }: Props, parent: 
 
 export default function ManageClassRoomPage({}: ManageClassRoomPageProps) {
   return (
-    <PageContainer title="Tạo bài học" breadcrumbs={[{ title: "Dashboard" }, { title: "Tạo bài học" }]}></PageContainer>
+    <PageContainer title="Tạo bài học" breadcrumbs={[{ title: "Dashboard" }, { title: "Tạo bài học" }]}>
+      <CreateCourseForm />
+    </PageContainer>
   );
 }
