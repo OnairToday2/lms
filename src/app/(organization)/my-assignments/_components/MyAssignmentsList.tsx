@@ -34,7 +34,7 @@ export default function MyAssignmentsList() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedAssignmentId, setSelectedAssignmentId] = React.useState<string | null>(null);
 
-  const { data: assignments, isLoading, error } = useGetMyAssignmentsQuery();
+  const { data: paginatedResult, isLoading, error } = useGetMyAssignmentsQuery(page, rowsPerPage);
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
@@ -94,14 +94,8 @@ export default function MyAssignmentsList() {
     return <Chip label="Chưa nộp" color="warning" size="small" />;
   };
 
-  const paginatedAssignments = React.useMemo(() => {
-    if (!assignments) return [];
-    const startIndex = page * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    return assignments.slice(startIndex, endIndex);
-  }, [assignments, page, rowsPerPage]);
-
-  const totalCount = assignments?.length || 0;
+  const assignments = paginatedResult?.data || [];
+  const totalCount = paginatedResult?.total || 0;
 
   const selectedAssignment = React.useMemo(() => {
     return assignments?.find((a) => a.assignment_id === selectedAssignmentId);
@@ -169,7 +163,7 @@ export default function MyAssignmentsList() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {paginatedAssignments.map((assignment) => (
+                    {assignments.map((assignment) => (
                       <TableRow key={assignment.assignment_id} hover>
                         <TableCell>
                           <Typography variant="body2" sx={{ fontWeight: 500 }}>

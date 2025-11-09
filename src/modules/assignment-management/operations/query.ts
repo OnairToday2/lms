@@ -1,5 +1,6 @@
 import { useTQuery } from "@/lib/queryClient";
 import type { GetAssignmentsParams, AssignmentStudentDto, AssignmentQuestionDto, SubmissionDetailDto, MyAssignmentDto } from "@/types/dto/assignments";
+import type { PaginatedResult } from "@/types/dto/pagination.dto";
 import * as assignmentService from "@/services/assignments/assignment.service";
 import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";
 
@@ -61,11 +62,15 @@ export const useGetSubmissionDetailQuery = (assignmentId: string, employeeId: st
   });
 };
 
-export const useGetMyAssignmentsQuery = () => {
-  return useTQuery<MyAssignmentDto[]>({
-    queryKey: [GET_ASSIGNMENTS, "my-assignments"],
+export const useGetMyAssignmentsQuery = (page: number = 0, limit: number = 25) => {
+  return useTQuery<PaginatedResult<MyAssignmentDto>>({
+    queryKey: [GET_ASSIGNMENTS, "my-assignments", page, limit],
     queryFn: async () => {
-      const response = await fetch("/api/my-assignments");
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+      const response = await fetch(`/api/my-assignments?${params.toString()}`);
       if (!response.ok) {
         throw new Error("Failed to fetch my assignments");
       }

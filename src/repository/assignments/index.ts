@@ -354,11 +354,19 @@ const getAssignmentQuestions = async (assignmentId: string) => {
   return data;
 };
 
-const getMyAssignments = async (employeeId: string) => {
+const getMyAssignments = async (
+  employeeId: string,
+  page: number = 0,
+  limit: number = 25
+): Promise<PaginatedResult<any>> => {
   const supabase = createClient();
 
-  // Get all assignments assigned to this employee
-  const { data, error } = await supabase
+  // Calculate range for pagination
+  const from = page * limit;
+  const to = from + limit - 1;
+
+  // Get assignments assigned to this employee with pagination
+  const { data, error, count } = await supabase
     .from("assignment_employees")
     .select(
       `
@@ -369,19 +377,27 @@ const getMyAssignments = async (employeeId: string) => {
         description,
         created_at
       )
-    `
+    `,
+      { count: "exact" }
     )
-    .eq("employee_id", employeeId);
+    .eq("employee_id", employeeId)
+    .order("assignment_id", { ascending: false })
+    .range(from, to);
 
   if (error) {
     throw new Error(`Failed to fetch my assignments: ${error.message}`);
   }
 
-  if (!data) {
-    return [];
+  if (!data || data.length === 0) {
+    return {
+      data: [],
+      total: count ?? 0,
+      page,
+      limit,
+    };
   }
 
-  // Get all submission results for this employee
+  // Get submission results for the assignments on this page
   const assignmentIds = data.map((item) => item.assignment_id);
 
   const { data: results, error: resultsError } = await supabase
@@ -425,7 +441,12 @@ const getMyAssignments = async (employeeId: string) => {
     };
   });
 
-  return myAssignments;
+  return {
+    data: myAssignments,
+    total: count ?? 0,
+    page,
+    limit,
+  };
 };
 
 export { getAssignments, getAssignmentById, getAssignmentStudents, getAssignmentQuestions, getMyAssignments };

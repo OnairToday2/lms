@@ -165,8 +165,8 @@ async function getAssignmentQuestions(assignmentId: string) {
   return assignmentsRepository.getAssignmentQuestions(assignmentId);
 }
 
-async function getMyAssignments(employeeId: string) {
-  return assignmentsRepository.getMyAssignments(employeeId);
+async function getMyAssignments(employeeId: string, page: number = 0, limit: number = 25) {
+  return assignmentsRepository.getMyAssignments(employeeId, page, limit);
 }
 
 export {

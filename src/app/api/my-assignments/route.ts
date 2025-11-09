@@ -25,7 +25,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const myAssignments = await getMyAssignments(employee.id);
+    // Get pagination parameters from query string
+    const searchParams = request.nextUrl.searchParams;
+    const page = parseInt(searchParams.get("page") || "0", 10);
+    const limit = parseInt(searchParams.get("limit") || "25", 10);
+
+    const myAssignments = await getMyAssignments(employee.id, page, limit);
 
     return NextResponse.json(myAssignments, { status: 200 });
   } catch (error) {
