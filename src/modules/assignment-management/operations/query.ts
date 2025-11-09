@@ -19,11 +19,20 @@ export const useGetAssignmentQuery = (id: string) => {
   });
 };
 
-export const useGetAssignmentStudentsQuery = (assignmentId: string, enabled: boolean = true) => {
-  return useTQuery<AssignmentStudentDto[]>({
-    queryKey: [GET_ASSIGNMENTS, assignmentId, "students"],
+export const useGetAssignmentStudentsQuery = (
+  assignmentId: string,
+  page: number = 0,
+  limit: number = 25,
+  enabled: boolean = true
+) => {
+  return useTQuery<PaginatedResult<AssignmentStudentDto>>({
+    queryKey: [GET_ASSIGNMENTS, assignmentId, "students", page, limit],
     queryFn: async () => {
-      const response = await fetch(`/api/assignments/${assignmentId}/students`);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+      const response = await fetch(`/api/assignments/${assignmentId}/students?${params.toString()}`);
       if (!response.ok) {
         throw new Error("Failed to fetch assignment students");
       }

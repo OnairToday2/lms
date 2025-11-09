@@ -261,11 +261,19 @@ export async function deleteAssignmentEmployeesByAssignmentId(assignmentId: stri
   }
 }
 
-const getAssignmentStudents = async (assignmentId: string) => {
+const getAssignmentStudents = async (
+  assignmentId: string,
+  page: number = 0,
+  limit: number = 25
+): Promise<PaginatedResult<any>> => {
   const supabase = createClient();
 
-  // Get all assigned employees with their submission status
-  const { data, error } = await supabase
+  // Calculate range for pagination
+  const from = page * limit;
+  const to = from + limit - 1;
+
+  // Get assigned employees with pagination
+  const { data, error, count } = await supabase
     .from("assignment_employees")
     .select(
       `
@@ -280,23 +288,35 @@ const getAssignmentStudents = async (assignmentId: string) => {
           avatar
         )
       )
-    `
+    `,
+      { count: "exact" }
     )
-    .eq("assignment_id", assignmentId);
+    .eq("assignment_id", assignmentId)
+    .order("employee_id", { ascending: true })
+    .range(from, to);
 
   if (error) {
     throw new Error(`Failed to fetch assignment students: ${error.message}`);
   }
 
-  if (!data) {
-    return [];
+  if (!data || data.length === 0) {
+    return {
+      data: [],
+      total: count ?? 0,
+      page,
+      limit,
+    };
   }
 
-  // Get all submission results for this assignment
+  // Get employee IDs from the current page
+  const employeeIds = data.map((item) => item.employee_id);
+
+  // Get submission results only for employees on the current page
   const { data: results, error: resultsError } = await supabase
     .from("assignment_results")
     .select("employee_id, created_at, score, max_score, status")
-    .eq("assignment_id", assignmentId);
+    .eq("assignment_id", assignmentId)
+    .in("employee_id", employeeIds);
 
   if (resultsError) {
     throw new Error(`Failed to fetch assignment results: ${resultsError.message}`);
@@ -335,7 +355,12 @@ const getAssignmentStudents = async (assignmentId: string) => {
     };
   });
 
-  return students;
+  return {
+    data: students,
+    total: count ?? 0,
+    page,
+    limit,
+  };
 };
 
 const getAssignmentQuestions = async (assignmentId: string) => {

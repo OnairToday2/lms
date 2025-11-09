@@ -39,7 +39,11 @@ export default function AssignmentStudentList() {
   const [selectedStudentId, setSelectedStudentId] = React.useState<string | null>(null);
 
   const { data: assignment, isLoading: isLoadingAssignment } = useGetAssignmentQuery(assignmentId);
-  const { data: students, isLoading: isLoadingStudents, error } = useGetAssignmentStudentsQuery(assignmentId);
+  const { data: paginatedResult, isLoading: isLoadingStudents, error } = useGetAssignmentStudentsQuery(
+    assignmentId,
+    page,
+    rowsPerPage
+  );
 
   const isLoading = isLoadingAssignment || isLoadingStudents;
 
@@ -99,14 +103,8 @@ export default function AssignmentStudentList() {
     });
   };
 
-  const paginatedStudents = React.useMemo(() => {
-    if (!students) return [];
-    const startIndex = page * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    return students.slice(startIndex, endIndex);
-  }, [students, page, rowsPerPage]);
-
-  const totalCount = students?.length || 0;
+  const students = paginatedResult?.data || [];
+  const totalCount = paginatedResult?.total || 0;
 
   return (
     <PageContainer
@@ -178,7 +176,7 @@ export default function AssignmentStudentList() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {paginatedStudents.map((student) => (
+                    {students.map((student) => (
                       <TableRow key={student.employee_id} hover>
                         <TableCell>{student.employee_code}</TableCell>
                         <TableCell>

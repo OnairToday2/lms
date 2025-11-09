@@ -157,8 +157,8 @@ async function getAssignmentById(id: string): Promise<AssignmentDto> {
   return assignmentsRepository.getAssignmentById(id);
 }
 
-async function getAssignmentStudents(assignmentId: string) {
-  return assignmentsRepository.getAssignmentStudents(assignmentId);
+async function getAssignmentStudents(assignmentId: string, page: number = 0, limit: number = 25) {
+  return assignmentsRepository.getAssignmentStudents(assignmentId, page, limit);
 }
 
 async function getAssignmentQuestions(assignmentId: string) {
