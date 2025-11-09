@@ -1,5 +1,5 @@
 import { useTMutation } from "@/lib/queryClient";
-import type { CreateAssignmentDto, UpdateAssignmentDto } from "@/types/dto/assignments";
+import type { CreateAssignmentDto, UpdateAssignmentDto, SaveGradeDto, SaveGradeResponse } from "@/types/dto/assignments";
 import { useQueryClient } from "@tanstack/react-query";
 import { GET_ASSIGNMENTS } from "./key";
 
@@ -77,3 +77,29 @@ export const useDeleteAssignmentMutation = () => {
   });
 };
 
+export const useSaveGradeMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useTMutation({
+    mutationFn: async (payload: SaveGradeDto) => {
+      const response = await fetch(`/api/assignments/${payload.assignmentId}/grade/${payload.employeeId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ questionGrades: payload.questionGrades }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to save grade");
+      }
+
+      return response.json() as Promise<SaveGradeResponse>;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [GET_ASSIGNMENTS, variables.assignmentId, "students"] });
+      queryClient.invalidateQueries({ queryKey: [GET_ASSIGNMENTS, variables.assignmentId, "grade", variables.employeeId] });
+    },
+  });
+};

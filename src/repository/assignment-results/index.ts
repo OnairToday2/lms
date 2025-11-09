@@ -152,3 +152,72 @@ export async function deleteAssignmentResult(id: string): Promise<void> {
   }
 }
 
+export interface AssignmentResultWithEmployee {
+  id: string;
+  assignment_id: string;
+  employee_id: string;
+  data: SubmissionData;
+  score: number;
+  max_score: number | null;
+  status: AssignmentResultStatus;
+  created_at: string;
+  employee: {
+    employee_code: string;
+    profiles: {
+      full_name: string;
+      email: string;
+      avatar: string | null;
+    } | null;
+  } | null;
+}
+
+export async function getAssignmentResultWithEmployee(
+  assignmentId: string,
+  employeeId: string
+): Promise<AssignmentResultWithEmployee | null> {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("assignment_results")
+    .select(`
+      id,
+      assignment_id,
+      employee_id,
+      data,
+      score,
+      max_score,
+      status,
+      created_at,
+      employees!assignment_results_employee_id_fkey (
+        employee_code,
+        profiles!profiles_employee_id_fkey (
+          full_name,
+          email,
+          avatar
+        )
+      )
+    `)
+    .eq("assignment_id", assignmentId)
+    .eq("employee_id", employeeId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch assignment result with employee: ${error.message}`);
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    id: data.id,
+    assignment_id: data.assignment_id,
+    employee_id: data.employee_id,
+    data: data.data as unknown as SubmissionData,
+    score: data.score,
+    max_score: data.max_score,
+    status: data.status,
+    created_at: data.created_at,
+    employee: data.employees as any,
+  };
+}

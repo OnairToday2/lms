@@ -18,9 +18,12 @@ import {
   Alert,
   Chip,
   Stack,
+  IconButton,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PageContainer from "@/shared/ui/PageContainer";
 import { useGetAssignmentStudentsQuery } from "@/modules/assignment-management/operations/query";
 import { useGetAssignmentQuery } from "@/modules/assignment-management/operations/query";
@@ -32,6 +35,8 @@ export default function AssignmentStudentList() {
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [selectedStudentId, setSelectedStudentId] = React.useState<string | null>(null);
 
   const { data: assignment, isLoading: isLoadingAssignment } = useGetAssignmentQuery(assignmentId);
   const { data: students, isLoading: isLoadingStudents, error } = useGetAssignmentStudentsQuery(assignmentId);
@@ -51,8 +56,28 @@ export default function AssignmentStudentList() {
     router.push("/assignments");
   };
 
-  const handleSubmitAssignment = (employeeId: string) => {
-    router.push(`/assignments/${assignmentId}/submit/${employeeId}`);
+  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, employeeId: string) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedStudentId(employeeId);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+    setSelectedStudentId(null);
+  };
+
+  const handleSubmitAssignment = () => {
+    if (selectedStudentId) {
+      router.push(`/assignments/${assignmentId}/submit/${selectedStudentId}`);
+      handleCloseMenu();
+    }
+  };
+
+  const handleGradeAssignment = () => {
+    if (selectedStudentId) {
+      router.push(`/assignments/${assignmentId}/grade/${selectedStudentId}`);
+      handleCloseMenu();
+    }
   };
 
   const formatDate = (dateString: string | null) => {
@@ -188,20 +213,53 @@ export default function AssignmentStudentList() {
                           )}
                         </TableCell>
                         <TableCell align="center">
-                          <Button
-                            variant="outlined"
+                          <IconButton
                             size="small"
-                            startIcon={<AssignmentTurnedInIcon />}
-                            onClick={() => handleSubmitAssignment(student.employee_id)}
+                            onClick={(e) => handleOpenMenu(e, student.employee_id)}
                           >
-                            Nộp bài
-                          </Button>
+                            <MoreVertIcon />
+                          </IconButton>
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </TableContainer>
+
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleCloseMenu}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+              >
+                <MenuItem
+                  onClick={handleSubmitAssignment}
+                  disabled={
+                    selectedStudentId
+                      ? students?.find((s) => s.employee_id === selectedStudentId)?.has_submitted
+                      : false
+                  }
+                >
+                  Nộp bài
+                </MenuItem>
+                <MenuItem
+                  onClick={handleGradeAssignment}
+                  disabled={
+                    selectedStudentId
+                      ? !students?.find((s) => s.employee_id === selectedStudentId)?.has_submitted
+                      : false
+                  }
+                >
+                  Chấm điểm
+                </MenuItem>
+              </Menu>
 
               <TablePagination
                 component="div"

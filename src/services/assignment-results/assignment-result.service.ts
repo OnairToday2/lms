@@ -9,7 +9,7 @@ import type {
   QuestionAnswer,
 } from "@/repository/assignment-results";
 import { Database } from "@/types/supabase.types";
-import { QuestionOption, AssignmentDto } from "@/types/dto/assignments";
+import { QuestionOption, AssignmentDto, SubmissionDetailDto, QuestionGradeDetail, SaveGradeDto } from "@/types/dto/assignments";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
 type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
@@ -245,3 +245,121 @@ export async function getSubmissionStatus(
   };
 }
 
+export async function getSubmissionDetail(
+  assignmentId: string,
+  employeeId: string
+): Promise<SubmissionDetailDto> {
+  const resultWithEmployee = await assignmentResultsRepository.getAssignmentResultWithEmployee(
+    assignmentId,
+    employeeId
+  );
+
+  if (!resultWithEmployee) {
+    throw new Error("Không tìm thấy bài nộp của học viên");
+  }
+
+  if (!resultWithEmployee.employee || !resultWithEmployee.employee.profiles) {
+    throw new Error("Không tìm thấy thông tin học viên");
+  }
+
+  const submissionData = resultWithEmployee.data as SubmissionData;
+
+  const questions: QuestionGradeDetail[] = submissionData.questions.map((q) => {
+    const isAutoGraded = q.type === "radio" || q.type === "checkbox";
+
+    const answer: QuestionGradeDetail["answer"] = {};
+
+    if (q.type === "file") {
+      answer.fileUrl = (q.answer as FileAnswer).fileUrl;
+    } else if (q.type === "text") {
+      answer.text = (q.answer as TextAnswer).text;
+    } else if (q.type === "radio") {
+      answer.selectedOptionId = (q.answer as RadioAnswer).selectedOptionId;
+    } else if (q.type === "checkbox") {
+      answer.selectedOptionIds = (q.answer as CheckboxAnswer).selectedOptionIds;
+    }
+
+    return {
+      id: q.id,
+      label: q.label,
+      type: q.type,
+      maxScore: q.score,
+      options: q.options,
+      attachments: q.attachments,
+      answer,
+      answerAttachments: q.answerAttachments,
+      earnedScore: q.earnedScore,
+      isAutoGraded,
+    };
+  });
+
+  return {
+    resultId: resultWithEmployee.id,
+    assignmentId: submissionData.assignment.id,
+    assignmentName: submissionData.assignment.name,
+    assignmentDescription: submissionData.assignment.description,
+    employeeId: resultWithEmployee.employee_id,
+    employeeCode: resultWithEmployee.employee.employee_code,
+    fullName: resultWithEmployee.employee.profiles.full_name,
+    email: resultWithEmployee.employee.profiles.email,
+    avatar: resultWithEmployee.employee.profiles.avatar,
+    submittedAt: resultWithEmployee.created_at,
+    status: resultWithEmployee.status,
+    totalScore: resultWithEmployee.score,
+    maxScore: resultWithEmployee.max_score || 0,
+    questions,
+  };
+}
+
+export async function saveGrade(payload: SaveGradeDto): Promise<{ totalScore: number; maxScore: number }> {
+  const { assignmentId, employeeId, questionGrades } = payload;
+
+  const resultWithEmployee = await assignmentResultsRepository.getAssignmentResultWithEmployee(
+    assignmentId,
+    employeeId
+  );
+
+  if (!resultWithEmployee) {
+    throw new Error("Không tìm thấy bài nộp của học viên");
+  }
+
+  const submissionData = resultWithEmployee.data as SubmissionData;
+
+  const gradeMap = new Map(questionGrades.map((g) => [g.questionId, g.score]));
+
+  const updatedQuestions = submissionData.questions.map((q) => {
+    if (q.type === "radio" || q.type === "checkbox") {
+      return q;
+    }
+
+    const manualScore = gradeMap.get(q.id);
+    if (manualScore === undefined) {
+      throw new Error(`Thiếu điểm cho câu hỏi: ${q.label}`);
+    }
+
+    if (manualScore < 0 || manualScore > q.score) {
+      throw new Error(`Điểm không hợp lệ cho câu hỏi "${q.label}". Điểm phải từ 0 đến ${q.score}`);
+    }
+
+    return {
+      ...q,
+      earnedScore: manualScore,
+    };
+  });
+
+  const totalScore = updatedQuestions.reduce((sum, q) => sum + (q.earnedScore ?? 0), 0);
+  const maxScore = updatedQuestions.reduce((sum, q) => sum + q.score, 0);
+
+  const updatedSubmissionData: SubmissionData = {
+    ...submissionData,
+    questions: updatedQuestions,
+  };
+
+  await assignmentResultsRepository.updateAssignmentResult(resultWithEmployee.id, {
+    submissionData: updatedSubmissionData,
+    score: totalScore,
+    status: "graded",
+  });
+
+  return { totalScore, maxScore };
+}
