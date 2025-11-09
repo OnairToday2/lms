@@ -80,6 +80,13 @@ export default function AssignmentStudentList() {
     }
   };
 
+  const handleViewResult = () => {
+    if (selectedStudentId) {
+      router.push(`/assignments/${assignmentId}/result/${selectedStudentId}`);
+      handleCloseMenu();
+    }
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "-";
     const date = new Date(dateString);
@@ -258,6 +265,16 @@ export default function AssignmentStudentList() {
                   }
                 >
                   Chấm điểm
+                </MenuItem>
+                <MenuItem
+                  onClick={handleViewResult}
+                  disabled={
+                    selectedStudentId
+                      ? students?.find((s) => s.employee_id === selectedStudentId)?.status !== "graded"
+                      : false
+                  }
+                >
+                  Xem kết quả
                 </MenuItem>
               </Menu>
 
