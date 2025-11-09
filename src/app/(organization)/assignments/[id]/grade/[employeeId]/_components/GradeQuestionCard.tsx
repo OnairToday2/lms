@@ -5,7 +5,6 @@ import {
   Card,
   Typography,
   Stack,
-  TextField,
   Radio,
   RadioGroup,
   FormControlLabel,
@@ -14,6 +13,8 @@ import {
   Box,
   Chip,
   Link,
+  TextField,
+  FormHelperText,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -188,25 +189,47 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
 
           {control && (
             <Controller
-              name={`grades.${question.id}`}
+              name={`grades.${question.id}` as any}
               control={control}
               rules={{
                 required: "Vui lòng nhập điểm",
-                min: { value: 0, message: "Điểm không được nhỏ hơn 0" },
-                max: { value: question.maxScore, message: `Điểm không được lớn hơn ${question.maxScore}` },
+                validate: (value) => {
+                  if (value === "" || value === null || value === undefined) {
+                    return "Vui lòng nhập điểm";
+                  }
+                  const num = typeof value === "number" ? value : parseFloat(value);
+                  if (isNaN(num)) {
+                    return "Điểm không hợp lệ";
+                  }
+                  if (num < 0) {
+                    return "Điểm không được nhỏ hơn 0";
+                  }
+                  if (num > question.maxScore) {
+                    return `Điểm không được lớn hơn ${question.maxScore}`;
+                  }
+                  return true;
+                },
               }}
               render={({ field, fieldState: { error } }) => (
-                <TextField
-                  {...field}
-                  label="Điểm"
-                  type="number"
-                  size="small"
-                  fullWidth
-                  inputProps={{ min: 0, max: question.maxScore, step: 0.5 }}
-                  error={!!error}
-                  helperText={error?.message || `Điểm tối đa: ${question.maxScore}`}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                />
+                <Box>
+                  <TextField
+                    {...field}
+                    value={field.value ?? ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      field.onChange(value === "" ? "" : parseFloat(value) || 0);
+                    }}
+                    label="Điểm"
+                    type="number"
+                    fullWidth
+                    error={!!error}
+                    inputProps={{ min: 0, max: question.maxScore, step: 0.5 }}
+                  />
+                  {error?.message && <FormHelperText error>{error.message}</FormHelperText>}
+                  {!error?.message && (
+                    <FormHelperText>Điểm tối đa: {question.maxScore}</FormHelperText>
+                  )}
+                </Box>
               )}
             />
           )}
@@ -237,25 +260,47 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
 
           {control && (
             <Controller
-              name={`grades.${question.id}`}
+              name={`grades.${question.id}` as any}
               control={control}
               rules={{
                 required: "Vui lòng nhập điểm",
-                min: { value: 0, message: "Điểm không được nhỏ hơn 0" },
-                max: { value: question.maxScore, message: `Điểm không được lớn hơn ${question.maxScore}` },
+                validate: (value) => {
+                  if (value === "" || value === null || value === undefined) {
+                    return "Vui lòng nhập điểm";
+                  }
+                  const num = typeof value === "number" ? value : parseFloat(value);
+                  if (isNaN(num)) {
+                    return "Điểm không hợp lệ";
+                  }
+                  if (num < 0) {
+                    return "Điểm không được nhỏ hơn 0";
+                  }
+                  if (num > question.maxScore) {
+                    return `Điểm không được lớn hơn ${question.maxScore}`;
+                  }
+                  return true;
+                },
               }}
               render={({ field, fieldState: { error } }) => (
-                <TextField
-                  {...field}
-                  label="Điểm"
-                  type="number"
-                  size="small"
-                  fullWidth
-                  inputProps={{ min: 0, max: question.maxScore, step: 0.5 }}
-                  error={!!error}
-                  helperText={error?.message || `Điểm tối đa: ${question.maxScore}`}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                />
+                <Box>
+                  <TextField
+                    {...field}
+                    value={field.value ?? ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      field.onChange(value === "" ? "" : parseFloat(value) || 0);
+                    }}
+                    label="Điểm"
+                    type="number"
+                    fullWidth
+                    error={!!error}
+                    inputProps={{ min: 0, max: question.maxScore, step: 0.5 }}
+                  />
+                  {error?.message && <FormHelperText error>{error.message}</FormHelperText>}
+                  {!error?.message && (
+                    <FormHelperText>Điểm tối đa: {question.maxScore}</FormHelperText>
+                  )}
+                </Box>
               )}
             />
           )}

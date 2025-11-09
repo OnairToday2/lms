@@ -20,6 +20,7 @@ import { useGetSubmissionDetailQuery } from "@/modules/assignment-management/ope
 import { useSaveGradeMutation } from "@/modules/assignment-management/operations/mutation";
 import GradeQuestionCard from "./GradeQuestionCard";
 import { QuestionGradeInput } from "@/types/dto/assignments";
+import useNotifications from "@/hooks/useNotifications/useNotifications";
 
 interface AssignmentGradingProps {
   assignmentId: string;
@@ -27,7 +28,7 @@ interface AssignmentGradingProps {
 }
 
 interface GradeFormData {
-  grades: Record<string, number>;
+  grades: Record<string, number | string>;
 }
 
 const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
@@ -35,22 +36,24 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
   employeeId,
 }) => {
   const router = useRouter();
+  const notifications = useNotifications();
   const { data: submission, isLoading, error } = useGetSubmissionDetailQuery(assignmentId, employeeId);
   const saveGradeMutation = useSaveGradeMutation();
 
   const defaultGrades = useMemo(() => {
     if (!submission) return {};
 
-    const initialGrades: Record<string, number> = {};
+    const initialGrades: Record<string, number | string> = {};
     submission.questions.forEach((q) => {
       if (!q.isAutoGraded) {
-        initialGrades[q.id] = q.earnedScore ?? 0;
+        initialGrades[q.id] = q.earnedScore ?? "";
       }
     });
     return initialGrades;
   }, [submission]);
 
-  const { control, handleSubmit, watch, reset, formState: { errors } } = useForm<GradeFormData>({
+  const { control, handleSubmit, watch, reset, formState: { errors, isValid } } = useForm<GradeFormData>({
+    mode: "onChange",
     defaultValues: {
       grades: defaultGrades,
     },
@@ -64,6 +67,9 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
 
   const grades = watch("grades");
 
+  // Create a stable dependency by stringifying the grades object
+  const gradesJson = JSON.stringify(grades);
+
   const totalScore = useMemo(() => {
     if (!submission) return 0;
 
@@ -72,32 +78,49 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
       if (q.isAutoGraded) {
         total += q.earnedScore ?? 0;
       } else {
-        total += grades[q.id] ?? 0;
+        const gradeValue = grades[q.id];
+        total += typeof gradeValue === "number" ? gradeValue : (gradeValue === "" ? 0 : parseFloat(gradeValue!) || 0);
       }
     });
 
     return total;
-  }, [submission, grades]);
+  }, [submission, gradesJson]);
 
   const hasAllManualGrades = useMemo(() => {
     if (!submission) return false;
 
     const manualQuestions = submission.questions.filter((q) => !q.isAutoGraded);
-    return manualQuestions.every((q) => {
+
+    const result = manualQuestions.every((q) => {
       const grade = grades[q.id];
-      return grade !== undefined && grade !== null && !isNaN(grade);
+
+      if (grade === undefined || grade === null || grade === "") {
+        return false;
+      }
+
+      const numGrade = typeof grade === "number" ? grade : parseFloat(grade);
+      const isValid = !isNaN(numGrade);
+      return isValid;
     });
-  }, [submission, grades]);
+
+    return result;
+  }, [submission, gradesJson]);
 
   const onSubmit = async (data: GradeFormData) => {
     if (!submission) return;
 
     const questionGrades: QuestionGradeInput[] = submission.questions
       .filter((q) => !q.isAutoGraded)
-      .map((q) => ({
-        questionId: q.id,
-        score: data.grades[q.id] ?? 0,
-      }));
+      .map((q) => {
+        const gradeValue = data.grades[q.id];
+        const score = typeof gradeValue === "number"
+          ? gradeValue
+          : (gradeValue === "" ? 0 : parseFloat(gradeValue!) || 0);
+        return {
+          questionId: q.id,
+          score,
+        };
+      });
 
     try {
       await saveGradeMutation.mutateAsync({
@@ -106,11 +129,20 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
         questionGrades,
       });
 
-      alert("Lưu điểm thành công!");
+      notifications.show("Chấm bài thành công!", {
+        severity: "success",
+        autoHideDuration: 3000,
+      });
       router.push(`/assignments/${assignmentId}/students`);
     } catch (error) {
       console.error("Failed to save grade:", error);
-      alert(error instanceof Error ? error.message : "Có lỗi xảy ra khi lưu điểm");
+      notifications.show(
+        error instanceof Error ? error.message : "Có lỗi xảy ra khi chấm bài",
+        {
+          severity: "error",
+          autoHideDuration: 5000,
+        }
+      );
     }
   };
 
@@ -233,7 +265,7 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
             startIcon={<SaveIcon />}
             disabled={!hasAllManualGrades || saveGradeMutation.isPending}
           >
-            {saveGradeMutation.isPending ? "Đang lưu..." : "Lưu điểm"}
+            {saveGradeMutation.isPending ? "Đang chấm..." : "Chấm bài"}
           </Button>
         </Stack>
       </form>
