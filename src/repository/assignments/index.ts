@@ -354,5 +354,79 @@ const getAssignmentQuestions = async (assignmentId: string) => {
   return data;
 };
 
-export { getAssignments, getAssignmentById, getAssignmentStudents, getAssignmentQuestions };
+const getMyAssignments = async (employeeId: string) => {
+  const supabase = createClient();
+
+  // Get all assignments assigned to this employee
+  const { data, error } = await supabase
+    .from("assignment_employees")
+    .select(
+      `
+      assignment_id,
+      assignments (
+        id,
+        name,
+        description,
+        created_at
+      )
+    `
+    )
+    .eq("employee_id", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to fetch my assignments: ${error.message}`);
+  }
+
+  if (!data) {
+    return [];
+  }
+
+  // Get all submission results for this employee
+  const assignmentIds = data.map((item) => item.assignment_id);
+
+  const { data: results, error: resultsError } = await supabase
+    .from("assignment_results")
+    .select("assignment_id, created_at, score, max_score, status")
+    .eq("employee_id", employeeId)
+    .in("assignment_id", assignmentIds);
+
+  if (resultsError) {
+    throw new Error(`Failed to fetch assignment results: ${resultsError.message}`);
+  }
+
+  // Create a map of assignment results
+  const submissionMap = new Map(
+    results?.map((result) => [
+      result.assignment_id,
+      {
+        submitted_at: result.created_at,
+        score: result.score,
+        max_score: result.max_score,
+        status: result.status,
+      },
+    ]) || []
+  );
+
+  // Combine the data
+  const myAssignments = data.map((item) => {
+    const assignment = item.assignments;
+    const submission = submissionMap.get(item.assignment_id);
+
+    return {
+      assignment_id: item.assignment_id,
+      assignment_name: assignment?.name || "",
+      assignment_description: assignment?.description || "",
+      created_at: assignment?.created_at || "",
+      has_submitted: !!submission,
+      submitted_at: submission?.submitted_at || null,
+      score: submission?.score ?? null,
+      max_score: submission?.max_score ?? null,
+      status: submission?.status ?? null,
+    };
+  });
+
+  return myAssignments;
+};
+
+export { getAssignments, getAssignmentById, getAssignmentStudents, getAssignmentQuestions, getMyAssignments };
 
