@@ -36,6 +36,7 @@ import { ClassRoomStatusFilter, ClassRoomTypeFilter } from "../types/types";
 import { getClassRoomStatusLabel, getClassRoomTypeLabel, getColorClassRoomStatus } from "../utils/status";
 import ClassRoomRuntimeStatus from "./ClassRoomRuntimeStatus";
 import ClassRoomType from "./ClassRoomType";
+import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
 
 interface ClassRoomListTableProps {
   classRooms: ClassRoomPriorityDto[];
@@ -51,6 +52,8 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedClassRoom, setSelectedClassRoom] = useState<ClassRoomPriorityDto | null>(null);
+  const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [selectedQRClassRoom, setSelectedQRClassRoom] = useState<ClassRoomPriorityDto | null>(null);
 
   const { mutateAsync: deleteClassRoom, isPending } = useDeleteClassRoomMutation();
   const [isOpenDialogDelete, setIsOpenDialogDelete] = useState(false);
@@ -124,6 +127,16 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
   const handleEnterClassRoom = useCallback((room: ClassRoomPriorityDto) => {
     setSelectedClassRoom(room);
     setDialogOpen(true);
+  }, []);
+
+  const handleOpenQRDialog = useCallback((room: ClassRoomPriorityDto) => {
+    setSelectedQRClassRoom(room);
+    setQrDialogOpen(true);
+  }, []);
+
+  const handleCloseQRDialog = useCallback(() => {
+    setQrDialogOpen(false);
+    setSelectedQRClassRoom(null);
   }, []);
 
   const selectedSessions = selectedClassRoom?.class_sessions ?? [];
@@ -293,8 +306,14 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                               <MenuItem onClick={() => handleEnterClassRoom(room)} disabled={!isOnline!}>
                                 Vào lớp học
                               </MenuItem>
-                              <MenuItem onClick={() => {}} disabled={isOnline!}>
-                                Qr điểm danh
+                              <MenuItem 
+                                onClick={() => { 
+                                  handleOpenQRDialog(room);
+                                  popupState.close();
+                                }} 
+                                disabled={isOnline!}
+                              >
+                                QR điểm danh
                               </MenuItem>
                               <MenuItem
                                 onClick={() => handleEditClassRoom(isOnline!, room?.id as string)}
@@ -352,6 +371,14 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
         actionLabel={selectedActionLabel}
         onSelectSession={handleSelectSession}
       />
+
+      {selectedQRClassRoom && (
+        <QRCodeViewDialog
+          open={qrDialogOpen}
+          onClose={handleCloseQRDialog}
+          classRoom={selectedQRClassRoom}
+        />
+      )}
     </>
   );
 }

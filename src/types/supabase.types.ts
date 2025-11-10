@@ -742,15 +742,15 @@ export type Database = {
           channel_provider:
             | Database["public"]["Enums"]["channel_provider"]
             | null
-          class_room_id: string | null
+          class_room_id: string
           created_at: string
           description: string | null
           end_at: string | null
           id: string
-          is_online: boolean | null
+          is_online: boolean
           limit_person: number | null
           location: string | null
-          resource_ids: string | null
+          priority: number
           start_at: string | null
           title: string | null
           updated_at: string | null
@@ -760,15 +760,15 @@ export type Database = {
           channel_provider?:
             | Database["public"]["Enums"]["channel_provider"]
             | null
-          class_room_id?: string | null
+          class_room_id?: string
           created_at?: string
           description?: string | null
           end_at?: string | null
           id?: string
-          is_online?: boolean | null
+          is_online?: boolean
           limit_person?: number | null
           location?: string | null
-          resource_ids?: string | null
+          priority?: number
           start_at?: string | null
           title?: string | null
           updated_at?: string | null
@@ -778,15 +778,15 @@ export type Database = {
           channel_provider?:
             | Database["public"]["Enums"]["channel_provider"]
             | null
-          class_room_id?: string | null
+          class_room_id?: string
           created_at?: string
           description?: string | null
           end_at?: string | null
           id?: string
-          is_online?: boolean | null
+          is_online?: boolean
           limit_person?: number | null
           location?: string | null
-          resource_ids?: string | null
+          priority?: number
           start_at?: string | null
           title?: string | null
           updated_at?: string | null
@@ -856,10 +856,13 @@ export type Database = {
         Row: {
           community_info: Json | null
           created_at: string
+          created_by: string
           description: string | null
-          end_at: string | null
+          end_at: string
           id: string
-          start_at: string | null
+          organizarion_id: string
+          slug: string
+          start_at: string
           status: Database["public"]["Enums"]["course_status"]
           thumbnail_url: string | null
           title: string | null
@@ -867,10 +870,13 @@ export type Database = {
         Insert: {
           community_info?: Json | null
           created_at?: string
+          created_by?: string
           description?: string | null
-          end_at?: string | null
+          end_at: string
           id?: string
-          start_at?: string | null
+          organizarion_id?: string
+          slug: string
+          start_at: string
           status?: Database["public"]["Enums"]["course_status"]
           thumbnail_url?: string | null
           title?: string | null
@@ -878,10 +884,13 @@ export type Database = {
         Update: {
           community_info?: Json | null
           created_at?: string
+          created_by?: string
           description?: string | null
-          end_at?: string | null
+          end_at?: string
           id?: string
-          start_at?: string | null
+          organizarion_id?: string
+          slug?: string
+          start_at?: string
           status?: Database["public"]["Enums"]["course_status"]
           thumbnail_url?: string | null
           title?: string | null
@@ -926,30 +935,30 @@ export type Database = {
       }
       courses_metadatas: {
         Row: {
+          course_id: string
           created_at: string
           id: number
           key: string
-          online_course_id: string
           value: Json
         }
         Insert: {
+          course_id?: string
           created_at?: string
           id?: number
           key: string
-          online_course_id?: string
           value: Json
         }
         Update: {
+          course_id?: string
           created_at?: string
           id?: number
           key?: string
-          online_course_id?: string
           value?: Json
         }
         Relationships: [
           {
             foreignKeyName: "online_courses_metadatas_online_course_id_fkey"
-            columns: ["online_course_id"]
+            columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
             referencedColumns: ["id"]
@@ -992,16 +1001,19 @@ export type Database = {
       courses_students: {
         Row: {
           course_id: string
+          created_at: string
           id: number
           student_id: string
         }
         Insert: {
           course_id?: string
+          created_at: string
           id?: number
           student_id?: string
         }
         Update: {
           course_id?: string
+          created_at?: string
           id?: number
           student_id?: string
         }
@@ -1190,39 +1202,42 @@ export type Database = {
         }
         Relationships: []
       }
-      lessions: {
+      lessons: {
         Row: {
           content: string | null
           created_at: string
           id: string
-          lesstion_type: Database["public"]["Enums"]["lession_type"]
-          main_resource: string | null
-          order: number
+          lesson_type: Database["public"]["Enums"]["lesson_type"]
+          main_resource: string
+          priority: number
           section_id: string
           status: Database["public"]["Enums"]["status"]
           title: string | null
+          updated_at: string | null
         }
         Insert: {
           content?: string | null
           created_at?: string
           id?: string
-          lesstion_type: Database["public"]["Enums"]["lession_type"]
-          main_resource?: string | null
-          order?: number
+          lesson_type?: Database["public"]["Enums"]["lesson_type"]
+          main_resource?: string
+          priority?: number
           section_id?: string
           status?: Database["public"]["Enums"]["status"]
           title?: string | null
+          updated_at?: string | null
         }
         Update: {
           content?: string | null
           created_at?: string
           id?: string
-          lesstion_type?: Database["public"]["Enums"]["lession_type"]
-          main_resource?: string | null
-          order?: number
+          lesson_type?: Database["public"]["Enums"]["lesson_type"]
+          main_resource?: string
+          priority?: number
           section_id?: string
           status?: Database["public"]["Enums"]["status"]
           title?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -1234,31 +1249,31 @@ export type Database = {
           },
         ]
       }
-      lessions_resources: {
+      lessons_resources: {
         Row: {
-          courses_lession_id: string
           created_at: string
           id: number
+          lesson_id: string
           resource_id: string
         }
         Insert: {
-          courses_lession_id?: string
           created_at?: string
           id?: number
+          lesson_id?: string
           resource_id?: string
         }
         Update: {
-          courses_lession_id?: string
           created_at?: string
           id?: number
+          lesson_id?: string
           resource_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "course_lessions_resources_course_lession_id_fkey"
-            columns: ["courses_lession_id"]
+            columns: ["lesson_id"]
             isOneToOne: false
-            referencedRelation: "lessions"
+            referencedRelation: "lessons"
             referencedColumns: ["id"]
           },
           {
@@ -1701,7 +1716,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
-          order: number
+          priority: number
           status: Database["public"]["Enums"]["status"]
           title: string | null
         }
@@ -1710,7 +1725,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
-          order?: number
+          priority?: number
           status?: Database["public"]["Enums"]["status"]
           title?: string | null
         }
@@ -1719,7 +1734,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
-          order?: number
+          priority?: number
           status?: Database["public"]["Enums"]["status"]
           title?: string | null
         }
@@ -1881,7 +1896,7 @@ export type Database = {
       employee_type: "admin" | "student" | "teacher"
       gender: "male" | "female" | "other"
       hashtag_type: "class_room"
-      lession_type: "video" | "file" | "assessment"
+      lesson_type: "video" | "file" | "assessment"
       organization_unit_type: "branch" | "department"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
       question_type: "file" | "text" | "checkbox" | "radio"
@@ -2041,7 +2056,7 @@ export const Constants = {
       employee_type: ["admin", "student", "teacher"],
       gender: ["male", "female", "other"],
       hashtag_type: ["class_room"],
-      lession_type: ["video", "file", "assessment"],
+      lesson_type: ["video", "file", "assessment"],
       organization_unit_type: ["branch", "department"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],
       question_type: ["file", "text", "checkbox", "radio"],
