@@ -5,14 +5,19 @@ import ClassRoomContainer from "./_components/ClassRoomContainer";
 const ClassRoomList = () => {
   return (
     <PageContainer
-      title="Quản lý lớp học"
+      title="Danh sách lớp học"
       breadcrumbs={[
         {
           title: "LMS",
-          path: "/dashboard",
+          path: "/dashboard/",
         },
         {
           title: "Quản lý lớp học",
+          path: "/class-room"
+        },
+        {
+          title: "Danh sách lớp học",
+          path: "/class-room/list"
         },
       ]}
     >

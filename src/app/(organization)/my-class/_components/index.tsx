@@ -16,9 +16,9 @@ import {
     useGetClassRoomsByEmployeeId,
 } from "@/modules/class-room-management/operations/query";
 import {
-    ClassRoomRuntimeStatus,
-    ClassRoomType,
-    ClassSessionMode,
+    ClassRoomRuntimeStatusFilter,
+    ClassRoomTypeFilter,
+    ClassSessionModeFilter,
 } from "../../class-room/list/types/types";
 import SearchIcon from "@mui/icons-material/Search";
 import { SelectOption } from "@/shared/ui/form/SelectOption";
@@ -26,8 +26,9 @@ import { useUserOrganization } from "@/modules/organization/store/UserOrganizati
 import { Pagination } from "@/shared/ui/Pagination";
 import {
     CLASSROOM_RUNTIME_STATUS_LABEL,
+    getColorClassRoomRuntimeStatus,
     getStatusAndLabelBtnJoin,
-    RUNTIME_STATUS_COLOR_MAP,
+    RUNTIME_STATUS_COLOR_MAP
 } from "../../class-room/list/utils/status";
 import { ClassRoomPriorityDto } from "@/types/dto/classRooms/classRoom.dto";
 import { SESSION_MODE_OPTIONS, TYPE_OPTIONS } from "../../class-room/list/constants";
@@ -68,7 +69,6 @@ const getSessionMode = (
         isOnline: hasOnline
     };
 };
-
 const PALETTE_COLOR_TO_HEX: Record<"primary" | "error" | "secondary" | "default" | "info" | "success", string> = {
     primary: "#2065D1",
     error: "#FF5630",
@@ -78,8 +78,8 @@ const PALETTE_COLOR_TO_HEX: Record<"primary" | "error" | "secondary" | "default"
     default: "#637381",
 };
 
-const getRuntimeStatusColor = (status: ClassRoomRuntimeStatus): string => {
-    const paletteKey = RUNTIME_STATUS_COLOR_MAP[status] ?? RUNTIME_STATUS_COLOR_MAP[ClassRoomRuntimeStatus.All];
+const getRuntimeStatusColor = (status: ClassRoomRuntimeStatusFilter): string => {
+    const paletteKey = RUNTIME_STATUS_COLOR_MAP[status] ?? RUNTIME_STATUS_COLOR_MAP[ClassRoomRuntimeStatusFilter.All];
     return PALETTE_COLOR_TO_HEX[paletteKey] ?? PALETTE_COLOR_TO_HEX.default;
 };
 
@@ -88,9 +88,9 @@ const MyClassSection = () => {
     const employeeId = userOrganization?.id;
 
     const [search, setSearch] = useState("");
-    const [runtimeStatus, setRuntimeStatus] = useState<ClassRoomRuntimeStatus>(ClassRoomRuntimeStatus.All);
-    const [selectedType, setSelectedType] = useState<ClassRoomType>(ClassRoomType.All);
-    const [selectedSessionMode, setSelectedSessionMode] = useState<ClassSessionMode>(ClassSessionMode.All);
+    const [runtimeStatus, setRuntimeStatus] = useState<ClassRoomRuntimeStatusFilter>(ClassRoomRuntimeStatusFilter.All);
+    const [selectedType, setSelectedType] = useState<ClassRoomTypeFilter>(ClassRoomTypeFilter.All);
+    const [selectedSessionMode, setSelectedSessionMode] = useState<ClassSessionModeFilter>(ClassSessionModeFilter.All);
     const [page, setPage] = useState(1);
 
     const classRoomQueryInput = useMemo(() => {
@@ -140,18 +140,18 @@ const MyClassSection = () => {
         setPage(1);
     };
 
-    const handleStatusChange = (status: ClassRoomRuntimeStatus) => {
+    const handleStatusChange = (status: ClassRoomRuntimeStatusFilter) => {
         setRuntimeStatus(status);
         setPage(1);
     };
 
     const handleTypeFilterChange = (value: string) => {
-        setSelectedType(value as ClassRoomType);
+        setSelectedType(value as ClassRoomTypeFilter);
         setPage(1);
     };
 
     const handleSessionModeChange = (value: string) => {
-        setSelectedSessionMode(value as ClassSessionMode);
+        setSelectedSessionMode(value as ClassSessionModeFilter);
         setPage(1);
     };
 
@@ -257,7 +257,7 @@ const MyClassSection = () => {
                 <Grid container columns={12} spacing={2} mt={4}>
                     {classRooms.map((item) => {
                         const runtimeStatusKey =
-                            (item.runtime_status as ClassRoomRuntimeStatus) ?? ClassRoomRuntimeStatus.All;
+                            (item.runtime_status as ClassRoomRuntimeStatusFilter) ?? ClassRoomRuntimeStatusFilter.All;
                         const runtimeStatusLabel =
                             CLASSROOM_RUNTIME_STATUS_LABEL[runtimeStatusKey] ?? item.runtime_status ?? "Chưa xác định";
                         const runtimeStatusColor = getRuntimeStatusColor(runtimeStatusKey)
@@ -275,13 +275,14 @@ const MyClassSection = () => {
                                     end_at={item.end_at!}
                                     start_at={item.start_at!}
                                     participantCount={participantCount}
-                                    runtimeStatusColor={runtimeStatusColor}
+                                    runtimeStatusColor={runtimeStatusColor!}
                                     runtimeStatusLabel={runtimeStatusLabel}
                                     sessionModeLabel={sessionModeLabel}
                                     thumbnail={item.thumbnail_url ?? ""}
                                     title={item.title!}
                                     slug={item.slug ?? ""}
-                                    roomType={(item.room_type as ClassRoomType) ?? ClassRoomType.Single}
+                                    classRoomId={item.id ?? undefined}
+                                    roomType={(item.room_type as ClassRoomTypeFilter) ?? ClassRoomTypeFilter.Single}
                                     sessions={item.class_sessions ?? []}
                                 />
                             </Grid>

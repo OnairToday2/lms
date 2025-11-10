@@ -5,10 +5,6 @@ import {
   CreatePivotClassRoomAndFieldPayload,
   CreatePivotClassRoomAndEmployeePayload,
   UpSertClassRoomPayload,
-  ClassRoomStatus,
-  ClassRoomType,
-  ClassRoomRuntimeStatus,
-  ClassSessionMode,
 } from "./type";
 import { ClassRoomMetaKey, ClassRoomMetaValue } from "@/constants/class-room-meta.constant";
 import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
@@ -18,6 +14,7 @@ import { ClassRoomPriorityDto, ClassRoomSessionDetailDto, ClassRoomStatusCountDt
 import { CLASS_ROOM_STUDENTS_SELECT, CLASS_ROOMS_SELECT, CLASS_SESSION_WITH_CLASS_ROOM_SELECT, LIMIT, PAGE } from "./constants";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/types/supabase.types";
+import { ClassRoomRuntimeStatusFilter, ClassRoomStatusFilter, ClassRoomTypeFilter, ClassSessionModeFilter } from "@/app/(organization)/class-room/list/types/types";
 export * from "./type";
 
 const getClassRoomById = async (classRoomId: string) => {
@@ -267,20 +264,20 @@ const applyClassRoomFilters = <
   const { status, runtimeStatus, from, to, q, type, sessionMode } = filters;
   let builder = query;
 
-  if (status && status !== ClassRoomStatus.All) {
+  if (status && status !== ClassRoomStatusFilter.All) {
     builder = builder.eq("status", status);
   }
 
-  if (type && type !== ClassRoomType.All) {
+  if (type && type !== ClassRoomTypeFilter.All) {
     builder = builder.eq("room_type", type);
   }
 
-  if (runtimeStatus && runtimeStatus !== ClassRoomRuntimeStatus.All) {
+  if (runtimeStatus && runtimeStatus !== ClassRoomRuntimeStatusFilter.All) {
     builder = builder.eq("runtime_status", runtimeStatus);
   }
 
-  if (sessionMode && sessionMode !== ClassSessionMode.All) {
-    const isOnline = sessionMode === ClassSessionMode.Online;
+  if (sessionMode && sessionMode !== ClassSessionModeFilter.All) {
+    const isOnline = sessionMode === ClassSessionModeFilter.Online;
     builder = builder.eq("class_sessions.is_online", isOnline);
   }
 
@@ -309,22 +306,50 @@ const applyClassRoomFilters = <
 };
 
 const createClassRoomsQuery = (
-  filters: { organizationId?: string | null; employeeId?: string | null },
+  filters: {
+    organizationId?: string | null;
+    employeeId?: string | null;
+    teacherClassRoomIds?: string[];
+  },
   select: string,
   options?: { count?: "exact" | "planned" | "estimated"; head?: boolean },
 ) => {
-  const { organizationId, employeeId } = filters;
+  const { organizationId, employeeId, teacherClassRoomIds } = filters;
+  const trimmedEmployeeId = employeeId?.trim();
+  const uuidPattern =
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  const sanitizedTeacherClassRoomIds = Array.from(
+    new Set(
+      (teacherClassRoomIds ?? [])
+        .map((id) => id?.trim())
+        .filter(
+          (id): id is string =>
+            Boolean(id) && uuidPattern.test(id),
+        ),
+    ),
+  );
+
   let query = supabase
     .from("class_rooms_priority")
     .select(select, options)
-    .not("status", "in", "(deleted)")
+    .not("status", "in", "(deleted)");
 
   if (organizationId) {
     query = query.eq("organization_id", organizationId!);
   }
 
-  if (employeeId) {
-    query = query.eq("employee_id", employeeId);
+  const orConditions: string[] = [];
+
+  if (trimmedEmployeeId) {
+    orConditions.push(`employee_id.eq.${trimmedEmployeeId}`);
+  }
+
+  if (sanitizedTeacherClassRoomIds.length > 0) {
+    orConditions.push(`id.in.(${sanitizedTeacherClassRoomIds.join(",")})`);
+  }
+
+  if (orConditions.length > 0) {
+    query = query.or(orConditions.join(","));
   }
 
   return query;
@@ -350,12 +375,14 @@ const getClassRooms = async (
     sessionMode,
   } = input;
 
+  const trimmedEmployeeId = employeeId?.trim();
+
   const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
   const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 12;
   const rangeStart = (safePage - 1) * safeLimit;
   const rangeEnd = rangeStart + safeLimit - 1;
 
-  if (!organizationId && !employeeId) {
+  if (!organizationId && !trimmedEmployeeId) {
     return {
       data: [],
       total: 0,
@@ -364,8 +391,35 @@ const getClassRooms = async (
     };
   }
 
+  let teacherClassRoomIds: string[] | undefined;
+
+  if (trimmedEmployeeId) {
+    const { data: teacherAssignments, error: teacherError } = await supabase
+      .from("class_session_teacher")
+      .select(
+        `
+          class_sessions!inner (
+            class_room_id
+          )
+        `,
+      )
+      .eq("teacher_id", trimmedEmployeeId);
+
+    if (teacherError) {
+      throw teacherError;
+    }
+
+    teacherClassRoomIds = Array.from(
+      new Set(
+        (teacherAssignments ?? [])
+          .map((assignment) => assignment?.class_sessions?.class_room_id)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    );
+  }
+
   let query = createClassRoomsQuery(
-    { organizationId, employeeId },
+    { organizationId, employeeId: trimmedEmployeeId, teacherClassRoomIds },
     CLASS_ROOMS_SELECT,
     { count: "exact" },
   );
@@ -530,13 +584,13 @@ const getClassRoomStatusCounts = async (
   const toValue = normalizeString(input.to);
 
   const statusFilter =
-    input.status && input.status !== ClassRoomStatus.All ? input.status : undefined;
+    input.status && input.status !== ClassRoomStatusFilter.All ? input.status : undefined;
 
   const typeFilter =
-    input.type && input.type !== ClassRoomType.All ? input.type : undefined;
+    input.type && input.type !== ClassRoomTypeFilter.All ? input.type : undefined;
 
   const sessionModeFilter =
-    input.sessionMode && input.sessionMode !== ClassSessionMode.All
+    input.sessionMode && input.sessionMode !== ClassSessionModeFilter.All
       ? input.sessionMode
       : undefined;
 
@@ -704,7 +758,6 @@ export {
   deletePivotClassRoomAndHashTag,
   getClassRoomById,
   deletePivotClassRoomAndEmployee,
-
   getClassRoomsByEmployeeId,
   getClassRoomSessionDetail,
   deleteClassRoomById,

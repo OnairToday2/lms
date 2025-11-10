@@ -9,7 +9,9 @@ import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import { fDateTime } from "@/lib";
 import EnterClassRoomsDialog from "./EnterClassRooms";
 import { ClassRoomPriorityDto } from "@/types/dto/classRooms/classRoom.dto";
-import { ClassRoomType } from "../../class-room/list/types/types";
+import { ClassRoomTypeFilter } from "../../class-room/list/types/types";
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
 
 
 interface IClassRoomCard {
@@ -24,7 +26,8 @@ interface IClassRoomCard {
     thumbnail: string
     actionDisabled: boolean
     slug?: string
-    roomType?: ClassRoomType
+    classRoomId?: string
+    roomType?: ClassRoomTypeFilter
     sessions?: ClassRoomPriorityDto["class_sessions"]
     isOnline: boolean
 }
@@ -41,18 +44,22 @@ const ClassRoomCard = ({
     title,
     actionDisabled,
     slug,
-    roomType = ClassRoomType.Single,
+    classRoomId,
+    roomType = ClassRoomTypeFilter.Single,
     sessions = [],
     isOnline,
 }: IClassRoomCard) => {
     const router = useRouter();
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [qrScannerOpen, setQrScannerOpen] = useState(false);
+    const [selectedSessionId, setSelectedSessionId] = useState<string | undefined>();
+    const employeeId = useUserOrganization((state) => state.data.id);
 
     const navigateToSession = useCallback((sessionId?: string) => {
         if (!sessionId || !slug) {
             return;
         }
-        router.push(`/class-room/${slug}/${sessionId}`);
+        router.push(`/class-room/cd/${slug}/${sessionId}`);
     }, [router, slug]);
 
     const handleJoinClass = useCallback(() => {
@@ -61,7 +68,7 @@ const ClassRoomCard = ({
         }
 
         if (isOnline) {
-            if (roomType === ClassRoomType.Multiple) {
+            if (roomType === ClassRoomTypeFilter.Multiple) {
                 setDialogOpen(true);
                 return;
             }
@@ -70,12 +77,14 @@ const ClassRoomCard = ({
                 navigateToSession(sessions?.[0]?.id);
             }
         } else {
-            if (roomType === ClassRoomType.Multiple) {
+            if (roomType === ClassRoomTypeFilter.Multiple) {
                 setDialogOpen(true);
                 return;
             }
-            // xử lý btn quét mã qr khi là lớp học offline đơn
-            return;
+            if (roomType === ClassRoomTypeFilter.Single && sessions?.[0]?.id) {
+                setSelectedSessionId(sessions[0].id);
+            }
+            setQrScannerOpen(true);
         }
     }, [actionDisabled, isOnline, navigateToSession, roomType, sessions]);
 
@@ -85,7 +94,9 @@ const ClassRoomCard = ({
 
     const handleSelectSession = useCallback((sessionId: string) => {
         if (!isOnline) {
-            //  xử lý btn quét mã qr khi là lớp học offline chuỗi
+            setDialogOpen(false);
+            setSelectedSessionId(sessionId);
+            setQrScannerOpen(true);
             return;
         }
         setDialogOpen(false);
@@ -114,7 +125,7 @@ const ClassRoomCard = ({
                     </Stack>
 
                     <Box mt={2}>
-                        <Typography className="font-semibold text-[14px] text-[#212B36]">
+                        <Typography className="font-semibold text-[14px] text-[#212B36] line-clamp-2 h-[42px]">
                             {title ?? "Không có tiêu đề"}
                         </Typography>
                     </Box>
@@ -125,7 +136,7 @@ const ClassRoomCard = ({
                         <Stack direction="row" spacing={1} alignItems="center">
                             <AccessTimeIcon className="w-5" />
                             <Typography className="font-normal text-[12px] text-[#212B36]">
-                                {fDateTime(start_at)} -  {fDateTime(end_at)}
+                                {fDateTime(start_at)} - {fDateTime(end_at)}
                             </Typography>
                         </Stack>
 
@@ -162,6 +173,17 @@ const ClassRoomCard = ({
                 classTitle={title}
                 actionLabel={!isOnline ? "Quét mã QR" : undefined}
                 onSelectSession={handleSelectSession}
+            />
+            <QRScannerDialog
+                open={qrScannerOpen}
+                onClose={() => {
+                    setQrScannerOpen(false);
+                    setSelectedSessionId(undefined);
+                }}
+                employeeId={employeeId}
+                classRoomId={classRoomId}
+                sessionId={selectedSessionId}
+                classTitle={title}
             />
         </>
     );

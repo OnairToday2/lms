@@ -1,8 +1,8 @@
 import {
-  ClassRoomRuntimeStatus,
-  ClassRoomStatus,
-  ClassRoomType,
-  ClassSessionMode,
+  ClassRoomRuntimeStatusFilter,
+  ClassRoomStatusFilter,
+  ClassRoomTypeFilter,
+  ClassSessionModeFilter,
 } from "@/app/(organization)/class-room/list/types/types";
 import { useTQuery } from "@/lib/queryClient";
 import {
@@ -15,10 +15,10 @@ export interface GetClassRoomsQueryInput {
   q?: string;
   from?: string | null;
   to?: string | null;
-  type?: ClassRoomType;
-  sessionMode?: ClassSessionMode;
-  runtimeStatus?: ClassRoomRuntimeStatus;
-  status?: ClassRoomStatus;
+  type?: ClassRoomTypeFilter;
+  sessionMode?: ClassSessionModeFilter;
+  runtimeStatus?: ClassRoomRuntimeStatusFilter;
+  status?: ClassRoomStatusFilter;
   page?: number;
   limit?: number;
   organizationId?: string;
@@ -37,9 +37,9 @@ export interface GetClassRoomStatusCountsInput {
   q?: string;
   from?: string | null;
   to?: string | null;
-  status?: ClassRoomStatus;
-  type?: ClassRoomType;
-  sessionMode?: ClassSessionMode;
+  status?: ClassRoomStatusFilter;
+  type?: ClassRoomTypeFilter;
+  sessionMode?: ClassSessionModeFilter;
 }
 
 export interface GetClassRoomStudentsQueryInput {

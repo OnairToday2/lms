@@ -1,6 +1,6 @@
 import { Tables } from "@/types/supabase.types";
 
-type EmployeeWithProfileDto = Tables<"employees"> & {
+export type EmployeeWithProfileDto = Tables<"employees"> & {
   profile?: Tables<"profiles"> | null;
 };
 
