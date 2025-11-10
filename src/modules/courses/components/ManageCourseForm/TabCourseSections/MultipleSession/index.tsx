@@ -1,18 +1,18 @@
 "use client";
 import { useState, useRef, useTransition, useCallback, forwardRef, useImperativeHandle } from "react";
-import { type ClassRoom } from "../../../upsert-course.schema";
+import { type UpsertCourseFormData } from "../../../upsert-course.schema";
 import { Button, Divider, Typography } from "@mui/material";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 // import QuantityPersonField from "../class-room-session-fields/QuantityPersonField";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import ClassRoomSessionFromToDate from "../class-room-session-fields/ClassRoomSessionFromToDate";
+import ClassRoomSessionFromToDate from "../fields/ClassRoomSessionFromToDate";
 import AccordionSessionItem, { AccordionSessionItemProps } from "./AccordionSessionItem";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
 import RHFRichEditor from "@/shared/ui/form/RHFRichEditor";
-import RoomChannel from "../class-room-session-fields/RoomChannel";
-import TeacherSelector, { TeacherSelectorRef } from "../class-room-session-fields/TeacherSelector";
-import AgendarFields from "../class-room-session-fields/AgendarFields";
-import { initClassSessionFormData } from "..";
+import RoomChannel from "../fields/RoomChannel";
+import TeacherSelector, { TeacherSelectorRef } from "../fields/TeacherSelector";
+import AgendarFields from "../fields/AgendarFields";
+import { initSectionsFormData } from "..";
 import { MarkerPin01Icon } from "@/shared/assets/icons";
 import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
 
@@ -20,7 +20,7 @@ export type MultipleSessionRef = {
   checkAllSessionFields: () => Promise<boolean>;
 };
 interface MultipleSessionProps {
-  methods: UseFormReturn<ClassRoom>;
+  methods: UseFormReturn<UpsertCourseFormData>;
 }
 const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ methods }, ref) => {
   const {
@@ -36,8 +36,8 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
     remove,
   } = useFieldArray({
     control,
-    name: "classRoomSessions",
-    keyName: "_sessionId",
+    name: "sections",
+    keyName: "_sectionId",
   });
   const getTeachersByIndexSession = useClassRoomStore(({ actions }) => actions.getTeachersByIndexSession);
   const teacherSelectorRefs = useRef(new Map<number, TeacherSelectorRef>());
@@ -69,7 +69,7 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
   };
 
   const checkAllSessionFields = async (callback?: () => void) => {
-    const isAllSessionValid = await trigger("classRoomSessions");
+    const isAllSessionValid = await trigger("sections");
 
     setSessionsState((oldState) => {
       const newState = { ...oldState };

@@ -15,7 +15,7 @@ export interface UpsertCourseProviderProps {
 
 export const UpsertCourseProvider = ({
   children,
-  selectedTeachers = {},
+  selectedTeachers = [],
   selectedStudents = [],
 }: UpsertCourseProviderProps) => {
   const storeRef = useRef<UpsertCourseStoreAPI | null>(null);

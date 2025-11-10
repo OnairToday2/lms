@@ -1,80 +1,52 @@
 import { StoreApi } from "zustand";
-import { UpsertCrouseStore, StudentSelectedItem, TeacherSelectedItem } from "./upsert-course-store";
+import { UpsertCourseStore, StudentSelectedItem, TeacherSelectedItem } from "./upsert-course-store";
 
 export type ClassRoomActions = {
   reset: () => void;
-  setSelectedTeachers: (sessionIndex: number, teachers: TeacherSelectedItem[]) => void;
-  getTeachersByIndexSession: (sessionIndex: number) => TeacherSelectedItem[] | undefined;
-  removeTeacher: (id: string, sessionIndex: number) => void;
-  removeTeachers: (sessionIndex: number) => void;
+  setSelectedTeachers: (teachers: TeacherSelectedItem[]) => void;
+  removeTeacher: (id: string) => void;
+  resetTeachers: () => void;
   setSelectedStudents: (students: StudentSelectedItem[]) => void;
 };
 
 const attachActions =
-  (initState: UpsertCrouseStore["state"]) =>
+  (initState: UpsertCourseStore["state"]) =>
   (
-    set: StoreApi<UpsertCrouseStore>["setState"],
-    get: StoreApi<UpsertCrouseStore>["getState"],
-    store: StoreApi<UpsertCrouseStore>,
+    set: StoreApi<UpsertCourseStore>["setState"],
+    get: StoreApi<UpsertCourseStore>["getState"],
+    store: StoreApi<UpsertCourseStore>,
   ): ClassRoomActions => ({
-    setSelectedTeachers: (sessionIndex, teachers) =>
+    setSelectedTeachers: (teachers) =>
       set((prev) => ({
         ...prev,
         state: {
           ...prev.state,
-          selectedTeachers: {
-            ...prev.state.selectedTeachers,
-            [sessionIndex]: [...(prev.state.selectedTeachers[sessionIndex] || []), ...teachers],
-          },
+          selectedTeachers: [...prev.state.selectedTeachers, ...teachers],
         },
       })),
-    removeTeachers: (sessionIndex) => {
+    resetTeachers: () => {
       set((prev) => {
-        const newSelectedTeachers = { ...prev.state.selectedTeachers };
-        delete newSelectedTeachers[sessionIndex];
-
-        /**
-         * Resort Index session
-         */
-        let newSelectedTeachersResortByIndex: typeof newSelectedTeachers = {};
-        Object.entries(newSelectedTeachers).forEach(([key, value], _index) => {
-          newSelectedTeachersResortByIndex = {
-            ...newSelectedTeachersResortByIndex,
-            [_index]: value,
-          };
-        });
         return {
           ...prev,
           state: {
             ...prev.state,
-            selectedTeachers: {
-              ...newSelectedTeachersResortByIndex,
-            },
+            selectedTeachers: [],
           },
         };
       });
     },
-    removeTeacher: (id, sessionIndex) => {
+    removeTeacher: (id) => {
       set((prev) => {
-        const currentTeacherList = prev.state.selectedTeachers[sessionIndex];
-        const newListTeacher = currentTeacherList?.filter((tc) => tc.id !== id);
+        const currentTeacherList = prev.state.selectedTeachers;
+        const newListTeacher = currentTeacherList.filter((tc) => tc.id !== id);
         return {
           ...prev,
           state: {
             ...prev.state,
-            selectedTeachers: {
-              ...prev.state.selectedTeachers,
-              [sessionIndex]: newListTeacher ? [...newListTeacher] : [],
-            },
+            selectedTeachers: [...newListTeacher],
           },
         };
       });
-    },
-    getTeachersByIndexSession: (sessionIndex: number) => {
-      const {
-        state: { selectedTeachers },
-      } = get();
-      return selectedTeachers[sessionIndex];
     },
     setSelectedStudents: (students) => {
       set((prevState) => ({

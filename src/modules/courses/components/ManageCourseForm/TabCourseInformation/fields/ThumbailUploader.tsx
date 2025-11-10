@@ -1,7 +1,7 @@
 import Uploader, { UploaderProps } from "@/shared/ui/Uploader";
 import useUpload from "@/modules/class-room-management/hooks/useUpload";
 import { FormHelperText, FormLabel, IconButton, Typography } from "@mui/material";
-import { ClassRoom } from "../../../upsert-course.schema";
+import { UpsertCourseFormData } from "../../../upsert-course.schema";
 import { Control, useController } from "react-hook-form";
 import Image from "next/image";
 import { cn } from "@/utils";
@@ -9,7 +9,7 @@ import { CloseIcon } from "@/shared/assets/icons";
 
 export interface ThumbnailUploaderProps {
   onChange?: (url: string) => void;
-  control: Control<ClassRoom>;
+  control: Control<UpsertCourseFormData>;
   label?: string;
   subTitle?: string;
   description?: React.ReactNode;
@@ -51,12 +51,12 @@ const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({ control, onChange
       <div
         className={cn(
           "thumbnail-wraper",
-          "aspect-21/9 w-[480px] bg-gray-100 rounded-xl border border-dashed border-gray-300",
+          "aspect-video w-[480px] bg-gray-100 rounded-xl border border-dashed border-gray-300",
           "flex items-center justify-center",
         )}
       >
         {field.value && (
-          <div className="preview-url aspect-21/9 relative w-full overflow-hidden rounded-xl">
+          <div className="preview-url aspect-video relative w-full overflow-hidden rounded-xl">
             <Image src={field.value} alt="thumbnail" fill className="w-full h-full object-cover" />
             <IconButton
               sx={{ width: "2rem", height: "2rem", position: "absolute", right: "0.5rem", top: "0.5rem" }}

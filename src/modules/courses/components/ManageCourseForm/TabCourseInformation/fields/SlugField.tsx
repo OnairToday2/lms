@@ -1,13 +1,13 @@
-import { ClassRoom } from "../../../upsert-course.schema";
+import { UpsertCourseFormData } from "../../../upsert-course.schema";
 import { Control, useController, useWatch } from "react-hook-form";
 import { Typography } from "@mui/material";
 import { slugify } from "@/utils/slugify";
 import { useEffect } from "react";
 
-interface ClassRoomSlugFieldProps {
-  control: Control<ClassRoom>;
+interface SlugFieldProps {
+  control: Control<UpsertCourseFormData>;
 }
-const ClassRoomSlugField: React.FC<ClassRoomSlugFieldProps> = ({ control }) => {
+const SlugField: React.FC<SlugFieldProps> = ({ control }) => {
   const { field, formState } = useController({ control, name: "slug" });
   const title = useWatch({ control, name: "title" });
   const slug = slugify(title);
@@ -23,4 +23,4 @@ const ClassRoomSlugField: React.FC<ClassRoomSlugFieldProps> = ({ control }) => {
     </>
   );
 };
-export default ClassRoomSlugField;
+export default SlugField;

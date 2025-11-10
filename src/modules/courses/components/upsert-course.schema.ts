@@ -1,128 +1,41 @@
-import dayjs from "dayjs";
+import { LessionType } from "@/model/lession.model";
 import * as zod from "zod";
 
-const classRoomSessionAgendaSchema = zod.object({
+const courseLessionSchema = zod.object({
   id: zod.string().optional(),
-  title: zod.string().min(1, { message: "Tiêu đề không bỏ trống." }).max(100, "Tiêu đề tối đa 100 ký tự."),
-  description: zod.string().min(1, { message: "Nội dung không bỏ trống." }),
-  startDate: zod.iso.datetime({ error: "Ngày bắt đầu không hợp lệ." }),
-  endDate: zod.iso.datetime({ error: "Ngày bắt đầu không hợp lệ." }),
+  title: zod.string().min(1, { message: "Tiêu đề không bỏ trống." }).max(200, "Tiêu đề tối đa 200 ký tự."),
+  content: zod.string().min(1, { message: "Nội dung không bỏ trống." }),
+  status: zod.enum(["active", "deactive"]),
+  mainResource: zod.object({
+    id: zod.string(),
+    url: zod.string(),
+    type: zod.string(),
+  }),
+  resources: zod.array(
+    zod.object({
+      id: zod.string(),
+      url: zod.string(),
+      type: zod.string(),
+    }),
+  ),
+  lessionType: zod.enum(["file", "video", "assessment"]),
 });
 
-const courseSectionSchema = zod
-  .object({
-    id: zod.string().optional(),
-    title: zod.string(),
-    description: zod.string(),
-    thumbnailUrl: zod.string(),
-    startDate: zod.iso.datetime({ error: "Ngày bắt đầu không hợp lệ." }),
-    endDate: zod.iso.datetime({ error: "Ngày kết thúc không hợp lệ." }),
-    resources: zod.array(
-      zod.object({
-        id: zod.string(),
-      }),
-    ),
-    isOnline: zod.boolean(),
-    location: zod.string(), //only for offline class room
-    channelProvider: zod.enum(["zoom", "google_meet", "microsoft_teams"]), //only for online class room
-    channelInfo: zod.object({
-      providerId: zod.string(),
-      url: zod.string(),
-      password: zod.string(),
-    }),
-    agendas: zod.array(classRoomSessionAgendaSchema),
-    qrCode: zod.object({
-      id: zod.string().optional(),
-      isLimitTimeScanQrCode: zod.boolean(),
-      startDate: zod.string(),
-      endDate: zod.string(),
-    }),
-  })
-  .superRefine(({ startDate, endDate, qrCode, isOnline, location, channelInfo }, ctx) => {
-    if (dayjs(startDate).isAfter(endDate)) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Ngày bắt đầu phải nhỏ hơn ngày kết thúc.",
-        path: ["startDate"],
-      });
-    }
-    /**
-     * Only Validate if event is offline
-     */
-
-    if (isOnline) {
-      if (!channelInfo.url.length) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Url không bỏ trống",
-          path: ["channelInfo", "url"],
-        });
-      }
-      if (channelInfo.url.length) {
-        if (!channelInfo.url.startsWith("http://") && !channelInfo.url.startsWith("https://")) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Link tham dự không hợp lệ.",
-            path: ["channelInfo", "url"],
-          });
-        }
-      }
-    } else {
-      if (!location.length) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Địa điểm tổ chức không bỏ trống.",
-          path: ["location"],
-        });
-      }
-      if (qrCode.isLimitTimeScanQrCode) {
-        if (!qrCode.startDate) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Thời gian bắt đầu không bỏ trống",
-            path: ["qrCode", "startDate"],
-          });
-        } else {
-          if (!dayjs(qrCode.startDate).isValid()) {
-            ctx.addIssue({
-              code: "custom",
-              message: "Thời gian bắt đầu không hợp lệ.",
-              path: ["qrCode", "startDate"],
-            });
-          }
-        }
-
-        if (!qrCode.endDate) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Thời gian kết thúc không bỏ trống",
-            path: ["qrCode", "endDate"],
-          });
-        } else {
-          if (!dayjs(qrCode.endDate).isValid()) {
-            ctx.addIssue({
-              code: "custom",
-              message: "Thời gian kết thúc không hợp lệ.",
-              path: ["qrCode", "endDate"],
-            });
-          }
-        }
-        if (qrCode.startDate && qrCode.endDate && dayjs(qrCode.startDate).isAfter(dayjs(qrCode.endDate))) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Thời gian bắt đầu phải nhỏ hơn hoặc bằng thời gian kết thúc.",
-            path: ["qrCode", "startDate"],
-          });
-        }
-      }
-    }
-  });
+const courseSectionSchema = zod.object({
+  id: zod.string().optional(),
+  title: zod.string(),
+  description: zod.string(),
+  lessions: zod.array(courseLessionSchema),
+  status: zod.enum(["active", "deactive"]),
+});
 
 const upsertCourseSchema = zod.object({
-  classRoomId: zod.string(),
-  title: zod.string().min(1, { message: "Tên lớp học không bỏ trống." }).max(200, "Vui lòng nhập tối đa 200 ký tự"),
+  courseId: zod.string(),
+  title: zod.string().min(1, { message: "Tên môn học không bỏ trống." }).max(200, "Vui lòng nhập tối đa 200 ký tự"),
   description: zod.string().min(1, { error: "Không bỏ trống nội dung." }),
   slug: zod.string(),
+  startAt: zod.string(),
+  endAt: zod.string(),
   thumbnailUrl: zod
     .string()
     .min(1, { error: "Ảnh bìa không bỏ trống." })
@@ -130,7 +43,7 @@ const upsertCourseSchema = zod.object({
       if (!value.startsWith("http://") && !value.startsWith("https://")) {
         ctx.addIssue({
           code: "invalid_format",
-          format: "starts_with",
+          format: "thumbnailUrl",
           message: "Đường dẫn không hợp lệ.",
         });
       }
@@ -140,23 +53,21 @@ const upsertCourseSchema = zod.object({
     .min(1, "Chọn tối thiểu 1 lĩnh vực và tối đa 3 lĩnh vực.")
     .max(3, "Chọn tối thiểu 1 lĩnh vực và tối đa 3 lĩnh vực."),
   status: zod.enum(["publish", "draft", "pending", "deleted", "active", "deactive"]),
-  roomType: zod.enum(["single", "multiple"]),
-  classRoomSessions: zod.array(courseSectionSchema),
-  forWhom: zod
+  sections: zod.array(courseSectionSchema),
+  benefits: zod
     .array(
       zod.object({
-        id: zod.string().optional(),
-        description: zod.string(),
+        content: zod.string(),
       }),
     )
     .superRefine((values, context) => {
       if (values.length) {
-        values.forEach(({ description }, i) => {
-          if (!description.length) {
+        values.forEach(({ content }, i) => {
+          if (!content.length) {
             context.addIssue({
               code: "custom",
               message: `Không bỏ trống.`,
-              path: [i, "description"],
+              path: [i, "content"],
             });
           }
         });

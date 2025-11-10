@@ -21,9 +21,7 @@ export type StudentSelectedItem = {
 };
 
 type UpsertCourseState = {
-  selectedTeachers: {
-    [sessionIndex: number | string]: TeacherSelectedItem[];
-  };
+  selectedTeachers: TeacherSelectedItem[];
   selectedStudents: StudentSelectedItem[];
 };
 

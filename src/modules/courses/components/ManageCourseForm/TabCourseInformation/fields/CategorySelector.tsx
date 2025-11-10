@@ -1,12 +1,12 @@
 import { Control, useController } from "react-hook-form";
-import { ClassRoom } from "../../../upsert-course.schema";
+import { UpsertCourseFormData } from "../../../upsert-course.schema";
 import { useCreateCategoriesMutation, useGetCategoriesQuery } from "@/modules/categories/operations";
 import { slugify } from "@/utils/slugify";
 import RHFMultipleSelectField from "@/shared/ui/form/RHFMultipleSelectField";
-interface ClassFieldSelectorProps {
-  control: Control<ClassRoom>;
+interface CategorySelectorProps {
+  control: Control<UpsertCourseFormData>;
 }
-const ClassFieldSelector: React.FC<ClassFieldSelectorProps> = ({ control }) => {
+const CategorySelector: React.FC<CategorySelectorProps> = ({ control }) => {
   const {
     field: { onChange, value: classFieldList },
   } = useController({ control, name: "categories" });
@@ -44,4 +44,4 @@ const ClassFieldSelector: React.FC<ClassFieldSelectorProps> = ({ control }) => {
     />
   );
 };
-export default ClassFieldSelector;
+export default CategorySelector;

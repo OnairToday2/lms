@@ -9,15 +9,14 @@ import { useTheme } from "@mui/material";
 import { tabClasses } from "@mui/material";
 import { cn } from "@/utils";
 import { CheckCircleIcon } from "@/shared/assets/icons";
-import { TAB_KEYS_CLASS_ROOM, TAB_NODES_CLASS_ROOM } from "./UpsertCourseFormContainer";
+import { TAB_KEYS_MANAGE_COURSE, TAB_NODES_MANAGE_COURSE } from "./UpsertCourseFormContainer";
 import { useTransition } from "react";
 import { getKeyFieldByTab } from "./utils";
-import { FieldErrors, UseFormTrigger } from "react-hook-form";
-import { ClassRoom } from "../upsert-course.schema";
-import { getStatusTabClassRoom } from "./utils";
+import { UseFormTrigger } from "react-hook-form";
+import { UpsertCourseFormData } from "../upsert-course.schema";
 
 type ClassRoomTabStatus = "idle" | "invalid" | "valid";
-type TabKeyType = keyof typeof TAB_KEYS_CLASS_ROOM;
+type TabKeyType = keyof typeof TAB_KEYS_MANAGE_COURSE;
 type ClassRoomTabItem = {
   tabName: React.ReactNode;
   tabKey: TabKeyType;
@@ -25,19 +24,18 @@ type ClassRoomTabItem = {
   icon?: React.ReactNode;
 };
 type TabStateType = Record<TabKeyType, { status: ClassRoomTabStatus }>;
-export interface ClassRoomTabContainerRef {
+export interface UpsertCourseTabContainerRef {
   setTabStatus: (tabKey: TabKeyType, status: ClassRoomTabStatus) => void;
 }
-export interface ClassRoomTabContainerProps {
+export interface UpsertCourseTabContainerProps {
   items: ClassRoomTabItem[];
   actions: React.ReactNode;
   className?: string;
-  trigger: UseFormTrigger<ClassRoom>;
-  errors: FieldErrors<ClassRoom>;
+  trigger: UseFormTrigger<UpsertCourseFormData>;
 }
 
-const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRoomTabContainerProps>(
-  ({ items, className, actions, trigger, errors }, ref) => {
+const UpsertCourseTabContainer = React.forwardRef<UpsertCourseTabContainerRef, UpsertCourseTabContainerProps>(
+  ({ items, className, actions, trigger }, ref) => {
     const [isGotoNextTab, startGotoNextTab] = useTransition();
     const [currentTab, setCurrentTab] = useState<TabKeyType>(() => items?.[0]?.tabKey || "clsTab-information");
     const [tabsState, setTabsState] = useState<TabStateType>(
@@ -68,15 +66,26 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
       callback?.();
     }, []);
 
+    // const handleChangeTab = useCallback(
+    //   (_: React.SyntheticEvent, newTab: TabKeyType) =>
+    //     validateCurrentTabBeforeProceed(currentTab, () => {
+    //       setCurrentTab((oldTab) => {
+    //         const nextTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.next;
+    //         const prevTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.prev;
+    //         return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
+    //       });
+    //     }),
+    //   [currentTab],
+    // );
+
     const handleChangeTab = useCallback(
-      (_: React.SyntheticEvent, newTab: TabKeyType) =>
-        validateCurrentTabBeforeProceed(currentTab, () => {
-          setCurrentTab((oldTab) => {
-            const nextTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.next;
-            const prevTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.prev;
-            return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
-          });
-        }),
+      (_: React.SyntheticEvent, newTab: TabKeyType) => {
+        setCurrentTab((oldTab) => {
+          const nextTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.next;
+          const prevTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.prev;
+          return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
+        });
+      },
       [currentTab],
     );
     /**
@@ -88,7 +97,9 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
           startGotoNextTab(async () => {
             setCurrentTab((oldTab) => {
               const newTab =
-                action === "next" ? TAB_NODES_CLASS_ROOM.get(oldTab)?.next : TAB_NODES_CLASS_ROOM.get(oldTab)?.prev;
+                action === "next"
+                  ? TAB_NODES_MANAGE_COURSE.get(oldTab)?.next
+                  : TAB_NODES_MANAGE_COURSE.get(oldTab)?.prev;
               return newTab ? newTab : oldTab;
             });
             const scrollContainer = document.querySelector(".main-layout__content");
@@ -150,7 +161,7 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
     );
   },
 );
-export default ClassRoomTabContainer;
+export default UpsertCourseTabContainer;
 
 const ClassRoomTabList = styled((props: TabListProps) => <TabList {...props} />)(() => {
   const theme = useTheme();

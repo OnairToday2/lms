@@ -50,7 +50,12 @@ import FileZipIcon from "./FileZipIcon";
 import FileImageIcon from "./FileImageIcon";
 import FileVideoIcon from "./FileVideoIcon";
 import FileAdioIcon from "./FileAudioIcon";
-
+import Dot2RowVerticalIcon from "./Dot2RowVerticalIcon";
+import Edit05Icon from "./Edit05Icon";
+import Trash01Icon from "./TrashIcon1";
+import VideoIcon from "./VideoIcon";
+import FilePdf02Icon from "./FilePdf02Icon";
+import FileWord02Icon from "./FileWord02Icon";
 export {
   BarChart10Icon,
   BellIcon,
@@ -67,6 +72,8 @@ export {
   CloseIcon,
   ClipboardIcon,
   ClassIcon,
+  Dot2RowVerticalIcon,
+  Edit05Icon,
   EmptyBoxIcon,
   EyeIcon,
   EyeOffIcon,
@@ -76,8 +83,10 @@ export {
   FileExcelIcon,
   FileImageIcon,
   FilePdfIcon,
+  FilePdf02Icon,
   FileVideoIcon,
   FileWordIcon,
+  FileWord02Icon,
   FileZipIcon,
   FilterFunnelIcon,
   GoogleIcon,
@@ -93,15 +102,17 @@ export {
   MarkerPinIcon,
   MarkerPin01Icon,
   MonitorIcon,
+  ParagraphIcon,
   SearchIcon,
   SquareFourIcon,
   SettingIcon,
   Setting02Icon,
-  YoutubeIcon,
-  ParagraphIcon,
   UsersIcon2,
   UsersIcon,
   UsersPlusIcon,
+  YoutubeIcon,
+  VideoIcon,
   TrashIcon1,
+  Trash01Icon,
   ZaloIcon,
 };

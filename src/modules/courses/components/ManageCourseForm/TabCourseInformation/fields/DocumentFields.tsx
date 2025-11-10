@@ -2,7 +2,7 @@
 import { useUploadAsync } from "@/modules/class-room-management/hooks/useUpload";
 import { useFieldArray } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
-import { ClassRoom } from "../../../upsert-course.schema";
+import { UpsertCourseFormData } from "../../../upsert-course.schema";
 import {
   CloseIcon,
   CloudUploadIcon,
@@ -21,7 +21,7 @@ interface DocumentFieldsProps {
 }
 const DocumentFields: React.FC<DocumentFieldsProps> = ({ className }) => {
   const { fileList, onUploadMultipleAsync } = useUploadAsync();
-  const { control, setValue, getValues, trigger } = useFormContext<ClassRoom>();
+  const { control, setValue, getValues, trigger } = useFormContext<UpsertCourseFormData>();
   const {
     fields: docFields,
     remove,

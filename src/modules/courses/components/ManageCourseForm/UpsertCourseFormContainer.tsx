@@ -4,43 +4,41 @@ import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook
 import { upsertCourseSchema, UpsertCourseFormData } from "../upsert-course.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, IconButton } from "@mui/material";
-import { CalendarDateIcon, CloseIcon, EyeIcon, GlobeIcon, UsersPlusIcon } from "@/shared/assets/icons";
+import { BookOpenIcon, CloseIcon, EyeIcon, GlobeIcon, UsersPlusIcon } from "@/shared/assets/icons";
 import { useUpsertCourseStore } from "../../store/upsert-course-context";
 import UpsertCourseTabContainer, { UpsertCourseTabContainerRef } from "./UpsertCourseTabContainer";
-import TabClassRoomInformation from "./TabClassRoomInformation";
-import TabClassRoomSession, { initClassSessionFormData } from "./TabClassRoomSession";
+import TabCourseInformation from "./TabCourseInformation";
+import TabClassRoomSession, { initSectionFormData } from "./TabCourseSections";
 import TabClassRoomSetting from "./TabClassRoomSetting";
-import { ClassRoomPlatformType } from "@/constants/class-room.constant";
-import { ClassRoomType } from "@/model/class-room.model";
 import { useSnackbar } from "notistack";
 import { getKeyFieldByTab } from "./utils";
 import { UpsertCourseStore } from "../../store/upsert-course-store";
 
-export const TAB_KEYS_CLASS_ROOM = {
+export const TAB_KEYS_MANAGE_COURSE = {
   "clsTab-information": "clsTab-information",
-  "clsTab-session": "clsTab-session",
+  "clsTab-section": "clsTab-section",
   "clsTab-setting": "clsTab-setting",
 } as const;
 
-export const TAB_NODES_CLASS_ROOM = new Map([
+export const TAB_NODES_MANAGE_COURSE = new Map([
   [
-    TAB_KEYS_CLASS_ROOM["clsTab-information"],
+    TAB_KEYS_MANAGE_COURSE["clsTab-information"],
     {
       prev: null,
-      next: TAB_KEYS_CLASS_ROOM["clsTab-session"],
+      next: TAB_KEYS_MANAGE_COURSE["clsTab-section"],
     },
   ],
   [
-    TAB_KEYS_CLASS_ROOM["clsTab-session"],
+    TAB_KEYS_MANAGE_COURSE["clsTab-section"],
     {
-      prev: TAB_KEYS_CLASS_ROOM["clsTab-information"],
-      next: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+      prev: TAB_KEYS_MANAGE_COURSE["clsTab-information"],
+      next: TAB_KEYS_MANAGE_COURSE["clsTab-setting"],
     },
   ],
   [
-    TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+    TAB_KEYS_MANAGE_COURSE["clsTab-setting"],
     {
-      prev: TAB_KEYS_CLASS_ROOM["clsTab-session"],
+      prev: TAB_KEYS_MANAGE_COURSE["clsTab-section"],
       next: null,
     },
   ],
@@ -61,22 +59,17 @@ export interface UpsertCourseFormContainerProps {
   action?: "create" | "edit";
 }
 
-export const initClassRoomFormData = (oprions: {
-  platform?: ClassRoomPlatformType;
-  roomType?: ClassRoomType;
-}): Partial<UpsertCourseFormData> => {
+export const initClassRoomFormData = (): Partial<UpsertCourseFormData> => {
   return {
     title: "",
     description: "",
     thumbnailUrl: "",
     categories: [],
-    classRoomId: "",
     slug: "",
     status: "draft",
-    roomType: oprions?.roomType || "single",
-    forWhom: [],
+    benefits: [],
     docs: [],
-    classRoomSessions: [],
+    sections: [],
   };
 };
 
@@ -90,10 +83,7 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
 
     const methods = useForm<UpsertCourseFormData>({
       resolver: zodResolver(upsertCourseSchema),
-      // defaultValues: initClassRoomFormData({
-      //   platform: platform,
-      //   roomType: roomType,
-      // }),
+      defaultValues: initClassRoomFormData(),
     });
 
     const {
@@ -112,9 +102,9 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
     const triggerBeforeSubmitForm = (submitAction: () => void, status: "draft" | "publish") => async () => {
       try {
         const TAB_LIST = [
-          TAB_KEYS_CLASS_ROOM["clsTab-information"],
-          TAB_KEYS_CLASS_ROOM["clsTab-session"],
-          TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+          TAB_KEYS_MANAGE_COURSE["clsTab-information"],
+          TAB_KEYS_MANAGE_COURSE["clsTab-section"],
+          TAB_KEYS_MANAGE_COURSE["clsTab-setting"],
         ];
         const allTabsTriggers = await Promise.allSettled(
           TAB_LIST.map(async (key) => {
@@ -138,13 +128,13 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
     const submitForm: SubmitHandler<UpsertCourseFormData> = (data) => {
       console.log({ errors, data, selectedTeachers, selectedStudents });
 
-      const sessionList = getValues("classRoomSessions");
+      const sections = getValues("sections");
 
-      const isEverySessionHasTeacher = sessionList.every((session, _index) => {
-        const hasTeacher = !!selectedTeachers[_index]?.length;
+      const isEverySessionHasTeacher = sections.every((session, _index) => {
+        const hasTeacher = !!selectedTeachers.length;
         if (!hasTeacher) {
           enqueueSnackbar(`"${session.title}" chưa chọn giáo viên.`, { variant: "error" });
-          classRoomTabContainerRef.current?.setTabStatus("clsTab-session", "invalid");
+          classRoomTabContainerRef.current?.setTabStatus("clsTab-section", "invalid");
         }
         return hasTeacher;
       });
@@ -152,12 +142,6 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
       if (!isEverySessionHasTeacher) {
         return;
       }
-
-      // if (!selectedStudents.length) {
-      //   enqueueSnackbar(`Chưa chọn học viên.`, { variant: "error" });
-      //   classRoomTabContainerRef.current?.setTabStatus("clsTab-setting", "invalid");
-      //   return;
-      // }
 
       onSubmit?.(data, selectedStudents, selectedTeachers);
     };
@@ -188,29 +172,22 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
         <UpsertCourseTabContainer
           ref={classRoomTabContainerRef}
           trigger={trigger}
-          errors={errors}
           items={[
             {
-              tabName: "Thông tin chung",
-              tabKey: TAB_KEYS_CLASS_ROOM["clsTab-information"],
+              tabName: "Thông môn học",
+              tabKey: TAB_KEYS_MANAGE_COURSE["clsTab-information"],
               icon: <GlobeIcon className="w-5 h-5" />,
-              content: <TabClassRoomInformation />,
+              content: <TabCourseInformation />,
             },
             {
-              tabName: "Thời gian",
-              tabKey: TAB_KEYS_CLASS_ROOM["clsTab-session"],
-              icon: <CalendarDateIcon className="w-5 h-5" />,
+              tabName: "Nội dung môn học",
+              tabKey: TAB_KEYS_MANAGE_COURSE["clsTab-section"],
+              icon: <BookOpenIcon className="w-5 h-5" />,
               content: <TabClassRoomSession />,
             },
-            // {
-            //   tabName: "Tài nguyên",
-            //   tabKey: TAB_KEYS_CLASS_ROOM["clsTab-resource"],
-            //   icon: <ClipboardIcon className="w-5 h-5" />,
-            //   content: <TabClassRoomResource />,
-            // },
             {
               tabName: "Thiết lập",
-              tabKey: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+              tabKey: TAB_KEYS_MANAGE_COURSE["clsTab-setting"],
               icon: <UsersPlusIcon className="w-5 h-5" />,
               content: <TabClassRoomSetting />,
             },
