@@ -28,10 +28,7 @@ type AccountMenuItems = (AccountMenuItem | AccountMenuDividerItem)[];
 export interface AccountMenuOptionsProps extends React.PropsWithChildren {
   menuItems?: AccountMenuItems;
 }
-const AccountMenuOptions: React.FC<AccountMenuOptionsProps> = ({
-  children,
-  menuItems = [],
-}) => {
+const AccountMenuOptions: React.FC<AccountMenuOptionsProps> = ({ children, menuItems = [] }) => {
   const { signOut, isPending } = useAuthSignOut();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
@@ -54,7 +51,8 @@ const AccountMenuOptions: React.FC<AccountMenuOptionsProps> = ({
         type="button"
         color="inherit"
         variant="fill"
-        className="bg-transparent flex items-center gap-2 text-left px-0 py-0"
+        className="bg-transparent  text-left p-0 h-auto"
+        disableRipple
       >
         {Element}
       </Button>

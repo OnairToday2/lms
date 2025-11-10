@@ -28,7 +28,7 @@ export default function PageContainer(props: PageContainerProps) {
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <AccountSetting />
             <NotifycationButton />
-            <ThemeSwitcher />
+            {/* <ThemeSwitcher /> */}
             <SettingButton />
           </Stack>
         }
@@ -42,7 +42,7 @@ export default function PageContainer(props: PageContainerProps) {
           width: "100%",
           maxWidth: { sm: "100%", md: "1700px" },
         }}
-        className="!px-0"
+        className="px-0!"
         maxWidth={false}
       >
         {children}

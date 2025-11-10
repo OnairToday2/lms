@@ -8,7 +8,8 @@ export {
 } from "./qr-attendance/mutation";
 import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { useTMutation } from "@/lib";
-import { classFieldRepository } from "@/repository";
+import { categoriesRepository, classFieldRepository } from "@/repository";
+import { CreateCategoryPayload } from "@/repository/categories/type";
 import { CreateClassFieldPayload } from "@/repository/class-room-field/type";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -21,4 +22,15 @@ const useCreateClassFieldMutation = () => {
     },
   });
 };
-export { useCreateClassFieldMutation };
+
+const useCreateCategoriesMutation = () => {
+  const queryClient = useQueryClient();
+  return useTMutation({
+    mutationFn: (payload: CreateCategoryPayload) => categoriesRepository.createCategory(payload),
+    onSuccess(data, variables, onMutateResult, context) {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CATEGORIES] });
+    },
+  });
+};
+
+export { useCreateClassFieldMutation, useCreateCategoriesMutation };

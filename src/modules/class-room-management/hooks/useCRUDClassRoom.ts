@@ -8,7 +8,6 @@ import {
 import type {
   CreatePivotClassRoomAndEmployeePayload,
   CreatePivotClassRoomAndFieldPayload,
-  CreatePivotClassRoomAndHashTagPayload,
 } from "@/repository/class-room";
 import type { CreateClassRoomSessionPayload, UpSertClassRoomSessionPayload } from "@/repository/class-session";
 import { CreateSessionAgendasPayload, UpSertSessionAgendaPayload } from "@/repository/class-session-agenda";
@@ -33,22 +32,22 @@ const useCRUDClassRoom = () => {
     }) => {
       const { formData, teachers, students } = payload;
       const {
-        classRoomField,
+        categories,
         platform,
-        hashTags,
+        // hashTags,
         classRoomSessions,
-        communityInfo,
-        galleries,
+        // communityInfo,
+        // galleries,
         description,
         thumbnailUrl,
         roomType,
         slug,
         status,
         title,
-        faqs,
+        // faqs,
         forWhom,
         docs,
-        whies,
+        // whies,
       } = formData;
 
       const { startDate, endDate } = getStartDateAndEndDateFromClassSession(classRoomSessions, roomType);
@@ -58,7 +57,7 @@ const useCRUDClassRoom = () => {
       const { data: classRoomData, error } = await classRoomRepository.upsertClassRoom({
         action: "create",
         payload: {
-          comunity_info: communityInfo,
+          // comunity_info: communityInfo,
           description: description,
           room_type: roomType,
           slug: slug,
@@ -82,21 +81,21 @@ const useCRUDClassRoom = () => {
       /**
        * Step 2: Create ClassRoom Meta
        */
-      if (faqs.length) {
-        const { data: faqsData, error: faqsDataError } = await classRoomMetaRepository.createClassRoomMeta({
-          class_room_id: classRoomData.id,
-          key: "faqs",
-          value: faqs.map((faq) => ({ answer: faq.answer, question: faq.question })),
-        });
-      }
+      // if (faqs.length) {
+      //   const { data: faqsData, error: faqsDataError } = await classRoomMetaRepository.createClassRoomMeta({
+      //     class_room_id: classRoomData.id,
+      //     key: "faqs",
+      //     value: faqs.map((faq) => ({ answer: faq.answer, question: faq.question })),
+      //   });
+      // }
 
-      if (whies.length) {
-        const { data: whyData, error: whyError } = await classRoomMetaRepository.createClassRoomMeta({
-          class_room_id: classRoomData.id,
-          key: "why",
-          value: whies.map((item) => item.description),
-        });
-      }
+      // if (whies.length) {
+      //   const { data: whyData, error: whyError } = await classRoomMetaRepository.createClassRoomMeta({
+      //     class_room_id: classRoomData.id,
+      //     key: "why",
+      //     value: whies.map((item) => item.description),
+      //   });
+      // }
 
       if (forWhom.length) {
         const { data: forWhomData, error: forWhomError } = await classRoomMetaRepository.createClassRoomMeta({
@@ -105,19 +104,19 @@ const useCRUDClassRoom = () => {
           value: forWhom.map((item) => item.description),
         });
       }
-      if (galleries.length) {
-        const { data: galleriesData, error: galleriesDataError } = await classRoomMetaRepository.createClassRoomMeta({
-          class_room_id: classRoomData.id,
-          key: "galleries",
-          value: galleries,
-        });
-      }
+      // if (galleries.length) {
+      //   const { data: galleriesData, error: galleriesDataError } = await classRoomMetaRepository.createClassRoomMeta({
+      //     class_room_id: classRoomData.id,
+      //     key: "galleries",
+      //     value: galleries,
+      //   });
+      // }
 
       /**
        * Step 3: Sync Class room with Class Field
        */
       await classRoomRepository.createPivotClassRoomAndField(
-        classRoomField.map<CreatePivotClassRoomAndFieldPayload>((fieldId) => ({
+        categories.map<CreatePivotClassRoomAndFieldPayload>((fieldId) => ({
           class_field_id: fieldId,
           class_room_id: classRoomData.id,
         })),
@@ -125,12 +124,12 @@ const useCRUDClassRoom = () => {
       /**
        * Step 4: Sync Class room with Hashtags
        */
-      await classRoomRepository.createPivotClassRoomAndHashTag(
-        hashTags.map<CreatePivotClassRoomAndHashTagPayload>((hashTagId) => ({
-          hash_tag_id: hashTagId,
-          class_room_id: classRoomData.id,
-        })),
-      );
+      // await classRoomRepository.createPivotClassRoomAndHashTag(
+      //   hashTags.map<CreatePivotClassRoomAndHashTagPayload>((hashTagId) => ({
+      //     hash_tag_id: hashTagId,
+      //     class_room_id: classRoomData.id,
+      //   })),
+      // );
 
       /**
        * Step 5: Sync ClassRoom with Students
@@ -155,6 +154,7 @@ const useCRUDClassRoom = () => {
               title,
               description,
               classRoomData.id,
+              _sessionIndex,
             );
 
             const { data: sessionData, error: sessionError } = await classRoomSessionRepository.createClassSession(
@@ -241,22 +241,22 @@ const useCRUDClassRoom = () => {
       }
 
       const {
-        classRoomField,
-        hashTags,
+        categories,
+        // hashTags,
         classRoomSessions,
-        communityInfo,
-        galleries,
+        // communityInfo,
+        // galleries,
         description,
         thumbnailUrl,
         roomType,
         slug,
         status,
         title,
-        faqs,
+        // faqs,
         forWhom,
         docs,
         platform,
-        whies,
+        // whies,
       } = formData;
 
       const { startDate, endDate } = getStartDateAndEndDateFromClassSession(classRoomSessions, roomType);
@@ -267,7 +267,7 @@ const useCRUDClassRoom = () => {
         action: "update",
         payload: {
           id: classRoomId,
-          comunity_info: communityInfo,
+          // comunity_info: communityInfo,
           description: description,
           room_type: roomType,
           slug: slug,
@@ -292,27 +292,27 @@ const useCRUDClassRoom = () => {
        * Step 2: Update Metadata
        */
 
-      const faqMetadata = classRoomDetail.class_room_metadata.find((item) => item.key === "faqs");
-      const { error: faqsDataError } = await classRoomMetaRepository.upsertClassRoomMeta({
-        id: faqMetadata?.id,
-        class_room_id: classRoomData.id,
-        key: "faqs",
-        value: faqs.map((faq) => ({ answer: faq.answer, question: faq.question })),
-      });
-      if (faqsDataError) {
-        console.error(faqsDataError);
-      }
-      const whyMetadata = classRoomDetail.class_room_metadata.find((item) => item.key === "why");
-      const { error: whyError } = await classRoomMetaRepository.upsertClassRoomMeta({
-        id: whyMetadata?.id,
-        class_room_id: classRoomData.id,
-        key: "why",
-        value: whies.map((item) => item.description),
-      });
+      // const faqMetadata = classRoomDetail.class_room_metadata.find((item) => item.key === "faqs");
+      // const { error: faqsDataError } = await classRoomMetaRepository.upsertClassRoomMeta({
+      //   id: faqMetadata?.id,
+      //   class_room_id: classRoomData.id,
+      //   key: "faqs",
+      //   value: faqs.map((faq) => ({ answer: faq.answer, question: faq.question })),
+      // });
+      // if (faqsDataError) {
+      //   console.error(faqsDataError);
+      // }
+      // const whyMetadata = classRoomDetail.class_room_metadata.find((item) => item.key === "why");
+      // const { error: whyError } = await classRoomMetaRepository.upsertClassRoomMeta({
+      //   id: whyMetadata?.id,
+      //   class_room_id: classRoomData.id,
+      //   key: "why",
+      //   value: whies.map((item) => item.description),
+      // });
 
-      if (whyError) {
-        console.error(whyError);
-      }
+      // if (whyError) {
+      //   console.error(whyError);
+      // }
 
       const forWhomMetadata = classRoomDetail.class_room_metadata.find((item) => item.key === "forWhom");
       const { error: forWhomError } = await classRoomMetaRepository.upsertClassRoomMeta({
@@ -325,17 +325,17 @@ const useCRUDClassRoom = () => {
       if (forWhomError) {
         console.log(forWhomError);
       }
-      const galleriesMeta = classRoomDetail.class_room_metadata.find((item) => item.key === "galleries");
-      const { error: galleriesDataError } = await classRoomMetaRepository.upsertClassRoomMeta({
-        id: galleriesMeta?.id,
-        class_room_id: classRoomData.id,
-        key: "galleries",
-        value: galleries,
-      });
+      // const galleriesMeta = classRoomDetail.class_room_metadata.find((item) => item.key === "galleries");
+      // const { error: galleriesDataError } = await classRoomMetaRepository.upsertClassRoomMeta({
+      //   id: galleriesMeta?.id,
+      //   class_room_id: classRoomData.id,
+      //   key: "galleries",
+      //   value: galleries,
+      // });
 
-      if (galleriesDataError) {
-        console.log(galleriesDataError);
-      }
+      // if (galleriesDataError) {
+      //   console.log(galleriesDataError);
+      // }
 
       /**
        * Step 3: Sync Classroom with Employee
@@ -365,13 +365,13 @@ const useCRUDClassRoom = () => {
        * Step 4: Sync Classroom old Class Field to new Class Fields
        */
       const currentClassRoomFields = [...classRoomDetail.class_room_field];
-      const currentClassFieldIds = currentClassRoomFields
+      const currentCategoriesIds = currentClassRoomFields
         .map((item) => item.categories?.id)
         .filter((item) => !isUndefined(item));
 
-      const classRoomFieldListAddition = classRoomField.filter((id) => !currentClassFieldIds.includes(id));
+      const classRoomFieldListAddition = categories.filter((id) => !currentCategoriesIds.includes(id));
       const classRoomFieldListDeletation = currentClassRoomFields.filter((it) =>
-        classRoomField.every((id) => id !== it.categories?.id),
+        categories.every((id) => id !== it.categories?.id),
       );
 
       if (classRoomFieldListAddition.length) {
@@ -388,30 +388,31 @@ const useCRUDClassRoom = () => {
 
       /**
        * Step 5: Sync Classroom old hashtag to new hashtag
+       * Remove Hash Tags to class room - update 6/11
        */
-      const currentClassRoomTags = [...classRoomDetail.class_hash_tag];
-      const currentClassClassRoomHashTagIds = currentClassRoomTags
-        .map((item) => item.hash_tags?.id)
-        .filter((item) => !isUndefined(item));
+      // const currentClassRoomTags = [...classRoomDetail.class_hash_tag];
+      // const currentClassClassRoomHashTagIds = currentClassRoomTags
+      //   .map((item) => item.hash_tags?.id)
+      //   .filter((item) => !isUndefined(item));
 
-      const classRoomHashTagsAddition = hashTags.filter((id) => !currentClassClassRoomHashTagIds.includes(id)); //Add List
+      // const classRoomHashTagsAddition = hashTags.filter((id) => !currentClassClassRoomHashTagIds.includes(id)); //Add List
 
-      const classRoomHashTagsDeletation = currentClassRoomTags.filter((it) =>
-        hashTags.every((id) => id !== it.hash_tags?.id),
-      );
+      // const classRoomHashTagsDeletation = currentClassRoomTags.filter((it) =>
+      //   hashTags.every((id) => id !== it.hash_tags?.id),
+      // );
 
-      if (classRoomHashTagsAddition.length) {
-        await classRoomRepository.createPivotClassRoomAndHashTag(
-          classRoomHashTagsAddition.map((hashTagId) => ({
-            hash_tag_id: hashTagId,
-            class_room_id: classRoomData.id,
-          })),
-        );
-      }
+      // if (classRoomHashTagsAddition.length) {
+      //   await classRoomRepository.createPivotClassRoomAndHashTag(
+      //     classRoomHashTagsAddition.map((hashTagId) => ({
+      //       hash_tag_id: hashTagId,
+      //       class_room_id: classRoomData.id,
+      //     })),
+      //   );
+      // }
 
-      if (classRoomHashTagsDeletation.length) {
-        await classRoomRepository.deletePivotClassRoomAndHashTag(classRoomHashTagsDeletation.map((it) => it.id));
-      }
+      // if (classRoomHashTagsDeletation.length) {
+      //   await classRoomRepository.deletePivotClassRoomAndHashTag(classRoomHashTagsDeletation.map((it) => it.id));
+      // }
 
       /**
        * Step 6: Sync Old Sessions with new Sessions
@@ -459,6 +460,7 @@ const useCRUDClassRoom = () => {
             classRoomId: classRoomData.id,
             classSession: classSession,
             roomType: roomType,
+            index: _sessionIndex,
           });
           const { data: sessionData, error: sessionDataError } = await classRoomSessionRepository.upsertClassSession(
             classSessionPayload,
@@ -625,8 +627,9 @@ const useCRUDClassRoom = () => {
     classRoomTitle: string;
     classRoomDescription: string;
     classRoomId: string;
+    index: number;
   }): UpSertClassRoomSessionPayload => {
-    const { classSession, roomType, classRoomTitle, classRoomDescription, classRoomId } = data;
+    const { classSession, roomType, classRoomTitle, classRoomDescription, classRoomId, index } = data;
     const sessionId = classSession.id;
     const payload = {
       title: roomType === "single" ? classRoomTitle : classSession.title,
@@ -637,8 +640,7 @@ const useCRUDClassRoom = () => {
       end_at: classSession.endDate,
       start_at: classSession.startDate,
       is_online: classSession.isOnline,
-      limit_person: classSession.isUnlimited ? -1 : classSession.limitPerson,
-      resource_ids: null,
+      priority: index + 1,
     };
 
     return sessionId
@@ -667,6 +669,7 @@ const useCRUDClassRoom = () => {
     classRoomTitle: string,
     classRoomDescription: string,
     classRoomId: string,
+    index: number,
   ): CreateClassRoomSessionPayload => {
     return {
       title: roomType === "single" ? classRoomTitle : classSession.title,
@@ -677,9 +680,8 @@ const useCRUDClassRoom = () => {
       end_at: classSession.endDate,
       start_at: classSession.startDate,
       is_online: classSession.isOnline,
-      limit_person: classSession.isUnlimited ? -1 : classSession.limitPerson,
-      resource_ids: null,
       class_room_id: classRoomId,
+      priority: index + 1,
     };
   };
 

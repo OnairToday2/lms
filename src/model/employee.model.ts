@@ -40,6 +40,12 @@ export type EmployeeTeacherTypeItem = {
       id: string;
       name: string;
       type: string;
+      parent_id: string;
+      branch: {
+        id: string;
+        name: string;
+        type: string;
+      };
     };
   }[];
 };

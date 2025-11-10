@@ -4,7 +4,7 @@ import { ClassSessionAgenda } from "@/model/class-session-agenda.model";
 export type CreateClassRoomPayload = Pick<
   ClassRoom,
   | "description"
-  | "comunity_info"
+  // | "comunity_info"
   | "room_type"
   | "slug"
   | "start_at"
@@ -20,7 +20,7 @@ export type CreateClassRoomPayload = Pick<
 export type UpdateClassRoomPayload = Pick<
   ClassRoom,
   | "description"
-  | "comunity_info"
+  // | "comunity_info"
   | "room_type"
   | "slug"
   | "start_at"
@@ -36,13 +36,13 @@ export type UpdateClassRoomPayload = Pick<
 >;
 export type UpSertClassRoomPayload =
   | {
-    action: "create";
-    payload: CreateClassRoomPayload;
-  }
+      action: "create";
+      payload: CreateClassRoomPayload;
+    }
   | {
-    action: "update";
-    payload: UpdateClassRoomPayload;
-  };
+      action: "update";
+      payload: UpdateClassRoomPayload;
+    };
 
 export type CreatePivotClassRoomAndHashTagPayload = {
   class_room_id: string;

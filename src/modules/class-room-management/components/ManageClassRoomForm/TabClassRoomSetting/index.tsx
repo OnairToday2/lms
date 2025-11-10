@@ -26,23 +26,20 @@ const TabClassRoomSetting = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      {classRoomPlatform === "online" ? null : <QrSetting />}
-      <div className="bg-white p-6 rounded-xl">
-        <div className="flex items-center justify-between mb-6">
-          <Typography component="h3" sx={{ fontSize: "16px", fontWeight: "bold" }}>
-            Thêm học viên <span className="text-red-600">*</span>
-          </Typography>
-        </div>
-        {/* {!selectedStudents.length ? (
+    <div className="bg-white p-6 rounded-xl">
+      <div className="flex items-center justify-between mb-6">
+        <Typography component="h3" sx={{ fontSize: "16px", fontWeight: "bold" }}>
+          Thêm học viên <span className="text-red-600">*</span>
+        </Typography>
+      </div>
+      {/* {!selectedStudents.length ? (
           <div className="py-2">
             <Typography sx={(theme) => ({ color: theme.palette.error["main"], fontSize: "0.75rem" })}>
               {!selectedStudents.length ? "Chưa chọn học viên" : null}
             </Typography>
           </div>
         ) : null} */}
-        <StudentsContainer seletedItems={selectedStudents} onChange={handleSelect} />
-      </div>
+      <StudentsContainer seletedItems={selectedStudents} onChange={handleSelect} />
     </div>
   );
 };

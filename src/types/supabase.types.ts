@@ -1748,21 +1748,6 @@ export type Database = {
           },
         ]
       }
-      supersemar_masters: {
-        Row: {
-          data: string | null
-          id: number
-        }
-        Insert: {
-          data?: string | null
-          id?: number
-        }
-        Update: {
-          data?: string | null
-          id?: number
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           assigned_at: string | null
@@ -1863,7 +1848,10 @@ export type Database = {
         Args: { action_code: string; resource_code: string }
         Returns: boolean
       }
-      is_admin: { Args: never; Returns: boolean }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_qr_code_valid: {
         Args: { p_current_time?: string; p_qr_code: string }
         Returns: {
@@ -1871,6 +1859,18 @@ export type Database = {
           message: string
           qr_code_id: string
         }[]
+      }
+      slugify: {
+        Args: { value: string }
+        Returns: string
+      }
+      unaccent: {
+        Args: { "": string }
+        Returns: string
+      }
+      unaccent_init: {
+        Args: { "": unknown }
+        Returns: unknown
       }
     }
     Enums: {

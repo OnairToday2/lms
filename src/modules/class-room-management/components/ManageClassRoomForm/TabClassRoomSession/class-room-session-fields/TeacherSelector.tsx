@@ -4,12 +4,11 @@ import DialogTeacherContainer, {
 } from "@/modules/teacher/container/DialogTeacherContainer";
 import { Button, Chip, FormLabel, IconButton, Typography } from "@mui/material";
 import { memo, useCallback, useState, forwardRef, useImperativeHandle } from "react";
-
-import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
 import { CloseIcon } from "@/shared/assets/icons";
 import { cn } from "@/utils";
 import Avatar from "@/shared/ui/Avatar";
 import { TeacherSelectedItem } from "@/modules/class-room-management/store/class-room-store";
+import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
 
 export interface TeacherSelectorRef {
   removeTeachersBySessionIndex: (index: number) => void;
@@ -55,8 +54,10 @@ const TeacherSelector = forwardRef<TeacherSelectorRef, TeacherSelectorProps>(
       <>
         <div className={cn(className)}>
           <div className="flex items-center">
-            <div className="pr-6">
-              <FormLabel component="div">Giảng viên phụ trách</FormLabel>
+            <div className="pr-6 flex-1">
+              <FormLabel component="div">
+                Giảng viên phụ trách <span className="text-red-600">*</span>
+              </FormLabel>
               <Typography className="text-xs text-gray-600">
                 Chỉ định giảng viên phụ trách nội dung, quản lý lớp học và hỗ trợ người học trong buổi học.
               </Typography>
@@ -114,9 +115,7 @@ const TeacherItem: React.FC<TeacherItemProps> = memo(({ id, name, code, avatarUr
   return (
     <div className={cn("teacher flex items-center justify-between", className)}>
       <div className=" flex items-center gap-2">
-        <div className="tc-avatar w-8 h-8 rounded-full relative overflow-hidden">
-          <Avatar src={avatarUrl} alt={name} />
-        </div>
+        <Avatar src={avatarUrl} alt={name} size="small" />
         <div className="flex items-center justify-center gap-1">
           <Typography sx={{ fontSize: "0.875rem" }}>{name}</Typography>
           <Chip label={code} color="primary" variant="outlined" />
