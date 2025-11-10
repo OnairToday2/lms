@@ -261,11 +261,19 @@ export async function deleteAssignmentEmployeesByAssignmentId(assignmentId: stri
   }
 }
 
-const getAssignmentStudents = async (assignmentId: string) => {
+const getAssignmentStudents = async (
+  assignmentId: string,
+  page: number = 0,
+  limit: number = 25
+): Promise<PaginatedResult<any>> => {
   const supabase = createClient();
 
-  // Get all assigned employees with their submission status
-  const { data, error } = await supabase
+  // Calculate range for pagination
+  const from = page * limit;
+  const to = from + limit - 1;
+
+  // Get assigned employees with pagination
+  const { data, error, count } = await supabase
     .from("assignment_employees")
     .select(
       `
@@ -280,23 +288,35 @@ const getAssignmentStudents = async (assignmentId: string) => {
           avatar
         )
       )
-    `
+    `,
+      { count: "exact" }
     )
-    .eq("assignment_id", assignmentId);
+    .eq("assignment_id", assignmentId)
+    .order("employee_id", { ascending: true })
+    .range(from, to);
 
   if (error) {
     throw new Error(`Failed to fetch assignment students: ${error.message}`);
   }
 
-  if (!data) {
-    return [];
+  if (!data || data.length === 0) {
+    return {
+      data: [],
+      total: count ?? 0,
+      page,
+      limit,
+    };
   }
 
-  // Get all submission results for this assignment
+  // Get employee IDs from the current page
+  const employeeIds = data.map((item) => item.employee_id);
+
+  // Get submission results only for employees on the current page
   const { data: results, error: resultsError } = await supabase
     .from("assignment_results")
     .select("employee_id, created_at, score, max_score, status")
-    .eq("assignment_id", assignmentId);
+    .eq("assignment_id", assignmentId)
+    .in("employee_id", employeeIds);
 
   if (resultsError) {
     throw new Error(`Failed to fetch assignment results: ${resultsError.message}`);
@@ -335,7 +355,12 @@ const getAssignmentStudents = async (assignmentId: string) => {
     };
   });
 
-  return students;
+  return {
+    data: students,
+    total: count ?? 0,
+    page,
+    limit,
+  };
 };
 
 const getAssignmentQuestions = async (assignmentId: string) => {
@@ -354,5 +379,100 @@ const getAssignmentQuestions = async (assignmentId: string) => {
   return data;
 };
 
-export { getAssignments, getAssignmentById, getAssignmentStudents, getAssignmentQuestions };
+const getMyAssignments = async (
+  employeeId: string,
+  page: number = 0,
+  limit: number = 25
+): Promise<PaginatedResult<any>> => {
+  const supabase = createClient();
+
+  // Calculate range for pagination
+  const from = page * limit;
+  const to = from + limit - 1;
+
+  // Get assignments assigned to this employee with pagination
+  const { data, error, count } = await supabase
+    .from("assignment_employees")
+    .select(
+      `
+      assignment_id,
+      assignments (
+        id,
+        name,
+        description,
+        created_at
+      )
+    `,
+      { count: "exact" }
+    )
+    .eq("employee_id", employeeId)
+    .order("assignment_id", { ascending: false })
+    .range(from, to);
+
+  if (error) {
+    throw new Error(`Failed to fetch my assignments: ${error.message}`);
+  }
+
+  if (!data || data.length === 0) {
+    return {
+      data: [],
+      total: count ?? 0,
+      page,
+      limit,
+    };
+  }
+
+  // Get submission results for the assignments on this page
+  const assignmentIds = data.map((item) => item.assignment_id);
+
+  const { data: results, error: resultsError } = await supabase
+    .from("assignment_results")
+    .select("assignment_id, created_at, score, max_score, status")
+    .eq("employee_id", employeeId)
+    .in("assignment_id", assignmentIds);
+
+  if (resultsError) {
+    throw new Error(`Failed to fetch assignment results: ${resultsError.message}`);
+  }
+
+  // Create a map of assignment results
+  const submissionMap = new Map(
+    results?.map((result) => [
+      result.assignment_id,
+      {
+        submitted_at: result.created_at,
+        score: result.score,
+        max_score: result.max_score,
+        status: result.status,
+      },
+    ]) || []
+  );
+
+  // Combine the data
+  const myAssignments = data.map((item) => {
+    const assignment = item.assignments;
+    const submission = submissionMap.get(item.assignment_id);
+
+    return {
+      assignment_id: item.assignment_id,
+      assignment_name: assignment?.name || "",
+      assignment_description: assignment?.description || "",
+      created_at: assignment?.created_at || "",
+      has_submitted: !!submission,
+      submitted_at: submission?.submitted_at || null,
+      score: submission?.score ?? null,
+      max_score: submission?.max_score ?? null,
+      status: submission?.status ?? null,
+    };
+  });
+
+  return {
+    data: myAssignments,
+    total: count ?? 0,
+    page,
+    limit,
+  };
+};
+
+export { getAssignments, getAssignmentById, getAssignmentStudents, getAssignmentQuestions, getMyAssignments };
 

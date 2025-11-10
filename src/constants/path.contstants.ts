@@ -43,6 +43,9 @@ export const PATHS = {
     CREATE_ASSIGNMENT: "/assignments/create",
     EDIT_ASSIGNMENT: (id: string = ":id") => `/assignments/edit/${id}`,
   },
+  MY_ASSIGNMENTS: {
+    ROOT: "/my-assignments",
+  },
   REPORTS: {
     ROOT: "/report",
     OVER_VIEW: "/report/overview",
