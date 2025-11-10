@@ -27,13 +27,13 @@ export const PATHS = {
   CLASSROOMS: {
     ROOT: "/admin/class-room",
     CREATE_CLASSROOM: "/admin/class-room/create",
-    EDIT_CLASSROOM: (id: string = ":id") => `/admin/class-room/${id}/cedit`,
+    EDIT_CLASSROOM: (id: string = ":id") => `/admin/class-room/${id}/edit`,
     LIST_CLASSROOM: "/class-room/list",
   },
   COURSES: {
     ROOT: "/admin/online-course",
     CREATE: "/admin/online-course/create",
-    EDIT: (id: string = ":id") => `/admin/online-course/${id}/cedit`,
+    EDIT: (id: string = ":id") => `/admin/online-course/${id}/edit`,
   },
   STUDENTS: {
     ROOT: "/my-class",
