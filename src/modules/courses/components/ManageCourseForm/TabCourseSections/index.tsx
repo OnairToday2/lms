@@ -11,16 +11,15 @@ import { useFieldArray, UseFormReturn, useWatch } from "react-hook-form";
 import { UpsertCourseFormData } from "../../upsert-course.schema";
 // import ButtonAddQuestion from "../button-add-question";
 import CourseSectionItem, { CourseSectionItemRef } from "./CourseSections/CourseSectionItem";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
 import ButtonAddSection, { ButtonAddSectionProps } from "./ButtonAddSection";
-import LessionTypeSelector, { LessionTypeSelectorProps } from "./LessionTypeSelector";
-import LessionForm from "./LessionForm";
+import LessonTypeSelector, { LessonTypeSelectorProps } from "./LessonTypeSelector";
+import LessonForm from "./LessonForm";
 
 export const initSectionFormData = (): UpsertCourseFormData["sections"][number] => {
   return {
     title: "",
     description: "",
-    lessions: [],
+    lessons: [],
     status: "active",
   };
 };
@@ -32,7 +31,7 @@ interface TabCourseSectionsProps {}
 const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProps>((props, ref) => {
   const sectionRef = useRef<CourseSectionItemRef>(null);
   const [isAddLession, setIsAddLession] = useState(false);
-  const [editableLession, setEditAbleLession] = useState<{ sectionIndex: number; lessionIndex: number }>();
+  const [editableLession, setEditAbleLession] = useState<{ sectionIndex: number; lessonIndex: number }>();
   const methods = useUpsertCourseFormContext();
   const {
     control,
@@ -57,7 +56,6 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
     }),
   );
 
-  console.log(sections);
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     const activeId = active.id;
@@ -84,17 +82,17 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
   const handleDeleteSection = (sectionIndex: number) => {
     remove(sectionIndex);
   };
-  const handleLessionClick = (sectionIndex: number, lessionIndex: number) => {
-    setEditAbleLession({ lessionIndex, sectionIndex });
+  const handleLessionClick = (sectionIndex: number, lessonIndex: number) => {
+    setEditAbleLession({ lessonIndex, sectionIndex });
   };
   const handleClickAddLession = () => {
     setIsAddLession(true);
     setEditAbleLession(undefined);
   };
-  const handleSelectLession: LessionTypeSelectorProps["onSelect"] = (type) => {
+  const handleSelectLession: LessonTypeSelectorProps["onSelect"] = (type) => {
     if (!sectionRef.current) return;
-    const { lessionIndex, sectionIndex } = sectionRef.current.appendLession(type);
-    setEditAbleLession({ lessionIndex, sectionIndex });
+    const { lessonIndex, sectionIndex } = sectionRef.current.appendLesson(type);
+    setEditAbleLession({ lessonIndex, sectionIndex });
     setIsAddLession(false);
   };
   return (
@@ -133,22 +131,24 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
         </div>
       </div>
       <div className="lession-wraper flex-1">
-        <div className="bg-white rounded-xl p-6">
-          <Typography sx={{ fontWeight: "bold" }} className="mb-6">
-            Tạo Bài giảng
-          </Typography>
-          <div className="bg-white rounded-xl">
-            {isAddLession && <LessionTypeSelector onSelect={handleSelectLession} />}
+        {isAddLession || editableLession ? (
+          <div className="bg-white rounded-xl p-6">
+            <Typography sx={{ fontWeight: "bold" }} className="mb-6">
+              Tạo Bài giảng
+            </Typography>
+            <div className="bg-white rounded-xl">
+              {isAddLession ? <LessonTypeSelector onSelect={handleSelectLession} /> : null}
 
-            {editableLession ? (
-              <LessionForm
-                key={`lession-${editableLession.sectionIndex}-${editableLession.lessionIndex}`}
-                sectionIndex={editableLession.sectionIndex}
-                lessionIndex={editableLession.lessionIndex}
-              />
-            ) : null}
+              {editableLession ? (
+                <LessonForm
+                  key={`lession-${editableLession.sectionIndex}-${editableLession.lessonIndex}`}
+                  sectionIndex={editableLession.sectionIndex}
+                  lessonIndex={editableLession.lessonIndex}
+                />
+              ) : null}
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </div>
   );

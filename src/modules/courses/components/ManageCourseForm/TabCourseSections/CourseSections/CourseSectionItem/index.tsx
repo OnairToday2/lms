@@ -23,10 +23,10 @@ import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useFieldArray } from "react-hook-form";
 import SortableLessionItem from "../SortableLessionItem";
-import { LessionType } from "@/model/lession.model";
+import { LessonType } from "@/model/lesson.model";
 
 export type CourseSectionItemRef = {
-  appendLession: (type: LessionType) => { sectionIndex: number; lessionIndex: number };
+  appendLesson: (type: LessonType) => { sectionIndex: number; lessonIndex: number };
 };
 export interface CourseSectionItemProps extends PropsWithChildren {
   id: string;
@@ -53,7 +53,7 @@ const CourseSectionItem = forwardRef<CourseSectionItemRef, CourseSectionItemProp
       append,
     } = useFieldArray({
       control,
-      name: `sections.${index}.lessions`,
+      name: `sections.${index}.lessons`,
       keyName: "_lessionId",
     });
 
@@ -85,22 +85,22 @@ const CourseSectionItem = forwardRef<CourseSectionItemRef, CourseSectionItemProp
       onDelete?.(index);
     };
 
-    const getLessionTitle = (lessionIndex: number) => {
-      return getValues(`sections.${index}.lessions.${lessionIndex}.title`);
+    const getLessionTitle = (lessonIndex: number) => {
+      return getValues(`sections.${index}.lessons.${lessonIndex}.title`);
     };
 
     useImperativeHandle(ref, () => ({
-      appendLession: (type: LessionType) => {
-        const nextLessionIndex = lessionsField.length;
+      appendLesson: (type: LessonType) => {
+        const nextLessonIndex = lessionsField.length;
         append({
           lessionType: type,
           title: "",
           status: "active",
           content: "",
           resources: [],
-          mainResource: { id: "", type: "", url: "" },
+          mainResource: { id: "", mimeType: "", url: "", name: "" },
         });
-        return { lessionIndex: nextLessionIndex, sectionIndex: index };
+        return { lessonIndex: nextLessonIndex, sectionIndex: index };
       },
     }));
     return (

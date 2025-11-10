@@ -1,7 +1,7 @@
-import { LessionType } from "@/model/lession.model";
+import { LessonType } from "@/model/lesson.model";
 import * as zod from "zod";
 
-const courseLessionSchema = zod.object({
+const lessonSchema = zod.object({
   id: zod.string().optional(),
   title: zod.string().min(1, { message: "Tiêu đề không bỏ trống." }).max(200, "Tiêu đề tối đa 200 ký tự."),
   content: zod.string().min(1, { message: "Nội dung không bỏ trống." }),
@@ -9,13 +9,15 @@ const courseLessionSchema = zod.object({
   mainResource: zod.object({
     id: zod.string(),
     url: zod.string(),
-    type: zod.string(),
+    name: zod.string(),
+    mimeType: zod.string(),
   }),
   resources: zod.array(
     zod.object({
       id: zod.string(),
       url: zod.string(),
-      type: zod.string(),
+      name: zod.string(),
+      mimeType: zod.string(),
     }),
   ),
   lessionType: zod.enum(["file", "video", "assessment"]),
@@ -25,7 +27,7 @@ const courseSectionSchema = zod.object({
   id: zod.string().optional(),
   title: zod.string(),
   description: zod.string(),
-  lessions: zod.array(courseLessionSchema),
+  lessons: zod.array(lessonSchema),
   status: zod.enum(["active", "deactive"]),
 });
 

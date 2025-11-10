@@ -4,11 +4,10 @@ import StudentsContainer, { StudentsContainerProps } from "./StudentsContainer";
 import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
 import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 import QrSetting from "./QrSetting";
-import { useClassRoomFormContext } from "../UpsertCourseFormContainer";
+import { useUpsertCourseFormContext } from "../UpsertCourseFormContainer";
 
 const TabClassRoomSetting = () => {
-  const { control, getValues } = useClassRoomFormContext();
-  const classRoomPlatform = getValues("platform");
+  const { control, getValues } = useUpsertCourseFormContext();
 
   const setStudents = useClassRoomStore((state) => state.actions.setSelectedStudents);
   const selectedStudents = useClassRoomStore((state) => state.state.selectedStudents);

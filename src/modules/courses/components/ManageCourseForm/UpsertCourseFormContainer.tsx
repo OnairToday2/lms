@@ -8,8 +8,8 @@ import { BookOpenIcon, CloseIcon, EyeIcon, GlobeIcon, UsersPlusIcon } from "@/sh
 import { useUpsertCourseStore } from "../../store/upsert-course-context";
 import UpsertCourseTabContainer, { UpsertCourseTabContainerRef } from "./UpsertCourseTabContainer";
 import TabCourseInformation from "./TabCourseInformation";
-import TabClassRoomSession, { initSectionFormData } from "./TabCourseSections";
-import TabClassRoomSetting from "./TabClassRoomSetting";
+import TabCourseSections, { initSectionFormData } from "./TabCourseSections";
+import TabCourseSetting from "./TabCourseSetting";
 import { useSnackbar } from "notistack";
 import { getKeyFieldByTab } from "./utils";
 import { UpsertCourseStore } from "../../store/upsert-course-store";
@@ -183,13 +183,13 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
               tabName: "Nội dung môn học",
               tabKey: TAB_KEYS_MANAGE_COURSE["clsTab-section"],
               icon: <BookOpenIcon className="w-5 h-5" />,
-              content: <TabClassRoomSession />,
+              content: <TabCourseSections />,
             },
             {
               tabName: "Thiết lập",
               tabKey: TAB_KEYS_MANAGE_COURSE["clsTab-setting"],
               icon: <UsersPlusIcon className="w-5 h-5" />,
-              content: <TabClassRoomSetting />,
+              content: <TabCourseSetting />,
             },
           ]}
           actions={

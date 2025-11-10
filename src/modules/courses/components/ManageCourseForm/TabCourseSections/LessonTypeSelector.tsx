@@ -1,24 +1,24 @@
 import React, { useState } from "react";
 import { FilePdf02Icon, FileWord02Icon, VideoIcon } from "@/shared/assets/icons";
 import { Typography } from "@mui/material";
-import { LessionType } from "@/model/lession.model";
+import { LessonType } from "@/model/lesson.model";
 import { cn } from "@/utils";
-export interface LessionTypeSelectorProps {
-  onSelect: (type: LessionType) => void;
+export interface LessonTypeSelectorProps {
+  onSelect: (type: LessonType) => void;
 }
-const LessionTypeSelector: React.FC<LessionTypeSelectorProps> = ({ onSelect }) => {
-  const [lessionType, setLessionType] = useState<LessionType>();
+const LessonTypeSelector: React.FC<LessonTypeSelectorProps> = ({ onSelect }) => {
+  const [lessonType, setLessonType] = useState<LessonType>();
 
-  const handleSelect = (type: LessionType) => () => {
-    setLessionType(type);
+  const handleSelect = (type: LessonType) => () => {
+    setLessonType(type);
     onSelect(type);
   };
   return (
     <div className="grid grid-cols-3 gap-6">
       <div
         className={cn("border flex items-center justify-center rounded-xl p-6 cursor-pointer", {
-          "border-blue-600": lessionType === "video",
-          "border-gray-300": lessionType !== "video",
+          "border-blue-600": lessonType === "video",
+          "border-gray-300": lessonType !== "video",
         })}
         onClick={handleSelect("video")}
       >
@@ -31,8 +31,8 @@ const LessionTypeSelector: React.FC<LessionTypeSelectorProps> = ({ onSelect }) =
       </div>
       <div
         className={cn("border flex items-center justify-center rounded-xl p-6 cursor-pointer", {
-          "border-blue-600": lessionType === "file",
-          "border-gray-300": lessionType !== "file",
+          "border-blue-600": lessonType === "file",
+          "border-gray-300": lessonType !== "file",
         })}
         onClick={handleSelect("file")}
       >
@@ -45,8 +45,8 @@ const LessionTypeSelector: React.FC<LessionTypeSelectorProps> = ({ onSelect }) =
       </div>
       <div
         className={cn("border flex items-center justify-center border-gray-300 rounded-xl p-6 cursor-pointer", {
-          "border-blue-600": lessionType === "assessment",
-          "border-gray-300": lessionType !== "assessment",
+          "border-blue-600": lessonType === "assessment",
+          "border-gray-300": lessonType !== "assessment",
         })}
         onClick={handleSelect("assessment")}
       >
@@ -60,4 +60,4 @@ const LessionTypeSelector: React.FC<LessionTypeSelectorProps> = ({ onSelect }) =
     </div>
   );
 };
-export default LessionTypeSelector;
+export default LessonTypeSelector;
