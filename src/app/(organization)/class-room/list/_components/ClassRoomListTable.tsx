@@ -28,7 +28,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/shared/ui/custom-dialog";
 import { useCallback, useState } from "react";
-import { TABLE_HEAD } from "../constants";
+import { TABLE_HEAD_CLASS_ROOM } from "../constants";
 import { ClassRoomStatusFilter, ClassRoomTypeFilter } from "../types/types";
 import { getClassRoomStatusLabel, getClassRoomTypeLabel, getColorClassRoomStatus } from "../utils/status";
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
@@ -165,7 +165,7 @@ export default function ClassRoomListTable({
               }}
             >
               <TableRow>
-                {TABLE_HEAD.map((item) => {
+                {TABLE_HEAD_CLASS_ROOM.map((item) => {
                   return (
                     <TableCell
                       key={item.id}

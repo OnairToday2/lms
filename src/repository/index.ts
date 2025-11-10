@@ -20,3 +20,4 @@ export * as classRoomSessionRepository from "./class-room";
 export * as classRoomMetaRepository from "./class-room-meta";
 export * as qrAttendanceRepository from "./qr-attendance";
 export * as classSessionAgendaRepository from "./class-session-agenda";
+export * as elearningRepository from "./elearning";

@@ -1,4 +1,5 @@
 "use client";
+
 import { useMemo, useState } from "react";
 import {
   Alert,
@@ -20,39 +21,34 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { grey } from "@mui/material/colors";
-import { STUDENT_TABLE_HEAD, ATTENDANCE_OPTIONS } from "../constants/constants";
-import { useGetClassRoomStudentsQuery } from "@/modules/class-room-management/operations/query";
 import useDebounce from "@/hooks/useDebounce";
 import { Pagination } from "@/shared/ui/Pagination";
-import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import type { ClassRoomStudentDto } from "@/types/dto/classRooms/classRoom.dto";
 import { SelectOption } from "@/shared/ui/form/SelectOption";
-import { fDateTime } from "@/lib";
-import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
-import { useDeleteUserInClassRoomMutation, useExportStudentsMutation } from "@/modules/class-room-management/operations/mutation";
-import { useQueryClient } from "@tanstack/react-query";
-import { ConfirmDialog } from "@/shared/ui/custom-dialog";
-import useNotifications from "@/hooks/useNotifications/useNotifications";
-import DownloadIcon from '@mui/icons-material/Download';
 import { SearchIcon } from "@/shared/assets/icons";
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
+import { useGetElearningStudentsQuery } from "@/modules/elearning/operations/query";
+import type { ElearningCourseStudentDto } from "@/types/dto/elearning/elearning.dto";
+import { ELEARNING_STUDENT_TABLE_HEAD } from "../constants/constants";
+import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
+import { GridMoreVertIcon } from "@mui/x-data-grid";
+import { useDeleteUserInElearningMutation } from "@/modules/elearning/operations/mutation";
+import { ConfirmDialog } from "@/shared/ui/custom-dialog";
+import { useQueryClient } from "@tanstack/react-query";
 
-interface StudentsSectionProps {
-  classRoomId: string;
+interface ElearningStudentsSectionProps {
+  courseId: string;
 }
 
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE = 600;
 
-type AttendanceFilterValue = "all" | "attended" | "absent" | "pending";
-
 const resolveOrganizationUnitName = (
-  student: ClassRoomStudentDto,
+  student: ElearningCourseStudentDto,
   unitType: "branch" | "department",
 ) => {
-  const employments = student.employee?.employments ?? [];
+  const employments = student.student?.employments ?? [];
 
   return (
     employments.find(
@@ -61,42 +57,26 @@ const resolveOrganizationUnitName = (
   );
 };
 
-
-const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
+const ElearningStudentsSection = ({ courseId }: ElearningStudentsSectionProps) => {
 
   const queryClient = useQueryClient();
-  const notifications = useNotifications();
 
   const [search, setSearch] = useState("");
   const [branchId, setBranchId] = useState<string>("all");
   const [departmentId, setDepartmentId] = useState<string>("all");
-  const [attendance, setAttendance] =
-    useState<AttendanceFilterValue>("all");
+  const [deleteConfirmDialog, setDeleteConfirmDialog] = useState(false);
+  const [studentsId, setStudentsId] = useState<string[]>([]);
+  const [isAllowDeleteUser, setIsAllowDeleteUser] = useState(true);
   const [page, setPage] = useState(1);
 
   const debouncedSearch = useDebounce(search, SEARCH_DEBOUNCE);
-  const [deletedComfirm, setDeleteConfirm] = useState(false);
-  const [employeeIds, setEmployeeIds] = useState<string[]>([]);
-  const [isAllowDeleteUser, setIsAllowDeleteUser] = useState(false);
-
 
   const { organization } = useUserOrganization((state) => state.data);
   const organizationId = organization?.id;
 
   const { data: organizationUnits = [] } = useGetOrganizationUnitsQuery();
 
-  const { mutateAsync: deleteUserInClassRoom, isPending } = useDeleteUserInClassRoomMutation();
-  const { mutateAsync: exportStudents, isPending: isExporting } = useExportStudentsMutation();
-
-
-  const normalizedSearch = debouncedSearch?.trim()
-    ? debouncedSearch.trim()
-    : undefined;
-  const normalizedBranchId = branchId !== "all" ? branchId : undefined;
-  const normalizedDepartmentId =
-    departmentId !== "all" ? departmentId : undefined;
-  const normalizedAttendance =
-    attendance !== "all" ? attendance : undefined;
+  const { mutateAsync: deleteUserInElearningCourse } = useDeleteUserInElearningMutation()
 
   const branchOptions = useMemo(() => {
     return (organizationUnits ?? []).filter(
@@ -113,24 +93,23 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
     );
   }, [organizationUnits, organizationId]);
 
+  const normalizedSearch = debouncedSearch?.trim()
+    ? debouncedSearch.trim()
+    : undefined;
+  const normalizedBranchId = branchId !== "all" ? branchId : undefined;
+  const normalizedDepartmentId =
+    departmentId !== "all" ? departmentId : undefined;
+
   const queryInput = useMemo(
     () => ({
-      classRoomId,
+      courseId,
       page,
       limit: PAGE_SIZE,
       search: normalizedSearch,
       branchId: normalizedBranchId,
       departmentId: normalizedDepartmentId,
-      attendanceStatus: normalizedAttendance,
     }),
-    [
-      classRoomId,
-      page,
-      normalizedSearch,
-      normalizedBranchId,
-      normalizedDepartmentId,
-      normalizedAttendance,
-    ],
+    [courseId, page, normalizedSearch, normalizedBranchId, normalizedDepartmentId],
   );
 
   const {
@@ -139,45 +118,23 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
     isError,
     refetch,
     isFetching,
-  } = useGetClassRoomStudentsQuery(queryInput);
+  } = useGetElearningStudentsQuery(queryInput);
 
   const students = studentsResult?.data ?? [];
   const totalStudents = studentsResult?.total ?? 0;
 
-  const exportFilters = useMemo(
-    () => ({
-      search: normalizedSearch,
-      branchId: normalizedBranchId,
-      departmentId: normalizedDepartmentId,
-      attendanceStatus: normalizedAttendance,
-    }),
-    [
-      normalizedSearch,
-      normalizedBranchId,
-      normalizedDepartmentId,
-      normalizedAttendance,
-    ],
-  );
-
-  const handleSearchChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
     setPage(1);
   };
 
-  const handleBranchChange = (nextBranch: string) => {
-    setBranchId(nextBranch);
+  const handleBranchChange = (value: string) => {
+    setBranchId(value);
     setPage(1);
   };
 
-  const handleDepartmentChange = (nextDepartment: string) => {
-    setDepartmentId(nextDepartment);
-    setPage(1);
-  };
-
-  const handleAttendanceChange = (nextAttendance: AttendanceFilterValue) => {
-    setAttendance(nextAttendance);
+  const handleDepartmentChange = (value: string) => {
+    setDepartmentId(value);
     setPage(1);
   };
 
@@ -185,87 +142,16 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
     setPage(nextPage);
   };
 
-  const handleOpenDialogDeleteUser = (employeeId: string, classRoomRuntimeStatus: any) => {
-    setDeleteConfirm(true);
-    if (classRoomRuntimeStatus === "past" || classRoomRuntimeStatus === "ongoing") {
-      setIsAllowDeleteUser(false);
-    } else {
-      setIsAllowDeleteUser(true);
-    }
-    setEmployeeIds([employeeId]);
-  }
-
   const handleDeleteUser = async () => {
     const payload = {
-      class_room_id: classRoomId,
-      employeeIds,
+      courseId: courseId,
+      studentsId,
     }
-    await deleteUserInClassRoom(payload);
-    queryClient.invalidateQueries({ queryKey: ["class-room-students"] })
-    queryClient.invalidateQueries({ queryKey: ["class-rooms-priority"] })
-    setDeleteConfirm(false);
+    await deleteUserInElearningCourse(payload);
+    queryClient.invalidateQueries({ queryKey: ["elearning-courses"] })
+    queryClient.invalidateQueries({ queryKey: ["elearning-course-students"] })
+    setDeleteConfirmDialog(false);
   }
-
-  const handleExport = async () => {
-    if (isExporting) {
-      return;
-    }
-
-    if (!studentsResult) {
-      notifications.show(
-        "Dữ liệu đang được tải. Vui lòng thử lại trong giây lát.",
-        {
-          severity: "info",
-        },
-      );
-      return;
-    }
-
-    if ((studentsResult.total ?? 0) <= 0) {
-      notifications.show("Không có dữ liệu học viên để xuất.", {
-        severity: "info",
-      });
-      return;
-    }
-
-    try {
-      const { blob, fileName } = await exportStudents({
-        classRoomId,
-        ...exportFilters,
-      });
-
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = downloadUrl;
-      anchor.download = fileName;
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      window.URL.revokeObjectURL(downloadUrl);
-
-      notifications.show("Xuất danh sách học viên thành công.", {
-        severity: "success",
-      });
-    } catch (error) {
-      console.error("Export class room students failed:", error);
-      const fallbackMessage =
-        "Xuất danh sách học viên thất bại. Vui lòng thử lại.";
-      let message = fallbackMessage;
-      let severity: "info" | "error" = "error";
-
-      if (error instanceof Error) {
-        message = error.message || fallbackMessage;
-        severity =
-          (error as Error & { severity?: "info" | "error" }).severity ??
-          "error";
-      }
-
-      notifications.show(message, {
-        severity,
-      });
-    }
-  };
-
 
   return (
     <Stack spacing={2}>
@@ -274,6 +160,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
           display: "flex",
           justifyContent: "space-between",
           gap: 2,
+          flexDirection: { xs: "column", md: "row" },
         }}
       >
         <Box flex={1}>
@@ -301,7 +188,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
         >
           <SelectOption
             inputLabel="Chi nhánh"
-            onChange={(value) => handleBranchChange(value)}
+            onChange={handleBranchChange}
             value={branchId}
             options={[
               { display: true, label: "Tất cả", value: "all" },
@@ -316,7 +203,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
 
           <SelectOption
             inputLabel="Phòng ban"
-            onChange={(value) => handleDepartmentChange(value)}
+            onChange={handleDepartmentChange}
             value={departmentId}
             options={[
               { display: true, label: "Tất cả", value: "all" },
@@ -328,48 +215,19 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
             ]}
             size="small"
           />
-
-          <SelectOption
-            inputLabel="Điểm danh"
-            onChange={(value) => handleAttendanceChange(value)}
-            value={attendance}
-            options={ATTENDANCE_OPTIONS}
-            size="small"
-          />
-
-          <Button
-            variant="outlined"
-            color="primary"
-            sx={{ minWidth: 200 }}
-            onClick={handleExport}
-            disabled={isExporting}
-            startIcon={<DownloadIcon />}
-          >
-            {isExporting ? (
-              <Stack direction="row" spacing={1} alignItems="center">
-                <CircularProgress size={16} color="inherit" />
-                <Typography variant="body2" component="span">
-                  Đang xuất...
-                </Typography>
-              </Stack>
-            ) : (
-              "Xuất danh sách"
-            )}
-          </Button>
         </Stack>
       </Box>
 
       {isError ? (
         <Alert
           severity="error"
-          sx={{ borderRadius: 2 }}
           action={
             <Button color="inherit" size="small" onClick={() => refetch()}>
               Thử lại
             </Button>
           }
         >
-          Không thể tải danh sách học viên. Vui lòng thử lại sau.
+          Không thể tải danh sách học viên eLearning. Vui lòng thử lại sau.
         </Alert>
       ) : null}
 
@@ -384,11 +242,10 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
       >
         <TableContainer>
           <Table
-            aria-label="Danh sách học viên"
             sx={{
               tableLayout: "fixed",
               "& .MuiTableCell-root": {
-                py: 1.5,
+                py: 2,
                 px: 2,
               },
             }}
@@ -405,7 +262,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
               }}
             >
               <TableRow>
-                {STUDENT_TABLE_HEAD.map((column) => (
+                {ELEARNING_STUDENT_TABLE_HEAD.map((column) => (
                   <TableCell
                     key={column.id}
                     sx={{
@@ -430,7 +287,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
               {isLoading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={STUDENT_TABLE_HEAD.length}
+                    colSpan={ELEARNING_STUDENT_TABLE_HEAD.length}
                     align="center"
                   >
                     <Stack
@@ -450,7 +307,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
               ) : students.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={STUDENT_TABLE_HEAD.length}
+                    colSpan={ELEARNING_STUDENT_TABLE_HEAD.length}
                     align="center"
                     sx={{ py: 6 }}
                   >
@@ -462,7 +319,6 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
               ) : (
                 students.map((student, index) => {
                   const order = (page - 1) * PAGE_SIZE + index + 1;
-                  const isAttendance = student.class_room_attendance?.some((item) => item.check_in_at);
                   return (
                     <TableRow
                       key={`${student.id}-${order}`}
@@ -473,22 +329,23 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
                         },
                       }}
                     >
-                      <TableCell>
-                        <Typography
-                          variant="subtitle2"
-                          fontWeight={600}
-                          noWrap
-                        >
-                          {student.employee?.profile?.full_name ?? "-"}
+                      <TableCell align="center">
+                        <Typography variant="subtitle2" fontWeight={600}>
+                          {order}
                         </Typography>
-                        <Chip label={student.employee?.employee_code ?? "-"} variant="filled" color="success" />
                       </TableCell>
                       <TableCell>
-                        {student.employee?.profile?.email ?? "-"}
+                        <Stack spacing={0.5}>
+                          <Typography variant="subtitle2" fontWeight={600} noWrap>
+                            {student.student?.profile?.full_name ?? "-"}
+                          </Typography>
+                          <span>
+                            <Chip label={student.student?.employee_code ?? "-"} variant="filled" color="success" />
+                          </span>
+                        </Stack>
                       </TableCell>
-                      <TableCell>
-                        {student.employee?.profile?.phone_number ?? "-"}
-                      </TableCell>
+                      <TableCell>{student.student?.profile?.email ?? "-"}</TableCell>
+                      <TableCell>{student.student?.profile?.phone_number ?? "-"}</TableCell>
                       <TableCell>
                         {resolveOrganizationUnitName(student, "branch")}
                       </TableCell>
@@ -496,42 +353,20 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
                         {resolveOrganizationUnitName(student, "department")}
                       </TableCell>
                       <TableCell align="center">
-                        {fDateTime(student.created_at)}
-                      </TableCell>
-                      <TableCell align="center">
-                        {
-                          isAttendance ? (
-                            <Chip
-                              label={"Tham gia"}
-                              size="medium"
-                              variant="filled"
-                              color="success"
-                            />
-                          ) : (
-                            <Chip
-                              label={"Vắng mặt"}
-                              size="medium"
-                              variant="filled"
-                              color="error"
-                            />
-                          )
-                        }
-                      </TableCell>
-                      <TableCell align="center">
-                        {fDateTime(student?.class_room_attendance?.[0]?.check_in_at)}
-                      </TableCell>
-                      <TableCell align="center">
-                        {fDateTime(student?.class_room_attendance?.[0]?.check_out_at)}
-                      </TableCell>
-                      <TableCell align="center">
-                        <PopupState variant="popover" popupId="demo-popup-menu">
+                        <PopupState variant="popover" popupId={`elearning-row-${student.id ?? index}`}>
                           {(popupState) => (
                             <>
                               <IconButton {...bindTrigger(popupState)}>
-                                <MoreVertIcon />
+                                <GridMoreVertIcon />
                               </IconButton>
                               <Menu {...bindMenu(popupState)}>
-                                <MenuItem onClick={() => handleOpenDialogDeleteUser(student.employee?.id as string, student?.class_rooms_priority?.runtime_status)}>Gỡ học viên</MenuItem>
+                                <MenuItem onClick={() => {
+                                  popupState.close()
+                                  setDeleteConfirmDialog(true)
+                                  setStudentsId([student.student_id])
+                                }}>
+                                  Gỡ học viên
+                                </MenuItem>
                               </Menu>
                             </>
                           )}
@@ -568,17 +403,20 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
           </Box>
         ) : null}
       </Box>
-      <Pagination
-        onChange={handlePageChange}
-        total={totalStudents}
-        take={PAGE_SIZE}
-        value={page}
-        name="Học viên"
-      />
+
+      {totalStudents > 0 ? (
+        <Pagination
+          onChange={handlePageChange}
+          total={totalStudents}
+          take={PAGE_SIZE}
+          value={page}
+          name="Học viên eLearning"
+        />
+      ) : null}
 
       <ConfirmDialog
-        open={deletedComfirm}
-        onClose={() => setDeleteConfirm(false)}
+        open={deleteConfirmDialog}
+        onClose={() => setDeleteConfirmDialog(false)}
         title={isAllowDeleteUser ? "Xác nhận gỡ học viên khỏi lớp học" : "Không thể gỡ học viên khỏi lớp học"}
         content={isAllowDeleteUser ? "Bạn có chắc muốn gỡ học viên này khỏi lớp học trực tuyến? Sau khi gỡ, học viên sẽ không thể truy cập hoặc tham gia buổi học." : "Khi lớp học đang diễn ra hoặc đã diễn ra, hệ thống tạm khoá chức năng gỡ học viên để đảm bảo ổn định buổi học."}
         action={
@@ -593,4 +431,4 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
   );
 };
 
-export default StudentsSection;
+export default ElearningStudentsSection;

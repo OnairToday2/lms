@@ -60,7 +60,7 @@ const AccountSetting: React.FC<AccountSettingProps> = () => {
               sx={{ color: "text.secondary" }}
               className="line-clamp-1 break-all"
             >
-              admin
+              {name || email}
             </Typography>
           </Box>
         </>

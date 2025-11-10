@@ -8,9 +8,9 @@ const StudentsPage = async ({ params }: { params: Promise<{ classRoomId: string 
     const { data: classRoom, error } = await getClassRoomById(classRoomId);
 
 
-    if (!classRoom || error) {
-        return notFound();
-    }
+    // if (!classRoom || error) {
+    //     return notFound();
+    // }
 
     const classRoomTitle = classRoom?.title || "Lớp học";
     const pageTitle = `Danh Sách học viên${classRoom?.title ? ` • ${classRoomTitle}` : ""}`;

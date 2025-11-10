@@ -315,7 +315,6 @@ const createClassRoomsQuery = (
   options?: { count?: "exact" | "planned" | "estimated"; head?: boolean },
 ) => {
   const { organizationId, employeeId, teacherClassRoomIds } = filters;
-  const trimmedEmployeeId = employeeId?.trim();
   const uuidPattern =
     /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
   const sanitizedTeacherClassRoomIds = Array.from(
@@ -340,8 +339,8 @@ const createClassRoomsQuery = (
 
   const orConditions: string[] = [];
 
-  if (trimmedEmployeeId) {
-    orConditions.push(`employee_id.eq.${trimmedEmployeeId}`);
+  if (employeeId) {
+    orConditions.push(`employee_id.eq.${employeeId}`);
   }
 
   if (sanitizedTeacherClassRoomIds.length > 0) {
