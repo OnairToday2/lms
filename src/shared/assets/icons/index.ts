@@ -48,6 +48,7 @@ import FileZipIcon from "./FileZipIcon";
 import FileImageIcon from "./FileImageIcon";
 import FileVideoIcon from "./FileVideoIcon";
 import FileAdioIcon from "./FileAudioIcon";
+import VideoCameraRecordFillIcon from "./VideoCameraRecordFIll";
 
 export {
   BarChart10Icon,
@@ -100,4 +101,5 @@ export {
   UsersPlusIcon,
   TrashIcon1,
   ZaloIcon,
+  VideoCameraRecordFillIcon,
 };

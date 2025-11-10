@@ -30,6 +30,8 @@ export const PATHS = {
     CREATE_CLASSROOM_ONLINE: "/class-room/online/create",
     CREATE_CLASSROOM: "/class-room/create",
     LIST_CLASSROOM: "/class-room/list",
+    DETAIL_CLASSROOM: (slug: string) => `/class-room/detail/${slug}`,
+    COUNTDOWN_CLASSROOM: (slug: string, sessionId: string) => `/class-room/cd/${slug}/${sessionId}`,
   },
   STUDENTS: {
     ROOT: "/my-class",
