@@ -14,101 +14,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Debug SSH Key Secret
-        run: |
-          echo "EC2_SSH_KEY secret info:"
-          echo "Length: $(echo '${{ secrets.EC2_SSH_KEY }}' | wc -c)"
-          echo "Lines: $(echo '${{ secrets.EC2_SSH_KEY }}' | wc -l)"
-          echo "First line: $(echo '${{ secrets.EC2_SSH_KEY }}' | head -1)"
-          echo "Last line: $(echo '${{ secrets.EC2_SSH_KEY }}' | tail -1)"
-          echo "Contains BEGIN: $(echo '${{ secrets.EC2_SSH_KEY }}' | grep -c 'BEGIN' || echo '0')"
-          echo "Contains END: $(echo '${{ secrets.EC2_SSH_KEY }}' | grep -c 'END' || echo '0')"
-          
-          # Check if key ends properly
-          if ! echo '${{ secrets.EC2_SSH_KEY }}' | grep -q 'END.*PRIVATE KEY'; then
-            echo "WARNING: SSH key appears to be missing END marker!"
-            echo "This will cause libcrypto errors."
-            echo "Please check your GitHub secret EC2_SSH_KEY - it should end with:"
-            echo "-----END OPENSSH PRIVATE KEY----- or -----END RSA PRIVATE KEY-----"
-          fi
-
       - name: Setup SSH Key
         run: |
-          # Ensure the .ssh directory exists
           mkdir -p ~/.ssh
-          
-          # Write the SSH key to a temporary file first for validation
-          echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > /tmp/temp_key
-          
-          # Validate the key has proper BEGIN and END markers
-          if ! grep -q "BEGIN.*PRIVATE KEY" /tmp/temp_key; then
-            echo "ERROR: SSH key missing BEGIN marker"
-            exit 1
-          fi
-          
-          if ! grep -q "END.*PRIVATE KEY" /tmp/temp_key; then
-            echo "ERROR: SSH key missing END marker"
-            echo "Current key content (showing structure):"
-            sed 's/[A-Za-z0-9+/=]/X/g' /tmp/temp_key | head -5
-            echo "..."
-            sed 's/[A-Za-z0-9+/=]/X/g' /tmp/temp_key | tail -5
-            exit 1
-          fi
-          
-          # If validation passes, copy to the proper location
-          cp /tmp/temp_key ~/.ssh/id_rsa
+          echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           chmod 700 ~/.ssh
-          rm /tmp/temp_key
-          
-          # Debug the created key file
-          echo "Created SSH key file info:"
-          ls -la ~/.ssh/id_rsa
-          echo "File size: $(wc -c < ~/.ssh/id_rsa)"
-          echo "File lines: $(wc -l < ~/.ssh/id_rsa)"
-          echo "First line of key file: $(head -1 ~/.ssh/id_rsa)"
-          echo "Last line of key file: $(tail -1 ~/.ssh/id_rsa)"
           
       - name: Setup SSH Agent and Add Key
         run: |
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa
-          
-      - name: Validate SSH Key
-        run: |
-          echo "Validating SSH key..."
-          
-          # Check if the key file exists and has content
-          if [ ! -f ~/.ssh/id_rsa ]; then
-            echo "ERROR: SSH key file not found!"
-            exit 1
-          fi
-          
-          if [ ! -s ~/.ssh/id_rsa ]; then
-            echo "ERROR: SSH key file is empty!"
-            exit 1
-          fi
-          
-          # Try to get key fingerprint
-          echo "Attempting to get key fingerprint..."
-          if ssh-keygen -l -f ~/.ssh/id_rsa; then
-            echo "SSH key validation successful!"
-          else
-            echo "ERROR: SSH key validation failed!"
-            echo "Key file contents (first and last 2 lines):"
-            head -2 ~/.ssh/id_rsa
-            echo "..."
-            tail -2 ~/.ssh/id_rsa
-            exit 1
-          fi
-          
-          # Test SSH agent
-          echo "Testing SSH agent..."
-          if ssh-add -l > /dev/null 2>&1; then
-            echo "SSH agent is working!"
-          else
-            echo "SSH agent test failed, but continuing..."
-          fi
           
       - name: Add SSH Key to Known Hosts
         run: |
@@ -125,12 +41,9 @@ jobs:
           EC2_USER: ${{ secrets.EC2_USER }}
         run: |
           GITHUB_BRANCH=${GITHUB_REF##*/}
-          echo "Connecting to $EC2_USER@$EC2_HOST with branch: $GITHUB_BRANCH"
-          
           ssh -o BatchMode=yes -o ConnectTimeout=10 -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST << EOF
             set -e
             cd lms/lms-fe
-            # Ensure we are on the correct branch
             git fetch origin
             git reset --hard
             git checkout $GITHUB_BRANCH || git checkout -b $GITHUB_BRANCH origin/$GITHUB_BRANCH
