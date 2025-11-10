@@ -8,9 +8,10 @@ import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 
 interface ClassRoomHeaderProps {
   data: GetClassRoomBySlugResponse["data"];
+  isAdminView?: boolean;
 }
 
-const ClassRoomHeader = ({ data }: ClassRoomHeaderProps) => {
+const ClassRoomHeader = ({ data, isAdminView }: ClassRoomHeaderProps) => {
   const mdDown = useResponsive("down", "md");
   return (
     <Box>
@@ -51,7 +52,7 @@ const ClassRoomHeader = ({ data }: ClassRoomHeaderProps) => {
               </Typography>
               <ClassRoomDetailBox data={data} />
             </Stack>
-            <ClassRoomJoin data={data} />
+            <ClassRoomJoin data={data} isAdminView={isAdminView}/>
           </Stack>
         </Container>
       </Box>

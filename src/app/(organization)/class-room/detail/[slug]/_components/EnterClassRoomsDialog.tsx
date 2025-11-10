@@ -13,25 +13,27 @@ import {
   DialogTitle,
   IconButton,
   Stack,
-  Typography
+  Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-
+import JoinButton from "./JoinButton";
 
 const EnterClassRoomsDialog = ({
   open,
   onClose,
   thumbnail,
   isOnline,
+  isAdminView = false,
   sessions = [],
-  onSelectSession,
+  onClickJoin,
 }: {
   open: boolean;
   onClose: () => void;
   thumbnail?: string;
   isOnline: boolean;
+  isAdminView?: boolean;
   sessions: NonNullable<GetClassRoomBySlugResponse["data"]>["sessions"];
-  onSelectSession: (sessionId: string) => void;
+  onClickJoin: (sessionId: string) => void;
 }) => {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
@@ -86,16 +88,12 @@ const EnterClassRoomsDialog = ({
                 </Typography>
               </Box>
 
-              <Button
-                variant="contained"
-                color="primary"
-                size="medium"
-                sx={{ mt: 2, textTransform: "none" }}
-                endIcon={isOnline ? undefined : <QrCode />}
-                onClick={() => onSelectSession(session.id)}
-              >
-                {isOnline ? "Vào lớp học" : "Quét mã QR điểm danh"}
-              </Button>
+              <JoinButton
+                isOnline={isOnline}
+                onClick={() => { onClickJoin(session.id); }}
+                disabled={dayjs().isAfter(dayjs(session.end_at))}
+                isAdminView={isAdminView}
+              />
             </Stack>
           ))}
         </Stack>

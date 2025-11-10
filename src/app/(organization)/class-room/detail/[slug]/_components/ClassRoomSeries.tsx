@@ -1,37 +1,40 @@
 "use client";
 import { FORMAT_DATE_LABEL_WITHOUT_HUMAN_DAY_AND_YEAR, FORMAT_DATE_TIME_SHORTER, FORMAT_TIME } from "@/lib";
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
-import { LocationOnOutlined, QrCode, VideocamOutlined } from "@mui/icons-material";
+import { LocationOnOutlined, VideocamOutlined } from "@mui/icons-material";
 import {
   Box,
   Button,
   Card,
   CardContent,
-  Stack,
-  Typography,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Stack,
+  Typography,
 } from "@mui/material";
 import { ClockIcon } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { ROOM_PROVIDERS } from "../_constants";
-import { PATHS } from "@/constants/path.contstants";
-import { useRouter } from "next/navigation";
+import JoinButton from "./JoinButton";
+import { useClassRoomJoin } from "../_hooks/useClassRoomJoin";
+import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 
 const ClassRoomSerieCard = ({
   session,
   thumbnail,
-  slug,
+  isAdminView,
   index,
   setSelectedSession,
+  onClickJoin,
 }: {
   session: NonNullable<GetClassRoomBySlugResponse["data"]>["sessions"][number];
   thumbnail?: string;
-  slug: string;
+  isAdminView?: boolean;
   index: number;
   setSelectedSession: React.Dispatch<
     React.SetStateAction<
@@ -41,17 +44,17 @@ const ClassRoomSerieCard = ({
       | null
     >
   >;
+  onClickJoin: (sessionId: string) => void;
 }) => {
-  const router = useRouter();
   const isOnline = session.is_online;
 
-  const handleSelectSession = (sessionId: string) => {
-    if (!isOnline) {
-      // handle QR code
-      return;
-    }
-    return router.push(PATHS.CLASSROOMS.COUNTDOWN_CLASSROOM(slug || "", sessionId));
-  };
+  // const handleSelectSession = (sessionId: string) => {
+  //   if (!isOnline) {
+  //     // handle QR code
+  //     return;
+  //   }
+  //   return router.push(PATHS.CLASSROOMS.COUNTDOWN_CLASSROOM(slug || "", sessionId));
+  // };
 
   return (
     <Card variant="outlined" sx={{ px: "6px", pt: "6px", pb: "12px", minWidth: "214px", flexShrink: 0 }}>
@@ -168,16 +171,14 @@ const ClassRoomSerieCard = ({
               </>
             )}
           </Stack>
-          <Button
-            variant="contained"
-            color="primary"
-            size="medium"
-            sx={{ mt: 2, textTransform: "none" }}
-            endIcon={isOnline ? undefined : <QrCode />}
-            onClick={() => handleSelectSession(session.id)}
-          >
-            {isOnline ? "Vào lớp học" : "Quét mã QR điểm danh"}
-          </Button>
+          <Box mt={2}>
+            <JoinButton
+              isOnline={isOnline}
+              isAdminView={isAdminView}
+              onClick={() => onClickJoin(session.id)}
+              disabled={dayjs().isAfter(dayjs(session.end_at))}
+            />
+          </Box>
         </Stack>
       </CardContent>
     </Card>
@@ -188,11 +189,13 @@ const SessionDetail = ({
   session,
   thumbnail,
   open,
+  isAdminView,
   onClose,
   onClickJoin,
 }: {
   session: (NonNullable<GetClassRoomBySlugResponse["data"]>["sessions"][number] & { index: number }) | null;
   thumbnail?: string;
+  isAdminView?: boolean;
   open: boolean;
   onClose: () => void;
   onClickJoin: (sessionId: string) => void;
@@ -266,15 +269,7 @@ const SessionDetail = ({
         <Button onClick={onClose} color="primary" variant="outlined">
           Đóng
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          size="medium"
-          endIcon={session.is_online ? undefined : <QrCode />}
-          onClick={() => onClickJoin(session.id)}
-        >
-          {session.is_online ? "Vào lớp học" : "Quét mã điểm danh"}
-        </Button>
+        <JoinButton isOnline={session.is_online} isAdminView={isAdminView} onClick={() => onClickJoin(session.id)} />
       </DialogActions>
     </Dialog>
   );
@@ -282,12 +277,15 @@ const SessionDetail = ({
 
 interface ClassRoomSeriesProps {
   data: GetClassRoomBySlugResponse["data"];
+  isAdminView?: boolean;
 }
 
-const ClassRoomSeries = ({ data }: ClassRoomSeriesProps) => {
+const ClassRoomSeries = ({ data, isAdminView }: ClassRoomSeriesProps) => {
   const isSingle = data?.room_type === "single";
 
   if (isSingle) return null;
+
+  const employee = useUserOrganization((state) => state.data);
 
   const [selectedSession, setSelectedSession] = useState<
     (NonNullable<GetClassRoomBySlugResponse["data"]>["sessions"][number] & { index: number }) | null
@@ -300,6 +298,17 @@ const ClassRoomSeries = ({ data }: ClassRoomSeriesProps) => {
     }));
   }, [data?.sessions]);
 
+  const { joinSession, qrDialogOpen, selectedSessionForQR, closeQRDialog } = useClassRoomJoin({ data, isAdminView });
+
+  const onClickJoinSession = (sessionId: string) => {
+    setSelectedSession(null);
+
+    const selectedSessionData = data?.sessions.find((session) => session.id === sessionId);
+    const isOnline = selectedSessionData?.is_online ?? true;
+
+    joinSession({ sessionId, isOnline });
+  };
+  
   return (
     <>
       <Box sx={{ mt: 4 }}>
@@ -323,25 +332,39 @@ const ClassRoomSeries = ({ data }: ClassRoomSeriesProps) => {
             <ClassRoomSerieCard
               key={session.id}
               session={session}
-              slug={data?.slug || ""}
               thumbnail={data?.thumbnail_url || undefined}
               index={index}
+              isAdminView={isAdminView}
               setSelectedSession={setSelectedSession}
+              onClickJoin={onClickJoinSession}
             />
           ))}
         </Stack>
       </Box>
-      {
-        <SessionDetail
-          session={selectedSession!}
-          thumbnail={data?.thumbnail_url || undefined}
-          open={Boolean(selectedSession)}
-          onClose={() => setSelectedSession(null)}
-          onClickJoin={(sessionId) => {
-            setSelectedSession(null);
+
+      <SessionDetail
+        session={selectedSession!}
+        thumbnail={data?.thumbnail_url || undefined}
+        isAdminView={isAdminView}
+        open={Boolean(selectedSession)}
+        onClose={() => setSelectedSession(null)}
+        onClickJoin={onClickJoinSession}
+      />
+
+      {isAdminView ? (
+        <>{/* TODO: Add QR View */}</>
+      ) : (
+        <QRScannerDialog
+          open={qrDialogOpen}
+          onClose={() => {
+            closeQRDialog();
           }}
+          employeeId={employee?.id || ""}
+          classRoomId={data?.id || ""}
+          sessionId={selectedSessionForQR || ""}
+          classTitle={data?.title || ""}
         />
-      }
+      )}
     </>
   );
 };

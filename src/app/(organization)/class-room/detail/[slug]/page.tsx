@@ -1,9 +1,10 @@
 "use client";
 import { useGetClassRoomQuery } from "@/modules/class-room-management/operations/query";
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import PageContainer from "@/shared/ui/PageContainer";
 import { Box, Divider, Stack, Tab, Tabs } from "@mui/material";
-import { useParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import ClassRoomAgenda from "./_components/ClassRoomAgenda";
 import ClassRoomDocuments from "./_components/ClassRoomDocuments";
 import ClassRoomHeader from "./_components/ClassRoomHeader";
@@ -11,12 +12,15 @@ import ClassRoomJoinHorizontal from "./_components/ClassRoomJoinHorizontal";
 import ClassRoomSeries from "./_components/ClassRoomSeries";
 import { queryClassName } from "./_constants";
 
-const offsetValue = 0.3;
+const offsetValue = -0.1;
 const outOfMainJoinZoneClassName = "join-horizontal-zone";
 
 export default function ClassRoomDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
+  const router = useRouter();
+
+  const user = useUserOrganization((state) => state.data);
   const [showJoinHorizontal, setShowJoinHorizontal] = useState<boolean>(false);
 
   const [tabValue, setTabValue] = useState(0);
@@ -67,6 +71,20 @@ export default function ClassRoomDetailPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!data || !data.data) return;
+
+    const classRoomData = data.data;
+
+    const canAccess =
+      classRoomData.employees.find((employee) => employee.employee?.id === user.id) ||
+      classRoomData.owner?.id === user.id ||
+      user.employeeType === "admin" ||
+      classRoomData.sessions.find((section) => section.teachers?.some((teacher) => teacher.employee?.id === user.id));
+
+    if (!canAccess) return window.history.length > 2 ? router.back() : router.push("/");
+  }, [data]);
+
   if (isLoading && !data) return <div>Loading...</div>;
 
   if (!isLoading && ((data && !data.data) || !data)) return <div>Class room not found</div>;
@@ -75,8 +93,9 @@ export default function ClassRoomDetailPage() {
 
   if (!classRoomData) return <div>Class room not found</div>;
 
-  console.log(classRoomData);
-
+  const isAdminView =
+    classRoomData.owner?.id === user.id || user.employeeType === "admin" || user.employeeType === "teacher";
+    
   return (
     <PageContainer
       title="Chi tiết lớp học"
@@ -86,12 +105,12 @@ export default function ClassRoomDetailPage() {
       ]}
     >
       <Stack position="relative">
-        <ClassRoomHeader data={classRoomData} />
-        <ClassRoomSeries data={classRoomData} />
+        <ClassRoomHeader data={classRoomData} isAdminView={isAdminView} />
+        <ClassRoomSeries data={classRoomData} isAdminView={isAdminView} />
         <Divider className={`${outOfMainJoinZoneClassName} invisible`} />
 
         {showJoinHorizontal && (
-          <Box className="z-101 top-0 fixed w-3/4 bg-white pt-3">
+          <Box className="z-101 top-0 left-0 sticky w-full bg-white pt-3 pb-2">
             <ClassRoomJoinHorizontal data={classRoomData} />
           </Box>
         )}

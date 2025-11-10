@@ -1,43 +1,33 @@
-import {
-  FORMAT_DATE_LABEL_WITHOUT_HUMAN_DAY_AND_YEAR,
-  FORMAT_DATE_TIME_SHORTER,
-  FORMAT_TIME
-} from "@/lib";
+import { FORMAT_DATE_LABEL_WITHOUT_HUMAN_DAY_AND_YEAR, FORMAT_DATE_TIME_SHORTER, FORMAT_TIME } from "@/lib";
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 import { QrCode } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Stack,
-  Typography
-} from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import Image from "next/image";
-import { useState } from "react";
 import EnterClassRoomsDialog from "./EnterClassRoomsDialog";
-
-const MAX_AVATAR = 3;
+import { useClassRoomJoin } from "../_hooks/useClassRoomJoin";
+import JoinButton from "./JoinButton";
+import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 
 interface ClassRoomJoinProps {
   data: GetClassRoomBySlugResponse["data"];
+  isAdminView?: boolean;
 }
 
-export default function ClassRoomJoinHorizontal({ data }: ClassRoomJoinProps) {
-  const employees = data?.employees || [];
+export default function ClassRoomJoinHorizontal({ data, isAdminView = false }: ClassRoomJoinProps) {
+  const employee = useUserOrganization((state) => state.data);
 
-  const isSingle = data?.room_type === "single";
-  const isOnline = data?.sessions.every((session) => session.is_online) ?? true;
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  const handleClickJoin = () => {
-    if (!isSingle) {
-      setDialogOpen(true);
-      return;
-    }
-  };
-
-  const handleSelectSession = (sessionId: string) => {};
+  const {
+    dialogOpen,
+    qrDialogOpen,
+    selectedSessionForQR,
+    isAllOnline,
+    handleClickJoin,
+    handleSelectSession,
+    handleCloseDialog,
+    closeQRDialog,
+  } = useClassRoomJoin({ data, isAdminView });
 
   return (
     <>
@@ -98,27 +88,38 @@ export default function ClassRoomJoinHorizontal({ data }: ClassRoomJoinProps) {
             )}
           </Stack>
         </Stack>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          sx={{ mt: 2, textTransform: "none" }}
-          endIcon={isOnline ? undefined : <QrCode />}
+        <JoinButton
+          isOnline={isAllOnline}
           onClick={handleClickJoin}
-        >
-          {isOnline ? "Vào lớp học" : "Quét mã QR điểm danh"}
-        </Button>
+          disabled={dayjs().isAfter(dayjs(data?.end_at))}
+          isAdminView={isAdminView}
+        />
       </Stack>
+
       <EnterClassRoomsDialog
         open={dialogOpen}
-        onClose={() => {
-          setDialogOpen(false);
-        }}
-        isOnline={isOnline}
+        onClose={handleCloseDialog}
+        isOnline={isAllOnline}
         thumbnail={data?.thumbnail_url || undefined}
         sessions={data?.sessions || []}
-        onSelectSession={handleSelectSession}
+        isAdminView={isAdminView}
+        onClickJoin={handleSelectSession}
       />
+
+      {isAdminView ? (
+        <>{/* TODO: Add QR View */}</>
+      ) : (
+        <QRScannerDialog
+          open={qrDialogOpen}
+          onClose={() => {
+            closeQRDialog();
+          }}
+          employeeId={employee?.id || ""}
+          classRoomId={data?.id || ""}
+          sessionId={selectedSessionForQR || ""}
+          classTitle={data?.title || ""}
+        />
+      )}
     </>
   );
 }
