@@ -1,6 +1,6 @@
 "use client";
 import { Badge, IconButton } from "@mui/material";
-import { BellIcon } from "../assets/icons";
+import { Bell01Icon } from "../assets/icons";
 import { useTheme, useMediaQuery, useColorScheme } from "@mui/material";
 
 const NotifycationButton = () => {
@@ -17,6 +17,10 @@ const NotifycationButton = () => {
     <IconButton
       sx={{
         backgroundColor: paletteMode === "light" ? "white" : "white",
+        borderRadius: "0.625rem",
+        "&:hover": {
+          backgroundColor: "white",
+        },
       }}
     >
       <Badge
@@ -31,7 +35,7 @@ const NotifycationButton = () => {
           },
         }}
       >
-        <BellIcon />
+        <Bell01Icon className="w-5 h-5" />
       </Badge>
     </IconButton>
   );

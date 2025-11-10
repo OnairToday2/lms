@@ -26,12 +26,10 @@ type ClassRoomTabItem = {
 };
 type TabStateType = Record<TabKeyType, { status: ClassRoomTabStatus }>;
 export interface ClassRoomTabContainerRef {
-  checkStatusAllTabItems: () => boolean;
   setTabStatus: (tabKey: TabKeyType, status: ClassRoomTabStatus) => void;
 }
 export interface ClassRoomTabContainerProps {
   items: ClassRoomTabItem[];
-  previewUI?: React.ReactNode;
   actions: React.ReactNode;
   className?: string;
   trigger: UseFormTrigger<ClassRoom>;
@@ -39,39 +37,36 @@ export interface ClassRoomTabContainerProps {
 }
 
 const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRoomTabContainerProps>(
-  ({ items, className, previewUI, actions, trigger, errors }, ref) => {
+  ({ items, className, actions, trigger, errors }, ref) => {
     const [isGotoNextTab, startGotoNextTab] = useTransition();
     const [currentTab, setCurrentTab] = useState<TabKeyType>(() => items?.[0]?.tabKey || "clsTab-information");
-    const [tabsState, setTabsState] = useState(
+    const [tabsState, setTabsState] = useState<TabStateType>(
       () => Object.fromEntries(items.map((tab) => [tab.tabKey, { status: "idle" }])) as TabStateType,
     );
 
     /**
      * Trigger validate all field in current tab before process next action
      */
-    const validateCurrentTabBeforeProceed = useCallback(
-      async (tab: TabKeyType, callback?: () => void) => {
-        const keyList = getKeyFieldByTab(tab);
+    const validateCurrentTabBeforeProceed = useCallback(async (tab: TabKeyType, callback?: () => void) => {
+      const keyList = getKeyFieldByTab(tab);
 
-        await Promise.all(keyList.map((key) => trigger(key)));
+      const isValid = (await Promise.allSettled(keyList.map((key) => trigger(key)))).every(
+        (f) => f.status === "fulfilled" && !!f.value,
+      );
 
-        const status = getStatusTabClassRoom(errors, tab);
+      setTabsState((prevState) => {
+        return {
+          ...prevState,
+          [tab]: {
+            status: isValid ? "valid" : "invalid",
+          },
+        };
+      });
 
-        setTabsState((prevState) => {
-          return {
-            ...prevState,
-            [tab]: {
-              status: status,
-            },
-          } as typeof prevState;
-        });
+      if (!isValid) return;
 
-        if (status === "invalid") return;
-
-        callback?.();
-      },
-      [errors],
-    );
+      callback?.();
+    }, []);
 
     const handleChangeTab = useCallback(
       (_: React.SyntheticEvent, newTab: TabKeyType) =>
@@ -104,16 +99,6 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
     );
 
     useImperativeHandle(ref, () => ({
-      checkStatusAllTabItems: () => {
-        const updateAllTabState = items.reduce<TabStateType>((acc, item) => {
-          return {
-            ...acc,
-            [item.tabKey]: { status: getStatusTabClassRoom(errors, item.tabKey) },
-          };
-        }, {} as TabStateType);
-        setTabsState(updateAllTabState);
-        return items.every((item) => getStatusTabClassRoom(errors, item.tabKey) === "valid");
-      },
       setTabStatus: (tabKey, status) => {
         setTabsState((oldState) => ({ ...oldState, [tabKey]: { status: status } }));
       },
@@ -143,40 +128,21 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
             </ClassRoomTabList>
             <div className="tab-actions">{actions}</div>
           </div>
-          <div
-            className={cn("grid gap-6", {
-              "lg:grid-cols-2 grid-cols-1": currentTab !== "clsTab-setting",
-              "grid-cols-1": currentTab === "clsTab-setting",
-            })}
-          >
-            <div className="panels-wraper">
-              {items.map((item) => (
-                <TabPanel key={item.tabKey} value={item.tabKey} className="p-0">
-                  {item?.content}
-                </TabPanel>
-              ))}
-              <div className={cn({ hidden: currentTab === "clsTab-setting" })}>
-                <div className={cn("py-6 flex justify-between")}>
-                  <Button
-                    variant="outlined"
-                    color="inherit"
-                    onClick={goNextOrBackStep("back")}
-                    disabled={isGotoNextTab}
-                  >
-                    Quay lại
-                  </Button>
-                  <Button variant="fill" onClick={goNextOrBackStep("next")} disabled={isGotoNextTab}>
-                    Tiếp tục
-                  </Button>
-                </div>
+          <div className="panels-wraper">
+            {items.map((item) => (
+              <TabPanel key={item.tabKey} value={item.tabKey} className="p-0">
+                {item?.content}
+              </TabPanel>
+            ))}
+            <div className={cn({ hidden: currentTab === "clsTab-setting" })}>
+              <div className={cn("py-6 flex justify-between")}>
+                <Button variant="outlined" color="inherit" onClick={goNextOrBackStep("back")} disabled={isGotoNextTab}>
+                  Quay lại
+                </Button>
+                <Button variant="fill" onClick={goNextOrBackStep("next")} disabled={isGotoNextTab}>
+                  Tiếp tục
+                </Button>
               </div>
-            </div>
-            <div
-              className={cn("preview-ui", {
-                hidden: currentTab === "clsTab-setting",
-              })}
-            >
-              {previewUI}
             </div>
           </div>
         </TabContext>

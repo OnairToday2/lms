@@ -2,13 +2,15 @@
 import { PropsWithChildren, useCallback, useRef, useState } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
-import Sidebar from "./Sidebar";
+import DashboardSidebar from "./DashboardSidebar";
 import Footer from "./Footer";
+import { DashboardSidebarProps } from "./DashboardSidebar";
 interface MainLayoutProps extends PropsWithChildren {
   className?: string;
+  menuItems: DashboardSidebarProps["menuItems"];
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, className, menuItems }) => {
   const theme = useTheme();
   const [isDesktopNavigationExpanded, setIsDesktopNavigationExpanded] = useState(true);
   const [isMobileNavigationExpanded, setIsMobileNavigationExpanded] = useState(false);
@@ -51,11 +53,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         height: "100dvh",
       }}
     >
-      <Sidebar
+      <DashboardSidebar
         expanded={isNavigationExpanded}
         setExpanded={setIsNavigationExpanded}
         container={layoutRef.current ?? undefined}
         className="main-layout__sider"
+        menuItems={menuItems}
       />
       {/* Main content */}
       <Box

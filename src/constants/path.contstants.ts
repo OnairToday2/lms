@@ -25,19 +25,26 @@ export const PATHS = {
     CREATE: "/roles/create",
   },
   CLASSROOMS: {
-    ROOT: "/class-room",
-    CREATE_CLASSROOM_OFFLINE: "/class-room/offline/create",
-    CREATE_CLASSROOM_ONLINE: "/class-room/online/create",
-    CREATE_CLASSROOM: "/class-room/create",
+    ROOT: "/admin/class-room",
+    CREATE_CLASSROOM: "/admin/class-room/create",
+    EDIT_CLASSROOM: (id: string = ":id") => `/admin/class-room/${id}/cedit`,
     LIST_CLASSROOM: "/class-room/list",
+  },
+  COURSES: {
+    ROOT: "/admin/online-course",
+    CREATE: "/admin/online-course/create",
+    EDIT: (id: string = ":id") => `/admin/online-course/${id}/cedit`,
   },
   STUDENTS: {
     ROOT: "/my-class",
   },
   ASSIGNMENTS: {
-    ROOT: '/assignments',
-    CREATE_ASSIGNMENT: '/assignments/create',
-    EDIT_ASSIGNMENT: (id: string = ':id') => `/assignments/edit/${id}`,
+    ROOT: "/assignments",
+    CREATE_ASSIGNMENT: "/assignments/create",
+    EDIT_ASSIGNMENT: (id: string = ":id") => `/assignments/edit/${id}`,
+  },
+  MY_ASSIGNMENTS: {
+    ROOT: "/my-assignments",
   },
   REPORTS: {
     ROOT: "/report",

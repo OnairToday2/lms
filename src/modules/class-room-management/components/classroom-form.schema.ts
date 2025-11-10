@@ -1,7 +1,6 @@
+import { CLASS_ROOM_PLATFORM } from "@/constants/class-room.constant";
 import dayjs from "dayjs";
 import * as zod from "zod";
-import { CLASS_ROOM_PLATFORM } from "@/constants/class-room.constant";
-import { FILE_TYPES, FileCategory, FileTypes } from "@/constants/file.constant";
 
 const classRoomSessionAgendaSchema = zod.object({
   id: zod.string().optional(),
@@ -32,8 +31,6 @@ const classRoomSessionSchema = zod
       url: zod.string(),
       password: zod.string(),
     }),
-    limitPerson: zod.number(),
-    isUnlimited: zod.boolean(),
     agendas: zod.array(classRoomSessionAgendaSchema),
     qrCode: zod.object({
       id: zod.string().optional(),
@@ -42,23 +39,7 @@ const classRoomSessionSchema = zod
       endDate: zod.string(),
     }),
   })
-  .superRefine(({ limitPerson, isUnlimited, startDate, endDate, qrCode, isOnline, location, channelInfo }, ctx) => {
-    if (!isUnlimited) {
-      if (limitPerson <= 0) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Số lượng tối thiểu lớn hơn 0.",
-          path: ["limitPerson"],
-        });
-      }
-      if (limitPerson > 99) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Số lượng tối đa nhỏ hơn 99.",
-          path: ["limitPerson"],
-        });
-      }
-    }
+  .superRefine(({ startDate, endDate, qrCode, isOnline, location, channelInfo }, ctx) => {
     if (dayjs(startDate).isAfter(endDate)) {
       ctx.addIssue({
         code: "custom",
@@ -138,79 +119,31 @@ const classRoomSessionSchema = zod
     }
   });
 
-const classRoomSessionTeacherSchema = zod.object({
-  id: zod.string(),
-  name: zod.string().optional(),
-});
-
 const classRoomSchema = zod
   .object({
+    classRoomId: zod.string(),
     title: zod.string().min(1, { message: "Tên lớp học không bỏ trống." }).max(200, "Vui lòng nhập tối đa 200 ký tự"),
     description: zod.string().min(1, { error: "Không bỏ trống nội dung." }),
     slug: zod.string(),
     thumbnailUrl: zod
-      .string(),
-    // .min(1, { error: "Ảnh bìa không bỏ trống." })
-    // .superRefine((value, ctx) => {
-    //   if (!value.startsWith("http://") && !value.startsWith("https://")) {
-    //     ctx.addIssue({
-    //       code: "invalid_format",
-    //       format: "starts_with",
-    //       message: "Đường dẫn không hợp lệ.",
-    //     });
-    //   }
-    // }),
-    classRoomField: zod
-      .array(zod.string())
-      .min(1, "Chọn tối thiểu 1 lĩnh vực và tối đa 3 lĩnh vực.")
-      .max(3, "Chọn tối thiểu 1 lĩnh vực và tối đa 3 lĩnh vực."),
-    hashTags: zod.array(zod.string()),
-    classRoomId: zod.string(),
-    status: zod.enum(["publish", "draft", "pending", "deleted", "active", "deactive"]),
-    roomType: zod.enum(["single", "multiple"]),
-    classRoomSessions: zod.array(classRoomSessionSchema),
-    communityInfo: zod.object({
-      name: zod.string(),
-      url: zod.string().superRefine((value, ctx) => {
-        if (value.length) {
-          if (!value.startsWith("http://") && !value.startsWith("https://")) {
-            ctx.addIssue({
-              code: "invalid_format",
-              format: "starts_with",
-              message: "Đường dẫn không hợp lệ. URL phải bắt đầu bằng http:// hoặc https://",
-            });
-          }
-        }
-      }),
-    }),
-    faqs: zod
-      .array(
-        zod.object({
-          id: zod.string().optional(),
-          question: zod.string(),
-          answer: zod.string(),
-        }),
-      )
-      .superRefine((values, context) => {
-        if (values.length) {
-          values.forEach(({ answer, question }, i) => {
-            if (!answer.length || !answer) {
-              context.addIssue({
-                code: "custom",
-                message: `Không bỏ trống câu hỏi.`,
-                path: [i, "answer"],
-              });
-            }
-            if (!question.length) {
-              context.addIssue({
-                code: "custom",
-                message: `Không bỏ trống câu trả lời.`,
-                path: [i, "question"],
-              });
-            }
+      .string()
+      .min(1, { error: "Ảnh bìa không bỏ trống." })
+      .superRefine((value, ctx) => {
+        if (!value.startsWith("http://") && !value.startsWith("https://")) {
+          ctx.addIssue({
+            code: "invalid_format",
+            format: "starts_with",
+            message: "Đường dẫn không hợp lệ.",
           });
         }
       }),
+    categories: zod
+      .array(zod.string())
+      .min(1, "Chọn tối thiểu 1 lĩnh vực và tối đa 3 lĩnh vực.")
+      .max(3, "Chọn tối thiểu 1 lĩnh vực và tối đa 3 lĩnh vực."),
+    status: zod.enum(["publish", "draft", "pending", "deleted", "active", "deactive"]),
+    roomType: zod.enum(["single", "multiple"]),
+    classRoomSessions: zod.array(classRoomSessionSchema),
     forWhom: zod
       .array(
         zod.object({
@@ -244,49 +177,42 @@ const classRoomSchema = zod
         }),
       )
       .optional(),
-    whies: zod
-      .array(
-        zod.object({
-          id: zod.string().optional(),
-          description: zod.string(),
-        }),
-      )
-      .superRefine((values, context) => {
-        if (values.length) {
-          values.forEach(({ description }, i) => {
-            if (!description.length) {
-              context.addIssue({
-                code: "custom",
-                message: `Không bỏ trống.`,
-                path: [i, "description"],
-              });
-            }
-          });
-        }
-      }),
-    galleries: zod.array(zod.string()).superRefine((values, ctx) => {
-      if (values.length)
-        values.forEach((v, i) => {
-          if (!v.startsWith("http://")) {
-            ctx.addIssue({
-              code: "invalid_format",
-              format: "starts_with",
-              message: `Đường dẫn ${i} không hợp lệ.`,
-            });
-          }
-        });
-    }),
+    // whies: zod
+    //   .array(
+    //     zod.object({
+    //       id: zod.string().optional(),
+    //       description: zod.string(),
+    //     }),
+    //   )
+    //   .superRefine((values, context) => {
+    //     if (values.length) {
+    //       values.forEach(({ description }, i) => {
+    //         if (!description.length) {
+    //           context.addIssue({
+    //             code: "custom",
+    //             message: `Không bỏ trống.`,
+    //             path: [i, "description"],
+    //           });
+    //         }
+    //       });
+    //     }
+    //   }),
+    // galleries: zod.array(zod.string()).superRefine((values, ctx) => {
+    //   if (values.length)
+    //     values.forEach((v, i) => {
+    //       if (!v.startsWith("http://")) {
+    //         ctx.addIssue({
+    //           code: "invalid_format",
+    //           format: "starts_with",
+    //           message: `Đường dẫn ${i} không hợp lệ.`,
+    //         });
+    //       }
+    //     });
+    // }),
     platform: zod.enum([CLASS_ROOM_PLATFORM.HYBRID, CLASS_ROOM_PLATFORM.ONLINE, CLASS_ROOM_PLATFORM.OFFLINE]),
   })
   .superRefine(({ roomType, classRoomSessions }, ctx) => {
     if (roomType === "multiple") {
-      // if (classRoomSessions.length < 2) {
-      //   ctx.addIssue({
-      //     code: "custom",
-      //     message: "Lớp học chuỗi tối thiểu 2 buổi học",
-      //     path: ["classRoomSessions", "length"],
-      //   });
-      // }
       classRoomSessions.forEach((clrs, _index) => {
         if (!clrs.title.length) {
           ctx.addIssue({
@@ -305,26 +231,9 @@ const classRoomSchema = zod
         }
       });
     }
-    if (roomType === "single") {
-      // if (classRoomSessions.length < 2) {
-      //   ctx.addIssue({
-      //     code: "custom",
-      //     message: "Lớp học chuỗi tối thiểu 1 buổi học",
-      //     path: ["classRoomSessions", "length"],
-      //   });
-      // }
-    }
   });
 
 type ClassRoomSession = zod.infer<typeof classRoomSessionSchema>;
-type ClassRoomSessionTeacher = zod.infer<typeof classRoomSessionTeacherSchema>;
 type ClassRoom = zod.infer<typeof classRoomSchema>;
 
-export {
-  classRoomSessionTeacherSchema,
-  classRoomSessionSchema,
-  classRoomSchema,
-  type ClassRoomSession,
-  type ClassRoomSessionTeacher,
-  type ClassRoom,
-};
+export { classRoomSessionSchema, classRoomSchema, type ClassRoomSession, type ClassRoom };

@@ -1,24 +1,17 @@
 "use client";
-import Avatar from "@mui/material/Avatar";
+import { useMemo } from "react";
+import Avatar from "@/shared/ui/Avatar";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { useAuthStore } from "@/modules/auth/store/AuthProvider";
-import AccountMenuOptions, {
-  AccountMenuOptionsProps,
-} from "./AccountMenuOptions";
-import { useMemo } from "react";
+import AccountMenuOptions, { AccountMenuOptionsProps } from "./AccountMenuOptions";
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 interface AccountSettingProps {
   className?: string;
 }
 
 const AccountSetting: React.FC<AccountSettingProps> = () => {
-  const {
-    data: { name, email, avatarUrl } = {},
-    signOut,
-    isLoading,
-  } = useAuthStore((state) => state) || {};
-
+  const userOrganization = useUserOrganization((state) => state.data);
   const ACCOUNT_ITEMS: AccountMenuOptionsProps["menuItems"] = useMemo(
     () => [
       {
@@ -40,30 +33,26 @@ const AccountSetting: React.FC<AccountSettingProps> = () => {
   return (
     <Stack direction="row" className="account-item">
       <AccountMenuOptions menuItems={ACCOUNT_ITEMS}>
-        <>
+        <div className="max-w-40 flex items-center gap-2">
           <Avatar
-            sizes="small"
-            alt="Riley Carter"
-            src={avatarUrl ?? "/assets/images/avatar/7.jpg"}
-            sx={{ width: 36, height: 36 }}
+            alt={userOrganization.profile?.fullName}
+            src={userOrganization.profile?.avatarUrl}
             variant="rounded"
+            className="rounded-[10px]"
           />
           <Box component="div" sx={{ mr: "auto" }} className="flex-1">
-            <Typography
-              variant="body2"
-              sx={{ fontWeight: 500, lineHeight: "16px" }}
-            >
-              {name}
+            <Typography variant="body2" sx={{ fontWeight: 500, fontSize: "0.75rem" }} className="line-clamp-1">
+              {userOrganization.profile?.fullName}
             </Typography>
             <Typography
               variant="caption"
               sx={{ color: "text.secondary" }}
-              className="line-clamp-1 break-all"
+              className="line-clamp-1 break-all leading-tight"
             >
-              {name || email}
+              {userOrganization.employeeType}
             </Typography>
           </Box>
-        </>
+        </div>
       </AccountMenuOptions>
     </Stack>
   );

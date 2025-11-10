@@ -1850,6 +1850,18 @@ export type Database = {
           qr_code_id: string
         }[]
       }
+      slugify: {
+        Args: { value: string }
+        Returns: string
+      }
+      unaccent: {
+        Args: { "": string }
+        Returns: string
+      }
+      unaccent_init: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
     }
     Enums: {
       action_code_enum: "create" | "read" | "update" | "delete"

@@ -8,7 +8,12 @@ export async function GET(
   try {
     const { id: assignmentId } = await params;
 
-    const students = await getAssignmentStudents(assignmentId);
+    // Get pagination parameters from query string
+    const searchParams = request.nextUrl.searchParams;
+    const page = parseInt(searchParams.get("page") || "0", 10);
+    const limit = parseInt(searchParams.get("limit") || "25", 10);
+
+    const students = await getAssignmentStudents(assignmentId, page, limit);
 
     return NextResponse.json(students, { status: 200 });
   } catch (error) {
