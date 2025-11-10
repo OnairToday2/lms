@@ -125,6 +125,13 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
 
 const STUDENTS_MENU_LIST: MenuItemType[] = [
   {
+    title: "Bài kiểm tra của tôi",
+    icon: React.createElement(ClipboardIcon),
+    key: "my-assignments",
+    path: PATHS.MY_ASSIGNMENTS.ROOT,
+    type: "item",
+  },
+  {
     title: "Lớp học của tôi",
     icon: React.createElement(UsersIcon2),
     key: "my-class",
