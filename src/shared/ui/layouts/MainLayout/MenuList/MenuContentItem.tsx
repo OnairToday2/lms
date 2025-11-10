@@ -13,7 +13,7 @@ import Typography from "@mui/material/Typography";
 import type {} from "@mui/material/themeCssVarsAugmentation";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Link from "next/link";
-import { MINI_DRAWER_WIDTH } from "../Sidebar/constants";
+import { MINI_DRAWER_WIDTH } from "../DashboardSidebar/constants";
 import MenuContextProvider, { MenuContextApi, useMenuContext } from "./MenuContext";
 import { svgIconClasses } from "@mui/material";
 

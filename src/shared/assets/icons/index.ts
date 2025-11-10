@@ -9,7 +9,9 @@ import HelpIcon from "./HelpIcon";
 import LogoOnairIcon from "./LogoOnairIcon";
 import LogoOnairShortIcon from "./LogoOnairShortIcon";
 import SettingIcon from "./SettingIcon";
+import Setting02Icon from "./Setting02Icon";
 import BellIcon from "./BellIcon";
+import Bell01Icon from "./Bell01Icon";
 import BookOpenIcon from "./BookOpenIcon";
 import BarChart10Icon from "./BarChart10Icon";
 import EyeIcon from "./EyeIcon";
@@ -52,6 +54,7 @@ import FileAdioIcon from "./FileAudioIcon";
 export {
   BarChart10Icon,
   BellIcon,
+  Bell01Icon,
   BookOpenIcon,
   CalendarDateIcon,
   CalendarIcon2,
@@ -93,6 +96,7 @@ export {
   SearchIcon,
   SquareFourIcon,
   SettingIcon,
+  Setting02Icon,
   YoutubeIcon,
   ParagraphIcon,
   UsersIcon2,

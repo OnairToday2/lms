@@ -8,13 +8,33 @@ import {
 } from "./type";
 import { ClassRoomMetaKey, ClassRoomMetaValue } from "@/constants/class-room-meta.constant";
 import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
-import { GetClassRoomsQueryInput, GetClassRoomStatusCountsInput, GetClassRoomStudentsQueryInput } from "@/modules/class-room-management/operations/query";
+import {
+  GetClassRoomsQueryInput,
+  GetClassRoomStatusCountsInput,
+  GetClassRoomStudentsQueryInput,
+} from "@/modules/class-room-management/operations/query";
 import { PaginatedResult } from "@/types/dto/pagination.dto";
-import { ClassRoomPriorityDto, ClassRoomSessionDetailDto, ClassRoomStatusCountDto, ClassRoomStudentDto } from "@/types/dto/classRooms/classRoom.dto";
-import { CLASS_ROOM_STUDENTS_SELECT, CLASS_ROOMS_SELECT, CLASS_SESSION_WITH_CLASS_ROOM_SELECT, LIMIT, PAGE } from "./constants";
+import {
+  ClassRoomPriorityDto,
+  ClassRoomSessionDetailDto,
+  ClassRoomStatusCountDto,
+  ClassRoomStudentDto,
+} from "@/types/dto/classRooms/classRoom.dto";
+import {
+  CLASS_ROOM_STUDENTS_SELECT,
+  CLASS_ROOMS_SELECT,
+  CLASS_SESSION_WITH_CLASS_ROOM_SELECT,
+  LIMIT,
+  PAGE,
+} from "./constants";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/types/supabase.types";
-import { ClassRoomRuntimeStatusFilter, ClassRoomStatusFilter, ClassRoomTypeFilter, ClassSessionModeFilter } from "@/app/(organization)/class-room/list/types/types";
+import {
+  ClassRoomRuntimeStatusFilter,
+  ClassRoomStatusFilter,
+  ClassRoomTypeFilter,
+  ClassSessionModeFilter,
+} from "@/app/(organization)/class-room/list/types/types";
 export * from "./type";
 
 const getClassRoomById = async (classRoomId: string) => {
@@ -91,6 +111,7 @@ const getClassRoomById = async (classRoomId: string) => {
             channel_provider,
             channel_info,
             limit_person,
+            priority,
             teachers:class_session_teacher(
               id,
               employee:employees!class_session_teacher_teacher_id_fkey(
@@ -132,6 +153,7 @@ const getClassRoomById = async (classRoomId: string) => {
         `,
       )
       .eq("id", classRoomId)
+      .order("priority", { ascending: true, foreignTable: "class_sessions" })
       .single()
       .overrideTypes<{
         class_room_metadata: {
@@ -251,13 +273,9 @@ const deletePivotClassRoomAndEmployeeByEmployeeId = async (payload: DeletePivotC
   }
 };
 
+const sanitizeSearchTerm = (value: string) => value.replace(/%/g, "\\%").replace(/_/g, "\\_").replace(/,/g, " ");
 
-const sanitizeSearchTerm = (value: string) =>
-  value.replace(/%/g, "\\%").replace(/_/g, "\\_").replace(/,/g, " ");
-
-const applyClassRoomFilters = <
-  T extends PostgrestFilterBuilder<any, any, any, any>,
->(
+const applyClassRoomFilters = <T extends PostgrestFilterBuilder<any, any, any, any>>(
   query: T,
   filters: GetClassRoomsQueryInput = {},
 ): T => {
@@ -293,12 +311,7 @@ const applyClassRoomFilters = <
     const trimmed = q.trim();
     if (trimmed) {
       const escaped = sanitizeSearchTerm(trimmed);
-      builder = builder.or(
-        [
-          `title.ilike.%${escaped}%`,
-          `description.ilike.%${escaped}%`,
-        ].join(","),
-      );
+      builder = builder.or([`title.ilike.%${escaped}%`, `description.ilike.%${escaped}%`].join(","));
     }
   }
 
@@ -316,23 +329,16 @@ const createClassRoomsQuery = (
 ) => {
   const { organizationId, employeeId, teacherClassRoomIds } = filters;
   const trimmedEmployeeId = employeeId?.trim();
-  const uuidPattern =
-    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
   const sanitizedTeacherClassRoomIds = Array.from(
     new Set(
       (teacherClassRoomIds ?? [])
         .map((id) => id?.trim())
-        .filter(
-          (id): id is string =>
-            Boolean(id) && uuidPattern.test(id),
-        ),
+        .filter((id): id is string => Boolean(id) && uuidPattern.test(id)),
     ),
   );
 
-  let query = supabase
-    .from("class_rooms_priority")
-    .select(select, options)
-    .not("status", "in", "(deleted)");
+  let query = supabase.from("class_rooms_priority").select(select, options).not("status", "in", "(deleted)");
 
   if (organizationId) {
     query = query.eq("organization_id", organizationId!);
@@ -355,10 +361,7 @@ const createClassRoomsQuery = (
   return query;
 };
 
-
-const getClassRooms = async (
-  input: GetClassRoomsQueryInput = {},
-): Promise<PaginatedResult<ClassRoomPriorityDto>> => {
+const getClassRooms = async (input: GetClassRoomsQueryInput = {}): Promise<PaginatedResult<ClassRoomPriorityDto>> => {
   const {
     page = PAGE,
     limit = LIMIT,
@@ -440,13 +443,10 @@ const getClassRooms = async (
     query = query.order("created_at", { ascending: false });
   }
 
-  query = query
-    .order("sort_rank_primary")
-    .order("sort_rank_secondary")
-    .range(rangeStart, rangeEnd);
+  query = query.order("sort_rank_primary").order("sort_rank_secondary").range(rangeStart, rangeEnd);
 
   const { data, error, count } = await query;
-  const fnData = data as unknown as ClassRoomPriorityDto[]
+  const fnData = data as unknown as ClassRoomPriorityDto[];
 
   if (error) {
     throw error;
@@ -464,21 +464,12 @@ const getClassRoomStudents = async (
   input: GetClassRoomStudentsQueryInput,
   client?: SupabaseClient<Database>,
 ): Promise<PaginatedResult<ClassRoomStudentDto>> => {
-  const {
-    classRoomId,
-    page = 1,
-    limit = 20,
-    search,
-    branchId,
-    departmentId,
-  } = input;
+  const { classRoomId, page = 1, limit = 20, search, branchId, departmentId } = input;
 
   const supabaseClient = client ?? supabase;
 
-  const safePage =
-    Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
-  const safeLimit =
-    Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 20;
+  const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+  const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 20;
   const rangeStart = (safePage - 1) * safeLimit;
   const rangeEnd = rangeStart + safeLimit - 1;
 
@@ -493,20 +484,15 @@ const getClassRoomStudents = async (
 
   let query = supabaseClient
     .from("class_room_employee")
-    .select(CLASS_ROOM_STUDENTS_SELECT,
-      { count: "exact" },
-    )
+    .select(CLASS_ROOM_STUDENTS_SELECT, { count: "exact" })
     .eq("class_room_id", classRoomId)
     .eq("employee.employee_type", "student");
 
   if (search?.trim()) {
     const sanitized = sanitizeSearchTerm(search.trim());
     query = query.or(
-      [
-        `full_name.ilike.%${sanitized}%`,
-        `email.ilike.%${sanitized}%`,
-        `phone_number.ilike.%${sanitized}%`,
-      ].join(","), { foreignTable: "employee.profile" }
+      [`full_name.ilike.%${sanitized}%`, `email.ilike.%${sanitized}%`, `phone_number.ilike.%${sanitized}%`].join(","),
+      { foreignTable: "employee.profile" },
     );
   }
 
@@ -529,10 +515,7 @@ const getClassRoomStudents = async (
   // Remove auxiliary relations used for filtering so the payload matches the expected DTO shape.
   const rawData = (data ?? []) as Record<string, any>[];
   const parsedData = rawData.map((item) => {
-    const {
-      employee,
-      ...restItem
-    } = item as Record<string, any>;
+    const { employee, ...restItem } = item as Record<string, any>;
 
     if (!employee) {
       return {
@@ -559,10 +542,7 @@ const getClassRoomStudents = async (
   };
 };
 
-const getClassRoomStatusCounts = async (
-  input: GetClassRoomStatusCountsInput,
-): Promise<ClassRoomStatusCountDto[]> => {
-
+const getClassRoomStatusCounts = async (input: GetClassRoomStatusCountsInput): Promise<ClassRoomStatusCountDto[]> => {
   const trimmedEmployeeId = input.employeeId?.trim();
 
   if (!trimmedEmployeeId) {
@@ -583,16 +563,12 @@ const getClassRoomStatusCounts = async (
   const fromValue = normalizeString(input.from);
   const toValue = normalizeString(input.to);
 
-  const statusFilter =
-    input.status && input.status !== ClassRoomStatusFilter.All ? input.status : undefined;
+  const statusFilter = input.status && input.status !== ClassRoomStatusFilter.All ? input.status : undefined;
 
-  const typeFilter =
-    input.type && input.type !== ClassRoomTypeFilter.All ? input.type : undefined;
+  const typeFilter = input.type && input.type !== ClassRoomTypeFilter.All ? input.type : undefined;
 
   const sessionModeFilter =
-    input.sessionMode && input.sessionMode !== ClassSessionModeFilter.All
-      ? input.sessionMode
-      : undefined;
+    input.sessionMode && input.sessionMode !== ClassSessionModeFilter.All ? input.sessionMode : undefined;
 
   const { data, error } = await supabase.rpc("count_class_room_runtime_status_by_employee", {
     p_employee_id: trimmedEmployeeId,
@@ -624,18 +600,14 @@ const getClassRoomStatusCounts = async (
 };
 
 const deleteClassRoomById = async (classRoomId: string) => {
-  const { error } = await supabase.from("class_rooms")
-    .update({ status: "deleted" })
-    .eq("id", classRoomId);
+  const { error } = await supabase.from("class_rooms").update({ status: "deleted" }).eq("id", classRoomId);
 
   if (error) {
     throw new Error(`Failed to delete classRoom: ${error.message}`);
   }
-}
+};
 
-const getClassRoomSessionDetail = async (
-  input: { sessionId: string },
-): Promise<ClassRoomSessionDetailDto | null> => {
+const getClassRoomSessionDetail = async (input: { sessionId: string }): Promise<ClassRoomSessionDetailDto | null> => {
   const { sessionId } = input;
   if (!sessionId) {
     throw new Error("Session ID is required to fetch class session");
@@ -745,8 +717,6 @@ const getClassRoomsByEmployeeId = async (
     limit: safeLimit,
   };
 };
-
-
 
 export {
   createClassRoom,

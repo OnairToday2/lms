@@ -35,13 +35,21 @@ const getTeacherList = async (queryParams?: GetTeacherQueryParams) => {
         organization_units(
           id,
           name, 
-          type
+          type,
+          parent_id,
+          branch:parent_id(
+            id,
+            name,
+            type
+          )
         )
       )
     `,
       { count: "exact" },
     )
-    .eq("employee_type", "teacher");
+    .eq("employee_type", "teacher")
+    .eq("employments.organization_units.type", "department")
+    .eq("employments.organization_units.branch.type", "branch");
 
   if (exclude?.length) {
     teacherQuery = teacherQuery.not("id", "in", `(${excludeStr})`);

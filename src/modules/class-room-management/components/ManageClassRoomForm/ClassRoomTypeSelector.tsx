@@ -93,7 +93,7 @@ const SelectItem: React.FC<SelectItemProps> = ({ isActive, title, description, o
     <Box
       className={cn("bg-white rounded-xl p-6 border cursor-pointer", {
         "border-transparent": !isActive,
-        "!border-blue-600": isActive,
+        "border-blue-600!": isActive,
       })}
       onClick={onClick}
     >

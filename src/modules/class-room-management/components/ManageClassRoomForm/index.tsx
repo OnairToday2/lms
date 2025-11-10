@@ -11,7 +11,9 @@ import { forwardRef, memo } from "react";
 export type ManageClassRoomFormRef = ClassRoomFormContainerRef;
 export interface ManageClassRoomFormProps {
   onSubmit?: ClassRoomFormContainerProps["onSubmit"];
+  onCancel?: ClassRoomFormContainerProps["onCancel"];
   platform: ClassRoomFormContainerProps["platform"];
+  roomType?: ClassRoomFormContainerProps["roomType"];
   isLoading?: boolean;
   action?: "create" | "edit";
   initFormValue?: ClassRoomFormContainerProps["value"];
@@ -19,16 +21,21 @@ export interface ManageClassRoomFormProps {
   teachers?: ClassRoomStore["state"]["selectedTeachers"]; // init teachers
 }
 const ManageClassRoomForm = forwardRef<ManageClassRoomFormRef, ManageClassRoomFormProps>(
-  ({ onSubmit, initFormValue, action = "create", isLoading = false, teachers, students, platform }, ref) => {
+  (
+    { onSubmit, initFormValue, action = "create", isLoading = false, teachers, students, platform, roomType, onCancel },
+    ref,
+  ) => {
     return (
       <ClassRoomProvider selectedStudents={students} selectedTeachers={teachers}>
         <ClassRoomFormContainer
           ref={ref}
           onSubmit={onSubmit}
+          onCancel={onCancel}
           isLoading={isLoading}
           action={action}
           value={initFormValue}
           platform={platform}
+          roomType={roomType}
         />
       </ClassRoomProvider>
     );

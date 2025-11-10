@@ -48,7 +48,7 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
     });
   };
   return (
-    <>
+    <div>
       <Accordion
         expanded={isExpanded}
         className={cn({
@@ -56,6 +56,7 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
           valid: status === "valid",
         })}
         sx={(theme) => ({
+          padding: 0,
           "&.invalid": {
             borderColor: theme.palette.error["main"],
             backgroundColor: alpha(theme.palette.error["lighter"], 0.1),
@@ -69,8 +70,13 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
           expandIcon={<ExpandMoreIcon onClick={toggleExpand} />}
           className="felx items-center justify-between"
           sx={(theme) => ({
+            backgroundColor: theme.palette.grey[300],
+            borderRadius: 0,
             "& .MuiAccordionSummary-content": {
               marginBlock: "6px",
+            },
+            "&:hover": {
+              backgroundColor: theme.palette.grey[300],
             },
           })}
         >
@@ -114,7 +120,7 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
           </DialogActions>
         </Dialog>
       ) : null}
-    </>
+    </div>
   );
 };
 export default React.memo(AccordionSessionItem);

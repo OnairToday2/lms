@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 import MenuContentItem from "./MenuContentItem";
 import { useMenuContext } from "./MenuContext";
 import MenuHeaderItem from "./MenuHeaderItem";
-import { getDrawerSxTransitionMixin } from "../Sidebar/mixins";
-import { MINI_DRAWER_WIDTH } from "../Sidebar/constants";
+import { getDrawerSxTransitionMixin } from "../DashboardSidebar/mixins";
+import { MINI_DRAWER_WIDTH } from "../DashboardSidebar/constants";
 import MenuContentSubItem from "./MenuContentSubItem";
 import { MenuItemType } from "./type";
 
