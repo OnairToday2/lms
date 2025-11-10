@@ -31,7 +31,7 @@ interface TabCourseSectionsProps {}
 const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProps>((props, ref) => {
   const sectionRef = useRef<CourseSectionItemRef>(null);
   const [isAddLession, setIsAddLession] = useState(false);
-  const [editableLession, setEditAbleLession] = useState<{ sectionIndex: number; lessonIndex: number }>();
+  const [editingLesson, seteditingLesson] = useState<{ sectionIndex: number; lessonIndex: number }>();
   const methods = useUpsertCourseFormContext();
   const {
     control,
@@ -83,16 +83,16 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
     remove(sectionIndex);
   };
   const handleLessionClick = (sectionIndex: number, lessonIndex: number) => {
-    setEditAbleLession({ lessonIndex, sectionIndex });
+    seteditingLesson({ lessonIndex, sectionIndex });
   };
   const handleClickAddLession = () => {
     setIsAddLession(true);
-    setEditAbleLession(undefined);
+    seteditingLesson(undefined);
   };
   const handleSelectLession: LessonTypeSelectorProps["onSelect"] = (type) => {
     if (!sectionRef.current) return;
     const { lessonIndex, sectionIndex } = sectionRef.current.appendLesson(type);
-    setEditAbleLession({ lessonIndex, sectionIndex });
+    seteditingLesson({ lessonIndex, sectionIndex });
     setIsAddLession(false);
   };
   return (
@@ -131,7 +131,7 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
         </div>
       </div>
       <div className="lession-wraper flex-1">
-        {isAddLession || editableLession ? (
+        {isAddLession || editingLesson ? (
           <div className="bg-white rounded-xl p-6">
             <Typography sx={{ fontWeight: "bold" }} className="mb-6">
               Tạo Bài giảng
@@ -139,11 +139,11 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
             <div className="bg-white rounded-xl">
               {isAddLession ? <LessonTypeSelector onSelect={handleSelectLession} /> : null}
 
-              {editableLession ? (
+              {editingLesson ? (
                 <LessonForm
-                  key={`lession-${editableLession.sectionIndex}-${editableLession.lessonIndex}`}
-                  sectionIndex={editableLession.sectionIndex}
-                  lessonIndex={editableLession.lessonIndex}
+                  key={`lession-${editingLesson.sectionIndex}-${editingLesson.lessonIndex}`}
+                  sectionIndex={editingLesson.sectionIndex}
+                  lessonIndex={editingLesson.lessonIndex}
                 />
               ) : null}
             </div>

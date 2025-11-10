@@ -20,7 +20,7 @@ const lessonSchema = zod.object({
       mimeType: zod.string(),
     }),
   ),
-  lessionType: zod.enum(["file", "video", "assessment"]),
+  lessonType: zod.enum(["file", "video", "assessment"]),
 });
 
 const courseSectionSchema = zod.object({

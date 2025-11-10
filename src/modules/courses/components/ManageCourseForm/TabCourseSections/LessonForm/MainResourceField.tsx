@@ -3,18 +3,11 @@ import { UpsertCourseFormData } from "../../../upsert-course.schema";
 import { Control, useController, useFieldArray } from "react-hook-form";
 import Image from "next/image";
 import { cn } from "@/utils";
-import {
-  CloseIcon,
-  FileAdioIcon,
-  FileExcelIcon,
-  FileImageIcon,
-  FileVideoIcon,
-  FileWordIcon,
-} from "@/shared/assets/icons";
+import { CloseIcon, FileExcelIcon, FileImageIcon, FileVideoIcon } from "@/shared/assets/icons";
 import { useLibraryStore } from "@/modules/library/store/libraryProvider";
 import FileUnknownIcon from "@/shared/assets/icons/FileUnknownIcon";
 
-export interface DocumentsFieldsProps {
+export interface MainResourceFieldProps {
   onChange?: (url: string) => void;
   control: Control<UpsertCourseFormData>;
   sectionIndex: number;
@@ -22,7 +15,7 @@ export interface DocumentsFieldsProps {
   label?: string;
   subTitle?: string;
 }
-const DocumentsFields: React.FC<DocumentsFieldsProps> = ({
+const MainResourceField: React.FC<MainResourceFieldProps> = ({
   control,
   onChange,
   label,
@@ -72,6 +65,7 @@ const DocumentsFields: React.FC<DocumentsFieldsProps> = ({
         {label}
       </FormLabel>
       {subTitle ? <Typography className="text-xs mb-4">{subTitle}</Typography> : null}
+
       {resourceItems.length ? (
         <div>
           <div className="flex flex-wrap mb-4 -mx-2">
@@ -144,4 +138,4 @@ const DocumentsFields: React.FC<DocumentsFieldsProps> = ({
     </div>
   );
 };
-export default DocumentsFields;
+export default MainResourceField;

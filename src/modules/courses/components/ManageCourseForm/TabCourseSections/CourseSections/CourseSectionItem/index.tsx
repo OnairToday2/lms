@@ -32,6 +32,7 @@ export interface CourseSectionItemProps extends PropsWithChildren {
   id: string;
   index: number;
   methods: UseFormReturn<UpsertCourseFormData>;
+  editingLessonIndex?: number;
   onDelete?: (index: number) => void;
   onLessionClick?: (sectionIndex: number, lessionIndex: number) => void;
   onAddLession?: () => void;
@@ -93,7 +94,7 @@ const CourseSectionItem = forwardRef<CourseSectionItemRef, CourseSectionItemProp
       appendLesson: (type: LessonType) => {
         const nextLessonIndex = lessionsField.length;
         append({
-          lessionType: type,
+          lessonType: type,
           title: "",
           status: "active",
           content: "",
