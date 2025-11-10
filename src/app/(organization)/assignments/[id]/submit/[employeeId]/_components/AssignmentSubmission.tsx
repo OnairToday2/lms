@@ -184,11 +184,11 @@ export default function AssignmentSubmission() {
       const currentAnswer = currentAnswers[answerIndex];
       if (!currentAnswer) return;
 
-      const newFile = files[0];
+      const newFiles = Array.from(files);
       const updatedAnswers = [...currentAnswers];
       updatedAnswers[answerIndex] = {
         ...currentAnswer,
-        attachments: [newFile],
+        attachments: [...(currentAnswer.attachments || []), ...newFiles],
       };
       setValue("answers", updatedAnswers);
     }

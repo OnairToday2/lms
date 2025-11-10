@@ -12,7 +12,7 @@ export interface QuestionGradeDetail {
   options?: QuestionOption[];
   attachments?: string[];
   answer: {
-    fileUrl?: string;
+    fileUrls?: string[];
     text?: string;
     selectedOptionId?: string;
     selectedOptionIds?: string[];

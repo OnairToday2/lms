@@ -70,8 +70,8 @@ function convertAnswerToTypedFormat(
 ): QuestionAnswer {
   switch (questionType) {
     case "file":
-      const fileUrl = Array.isArray(answer) ? answer[0] : answer;
-      return { fileUrl } as FileAnswer;
+      const fileUrls = Array.isArray(answer) ? answer : [answer];
+      return { fileUrls } as FileAnswer;
 
     case "text":
       return { text: answer as string } as TextAnswer;
@@ -270,7 +270,7 @@ export async function getSubmissionDetail(
     const answer: QuestionGradeDetail["answer"] = {};
 
     if (q.type === "file") {
-      answer.fileUrl = (q.answer as FileAnswer).fileUrl;
+      answer.fileUrls = (q.answer as FileAnswer).fileUrls;
     } else if (q.type === "text") {
       answer.text = (q.answer as TextAnswer).text;
     } else if (q.type === "radio") {

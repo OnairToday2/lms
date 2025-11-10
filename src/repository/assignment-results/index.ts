@@ -7,7 +7,7 @@ type AssignmentResultRow = Database["public"]["Tables"]["assignment_results"]["R
 type QuestionType = Database["public"]["Enums"]["question_type"];
 type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
 
-export type FileAnswer = { fileUrl: string };
+export type FileAnswer = { fileUrls: string[] };
 export type TextAnswer = { text: string };
 export type RadioAnswer = { selectedOptionId: string };
 export type CheckboxAnswer = { selectedOptionIds: string[] };
