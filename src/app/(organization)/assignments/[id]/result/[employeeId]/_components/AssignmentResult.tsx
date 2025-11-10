@@ -7,8 +7,6 @@ import {
   Typography,
   Stack,
   Button,
-  Avatar,
-  Divider,
   CircularProgress,
   Alert,
 } from "@mui/material";
@@ -17,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useGetSubmissionDetailQuery } from "@/modules/assignment-management/operations/query";
 import PageContainer from "@/shared/ui/PageContainer";
 import ResultQuestionCard from "./ResultQuestionCard";
+import AssignmentSubmissionHeader from "../../../_components/AssignmentSubmissionHeader";
 
 interface AssignmentResultProps {
   assignmentId: string;
@@ -97,70 +96,20 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
       ]}
     >
       <Box sx={{ py: 3 }}>
-        <Card sx={{ p: 3, mb: 3 }}>
-        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
-          <Avatar
-            src={submission.avatar || undefined}
-            alt={submission.fullName}
-            sx={{ width: 56, height: 56 }}
-          />
-          <Box flex={1}>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {submission.fullName}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Mã học viên: {submission.employeeCode}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Email: {submission.email}
-            </Typography>
-          </Box>
-          <Box textAlign="right">
-            <Typography variant="body2" color="text.secondary">
-              Ngày nộp
-            </Typography>
-            <Typography variant="body1">
-              {new Date(submission.submittedAt).toLocaleString("vi-VN")}
-            </Typography>
-          </Box>
-        </Stack>
-
-        <Divider sx={{ my: 2 }} />
-
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {submission.assignmentName}
-            </Typography>
-            {submission.assignmentDescription && (
-              <Box
-                sx={{
-                  "& p": { margin: 0 },
-                  "& ul, & ol": { marginTop: 0.5, marginBottom: 0.5 },
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  component="div"
-                  dangerouslySetInnerHTML={{ __html: submission.assignmentDescription }}
-                />
-              </Box>
-            )}
-          </Box>
-          <Box textAlign="right">
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              {totalScore.toFixed(1)}/{submission.maxScore}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Tổng điểm
-            </Typography>
-          </Box>
-        </Stack>
-        </Card>
+        <AssignmentSubmissionHeader
+          avatar={submission.avatar}
+          fullName={submission.fullName}
+          employeeCode={submission.employeeCode}
+          email={submission.email}
+          submittedAt={submission.submittedAt}
+          assignmentName={submission.assignmentName}
+          assignmentDescription={submission.assignmentDescription}
+          totalScore={totalScore}
+          maxScore={submission.maxScore}
+        />
 
         {submission.feedback && (
-          <Card sx={{ p: 3, mb: 3, bgcolor: "info.50", border: "1px solid", borderColor: "info.200" }}>
+          <Card sx={{ p: 3, mb: 3, bgcolor: "info.50", border: "1px solid", borderColor: "grey.400" }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
               Nhận xét chung của giáo viên
             </Typography>
