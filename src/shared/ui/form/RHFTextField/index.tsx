@@ -2,7 +2,7 @@
 import React, { useId } from "react";
 
 import { FormControl, FormHelperText, FormLabel, OutlinedInput, SxProps, Theme } from "@mui/material";
-import type { Control, FieldValues, Path } from "react-hook-form";
+import type { Control, FieldValues, Path, RegisterOptions } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import InputNumber from "../InputNumber";
 
@@ -51,8 +51,11 @@ const RHFTextField = <T extends FieldValues>({
           ) : null}
           <OutlinedInput
             {...field}
-            value={type === "number" ? Number.parseInt(field.value) : field.value}
-            onChange={(evt) => field.onChange(type === "number" ? Number.parseInt(evt.target.value) : evt.target.value)}
+            value={field.value ?? (type === "number" ? "" : "")}
+            onChange={(evt) => {
+              const value = type === "number" ? Number.parseInt(evt.target.value) : evt.target.value;
+              field.onChange(value);
+            }}
             placeholder={placeholder}
             disabled={disabled}
             size="small"
@@ -66,7 +69,7 @@ const RHFTextField = <T extends FieldValues>({
             inputProps={inputProps}
           />
           {error?.message ? <FormHelperText>{error.message}</FormHelperText> : null}
-          {helpText ? <div className="mt-2">{helpText}</div> : null}
+          {helpText && !error?.message ? <div className="mt-2">{helpText}</div> : null}
         </FormControl>
       )}
     />

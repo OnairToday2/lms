@@ -436,9 +436,6 @@ export default function AssignmentSubmission() {
             </Button>
           </Stack>
 
-          {/* Assignment and Student Info */}
-          <AssignmentHeader assignment={assignment} employee={employee} />
-
           {isLoading ? (
             <Box
               sx={{
@@ -469,7 +466,7 @@ export default function AssignmentSubmission() {
             </Box>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)}>
-              <Stack spacing={4}>
+              <Stack spacing={3}>
                 {/* Upload Progress */}
                 {isSubmitting && uploadProgress > 0 && (
                   <Box>
