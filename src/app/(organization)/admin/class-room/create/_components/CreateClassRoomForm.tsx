@@ -1,0 +1,52 @@
+"use client";
+import { ClassRoomPlatformType } from "@/constants/class-room.constant";
+import { ClassRoomType } from "@/model/class-room.model";
+import ManageClassRoomForm, {
+  ManageClassRoomFormProps,
+  ManageClassRoomFormRef,
+} from "@/modules/class-room-management/components/ManageClassRoomForm";
+import { useCRUDClassRoom } from "@/modules/class-room-management/hooks/useCRUDClassRoom";
+import { useSnackbar } from "notistack";
+import { useRouter } from "next/navigation";
+import { useRef } from "react";
+import { useTransition } from "react";
+interface CreateClassRoomFormProps {
+  platform: ClassRoomPlatformType;
+  roomType: ClassRoomType;
+}
+const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform, roomType }) => {
+  const [isTransition, startTransition] = useTransition();
+  const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
+  const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
+  const { onCreate, isLoading } = useCRUDClassRoom();
+  const handleCancel = () => {
+    router.push("/admin/class-room");
+  };
+
+  const handleCreateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students, teachers) => {
+    onCreate(
+      { formData, students, teachers },
+      {
+        onSuccess(data, variables, onMutateResult, context) {
+          startTransition(() => {
+            enqueueSnackbar("Tạo lớp học thành công", { variant: "success" });
+            router.push("/admin/class-room");
+            formClassRoomRef.current?.resetForm();
+          });
+        },
+      },
+    );
+  };
+  return (
+    <ManageClassRoomForm
+      onSubmit={handleCreateClassRoom}
+      onCancel={handleCancel}
+      platform={platform}
+      roomType={roomType}
+      ref={formClassRoomRef}
+      isLoading={isLoading || isTransition}
+    />
+  );
+};
+export default CreateClassRoomForm;

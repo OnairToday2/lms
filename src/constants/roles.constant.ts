@@ -1,6 +1,5 @@
-const USER_ROLES = {
-  ADMIN: "ADMIN",
-  USER: "USER",
-} as const;
-
-export { USER_ROLES };
+export enum IMMUTABLE_ROLES {
+  SUPER_ADMIN = "super_admin",
+  ADMIN = "admin",
+  STUDENT = "student",
+}

@@ -2,26 +2,24 @@
 import { PropsWithChildren, useCallback, useRef, useState } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
-import Sidebar from "./Sidebar";
+import DashboardSidebar from "./DashboardSidebar";
 import Footer from "./Footer";
+import { DashboardSidebarProps } from "./DashboardSidebar";
 interface MainLayoutProps extends PropsWithChildren {
   className?: string;
+  menuItems: DashboardSidebarProps["menuItems"];
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, className, menuItems }) => {
   const theme = useTheme();
-  const [isDesktopNavigationExpanded, setIsDesktopNavigationExpanded] =
-    useState(true);
-  const [isMobileNavigationExpanded, setIsMobileNavigationExpanded] =
-    useState(false);
+  const [isDesktopNavigationExpanded, setIsDesktopNavigationExpanded] = useState(true);
+  const [isMobileNavigationExpanded, setIsMobileNavigationExpanded] = useState(false);
 
   const isOverLGViewport = useMediaQuery(theme.breakpoints.up("lg"), {
     defaultMatches: true,
   });
 
-  const isNavigationExpanded = isOverLGViewport
-    ? isDesktopNavigationExpanded
-    : isMobileNavigationExpanded;
+  const isNavigationExpanded = isOverLGViewport ? isDesktopNavigationExpanded : isMobileNavigationExpanded;
 
   const setIsNavigationExpanded = useCallback(
     (newExpanded: boolean) => {
@@ -31,11 +29,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         setIsMobileNavigationExpanded(newExpanded);
       }
     },
-    [
-      isOverLGViewport,
-      setIsDesktopNavigationExpanded,
-      setIsMobileNavigationExpanded,
-    ],
+    [isOverLGViewport, setIsDesktopNavigationExpanded, setIsMobileNavigationExpanded],
   );
 
   const handleToggleHeaderMenu = useCallback(
@@ -59,19 +53,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         height: "100dvh",
       }}
     >
-      <Sidebar
+      <DashboardSidebar
         expanded={isNavigationExpanded}
         setExpanded={setIsNavigationExpanded}
         container={layoutRef.current ?? undefined}
+        className="main-layout__sider"
+        menuItems={menuItems}
       />
       {/* Main content */}
       <Box
+        component="div"
+        className="main-layout__content"
         sx={{
           display: "flex",
           flexDirection: "column",
           flex: 1,
           background: "#F5F8FF",
-          overflow: "auto",
+          overflowY: "auto",
           ...theme.applyStyles("dark", {
             background: "rgb(5 7 10)",
           }),

@@ -13,16 +13,14 @@ import Typography from "@mui/material/Typography";
 import type {} from "@mui/material/themeCssVarsAugmentation";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Link from "next/link";
-import { MINI_DRAWER_WIDTH } from "../Sidebar/constants";
-import MenuContextProvider, {
-  MenuContextApi,
-  useMenuContext,
-} from "./MenuContext";
+import { MINI_DRAWER_WIDTH } from "../DashboardSidebar/constants";
+import MenuContextProvider, { MenuContextApi, useMenuContext } from "./MenuContext";
 import { svgIconClasses } from "@mui/material";
 
 export interface MenuContentItemProps {
   id: string;
   title: string;
+  subTitle?: string;
   icon?: React.ReactNode;
   href: string;
   action?: React.ReactNode;
@@ -37,6 +35,7 @@ export interface MenuContentItemProps {
 export default function MenuContentItem({
   id,
   title,
+  subTitle,
   icon,
   href,
   action,
@@ -78,14 +77,9 @@ export default function MenuContentItem({
     };
   }
 
-  const hasExternalHref = href
-    ? href.startsWith("http://") || href.startsWith("https://")
-    : false;
+  const hasExternalHref = href ? href.startsWith("http://") || href.startsWith("https://") : false;
 
-  const correctPath = React.useCallback(
-    (path: string) => (path.startsWith("/") ? path : ["/", path].join("")),
-    [],
-  );
+  const correctPath = React.useCallback((path: string) => (path.startsWith("/") ? path : ["/", path].join("")), []);
 
   const LinkComponent = hasExternalHref ? "a" : Link;
 
@@ -112,14 +106,23 @@ export default function MenuContentItem({
               },
             }
           : {})}
-        sx={{
+        sx={(theme) => ({
           display: "block",
           py: 0,
           px: mini ? 1 : 2,
           overflowX: "hidden",
           "& .MuiButtonBase-root": {
             minHeight: mini ? 58 : 42,
-            padding: mini ? 0 : "8px 6px 8px 12px",
+            padding: mini ? 0 : "6px 6px 6px 12px",
+            "&.Mui-selected": {
+              backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              ".menu-title .MuiTypography-root": {
+                color: theme.palette.primary.main,
+              },
+              svg: {
+                color: theme.palette.primary.main,
+              },
+            },
           },
           ["& .MuiListItemIcon-root"]: {
             [`& svg`]: {
@@ -127,7 +130,7 @@ export default function MenuContentItem({
               height: mini ? 24 : 22,
             },
           },
-        }}
+        })}
       >
         <ListItemButton
           selected={selected}
@@ -213,23 +216,41 @@ export default function MenuContentItem({
             </Box>
           ) : null}
           {!mini ? (
-            <ListItemText
-              primary={title}
-              sx={{
-                WebkitLineClamp: 2,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                display: "-webkit-box",
-                WebkitBoxOrient: "vertical",
-                zIndex: 1,
-                margin: 0,
-              }}
-            />
+            <div className="flex-1">
+              <ListItemText
+                className="menu-title"
+                primary={title}
+                sx={{
+                  WebkitLineClamp: 2,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "-webkit-box",
+                  WebkitBoxOrient: "vertical",
+                  zIndex: 1,
+                  margin: 0,
+                }}
+              />
+              <ListItemText
+                className="menu-sub-title"
+                secondary={subTitle}
+                sx={(theme) => ({
+                  WebkitLineClamp: 1,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "-webkit-box",
+                  WebkitBoxOrient: "vertical",
+                  zIndex: 1,
+                  margin: 0,
+                  ".MuiTypography-root": {
+                    color: theme.palette.grey[800],
+                    fontWeight: 400,
+                  },
+                })}
+              />
+            </div>
           ) : null}
           {action && !mini ? action : null}
-          {nestedNavigation && !mini ? (
-            <ExpandMoreIcon sx={nestedNavigationCollapseSx} />
-          ) : null}
+          {nestedNavigation && !mini ? <ExpandMoreIcon sx={nestedNavigationCollapseSx} /> : null}
         </ListItemButton>
         {nestedNavigation && mini ? (
           <Grow in={isHovered}>
@@ -249,9 +270,7 @@ export default function MenuContentItem({
                   background: "white",
                 }}
               >
-                <MenuContextProvider value={nestedMenuItemContext}>
-                  {nestedNavigation}
-                </MenuContextProvider>
+                <MenuContextProvider value={nestedMenuItemContext}>{nestedNavigation}</MenuContextProvider>
               </Paper>
             </Box>
           </Grow>

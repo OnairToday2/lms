@@ -130,7 +130,7 @@ export const Editor = forwardRef<HTMLDivElement, EditorProps>(
 
     useEffect(() => {
       if (!editor || content === "<p></p>") return;
-      let { from, to } = editor.state.selection;
+      const { from, to } = editor.state.selection;
       // editor.commands.setContent(content, false, {
       //   preserveWhitespace: "full",
       // });
@@ -153,9 +153,7 @@ export const Editor = forwardRef<HTMLDivElement, EditorProps>(
 
     return (
       <Portal disablePortal={!fullScreen}>
-        {fullScreen && (
-          <Backdrop open sx={{ zIndex: (theme) => theme.zIndex.modal - 1 }} />
-        )}
+        {fullScreen && <Backdrop open sx={{ zIndex: (theme) => theme.zIndex.modal - 1 }} />}
 
         <Stack
           sx={{
@@ -186,9 +184,7 @@ export const Editor = forwardRef<HTMLDivElement, EditorProps>(
               className={editorClasses.content.root}
             />
           </EditorContainer>
-          {helperText && (
-            <FormHelperText error={!!error}>{helperText}</FormHelperText>
-          )}
+          {helperText && <FormHelperText error={!!error}>{helperText}</FormHelperText>}
         </Stack>
       </Portal>
     );

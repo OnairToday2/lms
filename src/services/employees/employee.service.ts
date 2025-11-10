@@ -10,8 +10,10 @@ import {
   profilesRepository,
   employmentsRepository,
   managersEmployeesRepository,
+  organizationsRepository,
 } from "@/repository";
 import { createServiceRoleClient } from "@/services/supabase/service-role-client";
+import { createSVClient } from "@/services/supabase/server";
 
 interface CreateEmployeeResult {
   userId: string;
@@ -21,27 +23,32 @@ interface CreateEmployeeResult {
 }
 
 async function createEmployeeWithRelations(
-  payload: CreateEmployeeDto
+  payload: CreateEmployeeDto,
 ): Promise<CreateEmployeeResult> {
   let userId: string | null = null;
   let employeeId: string | null = null;
   let profileId: string | null = null;
 
   try {
+    // Get the current authenticated user's organization_id
+    const supabase = await createSVClient();
+    const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !currentUser) {
+      throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
+    }
+
+    const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
+    console.log(`Creating employee in organization: ${organizationId}`);
+
     const adminSupabase = createServiceRoleClient();
 
-    const temporaryPassword = "123123123aA";
+    const temporaryPassword = "123456";
 
     const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
       email: payload.email,
       password: temporaryPassword,
       email_confirm: true,
-      user_metadata: {
-        full_name: payload.full_name,
-        phone_number: payload.phone_number || "",
-        gender: payload.gender,
-        birthday: payload.birthday || null,
-      },
     });
 
     if (authError || !authData.user) {
@@ -63,13 +70,18 @@ async function createEmployeeWithRelations(
       employeeOrder = lastOrder + 1;
     }
 
+    const organization = await organizationsRepository.getFirstOrganization();
+
     const employeeData = await employeesRepository.createEmployee({
       user_id: userId,
       employee_code: employeeCode,
       employee_order: employeeOrder,
       start_date: payload.start_date,
       position_id: payload.position_id || null,
+      employee_type: payload.employee_type || null,
+      organization_id: organizationId,
       status: "active",
+      organization_id: organization.id,
     });
 
     employeeId = employeeData.id;
@@ -155,12 +167,13 @@ async function createEmployeeWithRelations(
 }
 
 async function updateEmployeeWithRelations(
-  payload: UpdateEmployeeDto
+  payload: UpdateEmployeeDto,
 ): Promise<void> {
   await employeesRepository.updateEmployeeById(payload.id, {
     employee_code: payload.employee_code,
     start_date: payload.start_date,
     position_id: payload.position_id || null,
+    employee_type: payload.employee_type || null,
   });
 
   await profilesRepository.updateProfileByEmployeeId(payload.id, {
@@ -204,10 +217,11 @@ async function updateEmployeeWithRelations(
 }
 
 async function deleteEmployeeWithRelations(
-  employeeId: string
+  employeeId: string,
 ): Promise<void> {
   const userId = await employeesRepository.getEmployeeUserId(employeeId);
 
+  await managersEmployeesRepository.deleteAllManagerRelationshipsForEmployee(employeeId);
   await employmentsRepository.deleteEmploymentsByEmployeeId(employeeId);
   await profilesRepository.deleteProfileByEmployeeId(employeeId);
   await employeesRepository.deleteEmployeeById(employeeId);

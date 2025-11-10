@@ -24,12 +24,8 @@ const EditEmployeePage = () => {
   const defaultValues = React.useMemo(() => {
     if (!employee) return undefined;
 
-    const departmentEmployment = employee.employments.find(
-      (emp) => emp.organization_units?.type === "department"
-    );
-    const branchEmployment = employee.employments.find(
-      (emp) => emp.organization_units?.type === "branch"
-    );
+    const departmentEmployment = employee.employments.find((emp) => emp.organization_units?.type === "department");
+    const branchEmployment = employee.employments.find((emp) => emp.organization_units?.type === "branch");
 
     const managerRelationship = employee.managers_employees?.[0];
 
@@ -43,8 +39,8 @@ const EditEmployeePage = () => {
       department: departmentEmployment?.organization_unit_id || "",
       branch: branchEmployment?.organization_unit_id || "",
       manager_id: managerRelationship?.manager_id || "",
-      role: "", // Placeholder - will be implemented when role field is added to DB
       position_id: employee.position_id || "",
+      employee_type: employee.employee_type || undefined,
       start_date: employee.start_date || null,
     };
   }, [employee]);
@@ -62,8 +58,8 @@ const EditEmployeePage = () => {
         department: formData.department,
         branch: formData.branch,
         manager_id: formData.manager_id,
-        role: formData.role,
         position_id: formData.position_id,
+        employee_type: formData.employee_type,
         start_date: formData.start_date || null,
       });
 
@@ -74,25 +70,16 @@ const EditEmployeePage = () => {
 
       router.push("/employees");
     } catch (error) {
-      notifications.show(
-        error instanceof Error ? error.message : "Có lỗi xảy ra khi cập nhật nhân viên",
-        {
-          severity: "error",
-          autoHideDuration: 5000,
-        }
-      );
+      notifications.show(error instanceof Error ? error.message : "Có lỗi xảy ra khi cập nhật nhân viên", {
+        severity: "error",
+        autoHideDuration: 5000,
+      });
     }
   };
 
   if (isLoading) {
     return (
-      <PageContainer
-        title={pageTitle}
-        breadcrumbs={[
-          { title: "Nhân viên", path: "/employees" },
-          { title: pageTitle },
-        ]}
-      >
+      <PageContainer title={pageTitle} breadcrumbs={[{ title: "Nhân viên", path: "/employees" }, { title: pageTitle }]}>
         <Box
           sx={{
             display: "flex",
@@ -109,41 +96,21 @@ const EditEmployeePage = () => {
 
   if (error || !employee) {
     return (
-      <PageContainer
-        title={pageTitle}
-        breadcrumbs={[
-          { title: "Nhân viên", path: "/employees" },
-          { title: pageTitle },
-        ]}
-      >
+      <PageContainer title={pageTitle} breadcrumbs={[{ title: "Nhân viên", path: "/employees" }, { title: pageTitle }]}>
         <Box sx={{ py: 3 }}>
-          <Alert severity="error">
-            Không tìm thấy thông tin nhân viên hoặc có lỗi xảy ra
-          </Alert>
+          <Alert severity="error">Không tìm thấy thông tin nhân viên hoặc có lỗi xảy ra</Alert>
         </Box>
       </PageContainer>
     );
   }
 
   return (
-    <PageContainer
-      title={pageTitle}
-      breadcrumbs={[
-        { title: "Nhân viên", path: "/employees" },
-        { title: pageTitle },
-      ]}
-    >
+    <PageContainer title={pageTitle} breadcrumbs={[{ title: "Nhân viên", path: "/employees" }, { title: pageTitle }]}>
       <Box sx={{ py: 3 }}>
-        <EmployeeForm
-          mode="edit"
-          defaultValues={defaultValues}
-          onSubmit={handleSubmit}
-          isSubmitting={isPending}
-        />
+        <EmployeeForm mode="edit" defaultValues={defaultValues} onSubmit={handleSubmit} isSubmitting={isPending} />
       </Box>
     </PageContainer>
   );
 };
 
 export default EditEmployeePage;
-

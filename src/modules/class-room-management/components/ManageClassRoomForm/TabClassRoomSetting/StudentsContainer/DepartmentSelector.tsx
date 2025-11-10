@@ -12,10 +12,6 @@ const DepartmentSelector: React.FC<DepartmentSelectorProps> = ({ className, onSe
     queryParams: { type: "department" },
   });
 
-  if (departmentsData?.error) {
-    return <Alert severity="error">{departmentsData.error.message}</Alert>;
-  }
-
   const departmentList = useMemo(() => {
     return departmentsData?.data || [];
   }, [departmentsData?.data]);
@@ -23,6 +19,11 @@ const DepartmentSelector: React.FC<DepartmentSelectorProps> = ({ className, onSe
   const hasChecked = (itemId: string) => {
     return values?.some((val) => val === itemId);
   };
+
+  if (departmentsData?.error) {
+    return <Alert severity="error">{departmentsData.error.message}</Alert>;
+  }
+
   return (
     <div className="depart-ment">
       {departmentList.map((item) => (

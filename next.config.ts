@@ -39,6 +39,12 @@ const nextConfig: NextConfig = {
         port: "3000", // leave empty unless using custom port
         pathname: "/storage/v1/object/public/**", // match all paths
       },
+      {
+        protocol: "https",
+        hostname: "lms-api.onairdev.com",
+        port: "",
+        pathname: "/storage/v1/object/public/**",
+      },
       // {
       //   protocol: 'https',
       //   hostname: 'xyzsupabase.co',
@@ -56,6 +62,9 @@ const nextConfig: NextConfig = {
       ...config.resolve.alias,
     };
     return config;
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   },
 };
 

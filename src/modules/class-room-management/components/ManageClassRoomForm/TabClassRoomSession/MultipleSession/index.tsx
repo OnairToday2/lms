@@ -1,56 +1,34 @@
 "use client";
+import { useState, useRef, useTransition, useCallback, forwardRef, useImperativeHandle } from "react";
 import { type ClassRoom } from "../../../classroom-form.schema";
 import { Button, Divider, Typography } from "@mui/material";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
-import QuantityPersonField from "../class-room-session-fields/QuantityPersonField";
+// import QuantityPersonField from "../class-room-session-fields/QuantityPersonField";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import ClassRoomSessionFromToDate from "../class-room-session-fields/ClassRoomSessionFromToDate";
 import AccordionSessionItem, { AccordionSessionItemProps } from "./AccordionSessionItem";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
-import { useState } from "react";
 import RHFRichEditor from "@/shared/ui/form/RHFRichEditor";
-import ClassRoomChannel from "../class-room-session-fields/RoomChannel";
-import TeacherSelector from "../class-room-session-fields/TeacherSelector";
+import RoomChannel from "../class-room-session-fields/RoomChannel";
+import TeacherSelector, { TeacherSelectorRef } from "../class-room-session-fields/TeacherSelector";
 import AgendarFields from "../class-room-session-fields/AgendarFields";
-import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
+import { initClassSessionFormData } from "..";
+import { MarkerPin01Icon } from "@/shared/assets/icons";
+import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
 
-export const getClassSessionInitData = (): ClassRoom["classRoomSessions"][number] => {
-  return {
-    title: "",
-    description: "",
-    startDate: "",
-    endDate: "",
-    channelInfo: { url: "", password: "", providerId: "" },
-    channelProvider: "zoom",
-    thumbnailUrl: "",
-    isOnline: true,
-    agendas: [],
-    limitPerson: 0,
-    isUnlimited: false,
-    recourses: [],
-  };
+export type MultipleSessionRef = {
+  checkAllSessionFields: () => Promise<boolean>;
 };
-
 interface MultipleSessionProps {
   methods: UseFormReturn<ClassRoom>;
 }
-const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
-  /**
-   * Session init items to validate when click add more button.
-   */
-  const [sessionItemInit, setSessionItemInit] = useState<{ index: number; isInit: boolean }[]>([
-    {
-      index: 0,
-      isInit: true,
-    },
-  ]);
+const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ methods }, ref) => {
   const {
     control,
-    trigger,
-    setValue,
     getValues,
+    trigger,
     formState: { errors },
-  } = useClassRoomFormContext();
+  } = methods;
 
   const {
     fields: classSessionsFields,
@@ -61,77 +39,146 @@ const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
     name: "classRoomSessions",
     keyName: "_sessionId",
   });
+  const getTeachersByIndexSession = useClassRoomStore(({ actions }) => actions.getTeachersByIndexSession);
+  const teacherSelectorRefs = useRef(new Map<number, TeacherSelectorRef>());
+  const [isTransition, startTransition] = useTransition();
+  /**
+   * Session init items to validate when click add more button.
+   */
+
+  const [sessionsState, setSessionsState] = useState<{
+    [key: number]: {
+      isInit: boolean;
+    };
+  }>(() => Object.fromEntries(classSessionsFields.map((fields, _index) => [_index, { isInit: true }])));
 
   const hasErrorSession = (index: number): AccordionSessionItemProps["status"] => {
-    if (sessionItemInit.find((it) => it.index === index)?.isInit) {
+    if (sessionsState[index]?.isInit) {
       return "idle";
     }
-    return !!errors.classRoomSessions?.[index] ? "invalid" : "valid";
-  };
-  const handleAddClassSession = async () => {
+    const sessionError = errors.classRoomSessions?.[index];
+    const selectedTeacher = getTeachersByIndexSession(index);
     /**
-     * Mark all section isInited
+     * qrcode check in tab setting
      */
-    setSessionItemInit((prev) => prev.map((it) => ({ ...it, isInit: false })));
+    const { qrCode, ...restSessionError } = sessionError || {};
 
-    await trigger("classRoomSessions")
-      .then((valid) => {
-        if (!valid) return;
+    if (!selectedTeacher || !selectedTeacher.length || Object.keys(restSessionError).length) return "invalid";
 
-        const sessionItemCount = classSessionsFields.length;
-        const initSessionItem = getClassSessionInitData();
-        append(initSessionItem);
-        setSessionItemInit((prev) => [...prev, { index: sessionItemCount, isInit: true }]);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    return "valid";
   };
+
+  const checkAllSessionFields = async (callback?: () => void) => {
+    const isAllSessionValid = await trigger("classRoomSessions");
+
+    setSessionsState((oldState) => {
+      const newState = { ...oldState };
+      for (const key in newState) {
+        if (newState[key]) {
+          newState[key].isInit = false;
+        }
+      }
+      return newState;
+    });
+
+    if (!isAllSessionValid) return;
+
+    callback?.();
+  };
+  const handleAddClassSession = () =>
+    checkAllSessionFields(() => {
+      startTransition(() => {
+        const nextSessionIndex = classSessionsFields.length;
+        const platform = getValues("platform");
+        append(initClassSessionFormData({ isOnline: platform === "online" }));
+        setSessionsState((prev) => ({ ...prev, [nextSessionIndex]: { isInit: true } }));
+      });
+    });
+
+  const handleRemoveSession = useCallback((sessionIndex: number) => {
+    const teacherRef = teacherSelectorRefs.current.get(sessionIndex);
+    teacherRef?.removeTeachersBySessionIndex(sessionIndex);
+    setTimeout(() => {
+      remove(sessionIndex);
+    }, 0);
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    checkAllSessionFields: async () => {
+      const isAllSessionValid = await trigger("classRoomSessions");
+      setSessionsState((oldState) => {
+        const newState = { ...oldState };
+        for (const key in newState) {
+          if (newState[key]) {
+            newState[key].isInit = false;
+          }
+        }
+        return newState;
+      });
+      return isAllSessionValid;
+    },
+  }));
   return (
     <div className="class-multiple-session">
-      <div className="inner bg-white rounded-xl p-6 mb-6">
+      <div className="inner">
         <div className="mb-6">
           <Typography component="h3" className="text-base font-semibold">
             Chi tiết chuỗi lớp học
           </Typography>
         </div>
         <div className="session-list flex flex-col gap-3">
-          {classSessionsFields.map((sessionField, _index) => (
-            <div key={sessionField._sessionId}>
-              <AccordionSessionItem
-                index={_index}
-                title={sessionField.title}
-                onRemove={() => remove(_index)}
-                status={hasErrorSession(_index)}
-              >
-                <div className="pt-6">
-                  <div className="flex flex-col gap-6">
+          {classSessionsFields.map(({ _sessionId, title, isOnline }, _index) => (
+            <AccordionSessionItem
+              index={_index}
+              key={_sessionId}
+              title={title}
+              onRemove={classSessionsFields.length > 2 ? handleRemoveSession : undefined}
+              status={hasErrorSession(_index)}
+            >
+              <div className="pt-6">
+                <div className="flex flex-col gap-6">
+                  <RHFTextField
+                    control={control}
+                    label="Tên lớp học"
+                    placeholder="Tên lớp học"
+                    name={`classRoomSessions.${_index}.title`}
+                    required
+                    helpText={<Typography className="text-xs text-gray-600 text-right">Tối đa 100 ký tự</Typography>}
+                  />
+                  <ClassRoomSessionFromToDate index={_index} control={control} />
+                  {/* <QuantityPersonField control={control} fieldIndex={_index} /> */}
+                  <RHFRichEditor
+                    control={control}
+                    name={`classRoomSessions.${_index}.description`}
+                    placeholder="Nội dung"
+                    label="Nội dung"
+                    required
+                  />
+                  <TeacherSelector
+                    ref={(tRef) => {
+                      tRef && teacherSelectorRefs.current.set(_index, tRef);
+                    }}
+                    sessionIndex={_index}
+                    error={sessionsState[_index]?.isInit ? undefined : !getTeachersByIndexSession(_index)?.length}
+                    helperText="Hiện chưa có giáo viên nào được chọn"
+                  />
+
+                  {isOnline ? (
+                    <RoomChannel control={control} index={_index} />
+                  ) : (
                     <RHFTextField
+                      name={`classRoomSessions.${_index}.location`}
                       control={control}
-                      label="Tên lớp học"
-                      placeholder="Tên lớp học"
-                      name={`classRoomSessions.${_index}.title`}
+                      label="Địa điểm tổ chức"
                       required
-                      helpText={<Typography className="text-xs text-gray-600 text-right">Tối đa 100 ký tự</Typography>}
+                      startAdornment={<MarkerPin01Icon />}
+                      placeholder="Nhập địa điểm tổ chức lớp học"
                     />
-                    <ClassRoomSessionFromToDate index={_index} control={control} />
-                    <QuantityPersonField control={control} fieldIndex={_index} />
-                    <RHFRichEditor
-                      control={control}
-                      name={`classRoomSessions.${_index}.description`}
-                      placeholder="Nội dung"
-                      label="Nội dung"
-                      required
-                    />
-                    <ClassRoomChannel index={_index} control={control} />
-                  </div>
-                  <div className="h-6"></div>
-                  <TeacherSelector sessionIndex={_index} />
-                  <div className="h-6"></div>
+                  )}
                   <AgendarFields sessionIndex={_index} />
                 </div>
-              </AccordionSessionItem>
-            </div>
+              </div>
+            </AccordionSessionItem>
           ))}
         </div>
         <div className="h-6"></div>
@@ -142,6 +189,7 @@ const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
             startIcon={<PlusIcon />}
             onClick={handleAddClassSession}
             size="small"
+            loading={isTransition}
           >
             Thêm mới
           </Button>
@@ -149,5 +197,5 @@ const MultipleSession: React.FC<MultipleSessionProps> = ({ methods }) => {
       </div>
     </div>
   );
-};
+});
 export default MultipleSession;

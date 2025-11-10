@@ -1,7 +1,5 @@
 import { FieldErrors } from "react-hook-form";
-import { ClassRoom } from "../classroom-form.schema";
-
-type ClassRoomTabTypes = "idle" | "invalid" | "valid";
+import { ClassRoom, ClassRoomSession } from "../classroom-form.schema";
 import { TAB_KEYS_CLASS_ROOM } from "./ClassRoomFormContainer";
 
 /**
@@ -13,20 +11,7 @@ export const getKeyFieldByTab = (tabKey: keyof typeof TAB_KEYS_CLASS_ROOM) => {
 
   switch (tabKey) {
     case "clsTab-information": {
-      keyListByTab = [
-        "title",
-        "thumbnailUrl",
-        "hashTags",
-        "slug",
-        "description",
-        "communityInfo",
-        "classRoomField",
-        "roomType",
-      ];
-      break;
-    }
-    case "clsTab-resource": {
-      keyListByTab = ["docs", "faqs", "forWhom", "whies"];
+      keyListByTab = ["title", "thumbnailUrl", "slug", "description", "categories", "roomType", "docs", "forWhom"];
       break;
     }
 
@@ -35,7 +20,6 @@ export const getKeyFieldByTab = (tabKey: keyof typeof TAB_KEYS_CLASS_ROOM) => {
       break;
     }
     case "clsTab-setting": {
-      keyListByTab = [];
       break;
     }
   }
@@ -43,14 +27,39 @@ export const getKeyFieldByTab = (tabKey: keyof typeof TAB_KEYS_CLASS_ROOM) => {
 };
 
 export const getStatusTabClassRoom = (
-  error: FieldErrors<ClassRoom>,
+  errors: FieldErrors<ClassRoom>,
   tabKey: keyof typeof TAB_KEYS_CLASS_ROOM,
-): ClassRoomTabTypes => {
-  let tabStatus: ClassRoomTabTypes = "idle";
-
+): "invalid" | "valid" => {
   const keyListByTab = getKeyFieldByTab(tabKey);
 
-  const isValid = keyListByTab.every((key) => !error[key]);
+  // const isValid = keyListByTab.every((key) => {
+  //   if (key === "classRoomSessions") {
+  //     const sessionsErrors = errors["classRoomSessions"] as FieldErrors<ClassRoomSession>[] | undefined;
+
+  //     if (!sessionsErrors || !sessionsErrors.length) return true;
+
+  //     return sessionsErrors.every((session) => {
+  //       if (!session) return true;
+  //       /**
+  //        * remove Qrcode
+  //        */
+  //       const { qrCode, ...restKeys } = session;
+
+  //       if (tabKey === "clsTab-setting" && qrCode) {
+  //         return false;
+  //       }
+  //       if (tabKey === "clsTab-session" && Object.keys(restKeys).length) {
+  //         return false;
+  //       }
+
+  //       return true;
+  //     });
+  //   } else {
+  //     return !errors[key];
+  //   }
+  // });
+
+  const isValid = keyListByTab.every((key) => !errors[key]);
 
   return isValid ? "valid" : "invalid";
 };

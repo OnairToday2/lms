@@ -58,6 +58,12 @@ export const inputsCustomizations: Components<Theme> = {
         [`&.${outlinedInputClasses.error}`]: {
           borderColor: theme.palette.error["main"],
         },
+        "&.MuiInputBase-adornedStart": {
+          paddingLeft: "10px",
+          input: {
+            paddingLeft: "0.5rem",
+          },
+        },
         ...theme.applyStyles("dark", {
           "&:hover": {
             borderColor: theme.palette.primary["main"],

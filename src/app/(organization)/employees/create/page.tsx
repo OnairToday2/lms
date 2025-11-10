@@ -26,8 +26,8 @@ const CreateEmployeePage = () => {
       department: data.department,
       employee_code: data.employee_code,
       manager_id: data.manager_id,
-      role: data.role,
       position_id: data.position_id,
+      employee_type: data.employee_type,
       start_date: data.start_date,
     };
 

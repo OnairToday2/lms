@@ -14,7 +14,6 @@ export default function ToastSnackbar() {
   const removeMessage = useToast((state) => state.removeMessage);
   const hideMessage = useToast((state) => state.hideMessage);
 
-  console.log(messsages);
   const closeSnackbar = (_index: number) => {
     hideMessage(_index);
     removeMessage(_index);
@@ -31,10 +30,9 @@ export default function ToastSnackbar() {
           anchorOrigin={{ vertical: "top", horizontal: "right" }}
           slotProps={{
             clickAwayListener: {
-              onClickAway: (event) => {
-                // Prevent's default 'onClickAway' behavior.
-                //@ts-ignore
-                event.defaultPrevented = true;
+              onClickAway: (evt) => {
+                evt.preventDefault();
+                return;
               },
             },
           }}

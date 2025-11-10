@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useTransition } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -7,14 +7,11 @@ import { Button, Dialog, DialogActions, DialogContent, DialogContentText, Dialog
 import { alpha, styled, Typography, TypographyProps } from "@mui/material";
 import { TrashIcon1 } from "@/shared/assets/icons";
 import { cn } from "@/utils";
-
 export interface AccordionSessionItemProps extends React.PropsWithChildren {
-  summary?: React.ReactNode;
-  detail?: React.ReactNode;
   index: number;
   title?: string;
   status?: "idle" | "valid" | "invalid";
-  onRemove: () => void;
+  onRemove?: (index: number) => void;
 }
 const BoxNumberCount = styled((props: TypographyProps) => <Typography {...props} component="span" />)(() => ({
   width: "1.25rem",
@@ -31,14 +28,13 @@ const BoxNumberCount = styled((props: TypographyProps) => <Typography {...props}
 }));
 
 const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
-  summary,
-  detail,
   index = 0,
   children,
   title,
   onRemove,
   status = "idle",
 }) => {
+  const [isTransition, startTransition] = useTransition();
   const [openDialog, setOpenDialog] = React.useState(false);
   const [isExpanded, setIsExpanded] = React.useState<boolean>(true);
   const toggleExpand = () => setIsExpanded((prev) => !prev);
@@ -46,11 +42,13 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
   const handleCloseDialog = () => setOpenDialog(false);
 
   const handleConfirm = () => {
-    setOpenDialog(false);
-    onRemove?.();
+    startTransition(() => {
+      setOpenDialog(false);
+      onRemove?.(index);
+    });
   };
   return (
-    <>
+    <div>
       <Accordion
         expanded={isExpanded}
         className={cn({
@@ -58,6 +56,7 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
           valid: status === "valid",
         })}
         sx={(theme) => ({
+          padding: 0,
           "&.invalid": {
             borderColor: theme.palette.error["main"],
             backgroundColor: alpha(theme.palette.error["lighter"], 0.1),
@@ -71,8 +70,13 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
           expandIcon={<ExpandMoreIcon onClick={toggleExpand} />}
           className="felx items-center justify-between"
           sx={(theme) => ({
+            backgroundColor: theme.palette.grey[300],
+            borderRadius: 0,
             "& .MuiAccordionSummary-content": {
               marginBlock: "6px",
+            },
+            "&:hover": {
+              backgroundColor: theme.palette.grey[300],
             },
           })}
         >
@@ -82,37 +86,41 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
               {title ? title : `Lớp học ${index + 1}`}
             </Typography>
           </div>
-          <span className="cursor-pointer w-8 h-8 inline-flex items-center justify-center" onClick={handleOpenDialog}>
-            <TrashIcon1 className="w-4 h-4" />
-          </span>
+          {onRemove ? (
+            <span className="cursor-pointer w-8 h-8 inline-flex items-center justify-center" onClick={handleOpenDialog}>
+              <TrashIcon1 className="w-4 h-4" />
+            </span>
+          ) : null}
         </AccordionSummary>
         <AccordionDetails>{children}</AccordionDetails>
       </Accordion>
-      <Dialog
-        open={openDialog}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-        fullWidth
-        maxWidth="xs"
-      >
-        <DialogTitle id="alert-dialog-title" className="break-all">{`Xoá`}</DialogTitle>
-        <DialogContent>
-          <DialogContentText
-            id="alert-dialog-description"
-            className="break-all"
-            sx={{ fontSize: "0.875rem" }}
-          >{`Bạn có chắc chắn muốn xoá "${title}"`}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} variant="outlined" color="inherit">
-            Tiếp tục chỉnh sửa
-          </Button>
-          <Button onClick={handleConfirm} color="error">
-            Xóa
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
+      {onRemove ? (
+        <Dialog
+          open={openDialog}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          fullWidth
+          maxWidth="xs"
+        >
+          <DialogTitle id="alert-dialog-title" className="break-all">{`Xoá`}</DialogTitle>
+          <DialogContent>
+            <DialogContentText
+              id="alert-dialog-description"
+              className="break-all"
+              sx={{ fontSize: "0.875rem" }}
+            >{`Bạn có chắc chắn muốn xoá "${title}"`}</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog} variant="outlined" color="inherit" disabled={isTransition}>
+              Tiếp tục chỉnh sửa
+            </Button>
+            <Button onClick={handleConfirm} color="error" loading={isTransition}>
+              Xóa
+            </Button>
+          </DialogActions>
+        </Dialog>
+      ) : null}
+    </div>
   );
 };
 export default React.memo(AccordionSessionItem);

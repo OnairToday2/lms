@@ -1,96 +1,133 @@
 "use client";
-import * as React from "react";
-import Tab, { TabProps } from "@mui/material/Tab";
+import React, { useCallback, useMemo, useState, useImperativeHandle } from "react";
+import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabPanel from "@mui/lab/TabPanel";
 import TabList, { TabListProps } from "@mui/lab/TabList";
-import { Button, styled, SxProps, Theme } from "@mui/material";
+import { Button, styled } from "@mui/material";
 import { useTheme } from "@mui/material";
 import { tabClasses } from "@mui/material";
 import { cn } from "@/utils";
 import { CheckCircleIcon } from "@/shared/assets/icons";
-import { TAB_KEYS_CLASS_ROOM } from "./ClassRoomFormContainer";
+import { TAB_KEYS_CLASS_ROOM, TAB_NODES_CLASS_ROOM } from "./ClassRoomFormContainer";
 import { useTransition } from "react";
+import { getKeyFieldByTab } from "./utils";
+import { FieldErrors, UseFormTrigger } from "react-hook-form";
+import { ClassRoom } from "../classroom-form.schema";
+import { getStatusTabClassRoom } from "./utils";
+
 type ClassRoomTabStatus = "idle" | "invalid" | "valid";
 type TabKeyType = keyof typeof TAB_KEYS_CLASS_ROOM;
 type ClassRoomTabItem = {
   tabName: React.ReactNode;
   tabKey: TabKeyType;
   content?: React.ReactNode;
-  status?: ClassRoomTabStatus;
   icon?: React.ReactNode;
 };
+type TabStateType = Record<TabKeyType, { status: ClassRoomTabStatus }>;
+export interface ClassRoomTabContainerRef {
+  setTabStatus: (tabKey: TabKeyType, status: ClassRoomTabStatus) => void;
+}
 export interface ClassRoomTabContainerProps {
   items: ClassRoomTabItem[];
-  previewUI?: React.ReactNode;
   actions: React.ReactNode;
   className?: string;
-  checkStatusTab: (tabKey: TabKeyType) => Promise<boolean>;
+  trigger: UseFormTrigger<ClassRoom>;
+  errors: FieldErrors<ClassRoom>;
 }
-const ClassRoomTabContainer: React.FC<ClassRoomTabContainerProps> = ({
-  items,
-  className,
-  previewUI,
-  actions,
-  checkStatusTab,
-}) => {
-  const [currentTab, setCurrentTab] = React.useState<TabKeyType | undefined>(() => items?.[0]?.tabKey);
-  const [isGotoNextTab, startGotoNextTab] = useTransition();
-  const handleChange = React.useCallback((event: React.SyntheticEvent, newValue: TabKeyType) => {
-    setCurrentTab(newValue);
-  }, []);
 
-  const goNextOrBackStep = (action: "next" | "back") => () => {
-    if (!currentTab) {
-      console.error("Current tab is undefined");
-      return;
-    }
-    startGotoNextTab(async () => {
-      const isCurrentTabValid = await checkStatusTab(currentTab);
+const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRoomTabContainerProps>(
+  ({ items, className, actions, trigger, errors }, ref) => {
+    const [isGotoNextTab, startGotoNextTab] = useTransition();
+    const [currentTab, setCurrentTab] = useState<TabKeyType>(() => items?.[0]?.tabKey || "clsTab-information");
+    const [tabsState, setTabsState] = useState<TabStateType>(
+      () => Object.fromEntries(items.map((tab) => [tab.tabKey, { status: "idle" }])) as TabStateType,
+    );
 
-      if (!isCurrentTabValid) return;
-      if (currentTab === "clsTab-information") {
-        setCurrentTab(action === "next" ? "clsTab-session" : "clsTab-information");
-      }
-      if (currentTab === "clsTab-session") {
-        setCurrentTab(action === "next" ? "clsTab-resource" : "clsTab-information");
-      }
-      if (currentTab === "clsTab-resource") {
-        setCurrentTab(action === "next" ? "clsTab-setting" : "clsTab-session");
-      }
-    });
-  };
+    /**
+     * Trigger validate all field in current tab before process next action
+     */
+    const validateCurrentTabBeforeProceed = useCallback(async (tab: TabKeyType, callback?: () => void) => {
+      const keyList = getKeyFieldByTab(tab);
 
-  return (
-    <div className={cn("class-room-tabs", className)}>
-      <TabContext value={currentTab ?? ""}>
-        <div className="bg-white rounded-xl flex items-center justify-between mb-6 px-6 py-4">
-          <ClassRoomTabList onChange={handleChange}>
-            {items.map(({ tabKey, tabName, status = "idle", icon }) => (
-              <Tab
-                key={tabKey}
-                value={tabKey}
-                label={
-                  <div className="flex items-center gap-1">
-                    {status === "valid" ? <CheckCircleIcon /> : icon ? icon : null}
-                    {tabName}
-                  </div>
-                }
-                className={cn("px-0", {
-                  "is-invalid": status === "invalid",
-                  "is-valid": status === "valid",
-                })}
-              />
-            ))}
-          </ClassRoomTabList>
-          <div className="tab-actions">{actions}</div>
-        </div>
-        <div
-          className={cn("grid gap-6", {
-            "lg:grid-cols-2 grid-cols-1": currentTab !== "clsTab-setting",
-            "grid-cols-1": currentTab === "clsTab-setting",
-          })}
-        >
+      const isValid = (await Promise.allSettled(keyList.map((key) => trigger(key)))).every(
+        (f) => f.status === "fulfilled" && !!f.value,
+      );
+
+      setTabsState((prevState) => {
+        return {
+          ...prevState,
+          [tab]: {
+            status: isValid ? "valid" : "invalid",
+          },
+        };
+      });
+
+      if (!isValid) return;
+
+      callback?.();
+    }, []);
+
+    const handleChangeTab = useCallback(
+      (_: React.SyntheticEvent, newTab: TabKeyType) =>
+        validateCurrentTabBeforeProceed(currentTab, () => {
+          setCurrentTab((oldTab) => {
+            const nextTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.next;
+            const prevTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.prev;
+            return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
+          });
+        }),
+      [currentTab],
+    );
+    /**
+     * Next and back action each tab
+     */
+    const goNextOrBackStep = useCallback(
+      (action: "next" | "back") => () =>
+        validateCurrentTabBeforeProceed(currentTab, () => {
+          startGotoNextTab(async () => {
+            setCurrentTab((oldTab) => {
+              const newTab =
+                action === "next" ? TAB_NODES_CLASS_ROOM.get(oldTab)?.next : TAB_NODES_CLASS_ROOM.get(oldTab)?.prev;
+              return newTab ? newTab : oldTab;
+            });
+            const scrollContainer = document.querySelector(".main-layout__content");
+            scrollContainer?.scrollTo({ top: 0 });
+          });
+        }),
+      [currentTab],
+    );
+
+    useImperativeHandle(ref, () => ({
+      setTabStatus: (tabKey, status) => {
+        setTabsState((oldState) => ({ ...oldState, [tabKey]: { status: status } }));
+      },
+    }));
+
+    return (
+      <div className={cn("class-room-tabs", className)}>
+        <TabContext value={currentTab}>
+          <div className="bg-white rounded-xl flex items-center justify-between mb-6 px-6 py-4">
+            <ClassRoomTabList onChange={handleChangeTab}>
+              {items.map(({ tabKey, tabName, icon }) => (
+                <Tab
+                  key={tabKey}
+                  value={tabKey}
+                  label={
+                    <div className="flex items-center gap-1">
+                      {tabsState[tabKey].status === "valid" ? <CheckCircleIcon /> : icon ? icon : null}
+                      {tabName}
+                    </div>
+                  }
+                  className={cn("px-0", {
+                    "is-invalid": tabsState[tabKey].status === "invalid",
+                    "is-valid": tabsState[tabKey].status === "valid",
+                  })}
+                />
+              ))}
+            </ClassRoomTabList>
+            <div className="tab-actions">{actions}</div>
+          </div>
           <div className="panels-wraper">
             {items.map((item) => (
               <TabPanel key={item.tabKey} value={item.tabKey} className="p-0">
@@ -108,18 +145,11 @@ const ClassRoomTabContainer: React.FC<ClassRoomTabContainerProps> = ({
               </div>
             </div>
           </div>
-          <div
-            className={cn("preview-ui", {
-              hidden: currentTab === "clsTab-setting",
-            })}
-          >
-            {previewUI}
-          </div>
-        </div>
-      </TabContext>
-    </div>
-  );
-};
+        </TabContext>
+      </div>
+    );
+  },
+);
 export default ClassRoomTabContainer;
 
 const ClassRoomTabList = styled((props: TabListProps) => <TabList {...props} />)(() => {
