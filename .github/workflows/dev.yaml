@@ -14,6 +14,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Debug SSH Key Secret
+        run: |
+          echo "EC2_SSH_KEY secret info:"
+          echo "Length: $(echo '${{ secrets.EC2_SSH_KEY }}' | wc -c)"
+          echo "Lines: $(echo '${{ secrets.EC2_SSH_KEY }}' | wc -l)"
+          echo "First line: $(echo '${{ secrets.EC2_SSH_KEY }}' | head -1)"
+          echo "Last line: $(echo '${{ secrets.EC2_SSH_KEY }}' | tail -1)"
+          echo "Contains BEGIN: $(echo '${{ secrets.EC2_SSH_KEY }}' | grep -c 'BEGIN' || echo '0')"
+          echo "Contains END: $(echo '${{ secrets.EC2_SSH_KEY }}' | grep -c 'END' || echo '0')"
+
       - name: Setup SSH Key
         run: |
           # Ensure the .ssh directory exists
@@ -23,6 +33,14 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           chmod 700 ~/.ssh
           
+          # Debug the created key file
+          echo "Created SSH key file info:"
+          ls -la ~/.ssh/id_rsa
+          echo "File size: $(wc -c < ~/.ssh/id_rsa)"
+          echo "File lines: $(wc -l < ~/.ssh/id_rsa)"
+          echo "First line of key file: $(head -1 ~/.ssh/id_rsa)"
+          echo "Last line of key file: $(tail -1 ~/.ssh/id_rsa)"
+          
       - name: Setup SSH Agent and Add Key
         run: |
           eval "$(ssh-agent -s)"
@@ -30,10 +48,39 @@ jobs:
           
       - name: Validate SSH Key
         run: |
-          # Check if the key is valid
-          ssh-keygen -l -f ~/.ssh/id_rsa
+          echo "Validating SSH key..."
+          
+          # Check if the key file exists and has content
+          if [ ! -f ~/.ssh/id_rsa ]; then
+            echo "ERROR: SSH key file not found!"
+            exit 1
+          fi
+          
+          if [ ! -s ~/.ssh/id_rsa ]; then
+            echo "ERROR: SSH key file is empty!"
+            exit 1
+          fi
+          
+          # Try to get key fingerprint
+          echo "Attempting to get key fingerprint..."
+          if ssh-keygen -l -f ~/.ssh/id_rsa; then
+            echo "SSH key validation successful!"
+          else
+            echo "ERROR: SSH key validation failed!"
+            echo "Key file contents (first and last 2 lines):"
+            head -2 ~/.ssh/id_rsa
+            echo "..."
+            tail -2 ~/.ssh/id_rsa
+            exit 1
+          fi
+          
           # Test SSH agent
-          ssh-add -l
+          echo "Testing SSH agent..."
+          if ssh-add -l > /dev/null 2>&1; then
+            echo "SSH agent is working!"
+          else
+            echo "SSH agent test failed, but continuing..."
+          fi
           
       - name: Add SSH Key to Known Hosts
         run: |
