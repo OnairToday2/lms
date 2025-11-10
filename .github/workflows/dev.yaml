@@ -23,15 +23,43 @@ jobs:
           echo "Last line: $(echo '${{ secrets.EC2_SSH_KEY }}' | tail -1)"
           echo "Contains BEGIN: $(echo '${{ secrets.EC2_SSH_KEY }}' | grep -c 'BEGIN' || echo '0')"
           echo "Contains END: $(echo '${{ secrets.EC2_SSH_KEY }}' | grep -c 'END' || echo '0')"
+          
+          # Check if key ends properly
+          if ! echo '${{ secrets.EC2_SSH_KEY }}' | grep -q 'END.*PRIVATE KEY'; then
+            echo "WARNING: SSH key appears to be missing END marker!"
+            echo "This will cause libcrypto errors."
+            echo "Please check your GitHub secret EC2_SSH_KEY - it should end with:"
+            echo "-----END OPENSSH PRIVATE KEY----- or -----END RSA PRIVATE KEY-----"
+          fi
 
       - name: Setup SSH Key
         run: |
           # Ensure the .ssh directory exists
           mkdir -p ~/.ssh
-          # Write the SSH key to a file, ensuring proper line endings
-          echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          
+          # Write the SSH key to a temporary file first for validation
+          echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > /tmp/temp_key
+          
+          # Validate the key has proper BEGIN and END markers
+          if ! grep -q "BEGIN.*PRIVATE KEY" /tmp/temp_key; then
+            echo "ERROR: SSH key missing BEGIN marker"
+            exit 1
+          fi
+          
+          if ! grep -q "END.*PRIVATE KEY" /tmp/temp_key; then
+            echo "ERROR: SSH key missing END marker"
+            echo "Current key content (showing structure):"
+            sed 's/[A-Za-z0-9+/=]/X/g' /tmp/temp_key | head -5
+            echo "..."
+            sed 's/[A-Za-z0-9+/=]/X/g' /tmp/temp_key | tail -5
+            exit 1
+          fi
+          
+          # If validation passes, copy to the proper location
+          cp /tmp/temp_key ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           chmod 700 ~/.ssh
+          rm /tmp/temp_key
           
           # Debug the created key file
           echo "Created SSH key file info:"
@@ -101,7 +129,7 @@ jobs:
           
           ssh -o BatchMode=yes -o ConnectTimeout=10 -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST << EOF
             set -e
-            cd lms-fe
+            cd lms/lms-fe
             # Ensure we are on the correct branch
             git fetch origin
             git reset --hard
