@@ -189,6 +189,17 @@ const ResultQuestionCard: React.FC<ResultQuestionCardProps> = ({
               {question.earnedScore}/{question.maxScore} điểm
             </Typography>
           </Box>
+
+          {question.feedback && (
+            <Box sx={{ mt: 2, p: 2, bgcolor: "info.50", borderRadius: 1, border: "1px solid", borderColor: "info.200" }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 600 }}>
+                Nhận xét của giáo viên:
+              </Typography>
+              <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
+                {question.feedback}
+              </Typography>
+            </Box>
+          )}
         </Box>
       )}
 
@@ -212,6 +223,26 @@ const ResultQuestionCard: React.FC<ResultQuestionCardProps> = ({
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Học viên chưa nộp tệp
             </Typography>
+          )}
+
+          <Box sx={{ mt: 2, p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              Điểm đạt được:
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {question.earnedScore}/{question.maxScore} điểm
+            </Typography>
+          </Box>
+
+          {question.feedback && (
+            <Box sx={{ mt: 2, p: 2, bgcolor: "info.50", borderRadius: 1, border: "1px solid", borderColor: "info.200" }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 600 }}>
+                Nhận xét của giáo viên:
+              </Typography>
+              <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
+                {question.feedback}
+              </Typography>
+            </Box>
           )}
         </Box>
       )}

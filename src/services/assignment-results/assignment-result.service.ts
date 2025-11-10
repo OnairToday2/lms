@@ -290,6 +290,7 @@ export async function getSubmissionDetail(
       answerAttachments: q.answerAttachments,
       earnedScore: q.earnedScore,
       isAutoGraded,
+      feedback: q.feedback,
     };
   });
 
@@ -308,11 +309,12 @@ export async function getSubmissionDetail(
     totalScore: resultWithEmployee.score,
     maxScore: resultWithEmployee.max_score || 0,
     questions,
+    feedback: resultWithEmployee.feedback,
   };
 }
 
 export async function saveGrade(payload: SaveGradeDto): Promise<{ totalScore: number; maxScore: number }> {
-  const { assignmentId, employeeId, questionGrades } = payload;
+  const { assignmentId, employeeId, questionGrades, overallFeedback } = payload;
 
   const resultWithEmployee = await assignmentResultsRepository.getAssignmentResultWithEmployee(
     assignmentId,
@@ -325,25 +327,26 @@ export async function saveGrade(payload: SaveGradeDto): Promise<{ totalScore: nu
 
   const submissionData = resultWithEmployee.data as SubmissionData;
 
-  const gradeMap = new Map(questionGrades.map((g) => [g.questionId, g.score]));
+  const gradeMap = new Map(questionGrades.map((g) => [g.questionId, { score: g.score, feedback: g.feedback }]));
 
   const updatedQuestions = submissionData.questions.map((q) => {
     if (q.type === "radio" || q.type === "checkbox") {
       return q;
     }
 
-    const manualScore = gradeMap.get(q.id);
-    if (manualScore === undefined) {
+    const gradeData = gradeMap.get(q.id);
+    if (!gradeData || gradeData.score === undefined) {
       throw new Error(`Thiếu điểm cho câu hỏi: ${q.label}`);
     }
 
-    if (manualScore < 0 || manualScore > q.score) {
+    if (gradeData.score < 0 || gradeData.score > q.score) {
       throw new Error(`Điểm không hợp lệ cho câu hỏi "${q.label}". Điểm phải từ 0 đến ${q.score}`);
     }
 
     return {
       ...q,
-      earnedScore: manualScore,
+      earnedScore: gradeData.score,
+      feedback: gradeData.feedback,
     };
   });
 
@@ -359,6 +362,7 @@ export async function saveGrade(payload: SaveGradeDto): Promise<{ totalScore: nu
     submissionData: updatedSubmissionData,
     score: totalScore,
     status: "graded",
+    feedback: overallFeedback || null,
   });
 
   return { totalScore, maxScore };

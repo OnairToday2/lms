@@ -26,6 +26,7 @@ export interface QuestionWithAnswer {
   answer: QuestionAnswer;
   answerAttachments?: string[];
   earnedScore: number | null;
+  feedback?: string;
 }
 
 export interface SubmissionData {
@@ -107,6 +108,7 @@ export async function updateAssignmentResult(
     score?: number | null;
     max_score?: number;
     status?: AssignmentResultStatus;
+    feedback?: string | null;
   }
 ): Promise<void> {
   const supabase = await createSVClient();
@@ -127,6 +129,10 @@ export async function updateAssignmentResult(
 
   if (data.status !== undefined) {
     updateData.status = data.status;
+  }
+
+  if (data.feedback !== undefined) {
+    updateData.feedback = data.feedback;
   }
 
   const { error } = await supabase
@@ -161,6 +167,7 @@ export interface AssignmentResultWithEmployee {
   max_score: number | null;
   status: AssignmentResultStatus;
   created_at: string;
+  feedback: string | null;
   employee: {
     employee_code: string;
     profiles: {
@@ -188,6 +195,7 @@ export async function getAssignmentResultWithEmployee(
       max_score,
       status,
       created_at,
+      feedback,
       employees!assignment_results_employee_id_fkey (
         employee_code,
         profiles!profiles_employee_id_fkey (
@@ -218,6 +226,7 @@ export async function getAssignmentResultWithEmployee(
     max_score: data.max_score,
     status: data.status,
     created_at: data.created_at,
+    feedback: data.feedback,
     employee: data.employees as any,
   };
 }

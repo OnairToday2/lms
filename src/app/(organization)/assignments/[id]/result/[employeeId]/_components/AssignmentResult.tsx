@@ -159,6 +159,17 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
         </Stack>
         </Card>
 
+        {submission.feedback && (
+          <Card sx={{ p: 3, mb: 3, bgcolor: "info.50", border: "1px solid", borderColor: "info.200" }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+              Nhận xét chung của giáo viên
+            </Typography>
+            <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
+              {submission.feedback}
+            </Typography>
+          </Card>
+        )}
+
         <Stack spacing={2} sx={{ mb: 3 }}>
           {submission.questions.map((question, index) => (
             <ResultQuestionCard

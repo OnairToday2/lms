@@ -11,11 +11,12 @@ import {
   Divider,
   CircularProgress,
   Alert,
+  TextField,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useGetSubmissionDetailQuery } from "@/modules/assignment-management/operations/query";
 import { useSaveGradeMutation } from "@/modules/assignment-management/operations/mutation";
 import GradeQuestionCard from "./GradeQuestionCard";
@@ -29,6 +30,8 @@ interface AssignmentGradingProps {
 
 interface GradeFormData {
   grades: Record<string, number | string>;
+  feedbacks: Record<string, string>;
+  overallFeedback: string;
 }
 
 const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
@@ -52,18 +55,36 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
     return initialGrades;
   }, [submission]);
 
+  const defaultFeedbacks = useMemo(() => {
+    if (!submission) return {};
+
+    const initialFeedbacks: Record<string, string> = {};
+    submission.questions.forEach((q) => {
+      if (!q.isAutoGraded) {
+        initialFeedbacks[q.id] = q.feedback ?? "";
+      }
+    });
+    return initialFeedbacks;
+  }, [submission]);
+
   const { control, handleSubmit, watch, reset, formState: { errors, isValid } } = useForm<GradeFormData>({
     mode: "onChange",
     defaultValues: {
       grades: defaultGrades,
+      feedbacks: defaultFeedbacks,
+      overallFeedback: submission?.feedback ?? "",
     },
   });
 
   useEffect(() => {
     if (submission) {
-      reset({ grades: defaultGrades });
+      reset({
+        grades: defaultGrades,
+        feedbacks: defaultFeedbacks,
+        overallFeedback: submission.feedback ?? "",
+      });
     }
-  }, [submission, defaultGrades, reset]);
+  }, [submission, defaultGrades, defaultFeedbacks, reset]);
 
   const grades = watch("grades");
 
@@ -116,9 +137,11 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
         const score = typeof gradeValue === "number"
           ? gradeValue
           : (gradeValue === "" ? 0 : parseFloat(gradeValue!) || 0);
+        const feedback = data.feedbacks[q.id] || undefined;
         return {
           questionId: q.id,
           score,
+          feedback,
         };
       });
 
@@ -127,6 +150,7 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
         assignmentId,
         employeeId,
         questionGrades,
+        overallFeedback: data.overallFeedback || undefined,
       });
 
       notifications.show("Chấm bài thành công!", {
@@ -250,6 +274,27 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
             />
           ))}
         </Stack>
+
+        <Card variant="outlined" sx={{ p: 2.5, mb: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            Nhận xét chung
+          </Typography>
+          <Controller
+            name="overallFeedback"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                value={field.value ?? ""}
+                label="Nhận xét chung cho bài làm"
+                multiline
+                rows={4}
+                fullWidth
+                placeholder="Nhập nhận xét chung cho toàn bộ bài làm của học viên (không bắt buộc)"
+              />
+            )}
+          />
+        </Card>
 
         <Stack direction="row" spacing={2} justifyContent="flex-end">
           <Button

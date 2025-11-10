@@ -20,6 +20,7 @@ export interface QuestionGradeDetail {
   answerAttachments?: string[];
   earnedScore: number | null;
   isAutoGraded: boolean;
+  feedback?: string;
 }
 
 export interface SubmissionDetailDto {
@@ -37,5 +38,6 @@ export interface SubmissionDetailDto {
   totalScore: number | null;
   maxScore: number;
   questions: QuestionGradeDetail[];
+  feedback: string | null;
 }
 
