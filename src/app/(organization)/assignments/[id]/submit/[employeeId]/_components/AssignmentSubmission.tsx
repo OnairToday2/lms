@@ -278,7 +278,7 @@ export default function AssignmentSubmission() {
             throw new Error("Không tìm thấy thông tin câu hỏi");
           }
 
-          let answerData: string | string[];
+          let answerData: string | string[] | Array<{ url: string; originalName: string; fileSize: number; mimeType: string }>;
 
           switch (answer.questionType) {
             case "file":
@@ -286,7 +286,7 @@ export default function AssignmentSubmission() {
                 throw new Error(`Vui lòng tải lên file cho câu hỏi: ${question.label}`);
               }
 
-              const uploadedUrls = await Promise.all(
+              const uploadedFiles = await Promise.all(
                 answer.files.map(async (file) => {
                   const result = await uploadFileToS3(file, {
                     onProgress: (percent) => {
@@ -305,10 +305,15 @@ export default function AssignmentSubmission() {
                     setUploadProgress(Math.round((completedFiles / totalFiles) * 100));
                   }
 
-                  return result.url;
+                  return {
+                    url: result.url,
+                    originalName: file.name,
+                    fileSize: file.size,
+                    mimeType: file.type,
+                  };
                 })
               );
-              answerData = uploadedUrls;
+              answerData = uploadedFiles;
               break;
 
             case "text":

@@ -103,7 +103,7 @@ const ResultQuestionCard: React.FC<ResultQuestionCardProps> = ({
 
       {question.type === "file" && (
         <Box>
-          <FileAnswerDisplay fileUrls={question.answer.fileUrls} />
+          <FileAnswerDisplay files={question.answer.files} />
 
           <ScoreDisplay earnedScore={question.earnedScore} maxScore={question.maxScore} />
 

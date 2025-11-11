@@ -13,7 +13,7 @@ interface SubmitAssignmentRequest {
     questionLabel: string;
     questionType: QuestionType;
     options?: QuestionOption[];
-    answer: string | string[];
+    answer: string | string[] | Array<{ url: string; originalName: string; fileSize: number; mimeType: string }>;
     attachments?: string[];
   }>;
 }
@@ -87,14 +87,32 @@ export async function POST(
               { status: 400 }
             );
           }
-          for (const url of answer.answer) {
-            if (typeof url !== "string") {
+          for (const file of answer.answer) {
+            if (typeof file !== "object" || !file.url || !file.originalName || file.fileSize === undefined || !file.mimeType) {
               return NextResponse.json(
-                { error: "Định dạng URL file không hợp lệ" },
+                { error: "Định dạng file không hợp lệ" },
                 { status: 400 }
               );
             }
-            const isValidS3Url = url.includes('.s3.') && url.includes('amazonaws.com');
+            if (typeof file.url !== "string" || typeof file.originalName !== "string" || typeof file.fileSize !== "number" || typeof file.mimeType !== "string") {
+              return NextResponse.json(
+                { error: "Định dạng URL, tên file, kích thước hoặc loại file không hợp lệ" },
+                { status: 400 }
+              );
+            }
+            if (file.fileSize <= 0) {
+              return NextResponse.json(
+                { error: "Kích thước file phải là số dương" },
+                { status: 400 }
+              );
+            }
+            if (file.mimeType.trim() === "") {
+              return NextResponse.json(
+                { error: "Loại file không được để trống" },
+                { status: 400 }
+              );
+            }
+            const isValidS3Url = file.url.includes('.s3.') && file.url.includes('amazonaws.com');
             if (!isValidS3Url) {
               return NextResponse.json(
                 { error: "URL file không hợp lệ" },
@@ -122,7 +140,7 @@ export async function POST(
           }
           if (answer.options) {
             const validOptionIds = answer.options.map(opt => opt.id);
-            for (const optionId of answer.answer) {
+            for (const optionId of answer.answer as string[]) {
               if (!validOptionIds.includes(optionId)) {
                 return NextResponse.json(
                   { error: "Đáp án được chọn không hợp lệ" },

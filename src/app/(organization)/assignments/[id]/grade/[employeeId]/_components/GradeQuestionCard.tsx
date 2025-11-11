@@ -153,7 +153,7 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
 
       {question.type === "file" && (
         <Box>
-          <FileAnswerDisplay fileUrls={question.answer.fileUrls} />
+          <FileAnswerDisplay files={question.answer.files} />
 
           {control && (
             <ScoreAndFeedbackInput

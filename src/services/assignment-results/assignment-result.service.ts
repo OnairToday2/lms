@@ -19,7 +19,7 @@ export interface QuestionAnswerInput {
   questionLabel: string;
   questionType: QuestionType;
   options?: QuestionOption[];
-  answer: string | string[];
+  answer: string | string[] | Array<{ url: string; originalName: string; fileSize: number; mimeType: string }>;
   attachments?: string[];
 }
 
@@ -66,12 +66,14 @@ function gradeCheckboxQuestion(
 
 function convertAnswerToTypedFormat(
   questionType: QuestionType,
-  answer: string | string[]
+  answer: string | string[] | Array<{ url: string; originalName: string; fileSize: number; mimeType: string }>
 ): QuestionAnswer {
   switch (questionType) {
     case "file":
-      const fileUrls = Array.isArray(answer) ? answer : [answer];
-      return { fileUrls } as FileAnswer;
+      if (Array.isArray(answer) && answer.length > 0 && typeof answer[0] === "object") {
+        return { files: answer as Array<{ url: string; originalName: string; fileSize: number; mimeType: string }> } as FileAnswer;
+      }
+      throw new Error("Invalid file answer format");
 
     case "text":
       return { text: answer as string } as TextAnswer;
@@ -270,7 +272,7 @@ export async function getSubmissionDetail(
     const answer: QuestionGradeDetail["answer"] = {};
 
     if (q.type === "file") {
-      answer.fileUrls = (q.answer as FileAnswer).fileUrls;
+      answer.files = (q.answer as FileAnswer).files;
     } else if (q.type === "text") {
       answer.text = (q.answer as TextAnswer).text;
     } else if (q.type === "radio") {

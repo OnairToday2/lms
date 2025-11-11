@@ -7,7 +7,7 @@ type AssignmentResultRow = Database["public"]["Tables"]["assignment_results"]["R
 type QuestionType = Database["public"]["Enums"]["question_type"];
 type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
 
-export type FileAnswer = { fileUrls: string[] };
+export type FileAnswer = { files: Array<{ url: string; originalName: string; fileSize: number; mimeType: string }> };
 export type TextAnswer = { text: string };
 export type RadioAnswer = { selectedOptionId: string };
 export type CheckboxAnswer = { selectedOptionIds: string[] };
@@ -46,7 +46,7 @@ export interface AnswerData {
   questionLabel: string;
   questionType: QuestionType;
   options?: QuestionOption[];
-  answer: string | string[];
+  answer: string | string[] | Array<{ url: string; originalName: string; fileSize: number; mimeType: string }>;
 }
 
 export async function createAssignmentResult(data: {
