@@ -1,13 +1,13 @@
 import { createSVClient } from "@/services";
 import { Database } from "@/types/supabase.types";
-import { QuestionOption } from "@/types/dto/assignments";
+import { QuestionOption, FileMetadata } from "@/types/dto/assignments";
 
 type AssignmentResultInsert = Database["public"]["Tables"]["assignment_results"]["Insert"];
 type AssignmentResultRow = Database["public"]["Tables"]["assignment_results"]["Row"];
 type QuestionType = Database["public"]["Enums"]["question_type"];
 type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
 
-export type FileAnswer = { files: Array<{ url: string; originalName: string; fileSize: number; mimeType: string }> };
+export type FileAnswer = { files: FileMetadata[] };
 export type TextAnswer = { text: string };
 export type RadioAnswer = { selectedOptionId: string };
 export type CheckboxAnswer = { selectedOptionIds: string[] };
@@ -24,7 +24,7 @@ export interface QuestionWithAnswer {
   created_at: string;
   updated_at: string;
   answer: QuestionAnswer;
-  answerAttachments?: string[];
+  answerAttachments?: FileMetadata[];
   earnedScore: number | null;
   feedback?: string;
 }
@@ -46,7 +46,7 @@ export interface AnswerData {
   questionLabel: string;
   questionType: QuestionType;
   options?: QuestionOption[];
-  answer: string | string[] | Array<{ url: string; originalName: string; fileSize: number; mimeType: string }>;
+  answer: string | string[] | FileMetadata[];
 }
 
 export async function createAssignmentResult(data: {

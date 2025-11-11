@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSVClient } from "@/services";
 import * as assignmentResultService from "@/services/assignment-results/assignment-result.service";
 import { Database } from "@/types/supabase.types";
-import { QuestionOption } from "@/types/dto/assignments";
+import { QuestionOption, FileMetadata } from "@/types/dto/assignments";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
 
@@ -13,8 +13,8 @@ interface SubmitAssignmentRequest {
     questionLabel: string;
     questionType: QuestionType;
     options?: QuestionOption[];
-    answer: string | string[] | Array<{ url: string; originalName: string; fileSize: number; mimeType: string }>;
-    attachments?: string[];
+    answer: string | string[] | FileMetadata[];
+    attachments?: FileMetadata[];
   }>;
 }
 
@@ -62,14 +62,32 @@ export async function POST(
       }
 
       if (answer.attachments && Array.isArray(answer.attachments)) {
-        for (const url of answer.attachments) {
-          if (typeof url !== "string") {
+        for (const attachment of answer.attachments) {
+          if (typeof attachment !== "object" || !attachment.url || !attachment.originalName || attachment.fileSize === undefined || !attachment.mimeType) {
             return NextResponse.json(
-              { error: "Định dạng URL tệp đính kèm không hợp lệ" },
+              { error: "Định dạng tệp đính kèm không hợp lệ" },
               { status: 400 }
             );
           }
-          const isValidS3Url = url.includes('.s3.') && url.includes('amazonaws.com');
+          if (typeof attachment.url !== "string" || typeof attachment.originalName !== "string" || typeof attachment.fileSize !== "number" || typeof attachment.mimeType !== "string") {
+            return NextResponse.json(
+              { error: "Định dạng URL, tên file, kích thước hoặc loại tệp đính kèm không hợp lệ" },
+              { status: 400 }
+            );
+          }
+          if (attachment.fileSize <= 0) {
+            return NextResponse.json(
+              { error: "Kích thước tệp đính kèm phải là số dương" },
+              { status: 400 }
+            );
+          }
+          if (attachment.mimeType.trim() === "") {
+            return NextResponse.json(
+              { error: "Loại tệp đính kèm không được để trống" },
+              { status: 400 }
+            );
+          }
+          const isValidS3Url = attachment.url.includes('.s3.') && attachment.url.includes('amazonaws.com');
           if (!isValidS3Url) {
             return NextResponse.json(
               { error: "URL tệp đính kèm không hợp lệ" },

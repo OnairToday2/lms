@@ -22,7 +22,7 @@ import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { uploadFileToS3 } from "@/utils/s3-upload";
 import { useQueryClient } from "@tanstack/react-query";
 import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";
-import AssignmentHeader from "./AssignmentHeader";
+import { FileMetadata } from "@/types/dto/assignments";
 import QuestionCard from "./QuestionCard";
 import SubmissionActions from "./SubmissionActions";
 
@@ -278,7 +278,7 @@ export default function AssignmentSubmission() {
             throw new Error("Không tìm thấy thông tin câu hỏi");
           }
 
-          let answerData: string | string[] | Array<{ url: string; originalName: string; fileSize: number; mimeType: string }>;
+          let answerData: string | string[] | FileMetadata[];
 
           switch (answer.questionType) {
             case "file":
@@ -341,9 +341,9 @@ export default function AssignmentSubmission() {
               throw new Error(`Loại câu hỏi không hợp lệ: ${answer.questionType}`);
           }
 
-          let attachmentUrls: string[] | undefined = undefined;
+          let attachmentMetadata: FileMetadata[] | undefined = undefined;
           if (answer.attachments && answer.attachments.length > 0) {
-            attachmentUrls = await Promise.all(
+            attachmentMetadata = await Promise.all(
               answer.attachments.map(async (file) => {
                 const result = await uploadFileToS3(file, {
                   onProgress: (percent) => {
@@ -362,7 +362,12 @@ export default function AssignmentSubmission() {
                   setUploadProgress(Math.round((completedFiles / totalFiles) * 100));
                 }
 
-                return result.url;
+                return {
+                  url: result.url,
+                  originalName: file.name,
+                  fileSize: file.size,
+                  mimeType: file.type,
+                };
               })
             );
           }
@@ -373,7 +378,7 @@ export default function AssignmentSubmission() {
             questionType: answer.questionType,
             options: question.options,
             answer: answerData,
-            attachments: attachmentUrls,
+            attachments: attachmentMetadata,
           };
         })
       );
@@ -511,7 +516,6 @@ export default function AssignmentSubmission() {
                   );
                 })}
 
-                {/* Submit Button */}
                 <SubmissionActions
                   onCancel={handleBack}
                   onSubmit={() => {}}

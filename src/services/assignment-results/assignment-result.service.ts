@@ -9,7 +9,7 @@ import type {
   QuestionAnswer,
 } from "@/repository/assignment-results";
 import { Database } from "@/types/supabase.types";
-import { QuestionOption, AssignmentDto, SubmissionDetailDto, QuestionGradeDetail, SaveGradeDto } from "@/types/dto/assignments";
+import { QuestionOption, AssignmentDto, SubmissionDetailDto, QuestionGradeDetail, SaveGradeDto, FileMetadata } from "@/types/dto/assignments";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
 type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
@@ -19,8 +19,8 @@ export interface QuestionAnswerInput {
   questionLabel: string;
   questionType: QuestionType;
   options?: QuestionOption[];
-  answer: string | string[] | Array<{ url: string; originalName: string; fileSize: number; mimeType: string }>;
-  attachments?: string[];
+  answer: string | string[] | FileMetadata[];
+  attachments?: FileMetadata[];
 }
 
 export interface SubmitAssignmentPayload {
@@ -66,12 +66,12 @@ function gradeCheckboxQuestion(
 
 function convertAnswerToTypedFormat(
   questionType: QuestionType,
-  answer: string | string[] | Array<{ url: string; originalName: string; fileSize: number; mimeType: string }>
+  answer: string | string[] | FileMetadata[]
 ): QuestionAnswer {
   switch (questionType) {
     case "file":
       if (Array.isArray(answer) && answer.length > 0 && typeof answer[0] === "object") {
-        return { files: answer as Array<{ url: string; originalName: string; fileSize: number; mimeType: string }> } as FileAnswer;
+        return { files: answer as FileMetadata[] } as FileAnswer;
       }
       throw new Error("Invalid file answer format");
 

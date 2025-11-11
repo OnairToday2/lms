@@ -2,9 +2,10 @@
 
 import React from "react";
 import { Box, Typography, Stack, Link } from "@mui/material";
+import { FileMetadata } from "@/types/dto/assignments";
 
 interface AnswerAttachmentsProps {
-  attachments: string[];
+  attachments: FileMetadata[];
 }
 
 const AnswerAttachments: React.FC<AnswerAttachmentsProps> = ({ attachments }) => {
@@ -18,16 +19,17 @@ const AnswerAttachments: React.FC<AnswerAttachmentsProps> = ({ attachments }) =>
         Tệp đính kèm của học viên:
       </Typography>
       <Stack spacing={0.5}>
-        {attachments.map((url, index) => (
-          <Link
-            key={index}
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{ fontSize: "0.875rem" }}
-          >
-            Tệp đính kèm {index + 1}
-          </Link>
+        {attachments.map((attachment, index) => (
+          <Box key={index}>
+            <Link
+              href={attachment.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ fontSize: "0.875rem" }}
+            >
+              {`Tệp đính kèm ${index + 1}: ${attachment.originalName}`}
+            </Link>
+          </Box>
         ))}
       </Stack>
     </Box>

@@ -2,23 +2,11 @@
 
 import React from "react";
 import { Box, Typography, Stack, Link } from "@mui/material";
+import { FileMetadata } from "@/types/dto/assignments";
 
 interface FileAnswerDisplayProps {
-  files: Array<{ url: string; originalName: string; fileSize: number; mimeType: string }> | undefined;
+  files: FileMetadata[] | undefined;
 }
-
-/**
- * Format file size in bytes to human-readable format
- */
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return "0 Bytes";
-
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
-};
 
 const FileAnswerDisplay: React.FC<FileAnswerDisplayProps> = ({ files }) => {
   return (
@@ -38,9 +26,6 @@ const FileAnswerDisplay: React.FC<FileAnswerDisplayProps> = ({ files }) => {
               >
                 {`Tệp ${index + 1}: ${file.originalName}`}
               </Link>
-              <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                ({formatFileSize(file.fileSize)})
-              </Typography>
             </Box>
           ))}
         </Stack>

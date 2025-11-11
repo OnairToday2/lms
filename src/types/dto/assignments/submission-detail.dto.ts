@@ -1,5 +1,6 @@
 import { Database } from "@/types/supabase.types";
 import { QuestionOption } from "./question-option.dto";
+import { FileMetadata } from "./file-metadata.dto";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
 type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
@@ -12,12 +13,12 @@ export interface QuestionGradeDetail {
   options?: QuestionOption[];
   attachments?: string[];
   answer: {
-    files?: Array<{ url: string; originalName: string; fileSize: number; mimeType: string }>;
+    files?: FileMetadata[];
     text?: string;
     selectedOptionId?: string;
     selectedOptionIds?: string[];
   };
-  answerAttachments?: string[];
+  answerAttachments?: FileMetadata[];
   earnedScore: number | null;
   isAutoGraded: boolean;
   feedback?: string;
