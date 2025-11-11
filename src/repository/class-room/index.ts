@@ -184,6 +184,109 @@ const getClassRoomById = async (classRoomId: string) => {
 };
 export type GetClassRoomByIdResponse = Awaited<ReturnType<typeof getClassRoomById>>;
 
+const getClassRoomBySlug = async (slug: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("class_rooms")
+      .select(
+        `
+          id, 
+          title,
+          slug,
+          description,
+          room_type,
+          comunity_info,
+          thumbnail_url,
+          documents,
+          start_at,
+          end_at,
+          status,
+          employee_id,
+          employees:class_room_employee(
+            employee:employees(
+              id,
+              employee_type,
+              employee_code,
+              profile:profiles(
+                id,
+                full_name,
+                email,
+                employee_id,
+                avatar
+              )
+            )
+          ),
+          owner:employees(
+            id,
+            employee_type,
+            employee_code,
+            profile:profiles(
+              id,
+              full_name,
+              email,
+              employee_id,
+              avatar
+            )
+          ),
+          organizations(
+            id, 
+            name
+          ),
+          sessions:class_sessions(
+            id,
+            title,
+            description,
+            start_at,
+            end_at,
+            class_room_id,
+            location,
+            is_online,
+            channel_provider,
+            channel_info,
+            limit_person,
+            teachers:class_session_teacher(
+              id,
+              employee:employees!class_session_teacher_teacher_id_fkey(
+                id,
+                employee_type,
+                employee_code,
+                profile:profiles(
+                  id,
+                  full_name,
+                  email,
+                  employee_id,
+                  avatar
+                )
+              )
+            ),
+            agendas:class_sessions_agendas(
+              id,
+              title,
+              description,
+              thumbnail_url,
+              start_at,
+              end_at,
+              class_session_id
+            ),
+            class_qr_codes(
+              id,
+              class_room_id, 
+              class_session_id, 
+              checkin_start_time, 
+              checkin_end_time
+            )
+          )
+        `,
+      )
+      .eq("slug", slug)
+      .single();
+    return { data, error };
+  } catch (err: any) {
+    throw new Error(err?.message ?? "Fetching ClassRoom Detail failed not found");
+  }
+};
+export type GetClassRoomBySlugResponse = Awaited<ReturnType<typeof getClassRoomBySlug>>;
+
 const createClassRoom = async (payload: CreateClassRoomPayload) => {
   try {
     return await supabase.from("class_rooms").insert(payload).select().single();
@@ -727,6 +830,7 @@ export {
   upsertClassRoom,
   deletePivotClassRoomAndHashTag,
   getClassRoomById,
+  getClassRoomBySlug,
   deletePivotClassRoomAndEmployee,
   getClassRoomsByEmployeeId,
   getClassRoomSessionDetail,
