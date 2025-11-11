@@ -1,7 +1,6 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { Image } from "@/shared/ui/Image";
-import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
+import { Box, Button, Divider, Stack, Tooltip, Typography } from "@mui/material";
 import { ElearningAssignedCourseDto } from "@/types/dto/elearning/elearning.dto";
 import ImportContactsIcon from '@mui/icons-material/ImportContacts';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
@@ -11,6 +10,18 @@ interface IElearningCourseCard {
 }
 
 const ElearningCourseCard = ({ assignment }: IElearningCourseCard) => {
+    const teacherNames =
+        assignment.course?.teacherAssignments
+            ?.map((teacherAssignment) =>
+                teacherAssignment.teacher?.profile?.full_name?.trim() ?? null
+            )
+            .filter((name): name is string => Boolean(name)) ?? [];
+
+    const primaryTeacherName = teacherNames[0] ?? "Đang cập nhật";
+    const additionalTeacherNames = teacherNames.slice(1);
+    const extraTeacherCount = additionalTeacherNames.length;
+    const shouldShowTeacherTooltip = extraTeacherCount > 0;
+
     return (
         <>
             <Box className="rounded-lg border border-[#919EAB33] p-2 shadow">
@@ -46,9 +57,34 @@ const ElearningCourseCard = ({ assignment }: IElearningCourseCard) => {
 
                     <Stack direction="row" alignItems="center" spacing={1} mt={1}>
                         <PeopleAltOutlinedIcon />
-                        <p className="font-normal text-xs">
-                            <span>GV</span> Lê Thị Hồng Đào
-                        </p>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                            <p className="font-normal text-xs">
+                                <span className="font-semibold text-xs">GV</span> {primaryTeacherName}
+                            </p>
+                            {shouldShowTeacherTooltip && (
+                                <Tooltip
+                                    arrow
+                                    placement="top"
+                                    title={
+                                        <Stack spacing={0.25}>
+                                            {additionalTeacherNames.map((name, index) => (
+                                                <Typography
+                                                    key={`${name}-${index}`}
+                                                    variant="caption"
+                                                    component="p"
+                                                >
+                                                    {name}
+                                                </Typography>
+                                            ))}
+                                        </Stack>
+                                    }
+                                >
+                                    <Box className="cursor-default rounded-full border border-[#B5D4FF] bg-[#E7F1FF] px-2 py-0.5 text-[12px] font-semibold leading-none text-[#1056B4]">
+                                        +{extraTeacherCount}
+                                    </Box>
+                                </Tooltip>
+                            )}
+                        </Stack>
                     </Stack>
 
                     <Box mt={2} mb={1}>

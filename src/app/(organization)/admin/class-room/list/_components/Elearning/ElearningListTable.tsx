@@ -4,7 +4,6 @@ import {
     AvatarGroup,
     Box,
     Button,
-    Chip,
     IconButton,
     Menu,
     MenuItem,
@@ -18,7 +17,6 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import type { ChipProps } from "@mui/material/Chip";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import { grey } from "@mui/material/colors";
 import { GridMoreVertIcon } from "@mui/x-data-grid";
@@ -30,23 +28,7 @@ import { useDeleteElearningCourseMutation } from "@/modules/elearning/operations
 import { useQueryClient } from "@tanstack/react-query";
 import { ConfirmDialog } from "@/shared/ui/custom-dialog";
 import { useState } from "react";
-import { Database } from "@/types/supabase.types";
-
-const COURSE_STATUS_LABELS: Record<string, string> = {
-    published: "Đã xuất bản",
-    unpublished: "Chưa xuất bản",
-    pending: "Chờ duyệt",
-    draft: "Bản nháp",
-    deleted: "Đã xoá",
-};
-
-const COURSE_STATUS_COLORS: Record<string, ChipProps["color"]> = {
-    published: "success",
-    unpublished: "warning",
-    pending: "warning",
-    draft: "default",
-    deleted: "error",
-};
+import AirplayOutlinedIcon from '@mui/icons-material/AirplayOutlined';
 
 const formatOrder = (value: number) => value.toString().padStart(2, "0");
 type ElearningTeacher = NonNullable<
@@ -100,7 +82,7 @@ export default function ElearningListTable({
         if (!courseId) {
             return;
         }
-        router.push(`/elearning/${courseId}/students`);
+        router.push(`/admin/elearning/${courseId}/students`);
     };
 
     return (
@@ -162,7 +144,6 @@ export default function ElearningListTable({
                         >
                             {elearnings.map((course, index) => {
                                 const order = formatOrder(startIndex + index + 1);
-                                const categories = course.categories ?? [];
                                 const studentCount = course.studentCount?.[0]?.count ?? 0;
                                 const teacherMap = new Map<string, ElearningTeacher>();
 
@@ -175,10 +156,6 @@ export default function ElearningListTable({
                                 });
 
                                 const teachers = Array.from(teacherMap.values());
-
-                                const courseStatus = course.status ?? "draft";
-                                const statusLabel = COURSE_STATUS_LABELS[courseStatus] ?? "Không xác định";
-                                const statusColor = COURSE_STATUS_COLORS[courseStatus] ?? "default";
 
                                 return (
                                     <TableRow
@@ -195,53 +172,16 @@ export default function ElearningListTable({
                                         </TableCell>
                                         <TableCell align="left">
                                             <Stack spacing={1}>
-                                                {/* <Chip
-                                                    label={statusLabel}
-                                                    color={statusColor}
-                                                    size="small"
-                                                    variant="outlined"
-                                                    sx={{ alignSelf: "flex-start" }}
-                                                /> */}
                                                 <Typography variant="subtitle2" fontWeight={600} className="line-clamp-2">
                                                     {course.title || "--"}
                                                 </Typography>
-                                                {course.description ? (
-                                                    <Typography variant="body2" color="text.secondary" className="line-clamp-2">
-                                                        {course.description}
-                                                    </Typography>
-                                                ) : null}
                                             </Stack>
                                         </TableCell>
                                         <TableCell align="center">
-                                            {categories.length > 0 ? (
-                                                <Stack
-                                                    direction="row"
-                                                    spacing={0.5}
-                                                    flexWrap="wrap"
-                                                    useFlexGap
-                                                    justifyContent="center"
-                                                >
-                                                    {categories.slice(0, 3).map((category, categoryIndex) => (
-                                                        <Chip
-                                                            key={`${course.id}-${category.category?.id ?? category.id ?? categoryIndex}`}
-                                                            label={category.category?.name ?? "--"}
-                                                            size="small"
-                                                            variant="outlined"
-                                                        />
-                                                    ))}
-                                                    {categories.length > 3 ? (
-                                                        <Chip
-                                                            label={`+${categories.length - 3}`}
-                                                            size="small"
-                                                            variant="outlined"
-                                                        />
-                                                    ) : null}
-                                                </Stack>
-                                            ) : (
-                                                <Typography variant="body2" color="text.secondary">
-                                                    --
-                                                </Typography>
-                                            )}
+                                            <div className="inline-flex items-center gap-1.5 bg-[#FFAB0029] text-[#B76E00] rounded-xl px-1.5 py-0.5 text-xs">
+                                                <AirplayOutlinedIcon className="text-[#B76E00] w-5 h-5" />
+                                                Môn học eLearning
+                                            </div>
                                         </TableCell>
                                         <TableCell align="center">
                                             <Stack direction="row" spacing={0.5} alignItems="center" justifyContent="center">

@@ -194,6 +194,12 @@ export type Database = {
       }
       class_attendances: {
         Row: {
+          attendance_method:
+            | Database["public"]["Enums"]["attendance_method_enum"]
+            | null
+          attendance_mode:
+            | Database["public"]["Enums"]["attendance_mode_enum"]
+            | null
           attendance_status:
             | Database["public"]["Enums"]["attendance_status"]
             | null
@@ -205,12 +211,18 @@ export type Database = {
           distance_from_class: number | null
           employee_id: string
           id: string
-          qr_code_id: string
+          qr_code_id: string | null
           rejection_reason: string | null
           scan_location_lat: number | null
           scan_location_lng: number | null
         }
         Insert: {
+          attendance_method?:
+            | Database["public"]["Enums"]["attendance_method_enum"]
+            | null
+          attendance_mode?:
+            | Database["public"]["Enums"]["attendance_mode_enum"]
+            | null
           attendance_status?:
             | Database["public"]["Enums"]["attendance_status"]
             | null
@@ -222,12 +234,18 @@ export type Database = {
           distance_from_class?: number | null
           employee_id: string
           id?: string
-          qr_code_id: string
+          qr_code_id?: string | null
           rejection_reason?: string | null
           scan_location_lat?: number | null
           scan_location_lng?: number | null
         }
         Update: {
+          attendance_method?:
+            | Database["public"]["Enums"]["attendance_method_enum"]
+            | null
+          attendance_mode?:
+            | Database["public"]["Enums"]["attendance_mode_enum"]
+            | null
           attendance_status?:
             | Database["public"]["Enums"]["attendance_status"]
             | null
@@ -239,7 +257,7 @@ export type Database = {
           distance_from_class?: number | null
           employee_id?: string
           id?: string
-          qr_code_id?: string
+          qr_code_id?: string | null
           rejection_reason?: string | null
           scan_location_lat?: number | null
           scan_location_lng?: number | null
@@ -1850,22 +1868,12 @@ export type Database = {
           qr_code_id: string
         }[]
       }
-      slugify: {
-        Args: { value: string }
-        Returns: string
-      }
-      unaccent: {
-        Args: { "": string }
-        Returns: string
-      }
-      unaccent_init: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
     }
     Enums: {
       action_code_enum: "create" | "read" | "update" | "delete"
       assignment_result_status: "submitted" | "graded"
+      attendance_method_enum: "qr" | "manual" | "online_auto"
+      attendance_mode_enum: "offline" | "online"
       attendance_status: "present" | "late" | "absent" | "rejected"
       channel_provider: "google_meet" | "zoom" | "microsoft_teams"
       class_room_status:
@@ -2021,6 +2029,8 @@ export const Constants = {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
       assignment_result_status: ["submitted", "graded"],
+      attendance_method_enum: ["qr", "manual", "online_auto"],
+      attendance_mode_enum: ["offline", "online"],
       attendance_status: ["present", "late", "absent", "rejected"],
       channel_provider: ["google_meet", "zoom", "microsoft_teams"],
       class_room_status: [

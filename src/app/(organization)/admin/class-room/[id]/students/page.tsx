@@ -3,14 +3,13 @@ import PageContainer from "@/shared/ui/PageContainer";
 import StudentsSection from "./_components";
 import { getClassRoomById } from "@/repository/class-room";
 
-const StudentsPage = async ({ params }: { params: Promise<{ classRoomId: string }> }) => {
-    const { classRoomId } = await params;
-    const { data: classRoom, error } = await getClassRoomById(classRoomId);
+const StudentsPage = async ({ params }: { params: Promise<{ id: string }> }) => {
+    const { id } = await params;
+    const { data: classRoom, error } = await getClassRoomById(id);
 
-
-    // if (!classRoom || error) {
-    //     return notFound();
-    // }
+    if (!classRoom || error) {
+        return notFound();
+    }
 
     const classRoomTitle = classRoom?.title || "Lớp học";
     const pageTitle = `Danh Sách học viên${classRoom?.title ? ` • ${classRoomTitle}` : ""}`;
@@ -31,7 +30,7 @@ const StudentsPage = async ({ params }: { params: Promise<{ classRoomId: string 
                 },
             ]}
         >
-            <StudentsSection classRoomId={classRoomId} />
+            <StudentsSection classRoomId={id} />
         </PageContainer>
     );
 };

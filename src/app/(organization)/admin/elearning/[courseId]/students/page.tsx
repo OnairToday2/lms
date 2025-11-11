@@ -11,12 +11,12 @@ const ElearningCourseStudentsPage = async ({
   const { courseId } = await params;
   const { data: course, error } = await getElearningCourseById(courseId);
 
-  // if (!course || error) {
-  //   return notFound();
-  // }
+  if (!course || error) {
+    return notFound();
+  }
 
   const courseTitle = course?.title || "Khóa học eLearning";
-  const pageTitle = `Danh sách học viên${course?.title ? ` • ${courseTitle}` : ""
+  const pageTitle = `Danh sách học viên ${course?.title ? ` • ${courseTitle}` : ""
     }`;
 
   return (

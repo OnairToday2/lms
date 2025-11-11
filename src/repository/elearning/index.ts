@@ -93,6 +93,8 @@ const getElearnings = async (
     limit = DEFAULT_LIMIT,
     orderField,
     orderBy = "desc",
+    employeeId,
+    organizationId,
   } = input;
 
   const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : DEFAULT_PAGE;
@@ -100,19 +102,68 @@ const getElearnings = async (
   const rangeStart = (safePage - 1) * safeLimit;
   const rangeEnd = rangeStart + safeLimit - 1;
 
+  if (!organizationId && !employeeId) {
+    return {
+      data: [],
+      total: 0,
+      page: safePage,
+      limit: safeLimit,
+    };
+  }
+
+  const teacherCourseIds: string[] = [];
+
+  if (employeeId) {
+    const { data: teacherAssignments, error: teacherError } = await supabase
+      .from("courses_teachers")
+      .select("online_course_id")
+      .eq("teacher_id", employeeId);
+
+    if (teacherError) {
+      throw teacherError;
+    }
+
+    for (const assignment of teacherAssignments ?? []) {
+      const courseId = assignment?.online_course_id;
+      if (courseId && !teacherCourseIds.includes(courseId)) {
+        teacherCourseIds.push(courseId);
+      }
+    }
+  }
+
   let query = supabase
     .from("courses")
     .select(COURSES_SELECT, { count: "exact" })
     .not("status", "in", "(deleted)");
 
-  if (q?.trim()) {
-    const sanitized = sanitizeSearchTerm(q.trim());
-    query = query.or(
-      [
-        `title.ilike.%${sanitized}%`,
-        `description.ilike.%${sanitized}%`,
-      ].join(","),
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId!);
+  }
+
+  const accessConditions: string[] = [];
+
+  if (employeeId) {
+    accessConditions.push(`created_by.eq.${employeeId}`);
+    if (teacherCourseIds.length > 0) {
+      accessConditions.push(`id.in.(${teacherCourseIds.join(",")})`);
+    }
+  }
+
+  const trimmedSearch = q?.trim();
+  const sanitizedSearch = trimmedSearch ? sanitizeSearchTerm(trimmedSearch) : null;
+  const searchClause = sanitizedSearch
+    ? `or(title.ilike.%${sanitizedSearch}%,description.ilike.%${sanitizedSearch}%)`
+    : null;
+
+  if (accessConditions.length > 0 && searchClause) {
+    const combined = accessConditions.map(
+      (condition) => `and(${condition},${searchClause})`,
     );
+    query = query.or(combined.join(","));
+  } else if (accessConditions.length > 0) {
+    query = query.or(accessConditions.join(","));
+  } else if (searchClause) {
+    query = query.or(searchClause);
   }
 
   const sortField =
@@ -231,14 +282,14 @@ const getElearningCourseStudents = async (
       };
     }
 
-    const { branchEmployments, departmentEmployments, ...restStudent } =
+    const { employments: studentEmployments, ...studentInfo } =
       student as Record<string, any>;
 
     return {
       ...restItem,
       student: {
-        ...restStudent,
-        employments: restStudent.employments ?? [],
+        ...studentInfo,
+        employments: studentEmployments ?? [],
       },
     };
   }) as ElearningCourseStudentDto[];

@@ -30,9 +30,11 @@ interface ElearningTabProps {
 export default function ELearningTab({ isActive }: ElearningTabProps) {
     const [page, setPage] = useState(1);
     const [filters, setFilters] = useState<ElearningFilters>(initialFilters);
-    const { ...rest } = useUserOrganization((state) => state.data);
+    const { organization, ...rest } = useUserOrganization((state) => state.data);
     const isAdmin = rest.employeeType === "admin";
     const isHasAccess = rest.employeeType === "admin" || rest.employeeType === "teacher"
+    const organizationId = isActive && isAdmin ? organization?.id : undefined;
+    const employeeId = isActive && rest.employeeType === "teacher" ? rest.id : undefined;
 
     const queryInput = useMemo<GetElearningsQueryInput>(() => {
         const trimmedSearch = filters.search.trim();
@@ -41,9 +43,11 @@ export default function ELearningTab({ isActive }: ElearningTabProps) {
             page,
             limit: PAGE_SIZE,
             orderField: "created_at",
-            orderBy: "desc"
+            orderBy: "desc",
+            organizationId,
+            employeeId,
         };
-    }, [filters.search, page]);
+    }, [employeeId, filters.search, organizationId, page]);
 
     const shouldFetch = isHasAccess && isActive;
     const { data: elearningsResult, isLoading, isError, refetch } =
@@ -69,8 +73,6 @@ export default function ELearningTab({ isActive }: ElearningTabProps) {
     if (!isHasAccess) {
         redirect('/403');
     }
-
-    console.log("elearnings", elearnings);
 
 
     return (

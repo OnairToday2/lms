@@ -9,6 +9,8 @@ export interface GetElearningsQueryInput {
     limit?: number;
     orderField?: string;
     orderBy?: "asc" | "desc";
+    organizationId?: string;
+    employeeId?: string;
 }
 
 export interface GetElearningStudentsQueryInput {

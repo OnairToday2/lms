@@ -28,7 +28,7 @@ export const PATHS = {
     ROOT: "/admin/class-room",
     CREATE_CLASSROOM: "/admin/class-room/create",
     EDIT_CLASSROOM: (id: string = ":id") => `/admin/class-room/${id}/cedit`,
-    LIST_CLASSROOM: "/class-room/list",
+    LIST_CLASSROOM: "/admin/class-room/list",
   },
   COURSES: {
     ROOT: "/admin/online-course",

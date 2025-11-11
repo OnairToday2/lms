@@ -19,7 +19,7 @@ import {
     ClassRoomRuntimeStatusFilter,
     ClassRoomTypeFilter,
     ClassSessionModeFilter,
-} from "../../class-room/list/types/types";
+} from "../../admin/class-room/list/types/types";
 import SearchIcon from "@mui/icons-material/Search";
 import { SelectOption } from "@/shared/ui/form/SelectOption";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
@@ -29,9 +29,9 @@ import {
     getColorClassRoomRuntimeStatus,
     getStatusAndLabelBtnJoin,
     RUNTIME_STATUS_COLOR_MAP
-} from "../../class-room/list/utils/status";
+} from "../../admin/class-room/list/utils/status";
 import { ClassRoomPriorityDto } from "@/types/dto/classRooms/classRoom.dto";
-import { SESSION_MODE_OPTIONS, TYPE_OPTIONS } from "../../class-room/list/constants";
+import { SESSION_MODE_OPTIONS, TYPE_OPTIONS } from "../../admin/class-room/list/constants";
 import ClassRoomCard from "./ClassRoomCard";
 
 const PAGE_SIZE = 12;
