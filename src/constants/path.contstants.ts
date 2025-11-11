@@ -44,6 +44,7 @@ export const PATHS = {
     EDIT_ASSIGNMENT: (id: string = ":id") => `/assignments/edit/${id}`,
     STUDENTS: (id: string = ":id") => `/assignments/${id}/students`,
     SUBMIT: (id: string = ":id", employeeId: string = ":employeeId") => `/assignments/${id}/submit/${employeeId}`,
+    GRADE: (id: string = ":id", employeeId: string = ":employeeId") => `/assignments/${id}/grade/${employeeId}`,
     RESULT: (id: string = ":id", employeeId: string = ":employeeId") => `/assignments/${id}/result/${employeeId}`,
   },
   MY_ASSIGNMENTS: {

@@ -44,7 +44,11 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
   }, [submission]);
 
   const handleBack = () => {
-    router.push(`${basePath}/${assignmentId}/students`);
+    if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
+      router.push(basePath);
+    } else {
+      router.push(`${basePath}/${assignmentId}/students`);
+    }
   };
 
   if (isLoading) {
