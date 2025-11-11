@@ -22,7 +22,8 @@ import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { uploadFileToS3 } from "@/utils/s3-upload";
 import { useQueryClient } from "@tanstack/react-query";
 import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";
-import AssignmentHeader from "./AssignmentHeader";
+import { FileMetadata } from "@/types/dto/assignments";
+import { PATHS } from "@/constants/path.contstants";
 import QuestionCard from "./QuestionCard";
 import SubmissionActions from "./SubmissionActions";
 
@@ -40,7 +41,11 @@ interface SubmissionFormData {
   answers: QuestionAnswer[];
 }
 
-export default function AssignmentSubmission() {
+interface AssignmentSubmissionProps {
+  basePath?: string;
+}
+
+export default function AssignmentSubmission({ basePath = PATHS.ASSIGNMENTS.ROOT }: AssignmentSubmissionProps) {
   const params = useParams();
   const router = useRouter();
   const { confirm } = useDialogs();
@@ -81,8 +86,8 @@ export default function AssignmentSubmission() {
   }, [questions, setValue]);
 
   const handleBack = React.useCallback(() => {
-    router.push(`/assignments/${assignmentId}/students`);
-  }, [router, assignmentId]);
+    router.push(`${basePath}/${assignmentId}/students`);
+  }, [router, assignmentId, basePath]);
 
   const handleFileSelect = React.useCallback((questionId: string, files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -184,11 +189,11 @@ export default function AssignmentSubmission() {
       const currentAnswer = currentAnswers[answerIndex];
       if (!currentAnswer) return;
 
-      const newFile = files[0];
+      const newFiles = Array.from(files);
       const updatedAnswers = [...currentAnswers];
       updatedAnswers[answerIndex] = {
         ...currentAnswer,
-        attachments: [newFile],
+        attachments: [...(currentAnswer.attachments || []), ...newFiles],
       };
       setValue("answers", updatedAnswers);
     }
@@ -278,7 +283,7 @@ export default function AssignmentSubmission() {
             throw new Error("Không tìm thấy thông tin câu hỏi");
           }
 
-          let answerData: string | string[];
+          let answerData: string | string[] | FileMetadata[];
 
           switch (answer.questionType) {
             case "file":
@@ -286,7 +291,7 @@ export default function AssignmentSubmission() {
                 throw new Error(`Vui lòng tải lên file cho câu hỏi: ${question.label}`);
               }
 
-              const uploadedUrls = await Promise.all(
+              const uploadedFiles = await Promise.all(
                 answer.files.map(async (file) => {
                   const result = await uploadFileToS3(file, {
                     onProgress: (percent) => {
@@ -305,10 +310,15 @@ export default function AssignmentSubmission() {
                     setUploadProgress(Math.round((completedFiles / totalFiles) * 100));
                   }
 
-                  return result.url;
+                  return {
+                    url: result.url,
+                    originalName: file.name,
+                    fileSize: file.size,
+                    mimeType: file.type,
+                  };
                 })
               );
-              answerData = uploadedUrls;
+              answerData = uploadedFiles;
               break;
 
             case "text":
@@ -336,9 +346,9 @@ export default function AssignmentSubmission() {
               throw new Error(`Loại câu hỏi không hợp lệ: ${answer.questionType}`);
           }
 
-          let attachmentUrls: string[] | undefined = undefined;
+          let attachmentMetadata: FileMetadata[] | undefined = undefined;
           if (answer.attachments && answer.attachments.length > 0) {
-            attachmentUrls = await Promise.all(
+            attachmentMetadata = await Promise.all(
               answer.attachments.map(async (file) => {
                 const result = await uploadFileToS3(file, {
                   onProgress: (percent) => {
@@ -357,7 +367,12 @@ export default function AssignmentSubmission() {
                   setUploadProgress(Math.round((completedFiles / totalFiles) * 100));
                 }
 
-                return result.url;
+                return {
+                  url: result.url,
+                  originalName: file.name,
+                  fileSize: file.size,
+                  mimeType: file.type,
+                };
               })
             );
           }
@@ -368,7 +383,7 @@ export default function AssignmentSubmission() {
             questionType: answer.questionType,
             options: question.options,
             answer: answerData,
-            attachments: attachmentUrls,
+            attachments: attachmentMetadata,
           };
         })
       );
@@ -398,7 +413,7 @@ export default function AssignmentSubmission() {
         queryKey: [GET_ASSIGNMENTS, assignmentId, "students"]
       });
 
-      router.push(`/assignments/${assignmentId}/students`);
+      router.push(`${basePath}/${assignmentId}/students`);
     } catch (error) {
       console.error("Error submitting assignment:", error);
 
@@ -419,8 +434,8 @@ export default function AssignmentSubmission() {
     <PageContainer
       title={assignment ? `Nộp bài - ${assignment.name}` : "Nộp bài"}
       breadcrumbs={[
-        { title: "Bài kiểm tra", path: "/assignments" },
-        { title: assignment?.name || "...", path: `/assignments/${assignmentId}/students` },
+        { title: "Bài kiểm tra", path: basePath },
+        { title: assignment?.name || "...", path: `${basePath}/${assignmentId}/students` },
         { title: "Nộp bài" },
       ]}
     >
@@ -506,7 +521,6 @@ export default function AssignmentSubmission() {
                   );
                 })}
 
-                {/* Submit Button */}
                 <SubmissionActions
                   onCancel={handleBack}
                   onSubmit={() => {}}

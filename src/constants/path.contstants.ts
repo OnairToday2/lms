@@ -42,9 +42,15 @@ export const PATHS = {
     ROOT: "/assignments",
     CREATE_ASSIGNMENT: "/assignments/create",
     EDIT_ASSIGNMENT: (id: string = ":id") => `/assignments/edit/${id}`,
+    STUDENTS: (id: string = ":id") => `/assignments/${id}/students`,
+    SUBMIT: (id: string = ":id", employeeId: string = ":employeeId") => `/assignments/${id}/submit/${employeeId}`,
+    RESULT: (id: string = ":id", employeeId: string = ":employeeId") => `/assignments/${id}/result/${employeeId}`,
   },
   MY_ASSIGNMENTS: {
     ROOT: "/my-assignments",
+    STUDENTS: (id: string = ":id") => `/my-assignments/${id}/students`,
+    SUBMIT: (id: string = ":id", employeeId: string = ":employeeId") => `/my-assignments/${id}/submit/${employeeId}`,
+    RESULT: (id: string = ":id", employeeId: string = ":employeeId") => `/my-assignments/${id}/result/${employeeId}`,
   },
   REPORTS: {
     ROOT: "/report",

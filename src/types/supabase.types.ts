@@ -81,6 +81,7 @@ export type Database = {
           created_at: string
           data: Json | null
           employee_id: string
+          feedback: string | null
           id: string
           max_score: number
           score: number
@@ -91,6 +92,7 @@ export type Database = {
           created_at?: string
           data?: Json | null
           employee_id: string
+          feedback?: string | null
           id?: string
           max_score: number
           score: number
@@ -101,6 +103,7 @@ export type Database = {
           created_at?: string
           data?: Json | null
           employee_id?: string
+          feedback?: string | null
           id?: string
           max_score?: number
           score?: number
