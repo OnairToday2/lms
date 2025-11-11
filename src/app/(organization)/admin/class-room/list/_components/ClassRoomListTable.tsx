@@ -84,10 +84,7 @@ export default function ClassRoomListTable({
   }
 
   const handleEditClassRoom = (isOnline: boolean, classRoomId: string) => {
-    if (isOnline) {
-      return router.push(`/class-room/manage/online/edit/${classRoomId}`)
-    }
-    return router.push(`/class-room/manage/offline/edit/${classRoomId}`)
+    return router.push(`/admin/class-room/${classRoomId}/edit`)
   }
 
   const navigateToSession = useCallback((sessionId?: string, slug?: string | null) => {
