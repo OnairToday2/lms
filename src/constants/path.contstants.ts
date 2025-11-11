@@ -33,7 +33,7 @@ export const PATHS = {
   COURSES: {
     ROOT: "/admin/online-course",
     CREATE: "/admin/online-course/create",
-    EDIT: (id: string = ":id") => `/admin/online-course/${id}/cedit`,
+    EDIT: (id: string = ":id") => `/admin/online-course/${id}/edit`,
   },
   STUDENTS: {
     ROOT: "/my-class",
