@@ -23,6 +23,7 @@ import { uploadFileToS3 } from "@/utils/s3-upload";
 import { useQueryClient } from "@tanstack/react-query";
 import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";
 import { FileMetadata } from "@/types/dto/assignments";
+import { PATHS } from "@/constants/path.contstants";
 import QuestionCard from "./QuestionCard";
 import SubmissionActions from "./SubmissionActions";
 
@@ -40,7 +41,11 @@ interface SubmissionFormData {
   answers: QuestionAnswer[];
 }
 
-export default function AssignmentSubmission() {
+interface AssignmentSubmissionProps {
+  basePath?: string;
+}
+
+export default function AssignmentSubmission({ basePath = PATHS.ASSIGNMENTS.ROOT }: AssignmentSubmissionProps) {
   const params = useParams();
   const router = useRouter();
   const { confirm } = useDialogs();
@@ -81,8 +86,8 @@ export default function AssignmentSubmission() {
   }, [questions, setValue]);
 
   const handleBack = React.useCallback(() => {
-    router.push(`/assignments/${assignmentId}/students`);
-  }, [router, assignmentId]);
+    router.push(`${basePath}/${assignmentId}/students`);
+  }, [router, assignmentId, basePath]);
 
   const handleFileSelect = React.useCallback((questionId: string, files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -408,7 +413,7 @@ export default function AssignmentSubmission() {
         queryKey: [GET_ASSIGNMENTS, assignmentId, "students"]
       });
 
-      router.push(`/assignments/${assignmentId}/students`);
+      router.push(`${basePath}/${assignmentId}/students`);
     } catch (error) {
       console.error("Error submitting assignment:", error);
 
@@ -429,8 +434,8 @@ export default function AssignmentSubmission() {
     <PageContainer
       title={assignment ? `Nộp bài - ${assignment.name}` : "Nộp bài"}
       breadcrumbs={[
-        { title: "Bài kiểm tra", path: "/assignments" },
-        { title: assignment?.name || "...", path: `/assignments/${assignmentId}/students` },
+        { title: "Bài kiểm tra", path: basePath },
+        { title: assignment?.name || "...", path: `${basePath}/${assignmentId}/students` },
         { title: "Nộp bài" },
       ]}
     >

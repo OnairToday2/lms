@@ -27,6 +27,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PageContainer from "@/shared/ui/PageContainer";
 import { useGetAssignmentStudentsQuery } from "@/modules/assignment-management/operations/query";
 import { useGetAssignmentQuery } from "@/modules/assignment-management/operations/query";
+import { PATHS } from "@/constants/path.contstants";
 
 export default function AssignmentStudentList() {
   const params = useParams();
@@ -57,7 +58,7 @@ export default function AssignmentStudentList() {
   };
 
   const handleBack = () => {
-    router.push("/assignments");
+    router.push(PATHS.ASSIGNMENTS.ROOT);
   };
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, employeeId: string) => {
@@ -110,7 +111,7 @@ export default function AssignmentStudentList() {
     <PageContainer
       title={assignment ? `Danh sách học viên - ${assignment.name}` : "Danh sách học viên"}
       breadcrumbs={[
-        { title: "Bài kiểm tra", path: "/assignments" },
+        { title: "Bài kiểm tra", path: PATHS.ASSIGNMENTS.ROOT },
         { title: "Danh sách học viên" },
       ]}
     >

@@ -4,6 +4,7 @@ import type { CreateAssignmentDto } from "@/types/dto/assignments";
 import { assignmentService } from "@/services";
 import { createSVClient } from "@/services";
 import { employeesRepository } from "@/repository";
+import { PATHS } from "@/constants/path.contstants";
 
 export async function GET(request: NextRequest) {
   try {
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     const result = await assignmentService.createAssignmentWithRelations(payload, employee.id);
 
-    revalidatePath("/assignments");
+    revalidatePath(PATHS.ASSIGNMENTS.ROOT);
 
     return NextResponse.json(
       {

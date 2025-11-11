@@ -14,17 +14,20 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useRouter } from "next/navigation";
 import { useGetSubmissionDetailQuery } from "@/modules/assignment-management/operations/query";
 import PageContainer from "@/shared/ui/PageContainer";
+import { PATHS } from "@/constants/path.contstants";
 import ResultQuestionCard from "./ResultQuestionCard";
 import AssignmentSubmissionHeader from "../../../_components/AssignmentSubmissionHeader";
 
 interface AssignmentResultProps {
   assignmentId: string;
   employeeId: string;
+  basePath?: string;
 }
 
 const AssignmentResult: React.FC<AssignmentResultProps> = ({
   assignmentId,
   employeeId,
+  basePath = PATHS.ASSIGNMENTS.ROOT,
 }) => {
   const router = useRouter();
   const { data: submission, isLoading, error } = useGetSubmissionDetailQuery(assignmentId, employeeId);
@@ -41,7 +44,7 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
   }, [submission]);
 
   const handleBack = () => {
-    router.push(`/assignments/${assignmentId}/students`);
+    router.push(`${basePath}/${assignmentId}/students`);
   };
 
   if (isLoading) {
@@ -49,7 +52,7 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
       <PageContainer
         title="Kết quả bài kiểm tra"
         breadcrumbs={[
-          { title: "Bài tập", path: "/assignments" },
+          { title: "Bài tập", path: basePath },
           { title: "Kết quả" },
         ]}
       >
@@ -65,7 +68,7 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
       <PageContainer
         title="Kết quả bài kiểm tra"
         breadcrumbs={[
-          { title: "Bài tập", path: "/assignments" },
+          { title: "Bài tập", path: basePath },
           { title: "Kết quả" },
         ]}
       >
@@ -89,9 +92,9 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
     <PageContainer
       title={`Kết quả - ${submission.assignmentName}`}
       breadcrumbs={[
-        { title: "Bài tập", path: "/assignments" },
-        { title: submission.assignmentName, path: `/assignments/${assignmentId}` },
-        { title: "Danh sách học viên", path: `/assignments/${assignmentId}/students` },
+        { title: "Bài tập", path: basePath },
+        { title: submission.assignmentName, path: `${basePath}/${assignmentId}` },
+        { title: "Danh sách học viên", path: `${basePath}/${assignmentId}/students` },
         { title: "Kết quả" },
       ]}
     >
