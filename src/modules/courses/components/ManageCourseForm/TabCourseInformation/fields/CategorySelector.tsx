@@ -1,5 +1,5 @@
 import { Control, useController } from "react-hook-form";
-import { UpsertCourseFormData } from "../../../upsert-course.schema";
+import { UpsertCourseFormData } from "../../upsert-course.schema";
 import { useCreateCategoriesMutation, useGetCategoriesQuery } from "@/modules/categories/operations";
 import { slugify } from "@/utils/slugify";
 import RHFMultipleSelectField from "@/shared/ui/form/RHFMultipleSelectField";

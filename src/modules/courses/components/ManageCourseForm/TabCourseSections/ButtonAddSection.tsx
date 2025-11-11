@@ -15,6 +15,7 @@ const ButtonAddSection: React.FC<ButtonAddSectionProps> = ({ onOk }) => {
   const cancelAddSection = () => {
     setTitle("");
     setOpenForm(false);
+    setError(undefined);
   };
   const clickOk = () => {
     if (!title.length) {
@@ -35,7 +36,7 @@ const ButtonAddSection: React.FC<ButtonAddSectionProps> = ({ onOk }) => {
   };
   return (
     <>
-      <Button startIcon={<PlusIcon />} variant="fill" fullWidth onClick={() => setOpenForm(true)}>
+      <Button startIcon={<PlusIcon />} variant="fill" fullWidth onClick={() => setOpenForm(true)} size="large">
         Tạo học phần
       </Button>
       {openForm ? (

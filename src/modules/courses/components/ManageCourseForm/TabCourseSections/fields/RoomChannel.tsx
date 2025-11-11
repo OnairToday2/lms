@@ -1,7 +1,7 @@
 import RHFRadioGroupField, { RHFRadioGroupFieldProps } from "@/shared/ui/form/RHFRadioGroupField";
 import RHFTextField, { RHFTextFieldProps } from "@/shared/ui/form/RHFTextField";
 import { Control, useController } from "react-hook-form";
-import { ClassRoom } from "../../../upsert-course.schema";
+import { ClassRoom } from "../../upsert-course.schema";
 import ZoomIcon from "@/shared/assets/icons/ZoomIcon";
 import GoogleMeetIcon from "@/shared/assets/icons/GoogleMeetIcon";
 import MicrosoftTeamIcon from "@/shared/assets/icons/MicrosoftTeamIcon";

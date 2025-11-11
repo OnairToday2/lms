@@ -1,122 +1,119 @@
-import { Button, FormHelperText, FormLabel, IconButton, Typography } from "@mui/material";
-import { UpsertCourseFormData } from "../../../upsert-course.schema";
-import { Control, useController, useFieldArray } from "react-hook-form";
+import { FormHelperText, FormLabel, IconButton, Typography } from "@mui/material";
+import { UpsertCourseFormData } from "../../upsert-course.schema";
+import { Control, useController } from "react-hook-form";
 import Image from "next/image";
 import { cn } from "@/utils";
-import { CloseIcon, FileExcelIcon, FileImageIcon, FileVideoIcon } from "@/shared/assets/icons";
+import { CloseIcon, FilePdfIcon } from "@/shared/assets/icons";
 import { useLibraryStore } from "@/modules/library/store/libraryProvider";
-import FileUnknownIcon from "@/shared/assets/icons/FileUnknownIcon";
-
+import { LessonType } from "@/model/lesson.model";
+import { useSnackbar } from "notistack";
 export interface MainResourceFieldProps {
   onChange?: (url: string) => void;
   control: Control<UpsertCourseFormData>;
+  lessonType: Extract<LessonType, "video" | "file">;
   sectionIndex: number;
   lessonIndex: number;
-  label?: string;
   subTitle?: string;
 }
 const MainResourceField: React.FC<MainResourceFieldProps> = ({
   control,
-  onChange,
-  label,
   subTitle,
   sectionIndex,
   lessonIndex,
+  lessonType,
 }) => {
+  const { enqueueSnackbar } = useSnackbar();
+  const {
+    field: { value, onChange },
+    fieldState: { error },
+  } = useController({ control, name: `sections.${sectionIndex}.lessons.${lessonIndex}.mainResource` });
   const openLibrary = useLibraryStore((state) => state.openLibrary);
 
-  const {
-    fields: resourceItems,
-    remove,
-    append,
-  } = useFieldArray({
-    control,
-    name: `sections.${sectionIndex}.lessons.${lessonIndex}.resources`,
-    keyName: "_resourceId",
-  });
-
   const handleSelectLibrary = async () => {
-    const selectingItems = await openLibrary({ mode: "multiple", selectedIds: resourceItems.map((item) => item.id) });
+    const selectingResource = await openLibrary({ mode: "single" });
+    const resourceItem = selectingResource[0];
 
-    const resourcesItemsMap = new Map(selectingItems.map((item) => [item.id, item]));
+    if (!resourceItem || !resourceItem.path || !resourceItem.mime_type) return;
 
-    let resourceItemsMaped: UpsertCourseFormData["sections"][number]["lessons"][number]["resources"] = [];
-    resourcesItemsMap.forEach((it) => {
-      resourceItemsMaped = [
-        ...resourceItemsMaped,
-        {
-          id: it.id,
-          mimeType: it.mime_type || "",
-          name: it.name,
-          url: it.path || "",
-        },
-      ];
+    if (lessonType === "video" && !resourceItem.mime_type?.includes("video")) {
+      enqueueSnackbar("Định dạng không hợp lệ", { variant: "warning" });
+      return;
+    }
+
+    if (lessonType === "file" && !resourceItem.mime_type?.includes("application/pdf")) {
+      enqueueSnackbar("Định dạng không hợp lệ", { variant: "warning" });
+      return;
+    }
+
+    onChange({
+      id: resourceItem.id,
+      mimeType: resourceItem.mime_type,
+      name: resourceItem.name,
+      url: resourceItem.path,
     });
-    remove(resourceItems.map((_, index) => index));
-    append(resourceItemsMaped);
   };
 
-  const handleClear = () => {
-    remove(resourceItems.map((_, index) => index));
+  const handleRemove = () => {
+    onChange(undefined);
   };
   return (
     <div>
       <FormLabel component="div" className="mb-2 inline-block">
-        {label}
+        {lessonType === "video" ? "Video" : lessonType === "file" ? "Tài liệu PDF" : "--"}
+        <span className="text-red-600 ml-1">*</span>
       </FormLabel>
       {subTitle ? <Typography className="text-xs mb-4">{subTitle}</Typography> : null}
-
-      {resourceItems.length ? (
-        <div>
-          <div className="flex flex-wrap mb-4 -mx-2">
-            {resourceItems.map((item, _index) => (
-              <div key={_index} className="w-32 px-1 mb-2">
-                <div className="py-4 px-2 bg-gray-100 relative flex flex-col rounded-lg w-full h-full">
-                  <div className="file-icon mx-auto mb-4">
-                    {item.mimeType.includes("image") ? (
-                      <FileImageIcon className="w-10 h-10" />
-                    ) : item.mimeType === "text/csv" ? (
-                      <FileExcelIcon className="w-10 h-10" />
-                    ) : item.mimeType.includes("video") ? (
-                      <FileVideoIcon className="w-10 h-10" />
-                    ) : (
-                      <FileUnknownIcon className="w-10 h-10" />
-                    )}
-                  </div>
-                  <div className="file-name line-clamp-2 text-xs text-center">
-                    <a href={item.url} target="__blank">
-                      {item.name}
-                    </a>
-                  </div>
-                  <IconButton className="w-6 h-6 absolute top-1 right-1" onClick={() => remove(_index)}>
-                    <CloseIcon className="w-4 h-4" />
-                  </IconButton>
+      {value ? (
+        <>
+          {lessonType === "video" ? (
+            <div className="aspect-video rounded-lg w-[460px] overflow-hidden relative">
+              <video src={value.url} controls className="absolute left-0 top-0 w-full h-full object-cover" />
+              <IconButton className="w-6 h-6 absolute top-1 right-1" onClick={handleRemove}>
+                <CloseIcon className="w-4 h-4" />
+              </IconButton>
+            </div>
+          ) : lessonType === "file" ? (
+            <div className="w-32 px-1 mb-2">
+              <div className="py-4 px-2 bg-gray-100 relative flex flex-col rounded-lg w-full h-full">
+                <div className="file-icon mx-auto mb-4">
+                  <FilePdfIcon className="w-10 h-10" />
                 </div>
+                <div className="file-name line-clamp-2 text-xs text-center">
+                  <a href={value.url} target="__blank">
+                    {value.name}
+                  </a>
+                </div>
+                <IconButton className="w-6 h-6 absolute top-1 right-1" onClick={handleRemove}>
+                  <CloseIcon className="w-4 h-4" />
+                </IconButton>
               </div>
-            ))}
-          </div>
-          <div className="flex gap-x-2">
-            <Button variant="fill" size="small" onClick={handleSelectLibrary}>
-              Tải lên
-            </Button>
-            <Button variant="outlined" size="small" onClick={handleClear} color="inherit">
-              Xoá hết
-            </Button>
-          </div>
-        </div>
+            </div>
+          ) : lessonType === "assessment" ? (
+            "assessment"
+          ) : (
+            "unknown"
+          )}
+        </>
       ) : (
         <div
           className={cn(
             "thumbnail-wraper",
-            "aspect-video w-[480px] bg-gray-100 rounded-xl border border-dashed border-gray-300",
+            "aspect-video w-[460px] bg-gray-100 rounded-xl border border-dashed border-gray-300",
             "flex items-center justify-center",
           )}
         >
-          <div className="text-center" onClick={handleSelectLibrary}>
+          <div className="text-center cursor-pointer" onClick={handleSelectLibrary}>
             <Image
-              src="/assets/icons/folder-icon.svg"
-              width={80}
-              height={40}
+              src={
+                lessonType === "video"
+                  ? "/assets/icons/video-upload-icon.png"
+                  : lessonType === "file"
+                  ? "/assets/icons/pdf-upload-icon.png"
+                  : "/assets/icons/folder-icon.svg"
+              }
+              width={58}
+              height={30}
+              quality={100}
               alt="upload icon"
               className="mb-3 mx-auto"
             />
@@ -126,15 +123,16 @@ const MainResourceField: React.FC<MainResourceFieldProps> = ({
                 backgroundColor: theme.palette.primary["lighter"],
                 fontWeight: "bold",
                 borderRadius: "8px",
-                padding: "6px 12px",
+                padding: "4px 8px",
                 fontSize: "0.75rem",
               })}
             >
-              Tải lên tài liệu
+              {lessonType === "video" ? "Tải lên video" : lessonType === "file" ? "Tải lên PDF" : "Tải lên"}
             </Typography>
           </div>
         </div>
       )}
+      {error?.message && <FormHelperText error>{error.message}</FormHelperText>}
     </div>
   );
 };

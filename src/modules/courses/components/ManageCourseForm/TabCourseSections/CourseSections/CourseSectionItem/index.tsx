@@ -1,151 +1,83 @@
 import React, {
-  ChangeEvent,
   ChangeEventHandler,
   Dispatch,
-  forwardRef,
   KeyboardEventHandler,
   memo,
   PropsWithChildren,
   SetStateAction,
   useCallback,
-  useEffect,
-  useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
-import SortableSectionItem from "../SortableSectionItem";
+import { get } from "lodash";
+
+import CourseSectionContent from "./CourseSectionContent";
 import { Button, FormHelperText, OutlinedInput, Typography } from "@mui/material";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
 
-import { Control, Controller, useController, UseFormReturn, useWatch } from "react-hook-form";
-import { UpsertCourseFormData } from "@/modules/courses/components/upsert-course.schema";
-import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { useFieldArray } from "react-hook-form";
-import SortableLessionItem from "../SortableLessionItem";
-import { LessonType } from "@/model/lesson.model";
-
-export type CourseSectionItemRef = {
-  appendLesson: (type: LessonType) => { sectionIndex: number; lessonIndex: number };
-};
+import { Control, Controller, useController } from "react-hook-form";
+import { UpsertCourseFormData } from "@/modules/courses/components/ManageCourseForm/upsert-course.schema";
+import { useUpsertCourseFormContext } from "../../../UpsertCourseFormContainer";
 export interface CourseSectionItemProps extends PropsWithChildren {
-  id: string;
   index: number;
-  methods: UseFormReturn<UpsertCourseFormData>;
-  editingLessonIndex?: number;
   onDelete?: (index: number) => void;
-  onLessionClick?: (sectionIndex: number, lessionIndex: number) => void;
-  onAddLession?: () => void;
+  onButtonAddLessonClick?: (sectionIndex: number) => void;
 }
-const CourseSectionItem = forwardRef<CourseSectionItemRef, CourseSectionItemProps>(
-  ({ id, index, methods, onDelete, onLessionClick, onAddLession }, ref) => {
-    const [isEditSectiontitle, setIsEditSectionTitle] = useState(false);
-    const {
-      control,
-      getValues,
-      trigger,
-      formState: { errors },
-    } = methods;
-    const {
-      fields: lessionsField,
-      remove,
-      move,
-      update,
-      append,
-    } = useFieldArray({
-      control,
-      name: `sections.${index}.lessons`,
-      keyName: "_lessionId",
-    });
+const CourseSectionItem: React.FC<CourseSectionItemProps> = ({ index, onDelete, onButtonAddLessonClick, children }) => {
+  const methods = useUpsertCourseFormContext();
 
-    const sensors = useSensors(
-      useSensor(PointerSensor, {
-        activationConstraint: {
-          distance: 5,
-        },
-      }),
-    );
+  const [isEditSectiontitle, setIsEditSectionTitle] = useState(false);
+  const {
+    control,
+    getValues,
+    formState: { errors },
+  } = methods;
+  const sectionEmptyErrorMessage = get(errors, `sections[${index}].lessons.message`);
 
-    const handleDragEnd = (event: DragEndEvent) => {
-      const { active, over } = event;
-      const activeId = active.id;
-      const overId = over?.id;
+  const toggleEditSectionTitle = useCallback(() => {
+    setIsEditSectionTitle((prev) => !prev);
+  }, []);
 
-      if (!over || activeId === overId) return;
+  const handleClickDelete = useCallback(() => {
+    onDelete?.(index);
+  }, [index]);
 
-      const activeIndex = lessionsField.findIndex((field) => field._lessionId === activeId);
-      const overIndex = lessionsField.findIndex((field) => field._lessionId === overId);
+  const getSectionTitle = useCallback(() => {
+    return getValues(`sections.${index}.title`);
+  }, [index]);
 
-      move(activeIndex, overIndex);
-    };
-
-    const toggleEditSectionTitle = () => {
-      setIsEditSectionTitle((prev) => !prev);
-    };
-    const handleClickDelete = () => {
-      onDelete?.(index);
-    };
-
-    const getLessionTitle = (lessonIndex: number) => {
-      return getValues(`sections.${index}.lessons.${lessonIndex}.title`);
-    };
-
-    useImperativeHandle(ref, () => ({
-      appendLesson: (type: LessonType) => {
-        const nextLessonIndex = lessionsField.length;
-        append({
-          lessonType: type,
-          title: "",
-          status: "active",
-          content: "",
-          resources: [],
-          mainResource: { id: "", mimeType: "", url: "", name: "" },
-        });
-        return { lessonIndex: nextLessonIndex, sectionIndex: index };
-      },
-    }));
-    return (
-      <SortableSectionItem
-        id={id}
-        header={
-          <SectionTitleField
-            control={control}
-            isEditting={isEditSectiontitle}
-            setEdit={setIsEditSectionTitle}
-            sectionIndex={index}
-          />
-        }
-        subLabel={`H${index + 1}`}
-        onEdit={isEditSectiontitle ? undefined : toggleEditSectionTitle}
-        onDelete={handleClickDelete}
-      >
-        <div className="section-item__body flex flex-col gap-2">
-          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-            <SortableContext
-              items={lessionsField.map((lession) => lession._lessionId)}
-              strategy={verticalListSortingStrategy}
-            >
-              {lessionsField.map((lession, lessionIndex) => (
-                <SortableLessionItem
-                  id={lession._lessionId}
-                  key={lession._lessionId}
-                  label={getLessionTitle(lessionIndex)}
-                  onClick={() => onLessionClick?.(index, lessionIndex)}
-                />
-              ))}
-            </SortableContext>
-          </DndContext>
-        </div>
-        <div className="h-4"></div>
-        <div className="section-item__footer">
-          <Button endIcon={<PlusIcon />} variant="outlined" color="inherit" size="small" onClick={onAddLession}>
-            Tạo bài giảng
-          </Button>
-        </div>
-      </SortableSectionItem>
-    );
-  },
-);
+  return (
+    <CourseSectionContent
+      label={getSectionTitle()}
+      header={
+        <SectionTitleField
+          control={control}
+          isEditting={isEditSectiontitle}
+          setEdit={setIsEditSectionTitle}
+          sectionIndex={index}
+        />
+      }
+      onEdit={isEditSectiontitle ? undefined : toggleEditSectionTitle}
+      onDelete={handleClickDelete}
+    >
+      {sectionEmptyErrorMessage && <FormHelperText error>{sectionEmptyErrorMessage}</FormHelperText>}
+      <div className="section-item__body flex flex-col gap-2">{children}</div>
+      <div className="h-4"></div>
+      <div className="section-item__footer">
+        <Button
+          endIcon={<PlusIcon />}
+          variant="outlined"
+          color="inherit"
+          size="small"
+          onClick={() => onButtonAddLessonClick?.(index)}
+        >
+          Tạo bài giảng
+        </Button>
+      </div>
+    </CourseSectionContent>
+  );
+};
 export default memo(CourseSectionItem);
 
 interface SectionTitleFieldProps {
@@ -175,8 +107,9 @@ const SectionTitleField: React.FC<SectionTitleFieldProps> = ({ control, sectionI
     }
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isEditting) return;
+    inputRef.current?.focus();
     prevInputValue.current = value;
   }, [isEditting]);
 
@@ -193,9 +126,10 @@ const SectionTitleField: React.FC<SectionTitleFieldProps> = ({ control, sectionI
         control={control}
         name={`sections.${sectionIndex}.title`}
         render={({ field }) => (
-          <>
+          <div className="input pt-1">
             <OutlinedInput
               size="small"
+              autoFocus
               ref={inputRef}
               value={field.value}
               onBlur={handleBlur}
@@ -211,9 +145,13 @@ const SectionTitleField: React.FC<SectionTitleFieldProps> = ({ control, sectionI
               })}
             />
             <FormHelperText>{error?.message}</FormHelperText>
-          </>
+          </div>
         )}
       />
     );
-  return <Typography sx={{ fontWeight: 600, fontSize: "0.875rem" }}>{value}</Typography>;
+  return (
+    <Typography sx={{ fontWeight: 600, fontSize: "0.875rem" }} className="line-clamp-3">
+      {value}
+    </Typography>
+  );
 };

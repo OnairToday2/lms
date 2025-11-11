@@ -47,11 +47,13 @@ const AccordionSummary = styled(
   },
   [`&.${accordionSummaryClasses.root}`]: {
     gap: "12px !important",
-    padding: "8px 12px",
-    // cursor: "auto",
+    padding: "0 4px",
+    "&:hover": {
+      backgroundColor: "transparent",
+    },
 
     [`@media(max-width: 1024px)`]: {
-      padding: "12px",
+      padding: "0 4px",
     },
   },
   ...theme.applyStyles("dark", {
@@ -60,9 +62,9 @@ const AccordionSummary = styled(
 }));
 
 const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
-  padding: "0 12px 8px",
+  padding: "4px 4px 4px",
   [`@media(max-width: 1024px)`]: {
-    padding: "0 12px 8px",
+    padding: "4px 4px 4px",
   },
 }));
 

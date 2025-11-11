@@ -8,27 +8,27 @@ import { useLibraryStore } from "@/modules/library/store/libraryProvider";
 import FileUnknownIcon from "@/shared/assets/icons/FileUnknownIcon";
 
 export interface DocumentsFieldsProps {
+  onChange?: (url: string) => void;
   control: Control<UpsertCourseFormData>;
-  sectionIndex: number;
-  lessonIndex: number;
   label?: string;
   subTitle?: string;
+  className?: string;
 }
-const DocumentsFields: React.FC<DocumentsFieldsProps> = ({ control, label, subTitle, sectionIndex, lessonIndex }) => {
+const DocumentsFields: React.FC<DocumentsFieldsProps> = ({ control, label, subTitle, className }) => {
   const openLibrary = useLibraryStore((state) => state.openLibrary);
 
   const {
-    fields: resourceItems,
+    fields: documents,
     remove,
     append,
   } = useFieldArray({
     control,
-    name: `sections.${sectionIndex}.lessons.${lessonIndex}.resources`,
-    keyName: "_resourceId",
+    name: "docs",
+    keyName: "_docs",
   });
 
   const handleSelectLibrary = async () => {
-    const selectingItems = await openLibrary({ mode: "multiple", selectedIds: resourceItems.map((item) => item.id) });
+    const selectingItems = await openLibrary({ mode: "multiple", selectedIds: documents.map((item) => item.id) });
 
     const resourcesItemsMap = new Map(selectingItems.map((item) => [item.id, item]));
 
@@ -44,23 +44,23 @@ const DocumentsFields: React.FC<DocumentsFieldsProps> = ({ control, label, subTi
         },
       ];
     });
-    remove(resourceItems.map((_, index) => index));
+    remove(documents.map((_, index) => index));
     append(resourceItemsMaped);
   };
 
   const handleClear = () => {
-    remove(resourceItems.map((_, index) => index));
+    remove(documents.map((_, index) => index));
   };
   return (
-    <div>
+    <div className={className}>
       <FormLabel component="div" className="mb-2 inline-block">
         {label}
       </FormLabel>
       {subTitle ? <Typography className="text-xs mb-4">{subTitle}</Typography> : null}
-      {resourceItems.length ? (
+      {documents.length ? (
         <div>
           <div className="flex flex-wrap mb-4 -mx-2">
-            {resourceItems.map((item, _index) => (
+            {documents.map((item, _index) => (
               <div key={_index} className="w-32 px-1 mb-2">
                 <div className="py-4 px-2 bg-gray-100 relative flex flex-col rounded-lg w-full h-full">
                   <div className="file-icon mx-auto mb-4">
@@ -99,11 +99,11 @@ const DocumentsFields: React.FC<DocumentsFieldsProps> = ({ control, label, subTi
         <div
           className={cn(
             "thumbnail-wraper",
-            "aspect-video w-[480px] bg-gray-100 rounded-xl border border-dashed border-gray-300",
-            "flex items-center justify-center",
+            "aspect-6/2 w-full bg-gray-100 rounded-xl border border-dashed border-gray-300",
+            "flex items-center justify-center py-6",
           )}
         >
-          <div className="text-center" onClick={handleSelectLibrary}>
+          <div className="text-center cursor-pointer" onClick={handleSelectLibrary}>
             <Image
               src="/assets/icons/folder-icon.svg"
               width={80}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useMemo, useState, useImperativeHandle } from "react";
+import React, { useCallback, useState, useImperativeHandle } from "react";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabPanel from "@mui/lab/TabPanel";
@@ -13,7 +13,7 @@ import { TAB_KEYS_MANAGE_COURSE, TAB_NODES_MANAGE_COURSE } from "./UpsertCourseF
 import { useTransition } from "react";
 import { getKeyFieldByTab } from "./utils";
 import { UseFormTrigger } from "react-hook-form";
-import { UpsertCourseFormData } from "../upsert-course.schema";
+import { UpsertCourseFormData } from "./upsert-course.schema";
 
 type ClassRoomTabStatus = "idle" | "invalid" | "valid";
 type TabKeyType = keyof typeof TAB_KEYS_MANAGE_COURSE;
@@ -145,7 +145,7 @@ const UpsertCourseTabContainer = React.forwardRef<UpsertCourseTabContainerRef, U
                 {item?.content}
               </TabPanel>
             ))}
-            <div className={cn({ hidden: currentTab === "clsTab-setting" })}>
+            <div className={cn({ hidden: currentTab === "clsTab-setting" || currentTab === "clsTab-section" })}>
               <div className={cn("py-6 flex justify-between")}>
                 <Button variant="outlined" color="inherit" onClick={goNextOrBackStep("back")} disabled={isGotoNextTab}>
                   Quay lại

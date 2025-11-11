@@ -1,4 +1,4 @@
-import { UpsertCourseFormData } from "../../../upsert-course.schema";
+import { UpsertCourseFormData } from "../../upsert-course.schema";
 import { Control, useController, useWatch } from "react-hook-form";
 import { Typography } from "@mui/material";
 import { slugify } from "@/utils/slugify";

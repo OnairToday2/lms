@@ -6,7 +6,7 @@ import { Control, useController, useFieldArray } from "react-hook-form";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { TrashIcon1 } from "@/shared/assets/icons";
-import { ClassRoom } from "../../../upsert-course.schema";
+import { ClassRoom } from "../../upsert-course.schema";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import { cn } from "@/utils";
 import dayjs from "dayjs";

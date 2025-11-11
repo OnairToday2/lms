@@ -106,6 +106,7 @@ export type Database = {
           created_at: string
           data: Json | null
           employee_id: string
+          feedback: string | null
           id: string
           max_score: number
           score: number
@@ -116,6 +117,7 @@ export type Database = {
           created_at?: string
           data?: Json | null
           employee_id: string
+          feedback?: string | null
           id?: string
           max_score: number
           score: number
@@ -126,6 +128,7 @@ export type Database = {
           created_at?: string
           data?: Json | null
           employee_id?: string
+          feedback?: string | null
           id?: string
           max_score?: number
           score?: number
@@ -219,6 +222,12 @@ export type Database = {
       }
       class_attendances: {
         Row: {
+          attendance_method:
+            | Database["public"]["Enums"]["attendance_method_enum"]
+            | null
+          attendance_mode:
+            | Database["public"]["Enums"]["attendance_mode_enum"]
+            | null
           attendance_status:
             | Database["public"]["Enums"]["attendance_status"]
             | null
@@ -230,12 +239,18 @@ export type Database = {
           distance_from_class: number | null
           employee_id: string
           id: string
-          qr_code_id: string
+          qr_code_id: string | null
           rejection_reason: string | null
           scan_location_lat: number | null
           scan_location_lng: number | null
         }
         Insert: {
+          attendance_method?:
+            | Database["public"]["Enums"]["attendance_method_enum"]
+            | null
+          attendance_mode?:
+            | Database["public"]["Enums"]["attendance_mode_enum"]
+            | null
           attendance_status?:
             | Database["public"]["Enums"]["attendance_status"]
             | null
@@ -247,12 +262,18 @@ export type Database = {
           distance_from_class?: number | null
           employee_id: string
           id?: string
-          qr_code_id: string
+          qr_code_id?: string | null
           rejection_reason?: string | null
           scan_location_lat?: number | null
           scan_location_lng?: number | null
         }
         Update: {
+          attendance_method?:
+            | Database["public"]["Enums"]["attendance_method_enum"]
+            | null
+          attendance_mode?:
+            | Database["public"]["Enums"]["attendance_mode_enum"]
+            | null
           attendance_status?:
             | Database["public"]["Enums"]["attendance_status"]
             | null
@@ -264,7 +285,7 @@ export type Database = {
           distance_from_class?: number | null
           employee_id?: string
           id?: string
-          qr_code_id?: string
+          qr_code_id?: string | null
           rejection_reason?: string | null
           scan_location_lat?: number | null
           scan_location_lng?: number | null
@@ -860,7 +881,7 @@ export type Database = {
           description: string | null
           end_at: string
           id: string
-          organizarion_id: string
+          organization_id: string
           slug: string
           start_at: string
           status: Database["public"]["Enums"]["course_status"]
@@ -870,11 +891,11 @@ export type Database = {
         Insert: {
           community_info?: Json | null
           created_at?: string
-          created_by?: string
+          created_by: string
           description?: string | null
           end_at: string
           id?: string
-          organizarion_id?: string
+          organization_id: string
           slug: string
           start_at: string
           status?: Database["public"]["Enums"]["course_status"]
@@ -888,14 +909,29 @@ export type Database = {
           description?: string | null
           end_at?: string
           id?: string
-          organizarion_id?: string
+          organization_id?: string
           slug?: string
           start_at?: string
           status?: Database["public"]["Enums"]["course_status"]
           thumbnail_url?: string | null
           title?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "courses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       courses_categories: {
         Row: {
@@ -1007,7 +1043,7 @@ export type Database = {
         }
         Insert: {
           course_id?: string
-          created_at: string
+          created_at?: string
           id?: number
           student_id?: string
         }
@@ -1036,27 +1072,27 @@ export type Database = {
       }
       courses_teachers: {
         Row: {
+          course_id: string
           created_at: string
           id: number
-          online_course_id: string
           teacher_id: string
         }
         Insert: {
+          course_id?: string
           created_at?: string
           id?: number
-          online_course_id?: string
           teacher_id?: string
         }
         Update: {
+          course_id?: string
           created_at?: string
           id?: number
-          online_course_id?: string
           teacher_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "online_courses_teachers_online_course_id_fkey"
-            columns: ["online_course_id"]
+            columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
             referencedColumns: ["id"]
@@ -1204,11 +1240,12 @@ export type Database = {
       }
       lessons: {
         Row: {
+          assignment_id: string | null
           content: string | null
           created_at: string
           id: string
           lesson_type: Database["public"]["Enums"]["lesson_type"]
-          main_resource: string
+          main_resource: string | null
           priority: number
           section_id: string
           status: Database["public"]["Enums"]["status"]
@@ -1216,11 +1253,12 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          assignment_id?: string | null
           content?: string | null
           created_at?: string
           id?: string
           lesson_type?: Database["public"]["Enums"]["lesson_type"]
-          main_resource?: string
+          main_resource?: string | null
           priority?: number
           section_id?: string
           status?: Database["public"]["Enums"]["status"]
@@ -1228,11 +1266,12 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          assignment_id?: string | null
           content?: string | null
           created_at?: string
           id?: string
           lesson_type?: Database["public"]["Enums"]["lesson_type"]
-          main_resource?: string
+          main_resource?: string | null
           priority?: number
           section_id?: string
           status?: Database["public"]["Enums"]["status"]
@@ -1240,6 +1279,20 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "lessons_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_main_resource_fkey"
+            columns: ["main_resource"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "online_courses_lessions_section_id_fkey"
             columns: ["section_id"]
@@ -1864,6 +1917,8 @@ export type Database = {
     Enums: {
       action_code_enum: "create" | "read" | "update" | "delete"
       assignment_result_status: "submitted" | "graded"
+      attendance_method_enum: "qr" | "manual" | "online_auto"
+      attendance_mode_enum: "offline" | "online"
       attendance_status: "present" | "late" | "absent" | "rejected"
       channel_provider: "google_meet" | "zoom" | "microsoft_teams"
       class_room_status:
@@ -2022,6 +2077,8 @@ export const Constants = {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
       assignment_result_status: ["submitted", "graded"],
+      attendance_method_enum: ["qr", "manual", "online_auto"],
+      attendance_mode_enum: ["offline", "online"],
       attendance_status: ["present", "late", "absent", "rejected"],
       channel_provider: ["google_meet", "zoom", "microsoft_teams"],
       class_room_status: [

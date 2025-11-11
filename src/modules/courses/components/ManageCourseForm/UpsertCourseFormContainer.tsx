@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useImperativeHandle, useCallback, forwardRef, useLayoutEffect } from "react";
 import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
-import { upsertCourseSchema, UpsertCourseFormData } from "../upsert-course.schema";
+import { upsertCourseSchema, UpsertCourseFormData } from "./upsert-course.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, IconButton } from "@mui/material";
 import { BookOpenIcon, CloseIcon, EyeIcon, GlobeIcon, UsersPlusIcon } from "@/shared/assets/icons";
@@ -84,6 +84,8 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
     const methods = useForm<UpsertCourseFormData>({
       resolver: zodResolver(upsertCourseSchema),
       defaultValues: initClassRoomFormData(),
+      reValidateMode: "onChange",
+      mode: "onChange",
     });
 
     const {
@@ -91,9 +93,7 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
       setValue,
       handleSubmit,
       formState: { errors },
-      control,
       trigger,
-      watch,
       reset,
     } = methods;
 
@@ -107,15 +107,22 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
           TAB_KEYS_MANAGE_COURSE["clsTab-setting"],
         ];
         const allTabsTriggers = await Promise.allSettled(
-          TAB_LIST.map(async (key) => {
-            const isValid = await trigger(getKeyFieldByTab(key));
-            classRoomTabContainerRef.current?.setTabStatus(key, isValid ? "valid" : "invalid");
+          TAB_LIST.map(async (tabKey) => {
+            const isValid = await trigger(getKeyFieldByTab(tabKey));
+            classRoomTabContainerRef.current?.setTabStatus(tabKey, isValid ? "valid" : "invalid");
             return isValid;
           }),
         );
+
         const isSomeTabFailed = allTabsTriggers.some((tab) => tab.status === "rejected" || !tab.value);
 
         if (isSomeTabFailed) return;
+
+        if (!selectedTeachers.length) {
+          classRoomTabContainerRef.current?.setTabStatus("clsTab-information", "invalid");
+          enqueueSnackbar(`Chưa chọn giáo viên.`, { variant: "error" });
+          return;
+        }
 
         setValue("status", status);
 
@@ -127,21 +134,6 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
 
     const submitForm: SubmitHandler<UpsertCourseFormData> = (data) => {
       console.log({ errors, data, selectedTeachers, selectedStudents });
-
-      const sections = getValues("sections");
-
-      const isEverySessionHasTeacher = sections.every((session, _index) => {
-        const hasTeacher = !!selectedTeachers.length;
-        if (!hasTeacher) {
-          enqueueSnackbar(`"${session.title}" chưa chọn giáo viên.`, { variant: "error" });
-          classRoomTabContainerRef.current?.setTabStatus("clsTab-section", "invalid");
-        }
-        return hasTeacher;
-      });
-
-      if (!isEverySessionHasTeacher) {
-        return;
-      }
 
       onSubmit?.(data, selectedStudents, selectedTeachers);
     };

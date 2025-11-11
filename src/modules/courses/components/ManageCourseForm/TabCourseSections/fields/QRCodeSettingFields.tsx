@@ -1,5 +1,5 @@
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
-import { ClassRoom } from "../../../upsert-course.schema";
+import { ClassRoom } from "../../upsert-course.schema";
 import { useClassRoomFormContext } from "../../UpsertCourseFormContainer";
 
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
