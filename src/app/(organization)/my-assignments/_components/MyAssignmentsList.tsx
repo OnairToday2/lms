@@ -32,8 +32,8 @@ import { useGetMyAssignmentsQuery } from "@/modules/assignment-management/operat
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { PATHS } from "@/constants/path.contstants";
 import type { MyAssignmentStatusFilter } from "@/types/dto/assignments";
+ import useDebounce from "@/hooks/useDebounce";
 
-// UI-specific type that includes "all" option for the dropdown
 type StatusFilterUI = "all" | MyAssignmentStatusFilter;
 
 export default function MyAssignmentsList() {
@@ -43,24 +43,15 @@ export default function MyAssignmentsList() {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
   const [searchInput, setSearchInput] = React.useState("");
-  const [debouncedSearch, setDebouncedSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<StatusFilterUI>("all");
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedAssignmentId, setSelectedAssignmentId] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchInput);
-      setPage(0);
-    }, 500);
+  const debouncedSearch = useDebounce(searchInput, 500);
 
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-
-  // Reset page when status filter changes
   React.useEffect(() => {
     setPage(0);
-  }, [statusFilter]);
+  }, [debouncedSearch, statusFilter]);
 
   const { data: paginatedResult, isLoading, error } = useGetMyAssignmentsQuery({
     page,
