@@ -31,7 +31,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import { TABLE_HEAD } from "../constants";
+import { TABLE_HEAD_CLASS_ROOM } from "../constants";
 import { ClassRoomStatusFilter, ClassRoomTypeFilter } from "../types/types";
 import { getClassRoomStatusLabel, getClassRoomTypeLabel, getColorClassRoomStatus } from "../utils/status";
 import ClassRoomRuntimeStatus from "./ClassRoomRuntimeStatus";
@@ -82,11 +82,8 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
   };
 
   const handleEditClassRoom = (isOnline: boolean, classRoomId: string) => {
-    if (isOnline) {
-      return router.push(`/class-room/manage/online/edit/${classRoomId}`);
-    }
-    return router.push(`/class-room/manage/offline/edit/${classRoomId}`);
-  };
+    return router.push(`/admin/class-room/${classRoomId}/edit`)
+  }
 
   const navigateToSession = useCallback(
     (sessionId?: string, slug?: string | null) => {
@@ -179,7 +176,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
               }}
             >
               <TableRow>
-                {TABLE_HEAD.map((item) => {
+                {TABLE_HEAD_CLASS_ROOM.map((item) => {
                   return (
                     <TableCell
                       key={item.id}
@@ -306,11 +303,11 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                               <MenuItem onClick={() => handleEnterClassRoom(room)} disabled={!isOnline!}>
                                 Vào lớp học
                               </MenuItem>
-                              <MenuItem 
-                                onClick={() => { 
+                              <MenuItem
+                                onClick={() => {
                                   handleOpenQRDialog(room);
                                   popupState.close();
-                                }} 
+                                }}
                                 disabled={isOnline!}
                               >
                                 QR điểm danh
