@@ -1,7 +1,17 @@
 "use client";
+import EnterClassRoomsDialog from "@/app/(organization)/my-class/_components/EnterClassRooms";
+import { PATHS } from "@/constants/path.contstants";
+import { fDate, FORMAT_DATE_TIME_CLEANER } from "@/lib";
+import { useDeleteClassRoomMutation } from "@/modules/class-room-management/operations/mutation";
+import { ConfirmDialog } from "@/shared/ui/custom-dialog";
+import { ClassRoomPriorityDto, EmployeeWithProfileDto } from "@/types/dto/classRooms/classRoom.dto";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import {
+  Avatar,
   AvatarGroup,
   Box,
+  Button,
   Chip,
   IconButton,
   Menu,
@@ -13,29 +23,20 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  Avatar,
   Tooltip,
-  Button,
+  Typography,
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { ClassRoomPriorityDto, EmployeeWithProfileDto } from "@/types/dto/classRooms/classRoom.dto";
-import { fDate, FORMAT_DATE_TIME_CLEANER } from "@/lib";
-import { useDeleteClassRoomMutation } from "@/modules/class-room-management/operations/mutation";
-import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { useQueryClient } from "@tanstack/react-query";
+import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { useRouter } from "next/navigation";
-import { ConfirmDialog } from "@/shared/ui/custom-dialog";
 import { useCallback, useState } from "react";
 import { TABLE_HEAD } from "../constants";
 import { ClassRoomStatusFilter, ClassRoomTypeFilter } from "../types/types";
 import { getClassRoomStatusLabel, getClassRoomTypeLabel, getColorClassRoomStatus } from "../utils/status";
-import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import ClassRoomType from "./ClassRoomType";
 import ClassRoomRuntimeStatus from "./ClassRoomRuntimeStatus";
-import EnterClassRoomsDialog from "@/app/(organization)/my-class/_components/EnterClassRooms";
-import { PATHS } from "@/constants/path.contstants";
+import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
 
 interface ClassRoomListTableProps {
   classRooms: ClassRoomPriorityDto[];
@@ -51,6 +52,8 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedClassRoom, setSelectedClassRoom] = useState<ClassRoomPriorityDto | null>(null);
+  const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [selectedQRClassRoom, setSelectedQRClassRoom] = useState<ClassRoomPriorityDto | null>(null);
 
   const { mutateAsync: deleteClassRoom, isPending } = useDeleteClassRoomMutation();
   const [isOpenDialogDelete, setIsOpenDialogDelete] = useState(false);
@@ -125,6 +128,16 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
   const handleEnterClassRoom = useCallback((room: ClassRoomPriorityDto) => {
     setSelectedClassRoom(room);
     setDialogOpen(true);
+  }, []);
+
+  const handleOpenQRDialog = useCallback((room: ClassRoomPriorityDto) => {
+    setSelectedQRClassRoom(room);
+    setQrDialogOpen(true);
+  }, []);
+
+  const handleCloseQRDialog = useCallback(() => {
+    setQrDialogOpen(false);
+    setSelectedQRClassRoom(null);
   }, []);
 
   const selectedSessions = selectedClassRoom?.class_sessions ?? [];
@@ -284,12 +297,24 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                               <MoreVertIcon />
                             </IconButton>
                             <Menu {...bindMenu(popupState)}>
-                              <MenuItem onClick={() => {}}>Xem chi tiết lớp học</MenuItem>
+                              <MenuItem
+                                onClick={() => {
+                                  router.push(PATHS.CLASSROOMS.DETAIL_CLASSROOM(room.slug as string));
+                                }}
+                              >
+                                Xem chi tiết lớp học
+                              </MenuItem>
                               <MenuItem onClick={() => handleEnterClassRoom(room)} disabled={!isOnline!}>
                                 Vào lớp học
                               </MenuItem>
-                              <MenuItem onClick={() => {}} disabled={isOnline!}>
-                                Qr điểm danh
+                              <MenuItem 
+                                onClick={() => { 
+                                  handleOpenQRDialog(room);
+                                  popupState.close();
+                                }} 
+                                disabled={isOnline!}
+                              >
+                                QR điểm danh
                               </MenuItem>
                               <MenuItem
                                 onClick={() => handleEditClassRoom(isOnline!, room?.id as string)}
@@ -347,6 +372,14 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
         actionLabel={selectedActionLabel}
         onSelectSession={handleSelectSession}
       />
+
+      {selectedQRClassRoom && (
+        <QRCodeViewDialog
+          open={qrDialogOpen}
+          onClose={handleCloseQRDialog}
+          classRoom={selectedQRClassRoom}
+        />
+      )}
     </>
   );
 }
