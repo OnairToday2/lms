@@ -1,6 +1,11 @@
 import { createClient, createSVClient } from "@/services";
 import type { Database } from "@/types/supabase.types";
-import type { AssignmentDto, GetAssignmentsParams, GetMyAssignmentsParams, QuestionOption } from "@/types/dto/assignments";
+import type {
+  AssignmentDto,
+  GetAssignmentsParams,
+  GetMyAssignmentsParams,
+  QuestionOption,
+} from "@/types/dto/assignments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 
 const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedResult<AssignmentDto>> => {
@@ -47,7 +52,7 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
         )
       )
     `,
-      { count: "exact" }
+      { count: "exact" },
     );
 
   if (search) {
@@ -118,7 +123,7 @@ const getAssignmentById = async (id: string): Promise<AssignmentDto> => {
           )
         )
       )
-    `
+    `,
     )
     .eq("id", id)
     .single();
@@ -151,7 +156,7 @@ export async function updateAssignmentById(
   data: {
     name?: string;
     description?: string;
-  }
+  },
 ) {
   const supabase = await createSVClient();
 
@@ -182,7 +187,7 @@ export async function createQuestions(
     options?: QuestionOption[] | null;
     attachments?: string[] | null;
     created_by: string;
-  }>
+  }>,
 ) {
   const supabase = await createSVClient();
 
@@ -390,18 +395,12 @@ const getMyAssignments = async (
   const from = page * limit;
   const to = from + limit - 1;
 
-  // Determine if we need to join with assignment_results for filtering
-  // Only "submitted" and "graded" require the join; "not_submitted" and undefined don't
-  const needsResultsJoin = status && status !== "not_submitted";
-
   let data: any[] | null;
   let error: any;
   let count: number | null;
 
-  // Use separate query paths to avoid TypeScript type inference issues
-  if (needsResultsJoin) {
-    // Query with assignment_results join for submitted/graded filtering
-    let queryWithResults = supabase
+  if (status === "submitted" || status === "graded") {
+    let queryWithInnerJoin = supabase
       .from("assignments")
       .select(
         `
@@ -418,18 +417,51 @@ const getMyAssignments = async (
           status
         )
       `,
-        { count: "exact" }
+        { count: "exact" },
       )
       .eq("assignment_employees.employee_id", employeeId)
       .eq("assignment_results.employee_id", employeeId)
       .eq("assignment_results.status", status);
 
-    // Apply search filter
     if (search) {
-      queryWithResults = queryWithResults.ilike("name", `%${search}%`);
+      queryWithInnerJoin = queryWithInnerJoin.ilike("name", `%${search}%`);
     }
 
-    const result = await queryWithResults
+    const result = await queryWithInnerJoin
+      .order("id", { ascending: false })
+      .range(from, to);
+
+    data = result.data;
+    error = result.error;
+    count = result.count;
+  } else if (status === "not_submitted") {
+    let queryWithLeftJoin = supabase
+      .from("assignments")
+      .select(
+        `
+        id,
+        name,
+        description,
+        created_at,
+        assignment_employees!inner (
+          employee_id
+        ),
+        assignment_results!left (
+          id,
+          employee_id
+        )
+      `,
+        { count: "exact" }
+      )
+      .eq("assignment_employees.employee_id", employeeId)
+      .eq("assignment_results.employee_id", employeeId)
+      .is("assignment_results", null);
+
+    if (search) {
+      queryWithLeftJoin = queryWithLeftJoin.ilike("name", `%${search}%`);
+    }
+
+    const result = await queryWithLeftJoin
       .order("id", { ascending: false })
       .range(from, to);
 
@@ -437,8 +469,7 @@ const getMyAssignments = async (
     error = result.error;
     count = result.count;
   } else {
-    // Query without assignment_results join for all/not_submitted filtering
-    let queryWithoutResults = supabase
+    let queryWithoutFilter = supabase
       .from("assignments")
       .select(
         `
@@ -450,16 +481,15 @@ const getMyAssignments = async (
           employee_id
         )
       `,
-        { count: "exact" }
+        { count: "exact" },
       )
       .eq("assignment_employees.employee_id", employeeId);
 
-    // Apply search filter
     if (search) {
-      queryWithoutResults = queryWithoutResults.ilike("name", `%${search}%`);
+      queryWithoutFilter = queryWithoutFilter.ilike("name", `%${search}%`);
     }
 
-    const result = await queryWithoutResults
+    const result = await queryWithoutFilter
       .order("id", { ascending: false })
       .range(from, to);
 
@@ -481,7 +511,6 @@ const getMyAssignments = async (
     };
   }
 
-  // Get submission results for the assignments on this page
   const assignmentIds = data.map((item) => item.id);
 
   const { data: results, error: resultsError } = await supabase
@@ -494,7 +523,6 @@ const getMyAssignments = async (
     throw new Error(`Failed to fetch assignment results: ${resultsError.message}`);
   }
 
-  // Create a map of assignment results
   const submissionMap = new Map(
     results?.map((result) => [
       result.assignment_id,
@@ -504,11 +532,10 @@ const getMyAssignments = async (
         max_score: result.max_score,
         status: result.status,
       },
-    ]) || []
+    ]) || [],
   );
 
-  // Combine the data
-  let myAssignments = data.map((item) => {
+  const myAssignments = data.map((item) => {
     const submission = submissionMap.get(item.id);
 
     return {
@@ -524,13 +551,9 @@ const getMyAssignments = async (
     };
   });
 
-  if (status === "not_submitted") {
-    myAssignments = myAssignments.filter((assignment) => !assignment.has_submitted);
-  }
-
   return {
     data: myAssignments,
-    total: status === "not_submitted" ? myAssignments.length : (count ?? 0),
+    total: count ?? 0,
     page,
     limit,
   };
