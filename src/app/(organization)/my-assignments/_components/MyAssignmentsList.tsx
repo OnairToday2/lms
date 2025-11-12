@@ -19,8 +19,11 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import SearchIcon from "@mui/icons-material/Search";
 import PageContainer from "@/shared/ui/PageContainer";
 import { useGetMyAssignmentsQuery } from "@/modules/assignment-management/operations/query";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
@@ -32,10 +35,25 @@ export default function MyAssignmentsList() {
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
+  const [searchInput, setSearchInput] = React.useState("");
+  const [debouncedSearch, setDebouncedSearch] = React.useState("");
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedAssignmentId, setSelectedAssignmentId] = React.useState<string | null>(null);
 
-  const { data: paginatedResult, isLoading, error } = useGetMyAssignmentsQuery(page, rowsPerPage);
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+      setPage(0);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  const { data: paginatedResult, isLoading, error } = useGetMyAssignmentsQuery({
+    page,
+    limit: rowsPerPage,
+    search: debouncedSearch,
+  });
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
@@ -140,6 +158,21 @@ export default function MyAssignmentsList() {
           <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
             Danh sách bài kiểm tra được giao
           </Typography>
+
+          <TextField
+            placeholder="Tìm kiếm bài kiểm tra..."
+            size="small"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ maxWidth: 300, mb: 3 }}
+          />
 
           {!assignments || assignments.length === 0 ? (
             <Box py={4} textAlign="center">

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSVClient } from "@/services";
 import { getMyAssignments } from "@/services/assignments/assignment.service";
 import { employeesRepository } from "@/repository";
+import type { GetMyAssignmentsParams } from "@/types/dto/assignments";
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,12 +26,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get pagination parameters from query string
+    // Get pagination and search parameters from query string
     const searchParams = request.nextUrl.searchParams;
-    const page = parseInt(searchParams.get("page") || "0", 10);
-    const limit = parseInt(searchParams.get("limit") || "25", 10);
+    const params: GetMyAssignmentsParams = {
+      page: parseInt(searchParams.get("page") || "0", 10),
+      limit: parseInt(searchParams.get("limit") || "25", 10),
+      search: searchParams.get("search") || undefined,
+    };
 
-    const myAssignments = await getMyAssignments(employee.id, page, limit);
+    const myAssignments = await getMyAssignments(employee.id, params);
 
     return NextResponse.json(myAssignments, { status: 200 });
   } catch (error) {

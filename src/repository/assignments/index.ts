@@ -1,6 +1,6 @@
 import { createClient, createSVClient } from "@/services";
 import type { Database } from "@/types/supabase.types";
-import type { AssignmentDto, GetAssignmentsParams, QuestionOption } from "@/types/dto/assignments";
+import type { AssignmentDto, GetAssignmentsParams, GetMyAssignmentsParams, QuestionOption } from "@/types/dto/assignments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 
 const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedResult<AssignmentDto>> => {
@@ -381,17 +381,17 @@ const getAssignmentQuestions = async (assignmentId: string) => {
 
 const getMyAssignments = async (
   employeeId: string,
-  page: number = 0,
-  limit: number = 25
+  params?: GetMyAssignmentsParams
 ): Promise<PaginatedResult<any>> => {
   const supabase = createClient();
+  const { page = 0, limit = 25, search } = params || {};
 
   // Calculate range for pagination
   const from = page * limit;
   const to = from + limit - 1;
 
   // Get assignments assigned to this employee with pagination
-  const { data, error, count } = await supabase
+  let query = supabase
     .from("assignment_employees")
     .select(
       `
@@ -405,7 +405,13 @@ const getMyAssignments = async (
     `,
       { count: "exact" }
     )
-    .eq("employee_id", employeeId)
+    .eq("employee_id", employeeId);
+
+  if (search) {
+    query = query.ilike("assignments.name", `%${search}%`);
+  }
+
+  const { data, error, count } = await query
     .order("assignment_id", { ascending: false })
     .range(from, to);
 
