@@ -7,6 +7,31 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       assignment_categories: {
@@ -93,6 +118,7 @@ export type Database = {
           data?: Json | null
           employee_id: string
           feedback?: string | null
+          feedback?: string | null
           id?: string
           max_score: number
           score: number
@@ -103,6 +129,7 @@ export type Database = {
           created_at?: string
           data?: Json | null
           employee_id?: string
+          feedback?: string | null
           feedback?: string | null
           id?: string
           max_score?: number
@@ -853,9 +880,14 @@ export type Database = {
           community_info: Json | null
           created_at: string
           created_by: string
+          created_by: string
           description: string | null
           end_at: string
+          end_at: string
           id: string
+          organization_id: string
+          slug: string
+          start_at: string
           organization_id: string
           slug: string
           start_at: string
@@ -867,9 +899,14 @@ export type Database = {
           community_info?: Json | null
           created_at?: string
           created_by: string
+          created_by: string
           description?: string | null
           end_at: string
+          end_at: string
           id?: string
+          organization_id: string
+          slug: string
+          start_at: string
           organization_id: string
           slug: string
           start_at: string
@@ -881,9 +918,14 @@ export type Database = {
           community_info?: Json | null
           created_at?: string
           created_by?: string
+          created_by?: string
           description?: string | null
           end_at?: string
+          end_at?: string
           id?: string
+          organization_id?: string
+          slug?: string
+          start_at?: string
           organization_id?: string
           slug?: string
           start_at?: string
@@ -891,6 +933,22 @@ export type Database = {
           thumbnail_url?: string | null
           title?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "courses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
         Relationships: [
           {
             foreignKeyName: "courses_created_by_fkey"
@@ -947,6 +1005,7 @@ export type Database = {
       courses_metadatas: {
         Row: {
           course_id: string
+          course_id: string
           created_at: string
           id: number
           key: string
@@ -954,12 +1013,14 @@ export type Database = {
         }
         Insert: {
           course_id?: string
+          course_id?: string
           created_at?: string
           id?: number
           key: string
           value: Json
         }
         Update: {
+          course_id?: string
           course_id?: string
           created_at?: string
           id?: number
@@ -969,6 +1030,7 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "online_courses_metadatas_online_course_id_fkey"
+            columns: ["course_id"]
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
@@ -1013,17 +1075,19 @@ export type Database = {
         Row: {
           course_id: string
           created_at: string
+          created_at: string
           id: number
           student_id: string
         }
         Insert: {
           course_id?: string
-          created_at: string
+          created_at?: string
           id?: number
           student_id?: string
         }
         Update: {
           course_id?: string
+          created_at?: string
           created_at?: string
           id?: number
           student_id?: string
@@ -1047,27 +1111,27 @@ export type Database = {
       }
       courses_teachers: {
         Row: {
+          course_id: string
           created_at: string
           id: number
-          online_course_id: string
           teacher_id: string
         }
         Insert: {
+          course_id?: string
           created_at?: string
           id?: number
-          online_course_id?: string
           teacher_id?: string
         }
         Update: {
+          course_id?: string
           created_at?: string
           id?: number
-          online_course_id?: string
           teacher_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "online_courses_teachers_online_course_id_fkey"
-            columns: ["online_course_id"]
+            columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
             referencedColumns: ["id"]
@@ -1214,43 +1278,64 @@ export type Database = {
         Relationships: []
       }
       lessons: {
+      lessons: {
         Row: {
+          assignment_id: string | null
           content: string | null
           created_at: string
           id: string
           lesson_type: Database["public"]["Enums"]["lesson_type"]
-          main_resource: string
+          main_resource: string | null
           priority: number
           section_id: string
           status: Database["public"]["Enums"]["status"]
           title: string | null
           updated_at: string | null
+          updated_at: string | null
         }
         Insert: {
+          assignment_id?: string | null
           content?: string | null
           created_at?: string
           id?: string
           lesson_type?: Database["public"]["Enums"]["lesson_type"]
-          main_resource?: string
+          main_resource?: string | null
           priority?: number
           section_id?: string
           status?: Database["public"]["Enums"]["status"]
           title?: string | null
+          updated_at?: string | null
           updated_at?: string | null
         }
         Update: {
+          assignment_id?: string | null
           content?: string | null
           created_at?: string
           id?: string
           lesson_type?: Database["public"]["Enums"]["lesson_type"]
-          main_resource?: string
+          main_resource?: string | null
           priority?: number
           section_id?: string
           status?: Database["public"]["Enums"]["status"]
           title?: string | null
           updated_at?: string | null
+          updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "lessons_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_main_resource_fkey"
+            columns: ["main_resource"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "online_courses_lessions_section_id_fkey"
             columns: ["section_id"]
@@ -1261,9 +1346,11 @@ export type Database = {
         ]
       }
       lessons_resources: {
+      lessons_resources: {
         Row: {
           created_at: string
           id: number
+          lesson_id: string
           lesson_id: string
           resource_id: string
         }
@@ -1271,11 +1358,13 @@ export type Database = {
           created_at?: string
           id?: number
           lesson_id?: string
+          lesson_id?: string
           resource_id?: string
         }
         Update: {
           created_at?: string
           id?: number
+          lesson_id?: string
           lesson_id?: string
           resource_id?: string
         }
@@ -1283,7 +1372,9 @@ export type Database = {
           {
             foreignKeyName: "course_lessions_resources_course_lession_id_fkey"
             columns: ["lesson_id"]
+            columns: ["lesson_id"]
             isOneToOne: false
+            referencedRelation: "lessons"
             referencedRelation: "lessons"
             referencedColumns: ["id"]
           },
@@ -1728,6 +1819,7 @@ export type Database = {
           description: string | null
           id: string
           priority: number
+          priority: number
           status: Database["public"]["Enums"]["status"]
           title: string | null
         }
@@ -1737,6 +1829,7 @@ export type Database = {
           description?: string | null
           id?: string
           priority?: number
+          priority?: number
           status?: Database["public"]["Enums"]["status"]
           title?: string | null
         }
@@ -1745,6 +1838,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          priority?: number
           priority?: number
           status?: Database["public"]["Enums"]["status"]
           title?: string | null
@@ -1758,6 +1852,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      supersemar_masters: {
+        Row: {
+          data: string | null
+          id: number
+        }
+        Insert: {
+          data?: string | null
+          id?: number
+        }
+        Update: {
+          data?: string | null
+          id?: number
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -1859,10 +1968,7 @@ export type Database = {
         Args: { action_code: string; resource_code: string }
         Returns: boolean
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
       is_qr_code_valid: {
         Args: { p_current_time?: string; p_qr_code: string }
         Returns: {
@@ -1897,6 +2003,7 @@ export type Database = {
       employee_type: "admin" | "student" | "teacher"
       gender: "male" | "female" | "other"
       hashtag_type: "class_room"
+      lesson_type: "video" | "file" | "assessment"
       lesson_type: "video" | "file" | "assessment"
       organization_unit_type: "branch" | "department"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
@@ -2028,6 +2135,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
@@ -2056,6 +2166,7 @@ export const Constants = {
       employee_type: ["admin", "student", "teacher"],
       gender: ["male", "female", "other"],
       hashtag_type: ["class_room"],
+      lesson_type: ["video", "file", "assessment"],
       lesson_type: ["video", "file", "assessment"],
       organization_unit_type: ["branch", "department"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],
