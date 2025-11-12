@@ -105,6 +105,9 @@ export const useGetMyAssignmentsQuery = (params?: GetMyAssignmentsParams) => {
       if (params?.search) {
         searchParams.set("search", params.search);
       }
+      if (params?.status) {
+        searchParams.set("status", params.status);
+      }
 
       const response = await fetch(`/api/my-assignments?${searchParams.toString()}`);
       if (!response.ok) {
