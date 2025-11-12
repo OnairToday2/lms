@@ -34,8 +34,8 @@ import { useCallback, useState } from "react";
 import { TABLE_HEAD } from "../constants";
 import { ClassRoomStatusFilter, ClassRoomTypeFilter } from "../types/types";
 import { getClassRoomStatusLabel, getClassRoomTypeLabel, getColorClassRoomStatus } from "../utils/status";
-import ClassRoomRuntimeStatus from "./ClassRoomRuntimeStatus";
 import ClassRoomType from "./ClassRoomType";
+import ClassRoomRuntimeStatus from "./ClassRoomRuntimeStatus";
 import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
 
 interface ClassRoomListTableProps {
@@ -82,10 +82,11 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
   };
 
   const handleEditClassRoom = (isOnline: boolean, classRoomId: string) => {
-    if (isOnline) {
-      return router.push(`/class-room/manage/online/edit/${classRoomId}`);
-    }
-    return router.push(`/class-room/manage/offline/edit/${classRoomId}`);
+    return PATHS.CLASSROOMS.EDIT_CLASSROOM(classRoomId);
+    // if (isOnline) {
+    //   return router.push(`/class-room/manage/online/edit/${classRoomId}`)
+    // }
+    // return router.push(`/class-room/manage/offline/edit/${classRoomId}`)
   };
 
   const navigateToSession = useCallback(

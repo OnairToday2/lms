@@ -97,14 +97,14 @@ export default function AssignmentList() {
 
   const handleViewStudents = () => {
     if (selectedAssignmentId) {
-      router.push(`/assignments/${selectedAssignmentId}/students`);
+      router.push(PATHS.ASSIGNMENTS.STUDENTS(selectedAssignmentId));
     }
     handleMenuClose();
   };
 
   const handleEdit = () => {
     if (selectedAssignmentId) {
-      router.push(`/assignments/edit/${selectedAssignmentId}`);
+      router.push(PATHS.ASSIGNMENTS.EDIT_ASSIGNMENT(selectedAssignmentId));
     }
     handleMenuClose();
   };
