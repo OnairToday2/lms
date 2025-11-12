@@ -7,31 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       assignment_categories: {
@@ -106,6 +81,7 @@ export type Database = {
           created_at: string
           data: Json | null
           employee_id: string
+          feedback: string | null
           id: string
           max_score: number
           score: number
@@ -116,6 +92,7 @@ export type Database = {
           created_at?: string
           data?: Json | null
           employee_id: string
+          feedback?: string | null
           id?: string
           max_score: number
           score: number
@@ -126,6 +103,7 @@ export type Database = {
           created_at?: string
           data?: Json | null
           employee_id?: string
+          feedback?: string | null
           id?: string
           max_score?: number
           score?: number
@@ -860,7 +838,7 @@ export type Database = {
           description: string | null
           end_at: string
           id: string
-          organizarion_id: string
+          organization_id: string
           slug: string
           start_at: string
           status: Database["public"]["Enums"]["course_status"]
@@ -870,11 +848,11 @@ export type Database = {
         Insert: {
           community_info?: Json | null
           created_at?: string
-          created_by?: string
+          created_by: string
           description?: string | null
           end_at: string
           id?: string
-          organizarion_id?: string
+          organization_id: string
           slug: string
           start_at: string
           status?: Database["public"]["Enums"]["course_status"]
@@ -888,14 +866,29 @@ export type Database = {
           description?: string | null
           end_at?: string
           id?: string
-          organizarion_id?: string
+          organization_id?: string
           slug?: string
           start_at?: string
           status?: Database["public"]["Enums"]["course_status"]
           thumbnail_url?: string | null
           title?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "courses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       courses_categories: {
         Row: {
@@ -2027,9 +2020,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
