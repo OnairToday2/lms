@@ -266,6 +266,19 @@ export async function deleteAssignmentEmployeesByAssignmentId(assignmentId: stri
   }
 }
 
+export async function nullifyLessonsAssignmentId(assignmentId: string) {
+  const supabase = await createSVClient();
+
+  const { error } = await supabase
+    .from("lessons")
+    .update({ assignment_id: null })
+    .eq("assignment_id", assignmentId);
+
+  if (error) {
+    throw new Error(`Failed to nullify lessons assignment_id: ${error.message}`);
+  }
+}
+
 const getAssignmentStudents = async (
   assignmentId: string,
   page: number = 0,
