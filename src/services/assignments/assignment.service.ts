@@ -6,7 +6,7 @@ import type {
   AssignmentDto,
 } from "@/types/dto/assignments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
-import { assignmentsRepository } from "@/repository";
+import { assignmentsRepository, assignmentResultsRepository } from "@/repository";
 
 interface CreateAssignmentResult {
   assignmentId: string;
@@ -144,9 +144,12 @@ async function updateAssignmentWithRelations(payload: UpdateAssignmentDto, updat
 }
 
 async function deleteAssignmentWithRelations(assignmentId: string): Promise<void> {
+  await assignmentResultsRepository.deleteAssignmentResultsByAssignmentId(assignmentId);
   await assignmentsRepository.deleteQuestionsByAssignmentId(assignmentId);
-  await assignmentsRepository.deleteAssignmentCategoriesByAssignmentId(assignmentId);
   await assignmentsRepository.deleteAssignmentEmployeesByAssignmentId(assignmentId);
+  await assignmentsRepository.deleteAssignmentCategoriesByAssignmentId(assignmentId);
+  await assignmentsRepository.nullifyLessonsAssignmentId(assignmentId);
+
   await assignmentsRepository.deleteAssignmentById(assignmentId);
 }
 
