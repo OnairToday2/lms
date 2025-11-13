@@ -2,6 +2,7 @@ import type {
   CreateAssignmentDto,
   UpdateAssignmentDto,
   GetAssignmentsParams,
+  GetMyAssignmentsParams,
   AssignmentDto,
 } from "@/types/dto/assignments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
@@ -165,8 +166,8 @@ async function getAssignmentQuestions(assignmentId: string) {
   return assignmentsRepository.getAssignmentQuestions(assignmentId);
 }
 
-async function getMyAssignments(employeeId: string, page: number = 0, limit: number = 25) {
-  return assignmentsRepository.getMyAssignments(employeeId, page, limit);
+async function getMyAssignments(employeeId: string, params?: GetMyAssignmentsParams) {
+  return assignmentsRepository.getMyAssignments(employeeId, params);
 }
 
 export {
