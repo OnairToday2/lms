@@ -82,11 +82,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
   };
 
   const handleEditClassRoom = (isOnline: boolean, classRoomId: string) => {
-    return PATHS.CLASSROOMS.EDIT_CLASSROOM(classRoomId);
-    // if (isOnline) {
-    //   return router.push(`/class-room/manage/online/edit/${classRoomId}`)
-    // }
-    // return router.push(`/class-room/manage/offline/edit/${classRoomId}`)
+    return router.push(PATHS.CLASSROOMS.EDIT_CLASSROOM(classRoomId))
   };
 
   const navigateToSession = useCallback(
